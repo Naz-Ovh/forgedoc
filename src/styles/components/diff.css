@@ -1,0 +1,98 @@
+/* `plan-diff` — +/- gutters and aligned line numbers. */
+
+@layer plan.components {
+  plan-diff {
+    margin-block: var(--plan-space-5);
+    border: var(--plan-border-width) solid var(--plan-code-border);
+    border-radius: var(--plan-radius);
+    background: var(--plan-code-surface);
+    color: var(--plan-code-text);
+    overflow: hidden;
+    break-inside: avoid;
+    print-color-adjust: exact;
+  }
+
+  plan-diff [data-part="header"] {
+    display: flex;
+    align-items: center;
+    gap: var(--plan-space-3);
+    padding: var(--plan-space-2) var(--plan-space-3);
+    border-block-end: var(--plan-border-width) solid var(--plan-code-border);
+    background: color-mix(in oklab, var(--plan-code-surface) 80%, var(--plan-surface-2));
+    font-size: var(--plan-text-xs);
+  }
+
+  plan-diff [data-part="filename"] {
+    font-family: var(--plan-font-mono);
+    font-weight: 620;
+  }
+
+  plan-diff [data-part="stat-add"] {
+    margin-inline-start: auto;
+    color: var(--plan-success-600);
+    font-weight: 700;
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  plan-diff [data-part="stat-remove"] {
+    color: var(--plan-danger-600);
+    font-weight: 700;
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  plan-diff [data-part="code"] {
+    overflow-x: auto;
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-sm);
+    line-height: var(--plan-leading-tight);
+  }
+
+  plan-diff [data-part="row"] {
+    display: grid;
+    grid-template-columns: 3.2em 3.2em 1.2em 1fr;
+    white-space: pre;
+  }
+
+  plan-diff :where([data-part="old-number"], [data-part="new-number"]) {
+    padding-inline-end: var(--plan-space-2);
+    color: var(--plan-code-gutter);
+    text-align: end;
+    user-select: none;
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  plan-diff [data-part="sign"] {
+    text-align: center;
+    user-select: none;
+    font-weight: 700;
+  }
+
+  plan-diff [data-part="row"][data-kind="add"] {
+    background: light-dark(
+      color-mix(in oklab, var(--plan-success-200) 45%, transparent),
+      color-mix(in oklab, var(--plan-success-900) 45%, transparent)
+    );
+    print-color-adjust: exact;
+  }
+
+  plan-diff [data-part="row"][data-kind="add"] [data-part="sign"] {
+    color: var(--plan-success-600);
+  }
+
+  plan-diff [data-part="row"][data-kind="remove"] {
+    background: light-dark(
+      color-mix(in oklab, var(--plan-danger-200) 45%, transparent),
+      color-mix(in oklab, var(--plan-danger-900) 45%, transparent)
+    );
+    print-color-adjust: exact;
+  }
+
+  plan-diff [data-part="row"][data-kind="remove"] [data-part="sign"] {
+    color: var(--plan-danger-600);
+  }
+
+  plan-diff [data-part="row"][data-kind="meta"] {
+    color: var(--plan-code-comment);
+    background: var(--plan-surface-2);
+  }
+}

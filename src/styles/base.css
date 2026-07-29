@@ -1,0 +1,255 @@
+/*
+ * Element resets, prose and typography.
+ *
+ * §8.7: there are deliberately no custom tags for `<code>`, `<a>`, `<strong>`,
+ * `<em>`, `<ul>`, `<ol>`, `<li>`, `<p>`, `<h*>` or `<table>`. The reference
+ * document uses all of them heavily and none needs a custom element — they are
+ * styled here instead. Every unnecessary tag is a line on a cheatsheet that has
+ * to fit on one page.
+ *
+ * Everything is scoped under `plan-doc` so the CDN build can sit inside a host
+ * page without redecorating it.
+ */
+
+@layer plan.reset {
+  plan-doc,
+  plan-doc *,
+  plan-doc *::before,
+  plan-doc *::after {
+    box-sizing: border-box;
+  }
+
+  /* Only claim the page when the document *is* a plan. */
+  html:has(plan-doc) {
+    background: var(--plan-surface-0);
+  }
+
+  body:has(plan-doc) {
+    margin: 0;
+    background: var(--plan-surface-0);
+  }
+
+  plan-doc :where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, figure, blockquote, pre) {
+    margin: 0;
+  }
+
+  plan-doc :where(ul, ol) {
+    padding: 0;
+    list-style: none;
+  }
+
+  plan-doc :where(img, svg, video, canvas, iframe) {
+    display: block;
+    max-width: 100%;
+  }
+
+  plan-doc :where(button, input, textarea, select) {
+    font: inherit;
+    color: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    plan-doc *,
+    plan-doc *::before,
+    plan-doc *::after {
+      transition-duration: 1ms !important;
+      animation-duration: 1ms !important;
+    }
+  }
+}
+
+@layer plan.base {
+  /*
+   * MUST (§7.5): the very first rule in this layer gives every plan-* tag a
+   * display value.
+   *
+   * why: an unknown or not-yet-upgraded custom element defaults to
+   * `display: inline`. Without this the reader sees a broken flash of inline
+   * layout for as long as it takes the deferred script to run — and in the
+   * offline build that flash is the whole document.
+   */
+  plan-doc,
+  plan-header,
+  plan-section,
+  plan-toc,
+  plan-chips,
+  plan-chip,
+  plan-note,
+  plan-blocker,
+  plan-blocks,
+  plan-why,
+  plan-action,
+  plan-list,
+  plan-quote,
+  plan-table,
+  plan-choice,
+  plan-option,
+  plan-collapse,
+  plan-tabs,
+  plan-tab,
+  plan-checklist,
+  plan-flow,
+  plan-flow-node,
+  plan-roadmap,
+  plan-stage,
+  plan-code,
+  plan-diff,
+  plan-figure,
+  plan-caption,
+  plan-tree,
+  plan-compare {
+    display: block;
+  }
+
+  /* The two inline members of the vocabulary. */
+  plan-term,
+  plan-ref {
+    display: inline;
+  }
+
+  /* ── Document frame ───────────────────────────────────────────────────────── */
+  plan-doc {
+    /* MUST (§6.4): one token set, `light-dark()`, no media-query duplication. */
+    color-scheme: light dark;
+    font-family: var(--plan-font-sans);
+    font-size: var(--plan-text-md);
+    line-height: var(--plan-leading);
+    color: var(--plan-text-1);
+    background: var(--plan-surface-0);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    hanging-punctuation: first;
+  }
+
+  /* ── Prose ────────────────────────────────────────────────────────────────── */
+  plan-doc :where(p) {
+    max-width: var(--plan-measure-prose);
+    margin-block: var(--plan-space-3) 0;
+    text-wrap: pretty;
+  }
+
+  plan-doc :where(p):first-child {
+    margin-block-start: 0;
+  }
+
+  plan-doc :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--plan-font-display);
+    font-weight: 640;
+    line-height: var(--plan-leading-heading);
+    letter-spacing: var(--plan-tracking-tight);
+    color: var(--plan-text-1);
+    text-wrap: balance;
+  }
+
+  plan-doc :where(strong, b) {
+    font-weight: 660;
+    color: var(--plan-text-1);
+  }
+
+  plan-doc :where(em, i) {
+    font-style: italic;
+  }
+
+  plan-doc :where(a) {
+    color: var(--plan-accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-color: var(--plan-accent-edge);
+    border-radius: 2px;
+    transition: text-decoration-color var(--plan-transition);
+  }
+
+  plan-doc :where(a):hover {
+    text-decoration-color: var(--plan-accent-line);
+  }
+
+  plan-doc :where(code, kbd, samp) {
+    font-family: var(--plan-font-mono);
+    font-size: 0.88em;
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  /* Inline code only — `plan-code` and `plan-diff` restyle their own `<code>`. */
+  plan-doc :where(:not(pre) > code) {
+    padding: 0.12em 0.36em;
+    border: var(--plan-border-width) solid var(--plan-border-1);
+    border-radius: var(--plan-radius-sm);
+    background: var(--plan-surface-2);
+    color: var(--plan-text-1);
+    white-space: nowrap;
+  }
+
+  plan-doc :where(ul, ol):not(plan-list *, plan-checklist *, plan-toc *) {
+    margin-block: var(--plan-space-3) 0;
+    padding-inline-start: var(--plan-space-6);
+    list-style: revert;
+  }
+
+  plan-doc :where(li):not(plan-list > li, plan-checklist > li, plan-toc *) {
+    margin-block: var(--plan-space-1);
+    max-width: var(--plan-measure-prose);
+  }
+
+  plan-doc :where(hr) {
+    height: 0;
+    margin-block: var(--plan-space-8);
+    border: 0;
+    border-top: var(--plan-rule);
+  }
+
+  plan-doc :where(small) {
+    font-size: var(--plan-text-sm);
+    color: var(--plan-text-2);
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────────── */
+  plan-doc :where(:focus-visible) {
+    outline: 2px solid var(--plan-accent-line);
+    outline-offset: 2px;
+  }
+
+  /* ── Selection ────────────────────────────────────────────────────────────── */
+  plan-doc ::selection {
+    background: color-mix(in oklab, var(--plan-accent-400) 34%, transparent);
+  }
+
+  /* ── Feedback highlights (§10.2) ──────────────────────────────────────────── */
+  /*
+   * MUST: highlights are painted with the CSS Custom Highlight API, never by
+   * wrapping ranges in <mark>. Wrapping mutates the DOM the reader is selecting
+   * from, which invalidates every offset captured afterwards and nests badly on
+   * overlapping highlights.
+   */
+  ::highlight(plan-feedback) {
+    background-color: var(--plan-highlight-bg);
+    color: var(--plan-highlight-text);
+  }
+
+  ::highlight(plan-feedback-active) {
+    background-color: color-mix(in oklab, var(--plan-accent-400) 46%, transparent);
+    color: var(--plan-text-1);
+  }
+
+  /* The <mark> fallback, used only where CSS.highlights is unavailable. */
+  plan-doc mark[data-plan-highlight] {
+    background: var(--plan-highlight-bg);
+    color: var(--plan-highlight-text);
+    border-radius: 2px;
+  }
+}
+
+@layer plan.utilities {
+  /* Visually hidden but reachable by assistive tech and by find-in-page. */
+  plan-doc [data-plan-visually-hidden] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

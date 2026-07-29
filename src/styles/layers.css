@@ -1,0 +1,10 @@
+/*
+ * The layer order. This file contains exactly one statement and MUST be the
+ * first import in index.css (§4.4).
+ *
+ * why: every rule the library ships lives inside one of these layers, and
+ * unlayered CSS beats layered CSS regardless of specificity. That is the whole
+ * override story — an author writes `plan-note { border-radius: 0 }` outside a
+ * layer and wins, with no `!important` and no specificity arithmetic.
+ */
+@layer plan.reset, plan.tokens, plan.preset, plan.base, plan.components, plan.utilities;

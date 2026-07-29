@@ -1,0 +1,70 @@
+/* `plan-figure` — one frame for SVG, images, Mermaid and isolated HTML. */
+
+@layer plan.components {
+  plan-figure {
+    /* Positioned so the block's own Comment button can sit in its corner. */
+    position: relative;
+    margin-block: var(--plan-space-6);
+    padding: var(--plan-space-4);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+    break-inside: avoid;
+  }
+
+  plan-figure [data-part="content"] {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  plan-figure[data-figure-type="mermaid"] [data-part="content"] svg {
+    width: 100%;
+    height: auto;
+  }
+
+  plan-figure[data-figure-type="html"] [data-part="content"] {
+    min-height: 12rem;
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius-sm);
+    background: var(--plan-surface-0);
+  }
+
+  plan-figure :where([data-part="caption"], plan-caption) {
+    display: block;
+    margin-block-start: var(--plan-space-3);
+    padding-block-start: var(--plan-space-3);
+    border-block-start: var(--plan-rule);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-sm);
+    text-wrap: pretty;
+  }
+
+  plan-figure [data-part="diagram-error"] {
+    padding: var(--plan-space-3);
+    border: var(--plan-border-width) solid var(--plan-danger-400);
+    border-radius: var(--plan-radius-sm);
+    background: light-dark(
+      var(--plan-danger-50),
+      color-mix(in oklab, var(--plan-danger-900) 45%, #101214)
+    );
+    color: light-dark(var(--plan-danger-900), var(--plan-danger-200));
+    font-size: var(--plan-text-sm);
+  }
+
+  plan-figure [data-part="diagram-error-title"] {
+    font-weight: 660;
+  }
+
+  plan-figure [data-part="diagram-error-source"] {
+    margin-block-start: var(--plan-space-2);
+    padding: var(--plan-space-2);
+    border-radius: var(--plan-radius-sm);
+    background: var(--plan-code-surface);
+    color: var(--plan-code-text);
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-xs);
+    overflow-x: auto;
+  }
+}

@@ -1,0 +1,124 @@
+/*
+ * Presets.
+ *
+ * Four orthogonal axes as attribute selectors on `plan-doc` (§6.3). State lives
+ * in the DOM: one source of truth, validatable against an enum, switchable at
+ * runtime with a single `setAttribute`, and reachable from the print stylesheet.
+ *
+ * why so few declarations per preset (§6.2): each axis moves the *unit* the rest
+ * of the system derives from. `density="compact"` sets one spacing unit and one
+ * line-height; every padding in every component follows. A preset that restated
+ * forty values would drift apart from its siblings within a month, and every new
+ * component would mean editing every preset.
+ *
+ * Named bundles ("presentation" = spacious + lg + narrow) are documented
+ * combinations, not a fifth attribute.
+ */
+
+@layer plan.preset {
+  /* ── density ─────────────────────────────────────────────────────────────── */
+  /* One unit and one line-height each — the rest of the system follows. */
+  plan-doc[density="compact"] {
+    --plan-space-unit: 3px;
+    --plan-leading: 1.55;
+  }
+
+  plan-doc[density="spacious"] {
+    --plan-space-unit: 5px;
+    --plan-leading: 1.85;
+  }
+
+  /* ── scale ───────────────────────────────────────────────────────────────── */
+  plan-doc[scale="sm"] {
+    --plan-text-base: 15px;
+    --plan-text-ratio: 1.18;
+  }
+
+  plan-doc[scale="lg"] {
+    --plan-text-base: 18px;
+    --plan-text-ratio: 1.22;
+  }
+
+  /* ── measure ─────────────────────────────────────────────────────────────── */
+  plan-doc[measure="narrow"] {
+    --plan-measure: 720px;
+  }
+
+  plan-doc[measure="wide"] {
+    --plan-measure: 1600px;
+  }
+
+  /* ── accent ──────────────────────────────────────────────────────────────── */
+  /* One ramp per accent. The semantic accent tokens in tokens.css derive light
+     and dark treatments from it, so an accent never needs a dark-mode variant. */
+  plan-doc[accent="indigo"] {
+    --plan-accent-50: #eef0fd;
+    --plan-accent-100: #dee2fb;
+    --plan-accent-200: #c1c8f6;
+    --plan-accent-400: #7f8cea;
+    --plan-accent-600: #4c56cf;
+    --plan-accent-800: #2e3480;
+    --plan-accent-900: #1e2157;
+  }
+
+  plan-doc[accent="slate"] {
+    --plan-accent-50: #f1f4f6;
+    --plan-accent-100: #e2e8ec;
+    --plan-accent-200: #c7d1d8;
+    --plan-accent-400: #8b9aa5;
+    --plan-accent-600: #4f606c;
+    --plan-accent-800: #2f3b43;
+    --plan-accent-900: #1f272c;
+  }
+
+  plan-doc[accent="plum"] {
+    --plan-accent-50: #faeef7;
+    --plan-accent-100: #f4dcef;
+    --plan-accent-200: #e8bade;
+    --plan-accent-400: #cf76bd;
+    --plan-accent-600: #a13c8c;
+    --plan-accent-800: #642357;
+    --plan-accent-900: #43163a;
+  }
+
+  plan-doc[accent="amber"] {
+    --plan-accent-50: #fdf4e7;
+    --plan-accent-100: #fbe8cb;
+    --plan-accent-200: #f6d197;
+    --plan-accent-400: #e6a53c;
+    --plan-accent-600: #a86d0f;
+    --plan-accent-800: #6c460a;
+    --plan-accent-900: #472e06;
+  }
+
+  /* ── code theme ──────────────────────────────────────────────────────────── */
+  /* `auto` is the default and needs no rules — the tokens already use
+     light-dark(). These two force one scheme for code blocks only. */
+  plan-doc[code="light"] {
+    --plan-code-surface: #f7f6f2;
+    --plan-code-text: #26292c;
+    --plan-code-border: #e4e2db;
+    --plan-code-gutter: #9b9992;
+    --plan-code-comment: #7c8a84;
+    --plan-code-keyword: #9235a4;
+    --plan-code-string: #0f7a5f;
+    --plan-code-number: #b5560d;
+    --plan-code-function: #2260bf;
+    --plan-code-punctuation: #6b706e;
+    --plan-code-highlight-row: #fff5d6;
+  }
+
+  plan-doc[code="dark"] {
+    --plan-code-surface: #14181b;
+    --plan-code-text: #dcdad2;
+    --plan-code-border: #262b2f;
+    --plan-code-gutter: #61665f;
+    --plan-code-comment: #6f7f79;
+    --plan-code-keyword: #d59ae2;
+    --plan-code-string: #66c8a5;
+    --plan-code-number: #e2a25f;
+    --plan-code-function: #7fb0ee;
+    --plan-code-punctuation: #91968f;
+    --plan-code-highlight-row: #2b2a1c;
+  }
+}

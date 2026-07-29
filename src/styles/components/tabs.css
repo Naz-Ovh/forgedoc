@@ -1,0 +1,49 @@
+/* `plan-tabs` / `plan-tab`. Flattened entirely in print — see print.css. */
+
+@layer plan.components {
+  plan-tabs {
+    margin-block: var(--plan-space-6);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+    overflow: hidden;
+  }
+
+  plan-tabs [data-part="strip"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--plan-space-1);
+    padding: var(--plan-space-2) var(--plan-space-2) 0;
+    border-block-end: var(--plan-rule);
+    background: var(--plan-surface-2);
+  }
+
+  plan-tabs [data-part="tab"] {
+    padding: var(--plan-space-2) var(--plan-space-4);
+    border: 0;
+    border-radius: var(--plan-radius-sm) var(--plan-radius-sm) 0 0;
+    background: none;
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-sm);
+    font-weight: 560;
+    cursor: pointer;
+  }
+
+  plan-tabs [data-part="tab"]:hover {
+    color: var(--plan-text-1);
+  }
+
+  plan-tabs [data-part="tab"][aria-selected="true"] {
+    background: var(--plan-surface-1);
+    color: var(--plan-accent-text);
+    box-shadow: inset 0 -2px 0 var(--plan-accent-line);
+  }
+
+  plan-tab {
+    padding: var(--plan-space-4);
+  }
+
+  plan-tab[hidden] {
+    display: none;
+  }
+}

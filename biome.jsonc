@@ -1,0 +1,132 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.6/schema.json",
+
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+
+  "files": {
+    "includes": [
+      "**",
+      "!dist",
+      "!node_modules",
+      "!coverage",
+      "!tests/visual/__screenshots__",
+      "!tests/visual/.output",
+      "!skills/better-plan/REFERENCE.md",
+      "!docs/PLAN.md",
+
+      // Test data. Whitespace is significant — the content of plan-code,
+      // plan-diff and plan-tree is rendered verbatim, and the validator tests
+      // assert exact line numbers — so reformatting these silently changes what
+      // they test.
+      "!tests/fixtures"
+    ]
+  },
+
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf",
+
+    // Biome 2.5.6 rewrites .svelte structurally — it hoists the `interface
+    // Props` block above its own doc comment and dedents the whole <script>
+    // body. Verified on BucketItem.svelte. This is the same class of breakage
+    // that kept prettier-plugin-svelte out, so these files stay hand-formatted;
+    // revisit when Svelte support leaves partial.
+    "includes": ["**", "!**/*.svelte"]
+  },
+
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always"
+    }
+  },
+
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+
+      "style": {
+        // §12: no default exports. Overridden below for the config files whose
+        // tools require one.
+        "noDefaultExport": "error",
+        "useConst": "error",
+        "useImportType": "error"
+      },
+
+      "suspicious": {
+        "noDoubleEquals": "error",
+        "noConsole": { "level": "error", "options": { "allow": ["warn", "error"] } },
+        "noExplicitAny": "error"
+      },
+
+      "correctness": {
+        // Biome exempts identifiers prefixed with `_`, which is what the
+        // previous argsIgnorePattern/varsIgnorePattern did.
+        "noUnusedVariables": "error"
+      },
+
+      "complexity": {
+        // The override story is `@layer`-based (§4.4): everything the library
+        // ships is layered, so unlayered author CSS already wins without
+        // `!important`. The seven remaining uses are the two places where the
+        // library itself must win — `prefers-reduced-motion` in base.css and
+        // the print overrides in print.css — and both are standard practice.
+        "noImportantStyles": "off"
+      }
+    }
+  },
+
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
+  },
+
+  "overrides": [
+    {
+      // Config files and ambient declarations have to default-export — that is
+      // the interface their tools define, not a style choice §12 can override.
+      "includes": [
+        "vite.config.ts",
+        "tsdown.config.ts",
+        "playwright.config.ts",
+        "svelte.config.js",
+        "src/env.d.ts"
+      ],
+      "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
+    },
+
+    {
+      // Biome parses only the <script> block of a .svelte file, never the
+      // template. Two consequences, both narrow and both deliberate:
+      //
+      //   noDefaultExport   — components legitimately default-export.
+      //   noUnusedVariables — every `$props()` binding is referenced from the
+      //   noUnusedImports     markup Biome cannot see, so all six of
+      //                       BucketItem's props, and the components
+      //                       BucketPanel renders, read as unused.
+      //
+      // eslint-plugin-svelte understood templates and did catch these. Nothing
+      // replaces that today; `npm run lint:no-shadow` still scans .svelte for
+      // the one rule that must never regress (§2.1), and `svelte-check` would
+      // be the way back if template linting is wanted.
+      "includes": ["**/*.svelte"],
+      "linter": {
+        "rules": {
+          "style": { "noDefaultExport": "off" },
+          "correctness": { "noUnusedVariables": "off", "noUnusedImports": "off" }
+        }
+      }
+    },
+
+    {
+      "includes": ["tools/**", "tests/**", "vite.config.ts", "tsdown.config.ts"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    }
+  ]
+}

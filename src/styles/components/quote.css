@@ -1,0 +1,62 @@
+/*
+ * `plan-quote`, `plan-term` and `plan-ref` — the inline and quotation roles.
+ *
+ * MUST NOT (§6.5): no serif face here, or anywhere. A pull quote gets its
+ * distinct typographic role from weight, measure and a rule, not from a
+ * different family.
+ */
+
+@layer plan.components {
+  plan-quote {
+    margin-block: var(--plan-space-6);
+    padding-inline-start: var(--plan-space-5);
+    border-inline-start: 3px solid var(--plan-accent-line);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-lg);
+    font-weight: 400;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  plan-quote [data-part="cite"] {
+    margin-block-start: var(--plan-space-2);
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-sm);
+    font-weight: 560;
+  }
+
+  plan-quote [data-part="cite"]::before {
+    content: "— ";
+  }
+
+  plan-term {
+    color: var(--plan-accent-text);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+  }
+
+  /* First mention carries the weight; repeats read as ordinary prose. */
+  plan-term:state(first-mention) {
+    font-weight: 600;
+  }
+
+  plan-term:not(:state(first-mention)) {
+    color: inherit;
+    text-decoration-color: var(--plan-border-2);
+  }
+
+  plan-ref {
+    color: var(--plan-accent-text);
+    font-variant-numeric: var(--plan-numeric);
+    font-weight: 560;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  plan-ref:hover {
+    text-decoration: underline;
+  }
+}

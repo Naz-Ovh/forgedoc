@@ -1,0 +1,205 @@
+/*
+ * `plan-choice` / `plan-option` — the question card.
+ *
+ * MUST (§8.4): every free-text field shares one visual style — same border,
+ * padding, radius and background. `--plan-field-*` below is that one style, used
+ * by the Other textarea, the note textarea and the bucket's comment composer.
+ */
+
+@layer plan.components {
+  plan-choice {
+    margin-block: var(--plan-space-8);
+    padding: var(--plan-space-5) var(--plan-space-5) var(--plan-space-4);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius-lg);
+    background: var(--plan-surface-1);
+    box-shadow: var(--plan-shadow-1);
+    break-inside: avoid;
+  }
+
+  plan-choice:state(answered) {
+    border-color: var(--plan-accent-edge);
+  }
+
+  plan-choice [data-part="sequence"] {
+    color: var(--plan-accent-text);
+    font-size: var(--plan-text-xs);
+    font-weight: 660;
+    letter-spacing: var(--plan-tracking-wide);
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  plan-choice [data-part="question"] {
+    margin-block: var(--plan-space-2) var(--plan-space-4);
+    max-width: var(--plan-measure-prose);
+    font-size: var(--plan-text-lg);
+    font-weight: 620;
+    line-height: var(--plan-leading-tight);
+    text-wrap: pretty;
+  }
+
+  plan-option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--plan-space-1) var(--plan-space-3);
+    margin-block: var(--plan-space-2);
+    padding: var(--plan-space-3);
+    border: var(--plan-border-width) solid var(--plan-border-1);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+    cursor: pointer;
+    transition:
+      border-color var(--plan-transition),
+      background-color var(--plan-transition);
+  }
+
+  plan-option:hover {
+    border-color: var(--plan-border-2);
+    background: var(--plan-surface-2);
+  }
+
+  plan-option[data-selected] {
+    border-color: var(--plan-accent-line);
+    background: var(--plan-accent-tint);
+  }
+
+  plan-option [data-part="control"] {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--plan-space-2);
+    grid-row: 1;
+  }
+
+  plan-option [data-part="input"] {
+    accent-color: var(--plan-accent-solid);
+    margin: 0;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  plan-option [data-part="key"] {
+    display: grid;
+    place-items: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding-inline: 0.35em;
+    border-radius: var(--plan-radius-sm);
+    background: var(--plan-surface-3);
+    color: var(--plan-text-2);
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-xs);
+    font-weight: 700;
+  }
+
+  plan-option[data-selected] [data-part="key"] {
+    background: var(--plan-accent-solid);
+    color: var(--plan-accent-on-solid);
+  }
+
+  plan-option [data-part="desc"] {
+    grid-column: 2;
+    margin-block-start: var(--plan-space-1);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-sm);
+  }
+
+  plan-option [data-part="recommended"] {
+    grid-column: 2;
+    justify-self: start;
+    margin-block-start: var(--plan-space-2);
+    padding: 0 var(--plan-space-2);
+    border-radius: var(--plan-radius-pill);
+    background: var(--plan-accent-tint);
+    color: var(--plan-accent-text);
+    border: var(--plan-border-width) solid var(--plan-accent-edge);
+    font-size: var(--plan-text-xs);
+    font-weight: 640;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  /* ── The appended Other option ──────────────────────────────────────────── */
+  plan-option[data-part="other"] [data-part="other-label"] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    font-weight: 560;
+  }
+
+  /* MUST (§8.4): the hint is smaller and on the same line as the label. */
+  plan-option[data-part="other"] [data-part="other-hint"] {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-xs);
+  }
+
+  /*
+   * The textarea lives *inside* the Other block so it reads as part of that
+   * choice — never as a stray field below the list.
+   */
+  plan-option[data-part="other"] [data-part="other-text"] {
+    display: none;
+    grid-column: 2;
+    margin-block-start: var(--plan-space-2);
+  }
+
+  plan-choice:state(other-open) plan-option[data-part="other"] [data-part="other-text"] {
+    display: block;
+  }
+
+  /* ── The note field ─────────────────────────────────────────────────────── */
+  plan-choice [data-part="note-toggle"] {
+    margin-block-start: var(--plan-space-3);
+    padding: var(--plan-space-1) var(--plan-space-2);
+    border: 0;
+    border-radius: var(--plan-radius-sm);
+    background: none;
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-sm);
+    cursor: pointer;
+  }
+
+  plan-choice [data-part="note-toggle"]:hover {
+    background: var(--plan-surface-2);
+    color: var(--plan-text-1);
+  }
+
+  plan-choice [data-part="note"] {
+    display: none;
+    margin-block-start: var(--plan-space-2);
+  }
+
+  plan-choice:state(note-open) [data-part="note"] {
+    display: block;
+  }
+
+  plan-choice:state(note-open) [data-part="note-toggle"] {
+    color: var(--plan-accent-text);
+  }
+
+  /* ── The one shared field style ─────────────────────────────────────────── */
+  plan-choice textarea {
+    width: 100%;
+    padding: var(--plan-space-2) var(--plan-space-3);
+    border: var(--plan-border-width) solid var(--plan-border-2);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-2);
+    color: var(--plan-text-1);
+    font-family: inherit;
+    font-size: var(--plan-text-sm);
+    line-height: var(--plan-leading);
+    resize: vertical;
+  }
+
+  plan-choice textarea::placeholder {
+    color: var(--plan-text-3);
+  }
+
+  plan-choice textarea:focus {
+    border-color: var(--plan-accent-line);
+    background: var(--plan-surface-1);
+  }
+}

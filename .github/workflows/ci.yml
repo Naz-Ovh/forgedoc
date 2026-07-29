@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, build, test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The only lockfile in the repo is pnpm-lock.yaml. `npm ci` requires a
+      # package-lock.json and fails outright without one.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Formatting
+        run: pnpm run format:check
+
+      - name: Lint
+        run: pnpm run lint
+
+      # Acceptance 14, belt and braces: Biome sees neither Svelte templates nor .html.
+      - name: No shadow DOM anywhere in src/
+        run: pnpm run lint:no-shadow
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Build all four artefacts
+        run: pnpm run build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Real Chromium: jsdom implements none of ElementInternals, CustomStateSet
+      # or the CSS Custom Highlight API, all of which are load-bearing here.
+      - name: Test
+        run: pnpm test
+
+      # `npx skills add MrBns/plankit` is the advertised install. A typo in the
+      # frontmatter, or a rename of skills/better-plan/, breaks it silently —
+      # nothing else in this job reads SKILL.md as the CLI does.
+      - name: Skill is discoverable by the skills CLI
+        env:
+          DISABLE_TELEMETRY: '1'
+        run: npx --yes skills add ./ --list | grep -q better-plan
+
+      - name: Fail if the working tree is dirty
+        # skills/better-plan/REFERENCE.md is generated; a stale commit shows up here.
+        run: git diff --exit-code
+
+  layout:
+    name: Layout and print rules
+    runs-on: ubuntu-latest
+    # Pinned so text metrics — which the geometry assertions measure — stay put.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.0-noble
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+      # Pixel baselines are generated and therefore not stored in the repo, so
+      # `@pixel` tests have nothing to compare against here and are excluded.
+      # What remains is the deterministic half: reading-column centring at four
+      # widths, TOC docking geometry, the collapsed-panel size rule, print
+      # chrome, and the whole offline `file://` suite.
+      - name: Layout geometry, print rules, offline document
+        run: pnpm run test:visual:ci
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diff
+          path: tests/visual/.output
+          retention-days: 7

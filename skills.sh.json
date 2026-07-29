@@ -1,0 +1,11 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Planning",
+      "description": "Write interactive planning documents a human can answer, and read their decisions back.",
+      "skills": ["better-plan"]
+    }
+  ]
+}

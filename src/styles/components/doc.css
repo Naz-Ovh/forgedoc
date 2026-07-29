@@ -1,0 +1,103 @@
+/*
+ * `plan-doc` — the reading column.
+ *
+ * MUST NOT reparent (§8.1): there is no generated `<div class="column">`. The
+ * column is produced by styling `plan-doc > *` directly, and the TOC and bucket
+ * are siblings of the content that opt out with `[data-plan-chrome]`.
+ */
+
+@layer plan.components {
+  plan-doc {
+    padding-block: var(--plan-space-12) var(--plan-space-20);
+    padding-inline: var(--plan-gutter);
+    min-height: 100vh;
+    transition: padding-inline-start var(--plan-transition);
+  }
+
+  /*
+   * A docked contents panel pushes the reading column across rather than
+   * covering it.
+   *
+   * why padding on `plan-doc` rather than a margin on the column: the column is
+   * `plan-doc > *` with `margin-inline: auto`, so widening the start padding
+   * both clears the rail *and* re-centres the content inside the space that is
+   * left — the "centre of the rest", not the centre of the viewport. No wrapper,
+   * no grid, nothing reparented (§2.2).
+   */
+  @media (min-width: 1280px) {
+    plan-doc:state(toc-docked) {
+      padding-inline-start: calc(var(--plan-toc-width) + var(--plan-gutter));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    plan-doc {
+      transition: none;
+    }
+  }
+
+  /*
+   * Below 1050px: full width, comfortable horizontal padding from the host.
+   * The column is centred at every viewport — never left-hugging on ultrawide.
+   */
+  plan-doc > *:not([data-plan-chrome]) {
+    width: 100%;
+    max-width: var(--plan-measure);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 1050px) {
+    /* From 1050px up, 90% of the viewport, still capped and still centred. */
+    plan-doc > *:not([data-plan-chrome]) {
+      width: 90%;
+    }
+  }
+
+  @media (min-width: 2560px) {
+    /* On a very large display the measure may widen, unless the author pinned it. */
+    plan-doc:not([measure]) {
+      --plan-measure: 1600px;
+    }
+  }
+
+  /* Vertical rhythm between top-level blocks. */
+  plan-doc > *:not([data-plan-chrome]) + *:not([data-plan-chrome]) {
+    margin-block-start: var(--plan-space-6);
+  }
+
+  /* MUST (§9.3): loud, permanent, non-dismissible. */
+  plan-doc > [data-part="storage-warning"] {
+    position: sticky;
+    top: 0;
+    z-index: var(--plan-z-banner);
+    padding: var(--plan-space-3) var(--plan-space-4);
+    border: var(--plan-border-width) solid var(--plan-warn-400);
+    border-radius: var(--plan-radius);
+    background: light-dark(
+      var(--plan-warn-50),
+      color-mix(in oklab, var(--plan-warn-900) 55%, #101214)
+    );
+    color: light-dark(var(--plan-warn-900), var(--plan-warn-200));
+    font-size: var(--plan-text-sm);
+    font-weight: 560;
+  }
+
+  plan-doc > [data-part="dev-banner"] {
+    padding: var(--plan-space-3) var(--plan-space-4);
+    border: var(--plan-border-width) solid var(--plan-danger-600);
+    border-radius: var(--plan-radius);
+    background: light-dark(
+      var(--plan-danger-50),
+      color-mix(in oklab, var(--plan-danger-900) 55%, #101214)
+    );
+    color: light-dark(var(--plan-danger-900), var(--plan-danger-200));
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-sm);
+  }
+
+  plan-doc > [data-part="dev-banner"] ul {
+    margin-block-start: var(--plan-space-2);
+    padding-inline-start: var(--plan-space-5);
+    list-style: disc;
+  }
+}

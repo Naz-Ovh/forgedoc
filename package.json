@@ -1,0 +1,99 @@
+{
+  "name": "plankit",
+  "version": "1.0.0",
+  "description": "Web components for AI-authored interactive planning documents.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrBns/plankit.git"
+  },
+  "homepage": "https://github.com/MrBns/plankit#readme",
+  "bugs": "https://github.com/MrBns/plankit/issues",
+  "keywords": [
+    "web-components",
+    "planning",
+    "ai-agents",
+    "agent-skill",
+    "design-doc"
+  ],
+  "type": "module",
+  "main": "./dist/plankit.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "plankit": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "skills",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/plankit.js"
+    },
+    "./style.css": "./dist/plankit.css",
+    "./standalone": "./dist/plankit.standalone.iife.js"
+  },
+  "sideEffects": [
+    "*.css",
+    "./dist/plankit.iife.js",
+    "./dist/plankit.standalone.iife.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.13.0",
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsdown && npm run build:types",
+    "build:types": "tsc -p tsconfig.build.json",
+    "dev": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:visual": "playwright test",
+    "test:visual:ci": "playwright test --grep-invert @pixel",
+    "test:visual:update": "playwright test --update-snapshots",
+    "docs:reference": "node tools/gen-reference.mjs",
+    "lint": "biome lint . && npm run lint:no-shadow",
+    "lint:no-shadow": "node tools/check-no-shadow-dom.mjs",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run build && npm test",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "mermaid": "^11.16.0"
+  },
+  "peerDependenciesMeta": {
+    "mermaid": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.6",
+    "@playwright/test": "1.62.0",
+    "@sveltejs/vite-plugin-svelte": "7.2.0",
+    "@tsdown/css": "^0.22.14",
+    "@types/node": "^22.20.1",
+    "@types/prismjs": "^1.26.5",
+    "@vitest/browser": "4.1.10",
+    "@vitest/browser-playwright": "4.1.10",
+    "mermaid": "11.16.0",
+    "parse5": "8.0.1",
+    "playwright": "1.62.0",
+    "prismjs": "1.30.0",
+    "rolldown": "~1.1.5",
+    "rollup-plugin-svelte": "^7.2.3",
+    "svelte": "5.56.8",
+    "tsdown": "^0.22.14",
+    "typescript": "~5.9.0",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
+  },
+  "author": {
+    "name": "mrbns (Mr Binary Sniper)",
+    "email": "hi@mrbns.dev"
+  }
+}

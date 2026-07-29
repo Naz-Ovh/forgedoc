@@ -1,0 +1,176 @@
+/*
+ * Print — a `plan-doc` responsibility (§8.8).
+ *
+ * The PDF is a real deliverable, not an afterthought. Every MUST from §8.8 is
+ * implemented here; retrofitting print across 22 components later is miserable,
+ * which is why this file exists from the start rather than at the end.
+ */
+
+@layer plan.components {
+  @media print {
+    /* Bucket hidden entirely. */
+    [data-part="bucket-trigger"],
+    [data-part="bucket-panel"],
+    [data-part="bucket-popover"],
+    plan-doc > [data-part="bucket"],
+    plan-doc > [data-part="dev-banner"] {
+      display: none !important;
+    }
+
+    /* TOC flattened into a real contents page, whatever the on-screen state. */
+    plan-toc,
+    plan-doc:state(toc-open) plan-toc,
+    plan-doc:state(toc-docked) plan-toc {
+      position: static;
+      width: auto;
+      max-width: none;
+      max-height: none;
+      margin-block-end: var(--plan-space-8);
+      border: 0;
+      border-block-end: 2px solid var(--plan-border-2);
+      border-radius: 0;
+      background: none;
+      backdrop-filter: none;
+      box-shadow: none;
+      overflow: visible;
+      break-after: page;
+    }
+
+    /* Docking is an on-screen convenience; the printed page is never offset. */
+    plan-doc:state(toc-docked) {
+      padding-inline-start: var(--plan-gutter);
+    }
+
+    plan-toc [data-part="dock"] {
+      display: none;
+    }
+
+    plan-toc [data-part="toggle"] {
+      font-size: var(--plan-text-lg);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    plan-toc [data-part="toggle"]::before {
+      content: none;
+    }
+
+    /* Force the list open regardless of the reader's on-screen preference, and
+       drop the scroll container — a printed contents page cannot scroll. */
+    plan-toc [data-part="list"] {
+      display: block !important;
+      overflow: visible;
+    }
+
+    plan-toc [data-part="entry"]::after {
+      /* Page numbers, where the engine supports target-counter. */
+      content: " " target-counter(attr(href), page);
+      color: var(--plan-text-3);
+    }
+
+    /* Every disclosure force-expanded. */
+    plan-collapse > [data-part="body"],
+    plan-stage > [data-part="body"],
+    plan-tab,
+    plan-tab > [data-part="body"] {
+      display: block !important;
+      content-visibility: visible !important;
+    }
+
+    plan-collapse [hidden],
+    plan-stage [hidden],
+    plan-tabs [hidden] {
+      display: block !important;
+    }
+
+    plan-collapse [data-part="chevron"],
+    plan-tabs [data-part="strip"] {
+      display: none;
+    }
+
+    /* Tabs flatten to sequential sections with their labels as sub-headings. */
+    plan-tab::before {
+      content: attr(label);
+      display: block;
+      margin-block-end: var(--plan-space-2);
+      font-size: var(--plan-text-lg);
+      font-weight: 660;
+    }
+
+    plan-tab + plan-tab {
+      border-block-start: var(--plan-rule);
+    }
+
+    /* Never split a box across a page break. */
+    plan-note,
+    plan-blocker,
+    plan-choice,
+    plan-figure,
+    plan-compare,
+    plan-compare > [data-part="column"],
+    plan-code,
+    plan-diff,
+    plan-stage,
+    plan-tree {
+      break-inside: avoid;
+    }
+
+    plan-section[data-depth="1"] {
+      break-before: page;
+    }
+
+    plan-section > [data-part="heading"] {
+      break-after: avoid;
+    }
+
+    /* Link URLs printed after the link text, for external hrefs only. */
+    plan-doc a[href^="http"]::after {
+      content: " (" attr(href) ")";
+      color: var(--plan-text-3);
+      font-size: var(--plan-text-xs);
+      word-break: break-all;
+    }
+
+    plan-term::after {
+      content: " (" attr(data-href) ")";
+      color: var(--plan-text-3);
+      font-size: var(--plan-text-xs);
+      word-break: break-all;
+    }
+
+    /* Background colours preserved on callouts and code. */
+    plan-note,
+    plan-blocker,
+    plan-code,
+    plan-diff,
+    plan-chip,
+    plan-tree,
+    plan-stage:state(current),
+    plan-flow-node:state(active),
+    plan-option[data-selected] {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    /* An unanswered question wastes half a page of interactive chrome. */
+    plan-choice [data-part="note-toggle"],
+    plan-choice [data-part="note"]:not([data-has-text]),
+    plan-code [data-part="copy"] {
+      display: none;
+    }
+
+    plan-doc {
+      padding: 0;
+      min-height: 0;
+    }
+
+    plan-doc > *:not([data-plan-chrome]) {
+      width: 100%;
+      max-width: none;
+    }
+
+    @page {
+      margin: 18mm 16mm;
+    }
+  }
+}

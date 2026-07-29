@@ -1,0 +1,48 @@
+/* `plan-checklist` — persistent reader-facing ticks. */
+
+@layer plan.components {
+  plan-checklist {
+    margin-block: var(--plan-space-5);
+    padding: var(--plan-space-3) var(--plan-space-4);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+  }
+
+  /* Hanging indent, for the same reason as plan-list: an `<li>` holds inline
+     content, and grid would promote each inline element to its own item. */
+  /* Same UA list-marker problem as plan-list — see the note there. */
+  plan-checklist > li,
+  plan-checklist > [data-part="item"] {
+    display: block;
+    list-style: none;
+  }
+
+  plan-checklist > [data-part="item"] {
+    position: relative;
+    padding-block: var(--plan-space-2);
+    padding-inline-start: var(--plan-space-7);
+    max-width: var(--plan-measure-prose);
+  }
+
+  plan-checklist > [data-part="item"] + [data-part="item"] {
+    border-block-start: var(--plan-rule);
+  }
+
+  plan-checklist [data-part="check"] {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: calc(var(--plan-space-2) + 0.25em);
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+    accent-color: var(--plan-accent-solid);
+    cursor: pointer;
+  }
+
+  plan-checklist > [data-part="item"][data-checked] {
+    color: var(--plan-text-3);
+    text-decoration: line-through;
+    text-decoration-color: var(--plan-border-2);
+  }
+}

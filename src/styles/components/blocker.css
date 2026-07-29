@@ -1,0 +1,127 @@
+/* `plan-blocker` and its three enforced children. */
+
+@layer plan.components {
+  plan-blocker {
+    --plan-blocker-line: var(--plan-warn-600);
+    --plan-blocker-tint: light-dark(
+      var(--plan-warn-50),
+      color-mix(in oklab, var(--plan-warn-900) 40%, #101214)
+    );
+
+    margin-block: var(--plan-space-6);
+    padding: var(--plan-space-4) var(--plan-space-5);
+    border: var(--plan-border-width) solid
+      color-mix(in oklab, var(--plan-blocker-line) 40%, transparent);
+    border-radius: var(--plan-radius);
+    background: var(--plan-blocker-tint);
+    break-inside: avoid;
+    print-color-adjust: exact;
+  }
+
+  plan-blocker[severity="low"] {
+    --plan-blocker-line: var(--plan-info-600);
+    --plan-blocker-tint: light-dark(
+      var(--plan-info-50),
+      color-mix(in oklab, var(--plan-info-900) 40%, #101214)
+    );
+  }
+
+  plan-blocker[severity="high"] {
+    --plan-blocker-line: var(--plan-danger-600);
+    --plan-blocker-tint: light-dark(
+      var(--plan-danger-50),
+      color-mix(in oklab, var(--plan-danger-900) 40%, #101214)
+    );
+  }
+
+  plan-blocker [data-part="header"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--plan-space-2) var(--plan-space-3);
+    margin-block-end: var(--plan-space-3);
+  }
+
+  plan-blocker [data-part="sequence"] {
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-xs);
+    font-weight: 640;
+    letter-spacing: var(--plan-tracking-wide);
+    text-transform: uppercase;
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  plan-blocker [data-part="severity"] {
+    padding: 0 var(--plan-space-2);
+    border-radius: var(--plan-radius-pill);
+    background: var(--plan-blocker-line);
+    color: #fff;
+    font-size: var(--plan-text-xs);
+    font-weight: 640;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  plan-blocker [data-part="title"] {
+    flex: 1 1 100%;
+    font-size: var(--plan-text-lg);
+    font-weight: 660;
+    line-height: var(--plan-leading-tight);
+  }
+
+  /*
+   * why the label is positioned rather than a grid column: the author's text is
+   * *inline* content — "Every key is namespaced <code>…</code>, and the
+   * validator rejects…" — and every inline element child of a grid container
+   * becomes its own grid item. A two-column grid would therefore tear a sentence
+   * containing `<code>` into three cells. A hanging indent with an absolutely
+   * positioned label holds any mix of inline content.
+   */
+  plan-blocks,
+  plan-why,
+  plan-action {
+    position: relative;
+    padding-block: var(--plan-space-2);
+    padding-inline-start: 6rem;
+    border-block-start: var(--plan-border-width) solid
+      color-mix(in oklab, var(--plan-blocker-line) 22%, transparent);
+  }
+
+  plan-blocks [data-part="label"],
+  plan-why [data-part="label"],
+  plan-action [data-part="label"] {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: var(--plan-space-2);
+    width: 5.25rem;
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-xs);
+    font-weight: 660;
+    letter-spacing: var(--plan-tracking-wide);
+    text-transform: uppercase;
+    line-height: 1.9;
+  }
+
+  plan-action {
+    font-weight: 560;
+  }
+
+  plan-action [data-part="label"] {
+    color: var(--plan-blocker-line);
+  }
+
+  @media (max-width: 640px) {
+    plan-blocks,
+    plan-why,
+    plan-action {
+      padding-inline-start: 0;
+      padding-block-start: var(--plan-space-6);
+    }
+
+    plan-blocks [data-part="label"],
+    plan-why [data-part="label"],
+    plan-action [data-part="label"] {
+      line-height: 1.4;
+    }
+  }
+}

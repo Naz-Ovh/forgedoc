@@ -1,0 +1,211 @@
+/*
+ * Design tokens.
+ *
+ * Rules (§6.1):
+ *   · Every token is prefixed `--plan-`. Non-negotiable — Mermaid and Prism both
+ *     inject stylesheets and read root-scoped values, so an unprefixed
+ *     `--border` or `--radius` is a collision waiting to happen.
+ *   · Scales derive from one unit and one ratio (§6.2). A preset that had to
+ *     restate forty values would drift within a month.
+ *   · Colour uses `light-dark()` on a single token set (§6.4) — no
+ *     `prefers-color-scheme` duplication, no theme toggle, no second stylesheet.
+ *
+ * ── Why this file is in two blocks ──────────────────────────────────────────
+ *
+ * A `var()` inside a custom property is substituted at computed-value time on
+ * the element that *declares* it, and the result is what inherits. So a derived
+ * token declared only on `:root` bakes in the root's primitives, and neither
+ * `plan-doc[density="compact"]` nor `<plan-table style="--plan-space-unit:9px">`
+ * can move it afterwards — the preset would change the unit and every step would
+ * quietly keep the old value.
+ *
+ * PRIMITIVES therefore sit on `:root, plan-doc`, so a preset can override them
+ * on the document root. DERIVED tokens are re-declared on `plan-doc, plan-doc *`
+ * so they re-substitute at every element, which is exactly what makes both
+ * `density="compact"` (§6.3) and a subtree token override (§6.1) work.
+ *
+ * The cost is a universal selector carrying ~30 declarations. That is a real
+ * price, paid deliberately: without it, two of the three documented override
+ * tiers in §6.6 silently do nothing.
+ */
+
+@layer plan.tokens {
+  /* ═══ Primitives ═══════════════════════════════════════════════════════════
+     Everything a preset or an author may want to move. No var() references. */
+  :root,
+  plan-doc {
+    /* Spacing: one unit. */
+    --plan-space-unit: 4px;
+
+    /* Type: one base, one ratio. */
+    --plan-text-base: 16px;
+    --plan-text-ratio: 1.2;
+
+    --plan-leading: 1.7;
+    --plan-leading-tight: 1.25;
+    --plan-leading-heading: 1.15;
+    --plan-tracking-tight: -0.011em;
+    --plan-tracking-wide: 0.08em;
+
+    /* Fonts (§6.5). MUST NOT use serif for body, headings or code. Serif is
+       permitted only if the author explicitly sets --plan-font-display. No web
+       fonts ship in either build. */
+    --plan-font-sans:
+      ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    --plan-font-mono:
+      ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", "Cascadia Mono", "Roboto Mono",
+      Menlo, Consolas, "Liberation Mono", monospace;
+    /* Tabular numerals in tables, code and every derived number. */
+    --plan-numeric: tabular-nums lining-nums;
+
+    /* Layout. */
+    --plan-measure: 1200px;
+    --plan-measure-prose: 74ch;
+    /* Width of the contents panel, and of the gap it pushes open when docked. */
+    --plan-toc-width: 19rem;
+    --plan-radius-sm: 4px;
+    --plan-radius: 8px;
+    --plan-radius-lg: 14px;
+    --plan-radius-pill: 999px;
+    --plan-border-width: 1px;
+
+    /* Accent ramp. One definition per accent; dark mode picks other steps
+       rather than restating the ramp. */
+    --plan-accent-50: #edfaf6;
+    --plan-accent-100: #d3f3ea;
+    --plan-accent-200: #a7e6d6;
+    --plan-accent-400: #4dc7ab;
+    --plan-accent-600: #12907a;
+    --plan-accent-800: #0b5c50;
+    --plan-accent-900: #073d36;
+
+    /* Surfaces and text. */
+    --plan-surface-0: light-dark(#fbfaf7, #101214);
+    --plan-surface-1: light-dark(#ffffff, #16181a);
+    --plan-surface-2: light-dark(#f5f4f0, #1c1f22);
+    --plan-surface-3: light-dark(#eceae4, #23272b);
+    --plan-text-1: light-dark(#1b1d1f, #e6e4dd);
+    --plan-text-2: light-dark(#4b4f53, #b0aea6);
+    --plan-text-3: light-dark(#767a7d, #85857f);
+    --plan-text-inverse: light-dark(#fbfaf7, #101214);
+    --plan-border-1: light-dark(#e4e2db, #2a2e32);
+    --plan-border-2: light-dark(#ccc9c0, #3b4046);
+    --plan-shadow-1: light-dark(0 1px 2px rgb(20 20 18 / 6%), 0 1px 2px rgb(0 0 0 / 40%));
+    --plan-shadow-2:
+      light-dark(0 2px 4px rgb(20 20 18 / 5%), 0 2px 6px rgb(0 0 0 / 45%)),
+      light-dark(0 12px 28px rgb(20 20 18 / 8%), 0 14px 34px rgb(0 0 0 / 45%));
+
+    /* Semantic ramps. MUST NOT change with `accent` (§6.4). */
+    --plan-info-600: #2563c9;
+    --plan-info-400: #6f9ff0;
+    --plan-info-200: #b9d1f8;
+    --plan-info-50: #eaf1fd;
+    --plan-info-900: #12305f;
+
+    --plan-success-600: #1f8a4c;
+    --plan-success-400: #46b877;
+    --plan-success-200: #b2e2c6;
+    --plan-success-50: #e9f7ee;
+    --plan-success-900: #0f4126;
+
+    --plan-warn-600: #b5760d;
+    --plan-warn-400: #e0a33a;
+    --plan-warn-200: #f5d9a4;
+    --plan-warn-50: #fdf5e7;
+    --plan-warn-900: #57370a;
+
+    --plan-danger-600: #c33a34;
+    --plan-danger-400: #e57a72;
+    --plan-danger-200: #f6cac6;
+    --plan-danger-50: #fdeeed;
+    --plan-danger-900: #5d1a17;
+
+    /* Code theme (§6.3, the `code` axis). */
+    --plan-code-surface: light-dark(#f7f6f2, #14181b);
+    --plan-code-text: light-dark(#26292c, #dcdad2);
+    --plan-code-border: light-dark(#e4e2db, #262b2f);
+    --plan-code-gutter: light-dark(#9b9992, #61665f);
+    --plan-code-comment: light-dark(#7c8a84, #6f7f79);
+    --plan-code-keyword: light-dark(#9235a4, #d59ae2);
+    --plan-code-string: light-dark(#0f7a5f, #66c8a5);
+    --plan-code-number: light-dark(#b5560d, #e2a25f);
+    --plan-code-function: light-dark(#2260bf, #7fb0ee);
+    --plan-code-punctuation: light-dark(#6b706e, #91968f);
+    --plan-code-highlight-row: light-dark(#fff5d6, #2b2a1c);
+
+    --plan-highlight-text: light-dark(#3b2c07, #f4e9cf);
+
+    /* Elevation. */
+    --plan-z-toc: 40;
+    --plan-z-popover: 60;
+    --plan-z-bucket: 70;
+    --plan-z-banner: 80;
+
+    --plan-transition: 140ms cubic-bezier(0.32, 0.72, 0.32, 1);
+  }
+
+  /* ═══ Derived ══════════════════════════════════════════════════════════════
+     Re-substituted at every element so a preset on `plan-doc` and a token
+     override on any subtree both reach the whole scale. */
+  plan-doc,
+  plan-doc * {
+    --plan-space-0: 0px;
+    --plan-space-1: calc(var(--plan-space-unit) * 1);
+    --plan-space-2: calc(var(--plan-space-unit) * 2);
+    --plan-space-3: calc(var(--plan-space-unit) * 3);
+    --plan-space-4: calc(var(--plan-space-unit) * 4);
+    --plan-space-5: calc(var(--plan-space-unit) * 5);
+    --plan-space-6: calc(var(--plan-space-unit) * 6);
+    --plan-space-7: calc(var(--plan-space-unit) * 7);
+    --plan-space-8: calc(var(--plan-space-unit) * 8);
+    --plan-space-9: calc(var(--plan-space-unit) * 9);
+    --plan-space-10: calc(var(--plan-space-unit) * 10);
+    --plan-space-11: calc(var(--plan-space-unit) * 11);
+    --plan-space-12: calc(var(--plan-space-unit) * 12);
+    --plan-space-16: calc(var(--plan-space-unit) * 16);
+    --plan-space-20: calc(var(--plan-space-unit) * 20);
+
+    --plan-text-xs: calc(var(--plan-text-base) / var(--plan-text-ratio) / var(--plan-text-ratio));
+    --plan-text-sm: calc(var(--plan-text-base) / var(--plan-text-ratio));
+    --plan-text-md: var(--plan-text-base);
+    --plan-text-lg: calc(var(--plan-text-base) * var(--plan-text-ratio));
+    --plan-text-xl: calc(var(--plan-text-lg) * var(--plan-text-ratio));
+    --plan-text-2xl: calc(var(--plan-text-xl) * var(--plan-text-ratio));
+    --plan-text-3xl: calc(var(--plan-text-2xl) * var(--plan-text-ratio));
+    --plan-text-4xl: calc(var(--plan-text-3xl) * var(--plan-text-ratio));
+
+    --plan-gutter: var(--plan-space-5);
+    --plan-rule: var(--plan-border-width) solid var(--plan-border-1);
+
+    /* Accent, resolved against the current colour scheme. Components use these,
+       not the raw ramp, so one ramp serves both schemes. */
+    --plan-accent-text: light-dark(var(--plan-accent-800), var(--plan-accent-200));
+    --plan-accent-line: light-dark(var(--plan-accent-600), var(--plan-accent-400));
+    --plan-accent-solid: light-dark(var(--plan-accent-600), var(--plan-accent-400));
+    --plan-accent-on-solid: light-dark(#ffffff, #06201c);
+    --plan-accent-tint: light-dark(
+      var(--plan-accent-50),
+      color-mix(in oklab, var(--plan-accent-900) 42%, #101214)
+    );
+    --plan-accent-edge: light-dark(
+      var(--plan-accent-200),
+      color-mix(in oklab, var(--plan-accent-400) 34%, #101214)
+    );
+
+    /* Feedback highlight (CSS Custom Highlight API, §10.2). */
+    --plan-highlight-bg: light-dark(
+      color-mix(in oklab, var(--plan-warn-200) 70%, transparent),
+      rgb(160 120 20 / 42%)
+    );
+  }
+
+  /* The highlight pseudo-element is painted at the document level, not inside
+     `plan-doc`, so it needs the token on the root as well. */
+  :root {
+    --plan-highlight-bg: light-dark(
+      color-mix(in oklab, #f5d9a4 70%, transparent),
+      rgb(160 120 20 / 42%)
+    );
+  }
+}

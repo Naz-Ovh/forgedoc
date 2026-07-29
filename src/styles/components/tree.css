@@ -1,0 +1,80 @@
+/* `plan-tree` — directory layouts drawn from indented text. */
+
+@layer plan.components {
+  plan-tree {
+    /* Positioned so the block's own Comment button can sit in its corner. */
+    position: relative;
+    margin-block: var(--plan-space-5);
+    padding: var(--plan-space-3) var(--plan-space-4);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-code-surface);
+    color: var(--plan-code-text);
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-sm);
+    line-height: 1.75;
+    break-inside: avoid;
+  }
+
+  /*
+   * The scroll container is the list, not the element.
+   *
+   * why it moved: an absolutely positioned corner button inside a scrolling box
+   * is placed against the *scrollable* area, so a wide tree parked it far off to
+   * the right where nobody would find it.
+   */
+  plan-tree [data-part="list"] {
+    overflow-x: auto;
+  }
+
+  plan-tree [data-part="node"] {
+    display: flex;
+    gap: var(--plan-space-2);
+    white-space: nowrap;
+    /* One indent step per depth, computed from the same spacing unit. */
+    padding-inline-start: calc(var(--plan-space-5) * attr(data-depth type(<number>), 0));
+  }
+
+  plan-tree [data-part="connector"] {
+    color: var(--plan-code-gutter);
+    user-select: none;
+  }
+
+  plan-tree [data-part="node"][data-kind="directory"] [data-part="label"] {
+    color: var(--plan-accent-text);
+    font-weight: 620;
+  }
+}
+
+/*
+ * Fallback for engines without `attr()` type support in arbitrary properties,
+ * which is still most of them. Three explicit depths cover the practical range;
+ * deeper trees are unreadable in a plan anyway.
+ */
+@layer plan.components {
+  @supports not (padding-inline-start: attr(data-depth type(<number>), 0)) {
+    plan-tree [data-part="node"] {
+      padding-inline-start: 0;
+    }
+
+    plan-tree [data-part="node"][data-depth="1"] {
+      padding-inline-start: var(--plan-space-5);
+    }
+
+    plan-tree [data-part="node"][data-depth="2"] {
+      padding-inline-start: calc(var(--plan-space-5) * 2);
+    }
+
+    plan-tree [data-part="node"][data-depth="3"] {
+      padding-inline-start: calc(var(--plan-space-5) * 3);
+    }
+
+    plan-tree [data-part="node"][data-depth="4"] {
+      padding-inline-start: calc(var(--plan-space-5) * 4);
+    }
+
+    plan-tree [data-part="node"][data-depth="5"] {
+      padding-inline-start: calc(var(--plan-space-5) * 5);
+    }
+  }
+}

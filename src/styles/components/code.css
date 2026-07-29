@@ -1,0 +1,168 @@
+/*
+ * `plan-code` — the syntax-highlighted block, plus the Prism token theme.
+ *
+ * The gutter and the emphasised-row overlay are both grids of empty `1lh` rows
+ * sitting alongside and over the code. Using the `lh` unit means neither needs a
+ * JavaScript measurement, so they stay aligned when the reader zooms.
+ */
+
+@layer plan.components {
+  plan-code {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    margin-block: var(--plan-space-5);
+    border: var(--plan-border-width) solid var(--plan-code-border);
+    border-radius: var(--plan-radius);
+    background: var(--plan-code-surface);
+    color: var(--plan-code-text);
+    overflow: hidden;
+    break-inside: avoid;
+    print-color-adjust: exact;
+  }
+
+  plan-code [data-part="header"] {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--plan-space-3);
+    padding: var(--plan-space-2) var(--plan-space-3);
+    border-block-end: var(--plan-border-width) solid var(--plan-code-border);
+    background: color-mix(in oklab, var(--plan-code-surface) 80%, var(--plan-surface-2));
+    font-size: var(--plan-text-xs);
+  }
+
+  plan-code [data-part="header"] [data-part="title"] {
+    font-family: var(--plan-font-mono);
+    font-weight: 620;
+    color: var(--plan-code-text);
+  }
+
+  plan-code [data-part="lang"] {
+    padding: 0 var(--plan-space-2);
+    border-radius: var(--plan-radius-pill);
+    background: var(--plan-surface-3);
+    color: var(--plan-text-2);
+    font-weight: 640;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  plan-code [data-part="copy"] {
+    margin-inline-start: auto;
+    padding: var(--plan-space-1) var(--plan-space-2);
+    border: var(--plan-border-width) solid var(--plan-code-border);
+    border-radius: var(--plan-radius-sm);
+    background: none;
+    color: var(--plan-text-2);
+    font-size: inherit;
+    cursor: pointer;
+  }
+
+  plan-code [data-part="copy"]:hover {
+    background: var(--plan-surface-2);
+    color: var(--plan-text-1);
+  }
+
+  plan-code [data-part="gutter"] {
+    grid-row: 2;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--plan-space-3) var(--plan-space-2) var(--plan-space-3) var(--plan-space-3);
+    border-inline-end: var(--plan-border-width) solid var(--plan-code-border);
+    color: var(--plan-code-gutter);
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-sm);
+    line-height: var(--plan-leading-tight);
+    text-align: end;
+    user-select: none;
+  }
+
+  plan-code [data-part="code"] {
+    position: relative;
+    grid-row: 2;
+    grid-column: 2;
+    margin: 0;
+    padding: var(--plan-space-3);
+    overflow-x: auto;
+    font-family: var(--plan-font-mono);
+    font-size: var(--plan-text-sm);
+    line-height: var(--plan-leading-tight);
+    tab-size: 2;
+  }
+
+  plan-code [data-part="code"][data-wrap] {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  plan-code [data-part="code"] code {
+    /*
+     * why positioned: the emphasised-row overlay below is absolutely positioned,
+     * and a positioned element paints above a non-positioned sibling regardless
+     * of DOM order — so without this the overlay covers the code it is meant to
+     * emphasise, and highlighted lines render blank.
+     */
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    white-space: inherit;
+    font-size: inherit;
+  }
+
+  /* The emphasised-row overlay: one empty 1lh row per source line. */
+  plan-code [data-part="lines"] {
+    position: absolute;
+    inset: var(--plan-space-3) 0 auto 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  plan-code [data-part="line"] {
+    height: 1lh;
+  }
+
+  plan-code [data-part="line"][data-emphasised] {
+    background: var(--plan-code-highlight-row);
+    box-shadow: inset 2px 0 0 var(--plan-warn-600);
+    print-color-adjust: exact;
+  }
+
+  /* ── Prism token theme, driven entirely by --plan-code-* tokens ─────────── */
+  plan-code :where(.token.comment, .token.prolog, .token.cdata) {
+    color: var(--plan-code-comment);
+    font-style: italic;
+  }
+
+  plan-code :where(.token.punctuation, .token.operator) {
+    color: var(--plan-code-punctuation);
+  }
+
+  plan-code :where(.token.keyword, .token.atrule, .token.rule, .token.important, .token.selector) {
+    color: var(--plan-code-keyword);
+  }
+
+  plan-code :where(.token.string, .token.char, .token.attr-value, .token.regex) {
+    color: var(--plan-code-string);
+  }
+
+  plan-code :where(.token.number, .token.boolean, .token.constant, .token.symbol) {
+    color: var(--plan-code-number);
+  }
+
+  plan-code :where(.token.function, .token.class-name, .token.tag, .token.attr-name) {
+    color: var(--plan-code-function);
+  }
+
+  plan-code :where(.token.deleted) {
+    color: var(--plan-danger-600);
+  }
+
+  plan-code :where(.token.inserted) {
+    color: var(--plan-success-600);
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "useDefineForClassFields": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": false,
+
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "types": ["node"],
+
+    "paths": {
+      // why: §4.2 — the three build variants differ by exactly this one module.
+      // tsdown.config.ts rewrites it per variant with a resolveId plugin (which
+      // must outrank these paths, hence a plugin rather than an alias), and
+      // vite.config.ts pins it to the bundled variant so the dev server and the
+      // visual suite render Mermaid offline. tsc always sees the cdn variant.
+      "@mermaid-source": ["./src/vendor/mermaid-source.cdn.ts"]
+    },
+
+    "noEmit": true
+  },
+  // Every root config file is listed explicitly. One left out falls outside the
+  // project, so it silently loses `types: ["node"]` — `npm run typecheck` stays
+  // green while the editor reports `Cannot find name 'node:fs'` (TS2591).
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "tools/**/*.ts",
+    "tests/**/*.ts",
+    "vite.config.ts",
+    "tsdown.config.ts",
+    "playwright.config.ts"
+  ]
+}

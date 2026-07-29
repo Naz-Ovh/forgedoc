@@ -1,0 +1,54 @@
+node_modules/
+dist/
+coverage/
+*.local
+.DS_Store
+
+# Scratch plans built while poking at the CLI.
+.plankit-demo/
+
+# Where `plankit build --offline` writes. Embedded runtime, megabytes of it —
+# a build artefact, never a source file.
+.temp/
+
+# Playwright's `outputDir` (see playwright.config.ts). On a failing run this
+# fills with full-page PNGs and error contexts — megabytes per failure, and the
+# CI job uploads it as an artifact rather than expecting it in the tree.
+tests/visual/.output/
+
+# Playwright's defaults, in case a run is invoked without the project config.
+test-results/
+playwright-report/
+
+# Visual baselines are generated, so they are not stored. `npm run test:visual`
+# records them on first run and compares on every run after; they are only
+# meaningful on the machine that recorded them anyway (font rendering), which is
+# why CI runs the assertion half of the suite instead — see test:visual:ci.
+tests/**/__screenshots__/
+
+# `npm pack` / `npm publish` leave the tarball in the repo root.
+*.tgz
+
+# Build and tooling caches.
+*.tsbuildinfo
+.vite/
+.cache/
+
+# Secrets. `*.local` above already covers .env.local; this covers the rest.
+.env
+.env.*
+!.env.example
+
+# Logs.
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Editor and OS noise. `.vscode/settings.json` is deliberately committed — it is
+# one shared setting, not personal configuration.
+.idea/
+*.swp
+*~
+Thumbs.db
+desktop.ini

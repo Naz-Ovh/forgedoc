@@ -1,0 +1,108 @@
+/*
+ * Block-level feedback: the Comment button, and the mark left on a block that
+ * has one.
+ *
+ * why blocks get their own affordance (§10.2): the bucket collects comments from
+ * a text selection, and there is nothing to select in an image, an `<svg>` or a
+ * rendered Mermaid chart. Without a button the most arguable parts of a plan are
+ * the only parts a reader cannot argue with.
+ */
+
+@layer plan.components {
+  [data-part="feedback"] {
+    padding: var(--plan-space-1) var(--plan-space-2);
+    border: var(--plan-border-width) solid var(--plan-border-2);
+    border-radius: var(--plan-radius-sm);
+    background: var(--plan-surface-1);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-xs);
+    font-weight: 560;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+
+  [data-part="feedback"]:hover {
+    border-color: var(--plan-accent-line);
+    background: var(--plan-accent-tint);
+    color: var(--plan-accent-text);
+  }
+
+  /* In a block that already has a header row, the button joins it. */
+  plan-code [data-part="header"] [data-part="feedback"],
+  plan-diff [data-part="header"] [data-part="feedback"] {
+    flex: none;
+    background: none;
+    font-size: inherit;
+  }
+
+  plan-diff [data-part="header"] [data-part="feedback"] {
+    margin-inline-start: auto;
+  }
+
+  plan-code [data-part="header"] [data-part="feedback"] {
+    border-color: var(--plan-code-border);
+  }
+
+  /*
+   * In a block with no header, the button floats in the corner and stays quiet
+   * until the reader looks at the block. It is always visible without a pointer,
+   * because "hover to discover" is not an interaction a touch reader has.
+   */
+  plan-figure > [data-part="feedback"],
+  plan-tree > [data-part="feedback"] {
+    position: absolute;
+    inset-block-start: var(--plan-space-2);
+    inset-inline-end: var(--plan-space-2);
+    z-index: 1;
+    opacity: 0;
+    transition: opacity var(--plan-transition);
+  }
+
+  plan-figure:hover > [data-part="feedback"],
+  plan-figure:focus-within > [data-part="feedback"],
+  plan-tree:hover > [data-part="feedback"],
+  plan-tree:focus-within > [data-part="feedback"],
+  plan-figure > [data-part="feedback"]:focus-visible,
+  plan-tree > [data-part="feedback"]:focus-visible {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    plan-figure > [data-part="feedback"],
+    plan-tree > [data-part="feedback"] {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    plan-figure > [data-part="feedback"],
+    plan-tree > [data-part="feedback"] {
+      transition: none;
+    }
+  }
+
+  /*
+   * A block that carries a comment.
+   *
+   * why an outline rather than a highlight: `CSS.highlights` paints text ranges,
+   * and the whole point of a block comment is that there is no text to paint.
+   */
+  [data-plan-commented] {
+    outline: 2px solid var(--plan-accent-edge);
+    outline-offset: 2px;
+  }
+
+  [data-plan-commented="active"] {
+    outline-color: var(--plan-accent-solid);
+  }
+
+  @media print {
+    [data-part="feedback"] {
+      display: none;
+    }
+
+    [data-plan-commented] {
+      outline: none;
+    }
+  }
+}

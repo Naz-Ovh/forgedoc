@@ -1,0 +1,113 @@
+/*
+ * `plan-table`.
+ *
+ * MUST (§8.3): below 1050px, `stack="auto"` turns rows into label/value cards.
+ * The label comes from `data-label`, which the runtime copies off the `<th>` at
+ * mount — CSS cannot read text from another element.
+ */
+
+@layer plan.components {
+  plan-table {
+    margin-block: var(--plan-space-6);
+    overflow-x: auto;
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+  }
+
+  plan-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: var(--plan-numeric);
+  }
+
+  plan-table :where(th, td) {
+    padding: var(--plan-space-3) var(--plan-space-4);
+    text-align: start;
+    vertical-align: top;
+    border-block-end: var(--plan-rule);
+  }
+
+  plan-table[size="sm"] :where(th, td) {
+    padding: var(--plan-space-2) var(--plan-space-3);
+    font-size: var(--plan-text-sm);
+  }
+
+  plan-table thead th {
+    position: sticky;
+    inset-block-start: 0;
+    background: var(--plan-surface-2);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-xs);
+    font-weight: 660;
+    letter-spacing: var(--plan-tracking-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  plan-table tbody tr:last-child :where(th, td) {
+    border-block-end: 0;
+  }
+
+  plan-table tbody tr:hover {
+    background: var(--plan-surface-2);
+  }
+
+  /* First column carries the row's identity, so it reads as a heading. */
+  plan-table tbody :where(th:first-child, td:first-child) {
+    font-weight: 600;
+    color: var(--plan-text-1);
+  }
+
+  plan-table caption {
+    padding: var(--plan-space-3) var(--plan-space-4);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-sm);
+    text-align: start;
+  }
+
+  plan-table [data-part="scroll-hint"] {
+    display: none;
+    padding: var(--plan-space-1) var(--plan-space-4) var(--plan-space-2);
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-xs);
+  }
+
+  @media (max-width: 1049px) {
+    plan-table:not([stack="never"]) thead {
+      display: none;
+    }
+
+    plan-table:not([stack="never"]) :where(table, tbody, tr, td, th) {
+      display: block;
+      width: 100%;
+    }
+
+    plan-table:not([stack="never"]) tbody tr {
+      margin-block: var(--plan-space-3);
+      border: var(--plan-rule);
+      border-radius: var(--plan-radius-sm);
+      background: var(--plan-surface-1);
+    }
+
+    plan-table:not([stack="never"]) tbody :where(td, th) {
+      display: grid;
+      grid-template-columns: 8rem 1fr;
+      gap: var(--plan-space-3);
+      border-block-end: 0;
+    }
+
+    plan-table:not([stack="never"]) tbody :where(td, th)[data-label]::before {
+      content: attr(data-label);
+      color: var(--plan-text-3);
+      font-size: var(--plan-text-xs);
+      font-weight: 660;
+      letter-spacing: var(--plan-tracking-wide);
+      text-transform: uppercase;
+    }
+
+    plan-table[stack="never"] [data-part="scroll-hint"] {
+      display: block;
+    }
+  }
+}

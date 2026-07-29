@@ -1,0 +1,88 @@
+/*
+ * `plan-flow` — the horizontal chain.
+ *
+ * MUST (§8.5): wraps to multiple rows below 1050px, with the arrows rotating to
+ * point down rather than dangling at the end of a row.
+ */
+
+@layer plan.components {
+  plan-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: var(--plan-space-2);
+    margin-block: var(--plan-space-6);
+  }
+
+  plan-flow [data-part="arrow"] {
+    align-self: center;
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-lg);
+  }
+
+  /*
+   * The host carries the *subtitle* typography, not the title's.
+   *
+   * why (§8.5 + §2.2): the subtitle arrives as a bare author text node, so there
+   * is no element to name without moving it. The title is generated from an
+   * attribute and overrides these values below.
+   */
+  plan-flow-node {
+    flex: 1 1 8rem;
+    min-width: 7rem;
+    padding: var(--plan-space-3);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-xs);
+    line-height: var(--plan-leading-tight);
+  }
+
+  plan-flow-node [data-part="title"] {
+    display: block;
+    margin-block-end: var(--plan-space-1);
+    color: var(--plan-text-1);
+    font-size: var(--plan-text-sm);
+    font-weight: 640;
+    line-height: var(--plan-leading-tight);
+  }
+
+  plan-flow-node [data-part="subtitle"] {
+    display: block;
+    margin-block-start: var(--plan-space-1);
+    color: var(--plan-text-3);
+    font-size: var(--plan-text-xs);
+    line-height: var(--plan-leading-tight);
+  }
+
+  /* The emphasised dark node. */
+  plan-flow-node:state(active) {
+    border-color: var(--plan-accent-line);
+    background: light-dark(var(--plan-accent-900), var(--plan-accent-tint));
+    color: light-dark(#f3fbf8, var(--plan-accent-text));
+    print-color-adjust: exact;
+  }
+
+  /* The title sets an explicit colour, so it has to be told to invert too —
+     otherwise it stays dark text on the dark node. */
+  plan-flow-node:state(active) [data-part="title"] {
+    color: inherit;
+  }
+
+  plan-flow-node:state(active) [data-part="subtitle"] {
+    color: light-dark(var(--plan-accent-200), var(--plan-text-2));
+  }
+
+  @media (max-width: 1049px) {
+    plan-flow {
+      flex-direction: column;
+    }
+
+    plan-flow [data-part="arrow"] {
+      align-self: start;
+      margin-inline-start: var(--plan-space-4);
+      rotate: 90deg;
+    }
+  }
+}

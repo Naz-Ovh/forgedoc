@@ -1,0 +1,23 @@
+=== FB v1 · vendor-orders · 2026-07-28T10:22:31Z · 4 items ===
+
+[1] ANSWER q-when-one-team-member-reads-a-notification-should-it
+q: When one team member reads a notification, should it show as read for the whole vendor team?
+a: Yes — shared team inbox
+n: only if we can still see who marked it read
+   otherwise nobody will trust it
+
+[2] ANSWER q-which-delivery-modes-must-ship-in-version-one
+q: Which delivery modes must ship in version one?
+a: Offline single file
+a: CDN script tag
+
+[3] ANSWER q-how-should-stages-be-numbered
+q: How should stages be numbered?
+a: Start at zero, because Stage 0 is the next deliverable and not a retrospective
+
+[4] COMMENT sec-what-we-are-building
+at: 1 What we are building
+> Vendors get told the moment a new order lands
+c: is this the payment webhook or the order row landing in the table?
+
+=== end FB v1 ===

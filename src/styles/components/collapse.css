@@ -1,0 +1,59 @@
+/*
+ * `plan-collapse`.
+ *
+ * The content is hidden by `hidden="until-found"` on the author's own children
+ * rather than by a `display: none` on a generated wrapper — see
+ * `core/disclosure.ts` for why, and note that this keeps Ctrl+F working into
+ * collapsed content (acceptance 4).
+ */
+
+@layer plan.components {
+  plan-collapse {
+    margin-block: var(--plan-space-5);
+    border: var(--plan-rule);
+    border-radius: var(--plan-radius);
+    background: var(--plan-surface-1);
+    overflow: hidden;
+  }
+
+  plan-collapse > [data-part="summary"] {
+    display: flex;
+    align-items: center;
+    gap: var(--plan-space-3);
+    width: 100%;
+    padding: var(--plan-space-3) var(--plan-space-4);
+    border: 0;
+    background: var(--plan-surface-2);
+    color: var(--plan-text-1);
+    font-size: var(--plan-text-md);
+    font-weight: 600;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  plan-collapse > [data-part="summary"]:hover {
+    background: var(--plan-surface-3);
+  }
+
+  plan-collapse [data-part="chevron"] {
+    display: inline-block;
+    color: var(--plan-text-3);
+    transition: transform var(--plan-transition);
+  }
+
+  plan-collapse:state(open) [data-part="chevron"] {
+    transform: rotate(90deg);
+  }
+
+  plan-collapse > [data-part="body"] {
+    padding-inline: var(--plan-space-4);
+  }
+
+  plan-collapse > [data-part="body"]:first-of-type {
+    padding-block-start: var(--plan-space-4);
+  }
+
+  plan-collapse > [data-part="body"]:last-child {
+    padding-block-end: var(--plan-space-4);
+  }
+}

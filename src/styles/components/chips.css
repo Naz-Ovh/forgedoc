@@ -1,0 +1,66 @@
+/* `plan-chips` / `plan-chip` — the pill row under the lede. */
+
+@layer plan.components {
+  plan-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--plan-space-2);
+    margin-block: var(--plan-space-5);
+  }
+
+  plan-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--plan-space-2);
+    padding: var(--plan-space-1) var(--plan-space-3);
+    border: var(--plan-border-width) solid var(--plan-border-1);
+    border-radius: var(--plan-radius-pill);
+    background: var(--plan-surface-1);
+    color: var(--plan-text-2);
+    font-size: var(--plan-text-sm);
+    font-weight: 520;
+    line-height: var(--plan-leading-tight);
+  }
+
+  plan-chip [data-part="icon"] {
+    display: inline-grid;
+    place-items: center;
+    width: 1.15em;
+    height: 1.15em;
+    border-radius: 50%;
+    background: var(--plan-surface-3);
+    color: var(--plan-text-2);
+    font-size: 0.8em;
+    font-weight: 700;
+  }
+
+  plan-chip[kind="confirmed"] {
+    border-color: color-mix(in oklab, var(--plan-success-400) 55%, transparent);
+    background: light-dark(
+      var(--plan-success-50),
+      color-mix(in oklab, var(--plan-success-900) 45%, #101214)
+    );
+    color: light-dark(var(--plan-success-900), var(--plan-success-200));
+  }
+
+  plan-chip[kind="confirmed"] [data-part="icon"] {
+    background: var(--plan-success-600);
+    color: #fff;
+  }
+
+  plan-chip[kind="action"] {
+    border-color: var(--plan-accent-edge);
+    background: var(--plan-accent-tint);
+    color: var(--plan-accent-text);
+  }
+
+  plan-chip[kind="action"] [data-part="icon"] {
+    background: var(--plan-accent-solid);
+    color: var(--plan-accent-on-solid);
+  }
+
+  plan-chip[kind="pending"] {
+    border-style: dashed;
+    color: var(--plan-text-3);
+  }
+}
