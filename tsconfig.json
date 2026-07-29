@@ -8,6 +8,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    // Only the two bundler configs use this, and only to import tools/build-env
+    // and tools/build-plugins. tsdown loads its config with a bare `import()`,
+    // which does not remap a `.js` specifier onto a `.ts` file the way Vite and
+    // tsc do — and neither `--config-loader tsx` nor `unrun` changes that. src/
+    // and tools/ keep writing `.js`, as the bundler requires.
+    "allowImportingTsExtensions": true,
     "useDefineForClassFields": true,
 
     "strict": true,
