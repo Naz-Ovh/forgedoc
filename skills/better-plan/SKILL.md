@@ -18,13 +18,17 @@ the cheatsheet leaves a question open.
 
 ## Producing a plan
 
-1. `plankit new <name>` — or write the skeleton yourself. It must end with
-   exactly these two lines, byte for byte:
+1. `plankit new <name>` — or write the skeleton yourself. It must contain these
+   two lines, byte for byte: the first in `<head>`, the second as the last line
+   of `<body>`.
 
    ```html
    <style>/*@PLAN_CSS@*/</style>
    <script>//@PLAN_JS@</script>
    ```
+
+   The styles go up top so the reader never sees a frame of unstyled markup;
+   the script goes last so every element upgrades with its children present.
 
 2. Write the document inside a single `<plan-doc plan-id="a-unique-slug">`.
    The `plan-id` is mandatory — it namespaces the reader's stored answers, and

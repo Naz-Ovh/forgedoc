@@ -290,7 +290,7 @@ Publish as `plankit` on npm. `unpkg` and `jsdelivr` serve from npm automatically
 
 ### 5.3 Offline mode — the primary path
 
-The authoring agent ends its HTML with exactly:
+The authoring agent writes two placeholders, byte for byte — the first in `<head>`, the second as the last line of `<body>`:
 
 ```html
 <style>/*@PLAN_CSS@*/</style>
@@ -300,6 +300,8 @@ The authoring agent ends its HTML with exactly:
 Then runs `plankit build PLAN_foo.html`, which validates (§11) and replaces both placeholders with file contents. Output: one self-contained `.html`, no network, no CDN, no dependencies.
 
 **MUST:** use a replacement *function* (`.replace(needle, () => content)`) not a string. A `$&` or `$1` sequence anywhere in the minified bundle will corrupt the output if you pass a string.
+
+**MUST:** the styles end up in `<head>` whichever flavour is built — embedded `<style>` no less than the CDN `<link>`. A stylesheet at the end of the body renders, but the reader sees a frame of unstyled semantic markup first. The build therefore *hoists*: wherever the placeholder was written, its replacement lands in `<head>`, so a document authored against the older end-of-body shape still builds correctly. The script does not move — end of `<body>` is where it belongs (§5.2).
 
 ### 5.4 Version stamp
 

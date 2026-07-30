@@ -15,6 +15,7 @@ PlanKit ships the runtime once, so the agent writes **only semantic markup** —
 about **4,000 tokens** for the same document. Everything else is derived:
 
 ```html
+<style>/*@PLAN_CSS@*/</style>   <!-- in <head> -->
 <plan-doc plan-id="vendor-orders" accent="teal">
   <plan-section title="What we are building">…</plan-section>
   <plan-choice mode="single" question="Should read state be shared?">
@@ -22,8 +23,7 @@ about **4,000 tokens** for the same document. Everything else is derived:
     <plan-option>No — per-person read state</plan-option>
   </plan-choice>
 </plan-doc>
-<style>/*@PLAN_CSS@*/</style>
-<script>//@PLAN_JS@</script>
+<script>//@PLAN_JS@</script>    <!-- last line of <body> -->
 ```
 
 No `<style>`, no `<script>`, no classes, no ids, no `A`/`B` keys, no `1.2.1`

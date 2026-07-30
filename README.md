@@ -10,6 +10,8 @@ and drifts from the intended design on every run.
 PlanKit ships the runtime once. The agent writes **only semantic markup**:
 
 ```html
+<style>/*@PLAN_CSS@*/</style>   <!-- in <head>: styles land before the markup -->
+
 <plan-doc plan-id="vendor-orders" density="comfortable" accent="teal">
   <plan-header kicker="Plan · Vendor dashboard">
     Vendor orders experience
@@ -26,8 +28,7 @@ PlanKit ships the runtime once. The agent writes **only semantic markup**:
   </plan-choice>
 </plan-doc>
 
-<style>/*@PLAN_CSS@*/</style>
-<script>//@PLAN_JS@</script>
+<script>//@PLAN_JS@</script>    <!-- last line of <body> -->
 ```
 
 No `<style>`, no `<script>`, no class names, no ids, no `A`/`B`/`C` option keys,

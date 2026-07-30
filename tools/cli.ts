@@ -265,6 +265,16 @@ async function runNew(parsed: ParsedArguments): Promise<number> {
   return 0;
 }
 
+/**
+ * The starting document — and the placeholder contract in its canonical shape.
+ *
+ * The two placeholders sit where their replacements belong: the styles in
+ * `<head>`, so the reader never sees a frame of unstyled markup, and the script
+ * at the end of `<body>`, so elements upgrade once, after parse, with every
+ * child present (§5.2). `injectAssets` hoists a body-end `<style>` anyway — a
+ * document written before this shape still builds correctly — but the skeleton
+ * is what agents copy, so it should not need the rescue.
+ */
 function skeleton(title: string, planId: string): string {
   return `<!doctype html>
 <html lang="en">
@@ -272,6 +282,7 @@ function skeleton(title: string, planId: string): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
+<style>/*@PLAN_CSS@*/</style>
 </head>
 <body>
 
@@ -305,7 +316,6 @@ function skeleton(title: string, planId: string): string {
 
 </plan-doc>
 
-<style>/*@PLAN_CSS@*/</style>
 <script>//@PLAN_JS@</script>
 </body>
 </html>

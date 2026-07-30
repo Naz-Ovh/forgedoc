@@ -76,6 +76,22 @@ describeBuilt('plankit build — the offline document', () => {
     }
   });
 
+  it('puts the embedded styles in <head> so nothing flashes unstyled', async () => {
+    const outputPath = join(workspace, 'offline.html');
+    await run(['build', FIXTURE, '--offline', '--out', outputPath]);
+    const output = await readFile(outputPath, 'utf8');
+
+    const head = output.indexOf('</head>');
+    // The real CSS, not just an empty shell: `@layer plan.reset` opens the
+    // bundle. `<style>` alone would also match the runtime, which contains the
+    // literal string for the styles it injects at upgrade time.
+    const styles = output.indexOf('<style>@layer plan.');
+    expect(styles).toBeGreaterThan(-1);
+    expect(styles).toBeLessThan(head);
+    // …and the body no longer carries a stylesheet of its own.
+    expect(output.slice(head)).not.toContain('@layer plan.reset');
+  });
+
   /*
    * Assertions on the bundles use `.includes()` rather than `toContain`, because
    * a failing `toContain` prints the whole three-megabyte bundle into the test

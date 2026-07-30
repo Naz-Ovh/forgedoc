@@ -28,7 +28,10 @@ export const JS_PLACEHOLDER = '//@PLAN_JS@';
  * though the contract asks for the two lines byte for byte — a stray attribute
  * should not silently fall through to an unreplaced placeholder.
  */
-const CSS_TAG = /<style\b[^>]*>\s*\/\*@PLAN_CSS@\*\/\s*<\/style>/;
+// Takes the line's newline with it: the tag is lifted out of wherever it was
+// written and re-emitted in <head>, and leaving the blank line behind would show
+// up in the built file as a gap the author never typed.
+const CSS_TAG = /<style\b[^>]*>\s*\/\*@PLAN_CSS@\*\/\s*<\/style>\n?/;
 const JS_TAG = /<script\b[^>]*>\s*\/\/@PLAN_JS@\s*<\/script>/;
 
 /**
@@ -107,24 +110,36 @@ export function injectAssets(html: string, assets: InjectionAssets): string {
   requirePlaceholder(html, CSS_PLACEHOLDER, '<style>/*@PLAN_CSS@*/</style>');
   requirePlaceholder(html, JS_PLACEHOLDER, '<script>//@PLAN_JS@</script>');
 
+  // The script stays where the placeholder was: end of body for the embedded
+  // bundle, `defer` for the linked one. Either way elements upgrade once, after
+  // parse, with every child present (§5.2). The styles are *placed*, not left —
+  // both flavours put them in <head>, so the reader never sees a frame of
+  // unstyled semantic markup. The skeleton already writes that placeholder in
+  // <head>, which makes the hoist a no-op for anything `plankit new` produced;
+  // it earns its keep on documents authored against the older end-of-body shape,
+  // which are already committed in people's repositories.
   if (assets.mode === 'embed') {
-    return html.replace(CSS_PLACEHOLDER, () => assets.css).replace(JS_PLACEHOLDER, () => assets.js);
+    return hoistToHead(html.replace(CSS_TAG, ''), `<style>${assets.css}</style>`).replace(
+      JS_PLACEHOLDER,
+      () => assets.js,
+    );
   }
 
   const stylesheet = `<link rel="stylesheet" href="${assets.cssHref}">`;
   const script = `<script src="${assets.jsSrc}" defer></script>`;
 
-  // `defer` and end-of-body both hold: elements upgrade once, after parse, with
-  // every child present (§5.2). The stylesheet moves to <head> so the reader
-  // never sees a flash of unstyled semantic markup.
   return hoistToHead(html.replace(CSS_TAG, ''), stylesheet).replace(JS_TAG, () => script);
 }
 
 /**
- * Put the stylesheet link in `<head>`, falling back to the end of the document.
+ * Put the stylesheet in `<head>`, falling back to the end of the document.
  *
  * `<link rel="stylesheet">` in `<body>` is honoured by every browser but is not
- * conforming HTML, and this library is held to its own validator.
+ * conforming HTML, and this library is held to its own validator. An inline
+ * `<style>` *is* conforming there, just late enough to flash — so both go up.
+ *
+ * MUST (§5.3): `tag` is spliced in from inside a replacement function. For the
+ * embedded flavour it carries the minified CSS bundle, `$&` sequences and all.
  */
 function hoistToHead(html: string, tag: string): string {
   if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, () => `${tag}\n</head>`);

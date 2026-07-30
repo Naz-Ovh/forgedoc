@@ -10,7 +10,25 @@ const SOURCE = `<plan-doc plan-id="x"></plan-doc>
 <style>/*@PLAN_CSS@*/</style>
 <script>//@PLAN_JS@</script>`;
 
+/** The canonical shape `plankit new` writes: styles in <head>, script last. */
 const DOCUMENT = `<!doctype html>
+<html lang="en">
+<head>
+<title>x</title>
+<style>/*@PLAN_CSS@*/</style>
+</head>
+<body>
+<plan-doc plan-id="x"></plan-doc>
+<script>//@PLAN_JS@</script>
+</body>
+</html>`;
+
+/**
+ * The shape documents were authored in before the placeholder moved to <head>.
+ * Those files are already committed in people's repositories, so the build has
+ * to keep producing a correct document from them — which means hoisting.
+ */
+const LEGACY_DOCUMENT = `<!doctype html>
 <html lang="en">
 <head>
 <title>x</title>
@@ -33,6 +51,41 @@ describe('injectAssets', () => {
     expect(output).toContain('<script>console.log(1)</script>');
     expect(output).not.toContain('@PLAN_CSS@');
     expect(output).not.toContain('@PLAN_JS@');
+  });
+
+  /*
+   * Same reason as link mode: styles that land at the end of the body flash the
+   * document unstyled first. Embedding removes the network hop, not the ordering
+   * problem, so the embedded <style> is hoisted too.
+   */
+  it('keeps the embedded styles in <head> and the script last', () => {
+    const output = injectAssets(DOCUMENT, embed('plan-doc{color:red}', 'console.log(1)'));
+
+    expect(output.indexOf('<style>plan-doc{color:red}</style>')).toBeLessThan(
+      output.indexOf('</head>'),
+    );
+    expect(output.indexOf('<script>console.log(1)</script>')).toBeGreaterThan(
+      output.indexOf('<plan-doc'),
+    );
+    // Lifted and re-emitted, not copied: exactly one stylesheet in the output.
+    expect(output.split('<style>').length - 1).toBe(1);
+  });
+
+  it('hoists the styles out of a body-end placeholder written the old way', () => {
+    const output = injectAssets(LEGACY_DOCUMENT, embed('plan-doc{color:red}', 'console.log(1)'));
+
+    expect(output.indexOf('<style>plan-doc{color:red}</style>')).toBeLessThan(
+      output.indexOf('</head>'),
+    );
+    expect(output.split('<style>').length - 1).toBe(1);
+    expect(output).not.toContain('@PLAN_CSS@');
+  });
+
+  it('does not treat $& in the embedded CSS as a replacement pattern', () => {
+    const hostile = 'plan-doc{--a:"$&";--b:"$1";--c:"$\'";--d:"$$"}';
+    const output = injectAssets(DOCUMENT, embed(hostile, ''));
+
+    expect(output).toContain(`<style>${hostile}</style>`);
   });
 
   /*

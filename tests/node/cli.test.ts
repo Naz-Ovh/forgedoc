@@ -46,6 +46,15 @@ describe('plankit new', () => {
     expect(contents).toContain('<style>/*@PLAN_CSS@*/</style>');
     expect(contents).toContain('<script>//@PLAN_JS@</script>');
 
+    // Each placeholder where its replacement belongs: styles in <head> so
+    // nothing flashes unstyled, script last so children exist at upgrade.
+    expect(contents.indexOf('<style>/*@PLAN_CSS@*/</style>')).toBeLessThan(
+      contents.indexOf('</head>'),
+    );
+    expect(contents.indexOf('<script>//@PLAN_JS@</script>')).toBeGreaterThan(
+      contents.indexOf('</plan-doc>'),
+    );
+
     stdout = '';
     expect(await run(['validate', path])).toBe(0);
     expect(stdout).toContain(': ok');

@@ -3,13 +3,13 @@
 Write **only** semantic markup. No `<style>`, no `<script>`, no classes, no ids, no `A`/`B` keys, no section numbers — the runtime derives all of it.
 
 ```html
+<style>/*@PLAN_CSS@*/</style>   <!-- in <head> -->
 <plan-doc plan-id="vendor-orders" density="comfortable" accent="teal">
   <plan-header kicker="Plan · Vendor dashboard">Vendor orders experience
     <p slot="lede">One sentence on what this is.</p></plan-header>
   <plan-section title="What we are building"><p>Prose.</p></plan-section>
 </plan-doc>
-<style>/*@PLAN_CSS@*/</style>
-<script>//@PLAN_JS@</script>
+<script>//@PLAN_JS@</script>    <!-- last line of <body> -->
 ```
 
 Then: `plankit build PLAN_x.html` → one ~15 kB file linking a pinned CDN. Add `--offline` to embed the runtime instead, for a `file://` document with no network. `plankit validate x.html --format=json` for a machine-readable report.
