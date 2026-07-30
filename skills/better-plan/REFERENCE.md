@@ -57,7 +57,7 @@ markup the agent has to remember and out of the DOM an author might edit.
 Accepted on every `plan-*` tag.
 
 | Attribute | Values | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `id` | slug — lowercase, digits, hyphens | Override the derived id. Prefer letting the runtime derive it. |
 | `class` | string | Author styling hook. Not used by the library. |
 | `style` | string | Inline token override, e.g. `--plan-space-unit: 3px`. |
@@ -74,7 +74,7 @@ Any `data-*` attribute is accepted and ignored.
 The root, and the only authored root. Owns the store, the layout column, the TOC and the bucket.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `plan-id` | **yes** | slug — lowercase, digits, hyphens | Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket. |
 | `density` | no | `compact` \| `comfortable` \| `spacious` | Spacing unit, line-height and component padding. |
 | `scale` | no | `sm` \| `md` \| `lg` | Type scale base size and ratio. |
@@ -93,7 +93,7 @@ The root, and the only authored root. Owns the store, the layout column, the TOC
 Document title block. Heading text is the default content; an optional `<p slot="lede">` follows.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `kicker` | no | string | Small-caps eyebrow line above the title. |
 
 **Parts:** `kicker`, `lede`, `title*`
@@ -103,7 +103,7 @@ Document title block. Heading text is the default content; an optional `<p slot=
 A numbered section. Nests to depth 3. Number, id and TOC entry are all derived.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `title` | **yes** | string | Heading text. Also the source of the derived id. |
 
 **Parts:** `heading`, `number`, `title`, `body`
@@ -133,7 +133,7 @@ One pill. Carries real meaning, not decoration.
 > Only valid inside `<plan-chips>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `kind` | no | `confirmed` \| `info` \| `action` \| `pending` | Colour and icon. Defaults to `info`. |
 
 **Parts:** `icon`
@@ -145,7 +145,7 @@ One pill. Carries real meaning, not decoration.
 Coloured callout.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `kind` | no | `info` \| `tip` \| `warn` \| `danger` \| `success` | Colour ramp and icon. Defaults to `info`. |
 | `title` | no | string | Optional bold lead line. |
 
@@ -158,7 +158,7 @@ A roadblock with an enforced shape: what it blocks, why, and the action that res
 > Requires `<plan-blocks>` and `<plan-action>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `severity` | no | `low` \| `medium` \| `high` | Drives colour. Defaults to `medium`. |
 | `title` | **yes** | string | One-line statement of the roadblock. |
 
@@ -199,7 +199,7 @@ _No attributes beyond the global ones._
 A marked list. Children are plain `<li>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `marker` | no | `check` \| `cross` \| `arrow` \| `dot` \| `number` | Bullet glyph. Defaults to `dot`. |
 | `title` | no | string | Column heading, used inside `plan-compare`. |
 | `kind` | no | `positive` \| `negative` \| `neutral` | Tone of the column inside `plan-compare`. Defaults to `neutral`. |
@@ -211,7 +211,7 @@ A marked list. Children are plain `<li>`.
 Inline technical term, hyperlinked. First mention is styled differently from repeats.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `href` | **yes** | URL | Where the term is defined. |
 
 **States:** `:state(first-mention)`
@@ -221,7 +221,7 @@ Inline technical term, hyperlinked. First mention is styled differently from rep
 Inline cross-reference. Resolves to the live number at mount, so nothing goes stale when sections shift.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `to` | **yes** | slug — lowercase, digits, hyphens | Id of a section, stage or question. |
 
 ### `<plan-quote>`
@@ -229,7 +229,7 @@ Inline cross-reference. Resolves to the live number at mount, so nothing goes st
 Pull quote with a distinct typographic role.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `cite` | no | string | Attribution line. |
 
 **Parts:** `cite`, `body*`
@@ -241,7 +241,7 @@ Wraps a plain `<table>`. Header styling, first-column emphasis, tabular numerals
 > Requires `<table>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `size` | no | `sm` \| `md` | Cell padding and type size. Defaults to `md`. |
 | `stack` | no | `auto` \| `never` | Below 1050px, `auto` converts rows into stacked label/value cards. Defaults to `auto`. |
 
@@ -256,7 +256,7 @@ A question with lettered options. Letter keys, the Other option, the note field 
 > Requires `<plan-option>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `mode` | no | `single` \| `multi` | One answer or several. Defaults to `single`. |
 | `question` | **yes** | string | The question text. Also the source of the derived id. |
 
@@ -271,7 +271,7 @@ One answer. Label text is the default content; an optional `<p slot="desc">` fol
 > Only valid inside `<plan-choice>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `recommended` | no | boolean (present or absent) | Adds a "recommended" badge. Use this instead of `disabled`. |
 | `value` | no | string | Override the stored value. Defaults to the derived letter key. |
 
@@ -282,7 +282,7 @@ One answer. Label text is the default content; an optional `<p slot="desc">` fol
 Generic disclosure, built on `<details>`/`<summary>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `title` | **yes** | string | Summary text. |
 | `open` | no | boolean (present or absent) | Start expanded. |
 | `sticky` | no | boolean (present or absent) | Persist the reader’s open/closed choice. |
@@ -308,7 +308,7 @@ One tab panel.
 > Only valid inside `<plan-tabs>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `label` | **yes** | string | Tab strip label. |
 | `active` | no | boolean (present or absent) | Initially selected tab. |
 
@@ -341,7 +341,7 @@ One step in a `plan-flow`. Child text is the subtitle.
 > Only valid inside `<plan-flow>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `title` | **yes** | string | Step name. |
 | `active` | no | boolean (present or absent) | The emphasised dark node. |
 
@@ -356,7 +356,7 @@ A numbered sequence of collapsible stages with a current-position marker.
 > Requires `<plan-stage>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `start` | no | whole number | First stage number. Defaults to 0. |
 
 ### `<plan-stage>`
@@ -366,7 +366,7 @@ One stage. Number badge, rail and current-stage treatment are all derived.
 > Only valid inside `<plan-roadmap>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `title` | **yes** | string | Stage name. |
 | `subtitle` | no | string | Secondary line beside the title. |
 | `current` | no | boolean (present or absent) | Marks the stage as the current position. |
@@ -383,7 +383,7 @@ One stage. Number badge, rail and current-stage treatment are all derived.
 A syntax-highlighted code block.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `lang` | **yes** | `ts` \| `js` \| `tsx` \| `jsx` \| `html` \| `css` \| `json` \| `bash` \| `sh` \| `sql` \| `rust` \| `python` \| `yaml` \| `toml` \| `diff` \| `http` \| `text` | Language. Outside the allowlist is a build error, never a silent fallback. |
 | `title` | no | string | Filename or caption in the block header. |
 | `wrap` | no | boolean (present or absent) | Soft-wrap long lines instead of scrolling. |
@@ -396,7 +396,7 @@ A syntax-highlighted code block.
 A unified diff with +/- gutters and aligned line numbers.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `lang` | no | `ts` \| `js` \| `tsx` \| `jsx` \| `html` \| `css` \| `json` \| `bash` \| `sh` \| `sql` \| `rust` \| `python` \| `yaml` \| `toml` \| `diff` \| `http` \| `text` | Language of the diffed content. |
 | `filename` | no | string | Path shown in the block header. |
 
@@ -407,7 +407,7 @@ A unified diff with +/- gutters and aligned line numbers.
 One framed box for a diagram, image, Mermaid source or isolated HTML mock.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `type` | no | `svg` \| `image` \| `mermaid` \| `html` | What the child content is. Defaults to `svg`. |
 | `src` | no | URL | Image source, for `type="image"`. |
 | `alt` | no | string | Alternative text, for `type="image"`. |
@@ -428,7 +428,7 @@ _No attributes beyond the global ones._
 A directory tree drawn from indented plain text.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `root` | no | string | Label for the root node. |
 
 **Parts:** `list`, `node`, `connector`, `label`, `feedback`
@@ -440,7 +440,7 @@ A two-column comparison panel. Children are `plan-list` blocks with a `title`.
 > Requires `<plan-list>`.
 
 | Attribute | Required | Values | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `columns` | no | whole number | Column count. Defaults to 2. |
 
 **Parts:** `column`

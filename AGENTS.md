@@ -82,7 +82,7 @@ Every unusual decision traces to one of these. Full rationale in
 
 ## Layout
 
-```
+```text
 src/core/          PlanElement base, store, slug, numbering, registry
 src/components/    one file per tag, named exactly after it
 src/bucket/        selection, serialise, and the three .svelte files

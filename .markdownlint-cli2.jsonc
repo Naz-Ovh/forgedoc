@@ -1,0 +1,30 @@
+// markdownlint configuration — read by `markdownlint-cli2` and by the VS Code
+// markdownlint extension, so an editor and a terminal run agree.
+//
+// Three rules are off because this repository's markdown deliberately does the
+// thing they forbid. Everything else is on, including the table and blank-line
+// rules that an editor's fix-on-save will silently apply — those now match what
+// is checked in, so opening a file changes nothing. That matters most for
+// `skills/better-plan/REFERENCE.md`, which is generated: an editor reformatting
+// it fails `tests/node/reference.test.ts` with nothing in the diff to explain
+// why (see the DELIMITER note in `tools/gen-reference.mjs`).
+{
+  "config": {
+    // MD013 line-length: the specification in `docs/PLAN.md` is written one
+    // line per paragraph so that a diff of a requirement is a one-line diff,
+    // and the reference tables carry a full sentence per cell. Wrapping either
+    // at 80 would make both harder to read and to review.
+    "MD013": false,
+
+    // MD026 no-trailing-punctuation: the §2 constraint headings are complete
+    // sentences by design — "MUST: light DOM only. No shadow DOM anywhere."
+    // They are read as statements of the contract, not as labels.
+    "MD026": false,
+
+    // MD036 no-emphasis-as-heading: `**Attributes**` and `**Parts:**` label the
+    // block that follows them. They must not be headings — headings feed the
+    // section numbering that the document's own § references depend on.
+    "MD036": false
+  },
+  "ignores": ["node_modules", "dist", "coverage", "test-results", "playwright-report"]
+}

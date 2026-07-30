@@ -152,6 +152,18 @@ const STATES = {
 
 const escapePipes = (text) => text.replace(/\|/g, '\\|');
 
+/**
+ * A table delimiter row in the one shape a markdown formatter leaves alone.
+ *
+ * why not the tighter `|---|---|`: this file is generated, and
+ * `tests/node/reference.test.ts` compares it to the generator byte for byte.
+ * An editor with markdownlint's fix-on-save enabled rewrites a tight delimiter
+ * row to `| --- |` the moment the file is opened — which dirties a generated
+ * file and fails that test, with nothing in the diff to suggest why. Emitting
+ * the formatter's own shape means opening the file changes nothing.
+ */
+const DELIMITER = (columns) => `| ${Array(columns).fill('---').join(' | ')} |`;
+
 function describeKind(kind) {
   switch (kind.type) {
     case 'enum':
@@ -193,7 +205,7 @@ function renderTag(name, contract) {
 
   const attributes = Object.entries(spec.attributes);
   if (attributes.length > 0) {
-    lines.push('| Attribute | Required | Values | Notes |', '|---|---|---|---|');
+    lines.push('| Attribute | Required | Values | Notes |', DELIMITER(4));
     for (const [attribute, definition] of attributes) {
       lines.push(
         `| \`${attribute}\` | ${definition.required ? '**yes**' : 'no'} | ${describeKind(definition.kind)} | ${escapePipes(definition.doc)} |`,
@@ -227,7 +239,7 @@ const globals = [
   'Accepted on every `plan-*` tag.',
   '',
   '| Attribute | Values | Notes |',
-  '|---|---|---|',
+  DELIMITER(3),
   ...Object.entries(contract.GLOBAL_ATTRIBUTES).map(
     ([name, definition]) =>
       `| \`${name}\` | ${describeKind(definition.kind)} | ${escapePipes(definition.doc)} |`,

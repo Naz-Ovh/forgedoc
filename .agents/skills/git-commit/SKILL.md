@@ -80,4 +80,4 @@ git commit -m "Plain-English overall summary" -m "Describe the problem or motiva
 - type(scope): third specific change"
 ```
 
-NOTE: you must give the git commit format inside `bash {...determined git commit format} `, do not give raw text. becuase output will be copied and pasted in terminal
+NOTE: you must give the git commit format inside `bash {...determined git commit format}`, do not give raw text. becuase output will be copied and pasted in terminal

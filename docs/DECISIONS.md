@@ -215,7 +215,7 @@ criterion was actually executed. Every one now has a regression test.
 | §13.4 screenshots                                 | `plan-diff` never dedented its source, so `+`/`-` were not at the start of a line and every row classified as unchanged context.                                                                                                                                                                                                                             |
 | §13.4 screenshots                                 | Inline elements inside a `display: grid` container each become their own grid item, so any roadblock, list item or callout containing `<code>` was torn into separate cells. Four components moved to hanging indents.                                                                                                                                       |
 | §13.4 screenshots                                 | An `<li>` keeps `display: list-item` when its parent is a custom element rather than a `<ul>`, so every marked list drew both a UA bullet and its own glyph.                                                                                                                                                                                                 |
-| Acceptance 3 (`tests/visual/offline.spec.ts`)     | `window.PlanKit.version` was `undefined`. An IIFE wrapper makes the module namespace _be_ the global, so an inner `PlanKit` object put the documented `PlanKit.chips.add(…)` one hop too deep. The API is now top-level named exports.                                                                                                                   |
+| Acceptance 3 (`tests/visual/offline.spec.ts`)     | `window.PlanKit.version` was `undefined`. An IIFE wrapper makes the module namespace _be_ the global, so an inner `PlanKit` object put the documented `PlanKit.chips.add(…)` one hop too deep. The API is now top-level named exports.                                                                                                                       |
 | Acceptance 6                                      | `resolveRange` fell back to a stale offset when the quoted text was gone, painting a reader's comment over unrelated prose instead of reporting it orphaned.                                                                                                                                                                                                 |
 
 ---
@@ -302,7 +302,7 @@ A block comment carries `scope: 'block'`, and everything downstream branches on
 it: the anchor is the element rather than a character range, it is painted as an
 outline rather than a highlight, it is orphaned only when its element is gone,
 and it is never resolved as a range — doing so fell through to a quote search
-that matched the composer's own label. The wire format is unchanged: the `> `
+that matched the composer's own label. The wire format is unchanged: the `>`
 line carries a descriptor (`plan-figure · Store shape`) instead of an excerpt,
 which `skills/better-plan/SKILL.md` now tells the reading agent to resolve by.
 
@@ -388,6 +388,25 @@ regress (§2.1), and `svelte-check` is the way back if template linting is wante
 it reports "Checked 0 files" for `README.md`. Prettier used to format every `.md`
 in the repository. The prose is hand-wrapped and reads the same either way, so
 this is recorded as a known gap rather than a reason to keep a second formatter.
+
+**Markdown is linted by configuration, not by a formatter.** With no formatter
+owning `.md`, each contributor's editor formatted on its own defaults, and the
+files drifted into two table styles at once — Prettier's width-padded delimiters
+in `README.md` and this file, tight `|---|` rows in `docs/PLAN.md` and the
+generated reference. That cost a real debugging session: opening
+`skills/better-plan/REFERENCE.md` in an editor with markdownlint's fix-on-save
+rewrote 15 delimiter rows, which failed `tests/node/reference.test.ts` — a
+staleness check on a generated file — with a diff that looked like whitespace
+noise and named no cause.
+
+`.markdownlint-cli2.jsonc` settles it. Every table now uses the `| --- |` row
+that markdownlint's own fixer produces, `tools/gen-reference.mjs` emits that
+shape too, and three rules are off because the docs deliberately break them:
+`MD013` (the specification is one line per paragraph, so a changed requirement is
+a one-line diff), `MD026` (the §2 constraint headings are complete sentences) and
+`MD036` (`**Attributes**` labels the block under it and must not enter the
+heading numbering the `§` references depend on). Opening a file in an editor now
+changes nothing.
 
 **Biome does not format `tests/fixtures/`.** The content of `plan-code`,
 `plan-diff` and `plan-tree` is rendered verbatim, and the validator tests assert

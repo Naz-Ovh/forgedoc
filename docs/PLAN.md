@@ -65,7 +65,7 @@ Why: the feedback system lets a reader select arbitrary text anywhere in the doc
 Everything shadow DOM would have given you has a replacement:
 
 | Shadow DOM feature | Replacement |
-|---|---|
+| --- | --- |
 | Style encapsulation | CSS cascade layers + `--plan-*` prefix |
 | `::part()` | Direct selection — you already have more access |
 | `<slot>` | Children are already in the right place; enhance in situ |
@@ -114,7 +114,7 @@ Svelte **is** used, but only for the bucket panel (§10), which is runtime-creat
 
 ## 3. Repository layout
 
-```
+```text
 plankit/
 ├── package.json              # npm name: plankit
 ├── AGENTS.md                 # loaded every session — start here
@@ -201,7 +201,7 @@ ES2022 is the floor because `ElementInternals`, `CustomStateSet`, `structuredClo
 Three JS bundles and one CSS file, from one source tree:
 
 | Output | Format | Contents | Used by |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `dist/plankit.iife.js` | IIFE, global `PlanKit` | Core + Prism. Mermaid lazy-loaded from CDN. | CDN / hosted viewer |
 | `dist/plankit.standalone.iife.js` | IIFE | Everything, Mermaid included | Offline `file://` injection |
 | `dist/plankit.js` | ESM | Core, external deps | npm consumers, tooling |
@@ -344,7 +344,7 @@ Then runs `plankit build PLAN_foo.html`, which validates (§11) and replaces bot
 Four orthogonal axes. A "compact" document must be able to have a wide measure and a light code theme.
 
 | Attribute | Values | Default | Controls |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `density` | `compact` `comfortable` `spacious` | `comfortable` | `--plan-space-unit`, line-height, component padding |
 | `scale` | `sm` `md` `lg` | `md` | `--plan-text-base`, `--plan-text-ratio` |
 | `accent` | `teal` `indigo` `slate` `plum` `amber` | `teal` | accent ramp + derived tints |
@@ -444,6 +444,7 @@ this.internals.ariaLabel = this.questionText;
 ```ts
 this.setState('open', true);
 ```
+
 ```css
 @layer plan.components {
   plan-collapse:state(open) [data-part="body"] { display: block; }
@@ -485,8 +486,9 @@ For every component: **Attributes** are what the agent writes. **Parts** are the
 #### `<plan-doc>` — the root, and the only authored root
 
 **Attributes**
+
 | Name | Values | Req | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `plan-id` | slug | **yes** | Storage namespace. Validator rejects a doc without it. See §9.3. |
 | `density` `scale` `accent` `measure` `code` | see §6.3 | no | Preset axes |
 | `toc` | `open` `closed` `off` | no | Default `closed` on narrow, `open` ≥1280px |
@@ -494,6 +496,7 @@ For every component: **Attributes** are what the agent writes. **Parts** are the
 **Derived:** `data-plankit` version stamp, `color-scheme`, the centred reading column, the TOC sidebar, the bucket mount point, all persisted state.
 
 **Layout — MUST:**
+
 - Reading column is horizontally centred at every viewport. Never left-hugging on ultrawide.
 - Container never exceeds `--plan-measure` (default 1200px). Above 2560px viewport it may widen to 1600px.
 - From 1050px up, use 90% of viewport width, still capped and centred.
@@ -522,6 +525,7 @@ Note: `slot` here is a plain attribute used as a selector hook, not a shadow slo
 **Parts:** `number`, `heading`, `body`.
 
 **Derived — this is the highest-value component in the library:**
+
 - **Number** from nesting depth via CSS counters: `1`, `1.1`, `1.1.1`. The agent never types a number.
 - **Id** by slugifying `title` → `sec-what-we-are-building`. This satisfies the anchor-stability rule for free: if a section's meaning changes, its title changes, so its id changes. If the title is unchanged, the id is stable across regenerations.
 - **TOC entry**, automatically.
@@ -647,6 +651,7 @@ The most important interactive component. **Every rule the authoring agent curre
 **`plan-option` attributes:** `recommended` (boolean badge), `value` (optional override).
 
 **Derived — the agent writes none of this:**
+
 - **Letter keys** `A`, `B`, `C`… assigned in document order.
 - **The `Other` option**, always appended, key `O`, with a **multiline `<textarea>`** placed *inside* the Other block so it reads as part of that choice — never a stray field below the list. Label inline: `Other — type your own solution`, hint smaller and on the same line. Hidden unless Other is checked.
 - **The note field.** A `<textarea>` for a comment on the chosen answer, hidden behind a small `＋ Add a note` toggle at the bottom of the question. Auto-revealed on load if it holds restored text. Placeholder must make clear it is a comment on the answer, not a second answer.
@@ -778,6 +783,7 @@ Two-column panel — the reference's "Already built" / "Missing (we build these)
 The PDF is a real deliverable, not an afterthought. Build this early — retrofitting print across 22 components later is miserable.
 
 **MUST, in `print.css`:**
+
 - Bucket hidden entirely.
 - TOC either hidden or flattened into a real contents page with page numbers.
 - Every `plan-collapse` and `plan-stage` force-expanded.
@@ -846,6 +852,7 @@ The floating trigger with count badge, the review panel, the item list with zoom
 **MUST** mount as a plain Svelte 5 component via `mount()` into a `<div>` the runtime appends as a sibling of the reading column — **not** as a custom element.
 
 Why this is the right call and the elements are not:
+
 - All of its DOM is runtime-created. There is no author content to preserve, so §2.2 does not apply.
 - No slots are needed, so the Svelte light-DOM slot limitation (§2.5) is irrelevant.
 - It is genuinely stateful reactive UI — list rendering, transitions, derived counts. This is what Svelte is for.
@@ -865,11 +872,13 @@ Provide a `<mark>`-based fallback only if the API is unavailable, and gate it be
 The Copy button emits a block beginning `=== FB v1 ·`. **MUST** keep this format byte-compatible with the existing implementation so buckets already collected against the prototype still parse. Locate the current `bucket_format.txt`, treat it as the spec, and write a round-trip test.
 
 Serialisation rules that carry over:
+
 - Answers serialise question text and chosen option labels **verbatim**, so a pasted bucket is self-contained in a fresh session with no access to the original file.
 - The note serialises as `n:` and is omitted when empty.
 - An Other answer serialises the reader's typed text as the answer label.
 
 Receipt rules (for the agent reading a pasted bucket back — document these in `SKILL.md`):
+
 - Resolve each item by anchor id first, quoted text second.
 - The option **label** is authoritative over the option key. If key and label disagree, or the anchor no longer exists, **ask** — never guess.
 - A malformed item invalidates only itself. Process the rest and report the broken one.
@@ -890,6 +899,7 @@ A `plan build` that fails loudly gives the authoring agent a feedback loop it ca
 Runs on the raw HTML with `linkedom` or `parse5` — the Node validator **MUST NOT** import the browser runtime.
 
 **Errors** (build fails, no output written):
+
 - `plan-doc` missing, duplicated, or without `plan-id`
 - Duplicate id anywhere
 - `plan-choice` with fewer than two `plan-option` children
@@ -904,6 +914,7 @@ Runs on the raw HTML with `linkedom` or `parse5` — the Node validator **MUST N
 - Unreplaced `@PLAN_CSS@` / `@PLAN_JS@` placeholder in a supposedly built file
 
 **Warnings** (build succeeds, message printed):
+
 - Duplicate section slug
 - `plan-figure` without a caption
 - A section deeper than level 3
@@ -918,7 +929,7 @@ In dev builds only, render violations as a red banner at the top of the document
 
 ### 11.4 CLI surface
 
-```
+```text
 plankit build <file.html> [--out <file>] [--cdn] [--no-validate]
 plankit validate <file.html> [--format=json]
 plankit new <name> [--dir <path>]     # scaffold with the required skeleton
@@ -934,6 +945,7 @@ plankit version
 The dist is minified. **The source is read by humans and by agents extending the library, and it is a first-class deliverable.**
 
 **MUST:**
+
 - One component per file, filename identical to tag name.
 - Named exports only. No default exports, no barrel re-exports that rename.
 - Explicit return types on every exported function. `strict: true`, `noUncheckedIndexedAccess: true`.
@@ -945,6 +957,7 @@ The dist is minified. **The source is read by humans and by agents extending the
 - Types in the file that owns them; only genuinely shared types go in `core/types.ts`.
 
 **MUST NOT:**
+
 - Abstract before the third occurrence. Two similar components stay duplicated.
 - Add a dependency without recording the reason in `docs/DECISIONS.md`. Current sanctioned runtime deps: Svelte (panel only), Prism (highlighting), Mermaid (diagrams). Nothing else without flagging.
 
@@ -970,6 +983,7 @@ Playwright provider, real Chromium. **jsdom and happy-dom are not options**: nei
 ### 13.3 Kitchen sink fixture
 
 `tests/fixtures/kitchen-sink.html` uses **every** tag, every attribute value, and every preset combination. It is simultaneously:
+
 - the golden-file snapshot target,
 - the manual QA page,
 - the print/PDF check,

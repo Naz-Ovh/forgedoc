@@ -36,7 +36,7 @@ no `1.2.1` section numbers. Every one of those is derived by the runtime — alo
 with layout, dark mode, persistence, and a feedback bucket the reader can paste
 straight back to the agent.
 
-```
+```sh
 plankit build PLAN_vendor-orders.html
 ```
 
@@ -116,11 +116,11 @@ npm install -g plankit
 | [`skills/better-plan/SKILL.md`](skills/better-plan/SKILL.md)           | The skill itself, including the rules for reading a pasted feedback bucket. |
 | [`skills/better-plan/CHEATSHEET.md`](skills/better-plan/CHEATSHEET.md) | One page. The authoring agent's primary reference.                          |
 | [`skills/better-plan/REFERENCE.md`](skills/better-plan/REFERENCE.md)   | Full per-component API. Generated from the contract.                        |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md)                                         | Open questions, flagged deviations, dependency justifications.              |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md)                               | Open questions, flagged deviations, dependency justifications.              |
 
 ## CLI
 
-```
+```text
 plankit build <file.html> [--out <file>] [--offline] [--no-validate]
 plankit validate <file.html> [--format=json] [--built]
 plankit new <name> [--dir <path>]

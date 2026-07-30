@@ -81,7 +81,7 @@ A reader sends you a block that begins `=== FB v1 ·`. It is self-contained: it
 carries the question text and the chosen option labels verbatim, so you do not
 need the original file to interpret it.
 
-```
+```text
 === FB v1 · vendor-orders · 2026-07-28T10:22:31Z · 2 items ===
 
 [1] ANSWER q-should-read-state-be-shared
@@ -98,12 +98,12 @@ c: is this the payment webhook or the order row?
 ```
 
 Fields: `q:` question, `a:` a chosen answer label (repeated for a multi answer),
-`n:` a note _about_ the answer, `> ` the quoted excerpt, `c:` the reader's
+`n:` a note _about_ the answer, `>` the quoted excerpt, `c:` the reader's
 comment, `at:` where in the document. A field's continuation lines are indented
 by exactly three spaces.
 
 A comment on a diagram, an image or a code block has no selectable text to
-quote, so its `> ` line is a descriptor instead — `> plan-figure · How a plan
+quote, so its `>` line is a descriptor instead — `> plan-figure · How a plan
 travels from the agent to the reader and back`. The anchor id is generated
 (`blk-figure-2`), so resolve it by the caption or filename in that descriptor,
 not by the id.
