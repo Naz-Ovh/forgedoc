@@ -1,5 +1,5 @@
 /**
- * §13.2: namespacing by `plan-id`; two documents in one origin do not collide;
+ * §13.2: namespacing by `doc-id`; two documents in one origin do not collide;
  * the unavailable-storage path shows the banner and never throws.
  *
  * why the collision test matters more than it looks (§9.3): Chrome has
@@ -17,12 +17,12 @@ import { mountPlan, settle } from '../helpers.js';
 
 describe('storage namespacing', () => {
   it('keys everything under the plan id', () => {
-    expect(storageKey('vendor-orders')).toBe('plankit:vendor-orders:state');
+    expect(storageKey('vendor-orders')).toBe('forgedoc:vendor-orders:state');
   });
 
   it('keeps two documents in the same origin apart', async () => {
-    const first = createStore('plan-one');
-    const second = createStore('plan-two');
+    const first = createStore('doc-one');
+    const second = createStore('doc-two');
 
     first.set('answers', { 'q-a': { keys: ['A'] } });
     second.set('answers', { 'q-a': { keys: ['B'] } });
@@ -32,8 +32,8 @@ describe('storage namespacing', () => {
     expect(second.get('answers')['q-a']?.keys).toEqual(['B']);
 
     // And on the wire, not just in memory.
-    expect(createStore('plan-one').get('answers')['q-a']?.keys).toEqual(['A']);
-    expect(createStore('plan-two').get('answers')['q-a']?.keys).toEqual(['B']);
+    expect(createStore('doc-one').get('answers')['q-a']?.keys).toEqual(['A']);
+    expect(createStore('doc-two').get('answers')['q-a']?.keys).toEqual(['B']);
   });
 
   it('survives a reload cycle', async () => {
@@ -54,7 +54,7 @@ describe('storage namespacing', () => {
   it('folds an older blob onto the current shape instead of discarding it', () => {
     localStorage.setItem(
       storageKey('legacy'),
-      JSON.stringify({ version: 1, planId: 'legacy', answers: { 'q-x': { keys: ['A'] } } }),
+      JSON.stringify({ version: 1, docId: 'legacy', answers: { 'q-x': { keys: ['A'] } } }),
     );
 
     const store = createStore('legacy');
@@ -99,11 +99,8 @@ describe('unavailable storage', () => {
       throw new DOMException('QuotaExceededError');
     });
 
-    const planDoc = mountPlan(
-      '<plan-section title="X"><p>a</p></plan-section>',
-      'plan-id="banner"',
-    );
-    const banner = planDoc.querySelector('[data-part="storage-warning"]');
+    const docPage = mountPlan('<doc-section title="X"><p>a</p></doc-section>', 'doc-id="banner"');
+    const banner = docPage.querySelector('[data-part="storage-warning"]');
 
     expect(banner).not.toBeNull();
     expect(banner?.textContent).toContain('won’t survive a reload');
@@ -113,8 +110,8 @@ describe('unavailable storage', () => {
   });
 
   it('shows no banner when storage works', () => {
-    const planDoc = mountPlan('<plan-section title="X"><p>a</p></plan-section>', 'plan-id="fine"');
-    expect(planDoc.querySelector('[data-part="storage-warning"]')).toBeNull();
+    const docPage = mountPlan('<doc-section title="X"><p>a</p></doc-section>', 'doc-id="fine"');
+    expect(docPage.querySelector('[data-part="storage-warning"]')).toBeNull();
   });
 });
 

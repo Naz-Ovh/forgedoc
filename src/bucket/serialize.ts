@@ -39,7 +39,7 @@ const ITEM_PATTERN = /^\[(\d+)\] (ANSWER|COMMENT) (.*)$/;
 
 export interface BucketAnswer {
   readonly kind: 'answer';
-  /** Id of the `plan-choice` this answers. */
+  /** Id of the `doc-choice` this answers. */
   readonly anchorId: string;
   readonly question: string;
   /** One entry per selected option, in document order. */
@@ -49,7 +49,7 @@ export interface BucketAnswer {
 
 export interface BucketComment {
   readonly kind: 'comment';
-  /** Id of the nearest `plan-*` ancestor of the selection. */
+  /** Id of the nearest `doc-*` ancestor of the selection. */
   readonly anchorId: string;
   /** Human-readable location, e.g. `3.1 Data model`. Omitted when unknown. */
   readonly at?: string;
@@ -60,7 +60,7 @@ export interface BucketComment {
 export type BucketEntry = BucketAnswer | BucketComment;
 
 export interface BucketDocument {
-  readonly planId: string;
+  readonly docId: string;
   /** ISO 8601, seconds precision. Round-tripped verbatim. */
   readonly timestamp: string;
   readonly entries: BucketEntry[];
@@ -90,7 +90,7 @@ export function serializeBucket(bucket: BucketDocument): string {
   const blocks = bucket.entries.map((entry, index) => serializeEntry(entry, index + 1));
 
   return [
-    `=== FB v1 · ${bucket.planId} · ${bucket.timestamp} · ${count} ${noun} ===`,
+    `=== FB v1 · ${bucket.docId} · ${bucket.timestamp} · ${count} ${noun} ===`,
     '',
     ...interleaveWithBlankLines(blocks),
     FOOTER,
@@ -167,7 +167,7 @@ export function parseBucket(text: string): ParseResult {
   }
 
   const header = HEADER_PATTERN.exec(lines[headerIndex] ?? '');
-  const planId = header?.[1] ?? '';
+  const docId = header?.[1] ?? '';
   const timestamp = header?.[2] ?? '';
 
   const body = lines.slice(headerIndex + 1).filter((line) => line !== FOOTER);
@@ -186,7 +186,7 @@ export function parseBucket(text: string): ParseResult {
     });
   }
 
-  return { document: { planId, timestamp, entries }, problems };
+  return { document: { docId, timestamp, entries }, problems };
 }
 
 interface ItemBlock {

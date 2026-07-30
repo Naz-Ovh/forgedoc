@@ -28,11 +28,11 @@
 <svelte:window onkeydown={onKeydown} />
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div data-part="detail-backdrop" data-plan-ui onclick={onClose}></div>
+<div data-part="detail-backdrop" data-doc-ui onclick={onClose}></div>
 
 <div
   data-part="detail"
-  data-plan-ui
+  data-doc-ui
   data-kind={view.kind}
   role="dialog"
   aria-modal="true"

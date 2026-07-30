@@ -1,5 +1,5 @@
 /**
- * `PlanElement` — the base every component extends.
+ * `DocElement` — the base every component extends.
  *
  * Two constraints shape all of it:
  *
@@ -16,9 +16,9 @@
 
 import { partOf, partsOf } from './parts.js';
 import { storeFor } from './store.js';
-import type { PlanStore } from './types.js';
+import type { DocStore } from './types.js';
 
-export abstract class PlanElement extends HTMLElement {
+export abstract class DocElement extends HTMLElement {
   /**
    * ARIA and form state live here, not in markup.
    *
@@ -34,8 +34,8 @@ export abstract class PlanElement extends HTMLElement {
     // MUST (§7.2): guard against double-enhancement. The runtime gets re-run
     // during iteration and re-injected on rebuild, and double-appended letter
     // badges with duplicate listeners are miserable to debug.
-    if (this.dataset.planUp !== undefined) return;
-    this.dataset.planUp = '';
+    if (this.dataset.docUp !== undefined) return;
+    this.dataset.docUp = '';
 
     this.#listeners = new AbortController();
     this.enhance();
@@ -118,9 +118,9 @@ export abstract class PlanElement extends HTMLElement {
     });
   }
 
-  /** The owning `plan-doc`, or null if this element is used outside one. */
-  protected planDoc(): HTMLElement | null {
-    return this.closest('plan-doc');
+  /** The owning `doc-page`, or null if this element is used outside one. */
+  protected docPage(): HTMLElement | null {
+    return this.closest('doc-page');
   }
 
   /**
@@ -129,10 +129,10 @@ export abstract class PlanElement extends HTMLElement {
    * Components MUST NOT reach for `localStorage` directly — one read on mount
    * and one debounced write on change, for the whole document.
    */
-  protected store(): PlanStore | null {
-    const planDoc = this.planDoc();
-    if (!planDoc) return null;
-    return storeFor(planDoc);
+  protected store(): DocStore | null {
+    const docPage = this.docPage();
+    if (!docPage) return null;
+    return storeFor(docPage);
   }
 
   /** Trimmed attribute value, or `fallback` when absent or blank. */

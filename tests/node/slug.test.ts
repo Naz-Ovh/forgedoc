@@ -1,7 +1,7 @@
 /**
  * §13.2: slugs are stable across regeneration, and duplicates get suffixes.
  *
- * The stability property is the load-bearing one. `plan-ref` targets, feedback
+ * The stability property is the load-bearing one. `doc-ref` targets, feedback
  * anchors and the reader's browser history all key off these ids, so a slug that
  * shifts because a plan was regenerated silently breaks every one of them.
  */

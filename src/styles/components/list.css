@@ -1,39 +1,39 @@
-/* `plan-list` — the marked list, and the atom underneath `plan-compare`. */
+/* `doc-list` — the marked list, and the atom underneath `doc-compare`. */
 
-@layer plan.components {
-  plan-list {
-    --plan-list-marker: var(--plan-text-3);
+@layer doc.components {
+  doc-list {
+    --doc-list-marker: var(--doc-text-3);
 
-    margin-block: var(--plan-space-4);
-    counter-reset: plan-list-item;
+    margin-block: var(--doc-space-4);
+    counter-reset: doc-list-item;
   }
 
-  plan-list[kind="positive"] {
-    --plan-list-marker: var(--plan-success-600);
+  doc-list[kind="positive"] {
+    --doc-list-marker: var(--doc-success-600);
   }
 
-  plan-list[kind="negative"] {
-    --plan-list-marker: var(--plan-danger-600);
+  doc-list[kind="negative"] {
+    --doc-list-marker: var(--doc-danger-600);
   }
 
-  plan-list[marker="check"] {
-    --plan-list-marker: var(--plan-success-600);
+  doc-list[marker="check"] {
+    --doc-list-marker: var(--doc-success-600);
   }
 
-  plan-list[marker="cross"] {
-    --plan-list-marker: var(--plan-danger-600);
+  doc-list[marker="cross"] {
+    --doc-list-marker: var(--doc-danger-600);
   }
 
-  plan-list[marker="arrow"] {
-    --plan-list-marker: var(--plan-accent-line);
+  doc-list[marker="arrow"] {
+    --doc-list-marker: var(--doc-accent-line);
   }
 
-  plan-list > [data-part="title"] {
-    margin-block-end: var(--plan-space-3);
-    color: var(--plan-text-2);
-    font-size: var(--plan-text-xs);
+  doc-list > [data-part="title"] {
+    margin-block-end: var(--doc-space-3);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-xs);
     font-weight: 660;
-    letter-spacing: var(--plan-tracking-wide);
+    letter-spacing: var(--doc-tracking-wide);
     text-transform: uppercase;
   }
 
@@ -49,38 +49,38 @@
    * the browser draws its own bullet next to the glyph the runtime added. The
    * reset in base.css only reaches `<li>` inside a real `<ul>`/`<ol>`.
    */
-  plan-list > li,
-  plan-list > [data-part="item"] {
+  doc-list > li,
+  doc-list > [data-part="item"] {
     display: block;
     list-style: none;
   }
 
-  plan-list > [data-part="item"] {
+  doc-list > [data-part="item"] {
     position: relative;
-    margin-block: var(--plan-space-2);
+    margin-block: var(--doc-space-2);
     padding-inline-start: 1.6em;
-    max-width: var(--plan-measure-prose);
+    max-width: var(--doc-measure-prose);
   }
 
-  plan-list > [data-part="item"] > [data-part="marker"] {
+  doc-list > [data-part="item"] > [data-part="marker"] {
     position: absolute;
     inset-inline-start: 0;
-    color: var(--plan-list-marker);
+    color: var(--doc-list-marker);
     font-weight: 700;
     line-height: inherit;
   }
 
   /* `marker="number"` uses a counter — no glyph element is generated. */
-  plan-list[marker="number"] > [data-part="item"] {
-    counter-increment: plan-list-item;
+  doc-list[marker="number"] > [data-part="item"] {
+    counter-increment: doc-list-item;
   }
 
-  plan-list[marker="number"] > [data-part="item"]::before {
-    content: counter(plan-list-item) ".";
+  doc-list[marker="number"] > [data-part="item"]::before {
+    content: counter(doc-list-item) ".";
     position: absolute;
     inset-inline-start: 0;
-    color: var(--plan-list-marker);
-    font-variant-numeric: var(--plan-numeric);
+    color: var(--doc-list-marker);
+    font-variant-numeric: var(--doc-numeric);
     font-weight: 640;
   }
 }

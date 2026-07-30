@@ -1,41 +1,41 @@
 /*
- * `plan-roadmap` / `plan-stage` — a numbered sequence with a current marker.
+ * `doc-roadmap` / `doc-stage` — a numbered sequence with a current marker.
  *
  * The rail is a single pseudo-element on the roadmap rather than a border per
  * stage, so it runs unbroken behind the number badges.
  */
 
-@layer plan.components {
-  plan-roadmap {
+@layer doc.components {
+  doc-roadmap {
     position: relative;
-    margin-block: var(--plan-space-8);
-    padding-inline-start: var(--plan-space-9);
+    margin-block: var(--doc-space-8);
+    padding-inline-start: var(--doc-space-9);
   }
 
-  plan-roadmap::before {
+  doc-roadmap::before {
     content: "";
     position: absolute;
-    inset-block: var(--plan-space-5);
-    inset-inline-start: calc(var(--plan-space-9) / 2 + 2px);
+    inset-block: var(--doc-space-5);
+    inset-inline-start: calc(var(--doc-space-9) / 2 + 2px);
     width: 2px;
-    background: var(--plan-border-1);
+    background: var(--doc-border-1);
   }
 
-  plan-stage {
+  doc-stage {
     position: relative;
-    margin-block: var(--plan-space-4);
-    border: var(--plan-rule);
-    border-radius: var(--plan-radius);
-    background: var(--plan-surface-1);
+    margin-block: var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
     break-inside: avoid;
   }
 
-  plan-stage > [data-part="header"] {
+  doc-stage > [data-part="header"] {
     display: flex;
     align-items: center;
-    gap: var(--plan-space-3);
+    gap: var(--doc-space-3);
     width: 100%;
-    padding: var(--plan-space-3) var(--plan-space-4);
+    padding: var(--doc-space-3) var(--doc-space-4);
     border: 0;
     border-radius: inherit;
     background: none;
@@ -44,47 +44,47 @@
     cursor: pointer;
   }
 
-  plan-stage [data-part="badge"] {
+  doc-stage [data-part="badge"] {
     position: absolute;
-    inset-inline-start: calc(var(--plan-space-9) * -1);
+    inset-inline-start: calc(var(--doc-space-9) * -1);
     display: grid;
     place-items: center;
-    width: var(--plan-space-8);
-    height: var(--plan-space-8);
-    border: 2px solid var(--plan-border-1);
+    width: var(--doc-space-8);
+    height: var(--doc-space-8);
+    border: 2px solid var(--doc-border-1);
     border-radius: 50%;
-    background: var(--plan-surface-0);
-    color: var(--plan-text-2);
-    font-variant-numeric: var(--plan-numeric);
+    background: var(--doc-surface-0);
+    color: var(--doc-text-2);
+    font-variant-numeric: var(--doc-numeric);
     font-weight: 700;
     print-color-adjust: exact;
   }
 
-  plan-stage [data-part="heading"] {
+  doc-stage [data-part="heading"] {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: var(--plan-space-1) var(--plan-space-3);
+    gap: var(--doc-space-1) var(--doc-space-3);
   }
 
-  plan-stage [data-part="title"] {
-    font-size: var(--plan-text-lg);
+  doc-stage [data-part="title"] {
+    font-size: var(--doc-text-lg);
     font-weight: 640;
-    line-height: var(--plan-leading-tight);
+    line-height: var(--doc-leading-tight);
   }
 
-  plan-stage [data-part="subtitle"] {
-    color: var(--plan-text-3);
-    font-size: var(--plan-text-sm);
+  doc-stage [data-part="subtitle"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-sm);
   }
 
-  plan-stage [data-part="current-marker"] {
+  doc-stage [data-part="current-marker"] {
     margin-inline-start: auto;
-    padding: 0 var(--plan-space-2);
-    border-radius: var(--plan-radius-pill);
-    background: var(--plan-accent-solid);
-    color: var(--plan-accent-on-solid);
-    font-size: var(--plan-text-xs);
+    padding: 0 var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    font-size: var(--doc-text-xs);
     font-weight: 660;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -99,36 +99,36 @@
    * light surfaces, which is unreadable. The header carries the emphasis; the
    * body stays on the ordinary reading surface.
    */
-  plan-stage:state(current) {
-    border-color: var(--plan-accent-line);
+  doc-stage:state(current) {
+    border-color: var(--doc-accent-line);
   }
 
-  plan-stage:state(current) > [data-part="header"] {
-    background: light-dark(var(--plan-accent-900), var(--plan-accent-800));
+  doc-stage:state(current) > [data-part="header"] {
+    background: light-dark(var(--doc-accent-900), var(--doc-accent-800));
     color: #f3fbf8;
     print-color-adjust: exact;
   }
 
-  plan-stage:state(current) > [data-part="header"] [data-part="badge"] {
-    border-color: var(--plan-accent-line);
-    background: var(--plan-accent-solid);
-    color: var(--plan-accent-on-solid);
+  doc-stage:state(current) > [data-part="header"] [data-part="badge"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
   }
 
-  plan-stage:state(current) > [data-part="header"] [data-part="subtitle"] {
-    color: var(--plan-accent-200);
+  doc-stage:state(current) > [data-part="header"] [data-part="subtitle"] {
+    color: var(--doc-accent-200);
   }
 
-  plan-stage > [data-part="body"] {
-    padding-inline: var(--plan-space-4);
+  doc-stage > [data-part="body"] {
+    padding-inline: var(--doc-space-4);
   }
 
-  plan-stage:state(open) > [data-part="body"]:first-of-type {
-    padding-block-start: var(--plan-space-4);
+  doc-stage:state(open) > [data-part="body"]:first-of-type {
+    padding-block-start: var(--doc-space-4);
   }
 
-  plan-stage:state(open) > [data-part="body"]:last-child {
-    padding-block-end: var(--plan-space-4);
+  doc-stage:state(open) > [data-part="body"]:last-child {
+    padding-block-end: var(--doc-space-4);
   }
 
   /*
@@ -137,22 +137,22 @@
    * band of empty padding. Zeroing it here is what makes closed actually look
    * closed, without giving up find-in-page.
    */
-  plan-stage > [data-part="body"][hidden],
-  plan-collapse > [data-part="body"][hidden] {
+  doc-stage > [data-part="body"][hidden],
+  doc-collapse > [data-part="body"][hidden] {
     padding-block: 0;
     margin-block: 0;
   }
 
   @media (max-width: 720px) {
-    plan-roadmap {
-      padding-inline-start: var(--plan-space-7);
+    doc-roadmap {
+      padding-inline-start: var(--doc-space-7);
     }
 
-    plan-stage [data-part="badge"] {
-      inset-inline-start: calc(var(--plan-space-7) * -1);
-      width: var(--plan-space-6);
-      height: var(--plan-space-6);
-      font-size: var(--plan-text-sm);
+    doc-stage [data-part="badge"] {
+      inset-inline-start: calc(var(--doc-space-7) * -1);
+      width: var(--doc-space-6);
+      height: var(--doc-space-6);
+      font-size: var(--doc-text-sm);
     }
   }
 }

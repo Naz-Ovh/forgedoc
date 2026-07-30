@@ -1,5 +1,5 @@
 /**
- * Acceptance 3: `plankit build` produces one `.html` that opens correctly from
+ * Acceptance 3: `forgedoc build` produces one `.html` that opens correctly from
  * `file://` on a machine with **no network**.
  *
  * This test proves the "no network" half by inspection — after injection there
@@ -23,16 +23,16 @@ import { run } from '../../tools/cli.js';
 import { validateHtml } from '../../tools/validate.js';
 
 const DIST = fileURLToPath(new URL('../../dist', import.meta.url));
-const FIXTURE = fileURLToPath(new URL('../fixtures/offline-plan.html', import.meta.url));
+const FIXTURE = fileURLToPath(new URL('../fixtures/offline-doc.html', import.meta.url));
 
 const isBuilt =
-  existsSync(join(DIST, 'plankit.standalone.iife.js')) && existsSync(join(DIST, 'plankit.css'));
+  existsSync(join(DIST, 'forgedoc.standalone.iife.js')) && existsSync(join(DIST, 'forgedoc.css'));
 const describeBuilt = isBuilt ? describe : describe.skip;
 
 let workspace: string;
 
 beforeEach(async () => {
-  workspace = await mkdtemp(join(tmpdir(), 'plankit-offline-'));
+  workspace = await mkdtemp(join(tmpdir(), 'forgedoc-offline-'));
   vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
   vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
 });
@@ -42,14 +42,14 @@ afterEach(async () => {
   await rm(workspace, { recursive: true, force: true });
 });
 
-describeBuilt('plankit build — the offline document', () => {
+describeBuilt('forgedoc build — the offline document', () => {
   it('replaces both placeholders and validates as built', async () => {
     const outputPath = join(workspace, 'offline.html');
     expect(await run(['build', FIXTURE, '--offline', '--out', outputPath])).toBe(0);
 
     const output = await readFile(outputPath, 'utf8');
-    expect(output).not.toContain('@PLAN_CSS@');
-    expect(output).not.toContain('@PLAN_JS@');
+    expect(output).not.toContain('@DOC_CSS@');
+    expect(output).not.toContain('@DOC_JS@');
 
     const check = validateHtml(output, { file: outputPath, expectBuilt: true });
     expect(check.errorCount).toBe(0);
@@ -82,14 +82,14 @@ describeBuilt('plankit build — the offline document', () => {
     const output = await readFile(outputPath, 'utf8');
 
     const head = output.indexOf('</head>');
-    // The real CSS, not just an empty shell: `@layer plan.reset` opens the
+    // The real CSS, not just an empty shell: `@layer doc.reset` opens the
     // bundle. `<style>` alone would also match the runtime, which contains the
     // literal string for the styles it injects at upgrade time.
-    const styles = output.indexOf('<style>@layer plan.');
+    const styles = output.indexOf('<style>@layer doc.');
     expect(styles).toBeGreaterThan(-1);
     expect(styles).toBeLessThan(head);
     // …and the body no longer carries a stylesheet of its own.
-    expect(output.slice(head)).not.toContain('@layer plan.reset');
+    expect(output.slice(head)).not.toContain('@layer doc.reset');
   });
 
   /*
@@ -98,8 +98,8 @@ describeBuilt('plankit build — the offline document', () => {
    * report and buries every other failure with it.
    */
   it('bundles Mermaid rather than fetching it', () => {
-    const cdnBundle = readFileSync(join(DIST, 'plankit.iife.js'), 'utf8');
-    const standaloneBundle = readFileSync(join(DIST, 'plankit.standalone.iife.js'), 'utf8');
+    const cdnBundle = readFileSync(join(DIST, 'forgedoc.iife.js'), 'utf8');
+    const standaloneBundle = readFileSync(join(DIST, 'forgedoc.standalone.iife.js'), 'utf8');
 
     // The CDN build lazily fetches Mermaid from a pinned URL (§16.5)…
     expect(cdnBundle.includes('cdn.jsdelivr.net/npm/mermaid@')).toBe(true);
@@ -109,8 +109,8 @@ describeBuilt('plankit build — the offline document', () => {
     expect(standaloneBundle.length).toBeGreaterThan(cdnBundle.length * 5);
   });
 
-  it('stamps the version onto plan-doc for the agent reading a bucket back', () => {
-    const bundle = readFileSync(join(DIST, 'plankit.standalone.iife.js'), 'utf8');
+  it('stamps the version onto doc-page for the agent reading a bucket back', () => {
+    const bundle = readFileSync(join(DIST, 'forgedoc.standalone.iife.js'), 'utf8');
     const packageVersion = (
       JSON.parse(
         readFileSync(fileURLToPath(new URL('../../package.json', import.meta.url)), 'utf8'),
@@ -124,12 +124,12 @@ describeBuilt('plankit build — the offline document', () => {
     // exact quoting made this test fail on a minifier swap that changed no
     // behaviour, so match any of the three.
     expect(bundle).toMatch(
-      new RegExp(`dataset\\.plankit\\s*=\\s*["'\`]${packageVersion.replace(/\./g, '\\.')}["'\`]`),
+      new RegExp(`dataset\\.forgedoc\\s*=\\s*["'\`]${packageVersion.replace(/\./g, '\\.')}["'\`]`),
     );
   });
 
   it('ships an IIFE, not an ES module', () => {
-    const bundle = readFileSync(join(DIST, 'plankit.standalone.iife.js'), 'utf8');
+    const bundle = readFileSync(join(DIST, 'forgedoc.standalone.iife.js'), 'utf8');
 
     // MUST (§2.3): ES module imports are blocked by CORS on file://.
     expect(/^\s*import\s/m.test(bundle)).toBe(false);
@@ -143,7 +143,7 @@ describeBuilt('plankit build — the offline document', () => {
  * an unpinned path both misses jsDelivr's `immutable` cache and re-renders
  * already-published plans against a runtime nobody checked them against.
  */
-describeBuilt('plankit build — the default CDN document', () => {
+describeBuilt('forgedoc build — the default CDN document', () => {
   it('references the runtime instead of embedding it', async () => {
     const outputPath = join(workspace, 'cdn.html');
     expect(await run(['build', FIXTURE, '--out', outputPath])).toBe(0);
@@ -151,8 +151,8 @@ describeBuilt('plankit build — the default CDN document', () => {
     const output = await readFile(outputPath, 'utf8');
     expect(output).toMatch(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="https:\/\/[^"]+\.css">/);
     expect(output).toMatch(/<script\b[^>]*\bsrc="https:\/\/[^"]+\.js"\s+defer><\/script>/);
-    expect(output).not.toContain('@PLAN_CSS@');
-    expect(output).not.toContain('@PLAN_JS@');
+    expect(output).not.toContain('@DOC_CSS@');
+    expect(output).not.toContain('@DOC_JS@');
 
     const check = validateHtml(output, { file: outputPath, expectBuilt: true });
     expect(check.errorCount).toBe(0);
@@ -192,7 +192,7 @@ describeBuilt('plankit build — the default CDN document', () => {
 });
 
 if (!isBuilt) {
-  describe('plankit build — the offline document', () => {
+  describe('forgedoc build — the offline document', () => {
     it.skip('needs `npm run build` first', () => {});
   });
 }

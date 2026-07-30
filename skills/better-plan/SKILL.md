@@ -1,9 +1,9 @@
 ---
 name: better-plan
-description: Write interactive planning documents as PlanKit markup, build them to a single self-contained HTML file, and read a pasted feedback bucket back. Use whenever you are asked to plan work, write a design doc, propose an approach, or collect decisions from a human reviewer.
+description: Write interactive planning documents as ForgeDoc markup, build them to a single self-contained HTML file, and read a pasted feedback bucket back. Use whenever you are asked to plan work, write a design doc, propose an approach, or collect decisions from a human reviewer.
 ---
 
-# PlanKit
+# ForgeDoc
 
 You write **semantic markup only**. A prebuilt runtime supplies all styling,
 layout, interactivity, persistence and feedback collection.
@@ -18,27 +18,27 @@ the cheatsheet leaves a question open.
 
 ## Producing a plan
 
-1. `plankit new <name>` — or write the skeleton yourself. It must contain these
+1. `forgedoc new <name>` — or write the skeleton yourself. It must contain these
    two lines, byte for byte: the first in `<head>`, the second as the last line
    of `<body>`.
 
    ```html
-   <style>/*@PLAN_CSS@*/</style>
-   <script>//@PLAN_JS@</script>
+   <style>/*@DOC_CSS@*/</style>
+   <script>//@DOC_JS@</script>
    ```
 
    The styles go up top so the reader never sees a frame of unstyled markup;
    the script goes last so every element upgrades with its children present.
 
-2. Write the document inside a single `<plan-doc plan-id="a-unique-slug">`.
-   The `plan-id` is mandatory — it namespaces the reader's stored answers, and
+2. Write the document inside a single `<doc-page doc-id="a-unique-slug">`.
+   The `doc-id` is mandatory — it namespaces the reader's stored answers, and
    without it two plans opened from disk can overwrite each other.
 
-3. `plankit build PLAN_<name>.html`
+3. `forgedoc build DOC_<name>.html`
 
    The build validates first and writes nothing if validation fails. Read the
    errors, fix them, and run it again. Each error carries a file, a line, a
-   column, a rule id and a concrete fix. `--format=json` on `plankit validate`
+   column, a rule id and a concrete fix. `--format=json` on `forgedoc validate`
    gives you the same thing as structured data.
 
    The output links a version-pinned CDN and stays around 15 kB, so it is safe
@@ -49,30 +49,30 @@ the cheatsheet leaves a question open.
 
 ## What the runtime derives, so you never type it
 
-| You write                                 | The runtime produces                                                                                                              |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `<plan-section title="Data model">`       | The number `2.1`, the id `sec-data-model`, the heading element, the TOC entry                                                     |
-| `<plan-choice question="…">` with options | Letters `A`/`B`/`C`, an "Other" option with a textarea, a note field, `QUESTION 3 · SINGLE CHOICE`, the id `q-…`, radiogroup ARIA |
-| `<plan-stage title="…">`                  | The stage number, starting at 0                                                                                                   |
-| `<plan-ref to="sec-data-model">`          | The live text "Section 2.1"                                                                                                       |
-| `<plan-term href="…">`                    | First-mention styling, distinct from repeats                                                                                      |
+| You write                                | The runtime produces                                                                                                              |
+|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `<doc-section title="Data model">`       | The number `2.1`, the id `sec-data-model`, the heading element, the TOC entry                                                     |
+| `<doc-choice question="…">` with options | Letters `A`/`B`/`C`, an "Other" option with a textarea, a note field, `QUESTION 3 · SINGLE CHOICE`, the id `q-…`, radiogroup ARIA |
+| `<doc-stage title="…">`                  | The stage number, starting at 0                                                                                                   |
+| `<doc-ref to="sec-data-model">`          | The live text "Section 2.1"                                                                                                       |
+| `<doc-term href="…">`                    | First-mention styling, distinct from repeats                                                                                      |
 
 ## Writing well
 
-- **Ask real questions.** A plan with no `plan-choice` collects no feedback, and
+- **Ask real questions.** A plan with no `doc-choice` collects no feedback, and
   the validator warns about it. Put a question wherever you made a judgement call
   the reader might disagree with, and mark your suggestion `recommended`.
-- **Every roadblock states its resolution.** `plan-blocker` requires a
-  `plan-action`. This is enforced, not advisory — a roadblock with no way out is
+- **Every roadblock states its resolution.** `doc-blocker` requires a
+  `doc-action`. This is enforced, not advisory — a roadblock with no way out is
   the failure the whole library exists to prevent.
-- **Prefer `plan-figure type="mermaid"` over hand-drawn SVG.** Five lines of
+- **Prefer `doc-figure type="mermaid"` over hand-drawn SVG.** Five lines of
   Mermaid replaces a few hundred lines of hand-placed coordinates, renders in the
   document's own colours, and is far more reliable to write.
-- **Use `plan-ref`, never "see Stage 5".** Numbering is automatic; a hardcoded
+- **Use `doc-ref`, never "see Stage 5".** Numbering is automatic; a hardcoded
   reference is a latent bug from the moment a stage is inserted above it.
 - **Use plain HTML for prose.** `<p> <ul> <ol> <li> <code> <a> <strong> <em>` are
   all styled. There is deliberately no tag for them.
-- **Presets, not CSS.** `<plan-doc density="compact" measure="wide">` is
+- **Presets, not CSS.** `<doc-page density="compact" measure="wide">` is
   validated and consistent; hand-written CSS is not.
 
 ## Reading a pasted bucket back
@@ -103,7 +103,7 @@ comment, `at:` where in the document. A field's continuation lines are indented
 by exactly three spaces.
 
 A comment on a diagram, an image or a code block has no selectable text to
-quote, so its `>` line is a descriptor instead — `> plan-figure · How a plan
+quote, so its `>` line is a descriptor instead — `> doc-figure · How a plan
 travels from the agent to the reader and back`. The anchor id is generated
 (`blk-figure-2`), so resolve it by the caption or filename in that descriptor,
 not by the id.
@@ -126,9 +126,9 @@ not by the id.
 ### After you have read it
 
 Regenerate the plan with the decisions folded in. Answered questions become
-`<plan-chip kind="confirmed">` entries rather than open `plan-choice` blocks — a
+`<doc-chip kind="confirmed">` entries rather than open `doc-choice` blocks — a
 question the reader has already settled should not be asked twice. Tooling can do
-this incrementally with `PlanKit.chips.add({kind: 'confirmed', text: '…'})`.
+this incrementally with `ForgeDoc.chips.add({kind: 'confirmed', text: '…'})`.
 
 ## Budget
 

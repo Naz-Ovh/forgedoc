@@ -17,7 +17,7 @@ import { mermaidSource, productionEnv } from './tools/build-plugins.ts';
 
 /**
  * The .svelte sources deliberately carry no <style> block (§10.1) — panel styles
- * live in styles/components/bucket.css so the `--plan-*` tokens reach them.
+ * live in styles/components/bucket.css so the `--doc-*` tokens reach them.
  * `emitCss: false` therefore drops nothing; it just keeps Svelte out of the CSS
  * graph entirely.
  *
@@ -45,10 +45,10 @@ interface Variant {
 }
 
 const VARIANTS: readonly Variant[] = [
-  /** CDN / hosted viewer, and the default `plankit build` target. */
+  /** CDN / hosted viewer, and the default `forgedoc build` target. */
   {
     name: 'cdn',
-    outFile: 'plankit.iife.js',
+    outFile: 'forgedoc.iife.js',
     format: 'iife',
     mermaidSource: './src/vendor/mermaid-source.cdn.ts',
     alwaysBundle: [],
@@ -57,7 +57,7 @@ const VARIANTS: readonly Variant[] = [
   /** Offline `file://` injection. Everything, Mermaid included. */
   {
     name: 'standalone',
-    outFile: 'plankit.standalone.iife.js',
+    outFile: 'forgedoc.standalone.iife.js',
     format: 'iife',
     mermaidSource: './src/vendor/mermaid-source.bundled.ts',
     alwaysBundle: ['mermaid'],
@@ -66,7 +66,7 @@ const VARIANTS: readonly Variant[] = [
   /** npm consumers and tooling. Mermaid stays a bare, external import. */
   {
     name: 'esm',
-    outFile: 'plankit.js',
+    outFile: 'forgedoc.js',
     format: 'es',
     mermaidSource: './src/vendor/mermaid-source.external.ts',
     alwaysBundle: [],
@@ -97,14 +97,14 @@ const runtimeBuild = (variant: Variant): UserConfig => ({
   css: {
     // MUST (§4.3): one CSS file, always. Per-component files that shipped
     // separately would break the @layer ordering guarantee. All three variants
-    // emit an identical plankit.css from the same styles/index.css graph, so the
+    // emit an identical forgedoc.css from the same styles/index.css graph, so the
     // concurrent overwrites are byte-identical and harmless.
     splitting: false,
-    fileName: 'plankit.css',
+    fileName: 'forgedoc.css',
     minify: true,
   },
   outputOptions: {
-    name: 'PlanKit',
+    name: 'ForgeDoc',
     entryFileNames: variant.outFile,
     // IIFE cannot code-split, and the standalone bundle must be one file that
     // opens from `file://` with no network (§2.3).

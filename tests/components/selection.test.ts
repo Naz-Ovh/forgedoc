@@ -20,17 +20,17 @@ import type { FeedbackItem, SerializedRange } from '../../src/core/types.js';
 import { mountPlan, snapshotNodes } from '../helpers.js';
 
 const DOCUMENT = `
-  <plan-section title="What we are building">
+  <doc-section title="What we are building">
     <p id="p-one">Vendors get told the moment a new order lands, without refreshing anything.</p>
     <p>A second paragraph, so the anchor has to pick the right one.</p>
-  </plan-section>
-  <plan-section title="Data model">
+  </doc-section>
+  <doc-section title="Data model">
     <p>Vendors get told the moment a new order lands, without refreshing anything.</p>
-  </plan-section>
+  </doc-section>
 `;
 
 /** Select `text` inside `container` and return the serialised anchor. */
-function selectText(planDoc: Element, container: Element, text: string): SerializedRange | null {
+function selectText(docPage: Element, container: Element, text: string): SerializedRange | null {
   const node = container.firstChild as Text;
   const start = node.data.indexOf(text);
   expect(start).toBeGreaterThanOrEqual(0);
@@ -43,7 +43,7 @@ function selectText(planDoc: Element, container: Element, text: string): Seriali
   selection?.removeAllRanges();
   selection?.addRange(range);
 
-  return serializeSelection(planDoc);
+  return serializeSelection(docPage);
 }
 
 describe('the Custom Highlight API', () => {
@@ -53,11 +53,11 @@ describe('the Custom Highlight API', () => {
 });
 
 describe('anchoring a selection', () => {
-  it('anchors to the nearest plan-* ancestor with an id', () => {
-    const planDoc = mountPlan(DOCUMENT);
-    const paragraph = planDoc.querySelector('#p-one') as HTMLElement;
+  it('anchors to the nearest doc-* ancestor with an id', () => {
+    const docPage = mountPlan(DOCUMENT);
+    const paragraph = docPage.querySelector('#p-one') as HTMLElement;
 
-    const anchor = selectText(planDoc, paragraph, 'the moment a new order lands');
+    const anchor = selectText(docPage, paragraph, 'the moment a new order lands');
 
     expect(anchor).not.toBeNull();
     expect(anchor?.anchorId).toBe('sec-what-we-are-building');
@@ -66,8 +66,8 @@ describe('anchoring a selection', () => {
   });
 
   it('records a human-readable location for the bucket', () => {
-    const planDoc = mountPlan(DOCUMENT);
-    const paragraph = planDoc.querySelector('#p-one') as HTMLElement;
+    const docPage = mountPlan(DOCUMENT);
+    const paragraph = docPage.querySelector('#p-one') as HTMLElement;
 
     expect(locationLabel(paragraph)).toBe('1 What we are building');
   });
@@ -94,7 +94,7 @@ describe('anchoring a selection', () => {
   });
 
   it('falls back to the quoted text when the offsets have shifted', () => {
-    const planDoc = mountPlan(DOCUMENT);
+    const docPage = mountPlan(DOCUMENT);
     const stale: SerializedRange = {
       anchorId: 'sec-what-we-are-building',
       start: 9999,
@@ -102,19 +102,19 @@ describe('anchoring a selection', () => {
       quote: 'the moment a new order lands',
     };
 
-    const restored = resolveRange(planDoc, stale);
+    const restored = resolveRange(docPage, stale);
     expect(restored?.toString()).toBe('the moment a new order lands');
   });
 
   it('resolves within the right section when the same sentence appears twice', () => {
-    const planDoc = mountPlan(DOCUMENT);
-    const second = planDoc.querySelectorAll('plan-section')[1] as HTMLElement;
+    const docPage = mountPlan(DOCUMENT);
+    const second = docPage.querySelectorAll('doc-section')[1] as HTMLElement;
     const paragraph = second.querySelector('p') as HTMLElement;
 
-    const anchor = selectText(planDoc, paragraph, 'without refreshing anything') as SerializedRange;
+    const anchor = selectText(docPage, paragraph, 'without refreshing anything') as SerializedRange;
     expect(anchor.anchorId).toBe('sec-data-model');
 
-    const restored = resolveRange(planDoc, anchor);
+    const restored = resolveRange(docPage, anchor);
     expect(second.contains(restored?.startContainer as Node)).toBe(true);
   });
 });
@@ -129,38 +129,38 @@ describe('painting highlights', () => {
   });
 
   it('does not touch the DOM', () => {
-    const planDoc = mountPlan(DOCUMENT);
+    const docPage = mountPlan(DOCUMENT);
     const anchor = selectText(
-      planDoc,
-      planDoc.querySelector('#p-one') as HTMLElement,
+      docPage,
+      docPage.querySelector('#p-one') as HTMLElement,
       'the moment a new order lands',
     ) as SerializedRange;
 
-    const before = snapshotNodes(planDoc);
-    const result = paintHighlights(planDoc, [itemFor(anchor)]);
-    const after = snapshotNodes(planDoc);
+    const before = snapshotNodes(docPage);
+    const result = paintHighlights(docPage, [itemFor(anchor)]);
+    const after = snapshotNodes(docPage);
 
     expect(result.orphaned).toEqual([]);
     expect(after).toEqual(before);
-    expect(planDoc.querySelectorAll('mark')).toHaveLength(0);
+    expect(docPage.querySelectorAll('mark')).toHaveLength(0);
   });
 
   it('registers the range with CSS.highlights', () => {
-    const planDoc = mountPlan(DOCUMENT);
+    const docPage = mountPlan(DOCUMENT);
     const anchor = selectText(
-      planDoc,
-      planDoc.querySelector('#p-one') as HTMLElement,
+      docPage,
+      docPage.querySelector('#p-one') as HTMLElement,
       'the moment a new order lands',
     ) as SerializedRange;
 
-    paintHighlights(planDoc, [itemFor(anchor)]);
+    paintHighlights(docPage, [itemFor(anchor)]);
 
     const registry = (CSS as unknown as { highlights: Map<string, { size: number }> }).highlights;
-    expect(registry.get('plan-feedback')?.size).toBe(1);
+    expect(registry.get('doc-feedback')?.size).toBe(1);
   });
 
   it('reports an anchor it can no longer find instead of dropping it', () => {
-    const planDoc = mountPlan(DOCUMENT);
+    const docPage = mountPlan(DOCUMENT);
     const gone: SerializedRange = {
       anchorId: 'sec-what-we-are-building',
       start: 0,
@@ -168,7 +168,7 @@ describe('painting highlights', () => {
       quote: 'text that was deleted from the document',
     };
 
-    const result = paintHighlights(planDoc, [itemFor(gone, 'fb-gone')]);
+    const result = paintHighlights(docPage, [itemFor(gone, 'fb-gone')]);
     expect(result.orphaned).toEqual(['fb-gone']);
   });
 });

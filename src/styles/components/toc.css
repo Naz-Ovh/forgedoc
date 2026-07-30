@@ -1,73 +1,73 @@
 /*
- * `plan-toc` — a floating panel by default, a docked rail on request.
+ * `doc-toc` — a floating panel by default, a docked rail on request.
  *
  * why fixed positioning rather than a grid column (§8.1): a grid would need the
  * content and the TOC to share a wrapper, and creating that wrapper would mean
- * reparenting the author's document. Docking is done by *padding* `plan-doc`
+ * reparenting the author's document. Docking is done by *padding* `doc-page`
  * instead — the reading column already centres itself in whatever width is left,
  * so pushing the padding across re-centres it in the remaining space with no
  * wrapper and no reflow of the author's markup.
  *
- * Three states, all driven from `plan-doc`:
+ * Three states, all driven from `doc-page`:
  *   · floating + collapsed — the default. A header-sized pill in the corner.
  *   · floating + open      — a full-height overlay panel.
  *   · docked   + open      — pinned to the edge; `doc.css` pads the content over.
  */
 
-@layer plan.components {
-  plan-toc {
+@layer doc.components {
+  doc-toc {
     position: fixed;
-    inset-block-start: var(--plan-space-4);
-    inset-inline-start: var(--plan-space-4);
-    z-index: var(--plan-z-toc);
+    inset-block-start: var(--doc-space-4);
+    inset-inline-start: var(--doc-space-4);
+    z-index: var(--doc-z-toc);
     display: flex;
     flex-direction: column;
     /* Collapsed, the panel is exactly as wide as its own header. */
     width: max-content;
-    max-width: calc(100vw - var(--plan-space-8));
-    border: var(--plan-rule);
-    border-radius: var(--plan-radius-lg);
-    background: color-mix(in oklab, var(--plan-surface-1) 92%, transparent);
+    max-width: calc(100vw - var(--doc-space-8));
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: color-mix(in oklab, var(--doc-surface-1) 92%, transparent);
     backdrop-filter: blur(10px);
-    box-shadow: var(--plan-shadow-1);
-    font-size: var(--plan-text-sm);
+    box-shadow: var(--doc-shadow-1);
+    font-size: var(--doc-text-sm);
     overflow: hidden;
   }
 
-  plan-toc [data-part="header"] {
+  doc-toc [data-part="header"] {
     display: flex;
     align-items: center;
-    gap: var(--plan-space-2);
+    gap: var(--doc-space-2);
     flex: none;
-    padding: var(--plan-space-2);
+    padding: var(--doc-space-2);
   }
 
-  plan-toc [data-part="toggle"] {
+  doc-toc [data-part="toggle"] {
     display: flex;
     align-items: center;
-    gap: var(--plan-space-2);
+    gap: var(--doc-space-2);
     flex: 1;
-    padding: var(--plan-space-1) var(--plan-space-2);
+    padding: var(--doc-space-1) var(--doc-space-2);
     border: 0;
-    border-radius: var(--plan-radius-sm);
+    border-radius: var(--doc-radius-sm);
     background: none;
-    color: var(--plan-text-2);
-    font-size: var(--plan-text-xs);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-xs);
     font-weight: 620;
-    letter-spacing: var(--plan-tracking-wide);
+    letter-spacing: var(--doc-tracking-wide);
     text-transform: uppercase;
     text-align: start;
     cursor: pointer;
   }
 
-  plan-toc [data-part="toggle"]::before {
+  doc-toc [data-part="toggle"]::before {
     content: "☰";
-    font-size: var(--plan-text-sm);
+    font-size: var(--doc-text-sm);
   }
 
-  plan-toc [data-part="toggle"]:hover {
-    background: var(--plan-surface-2);
-    color: var(--plan-text-1);
+  doc-toc [data-part="toggle"]:hover {
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
   }
 
   /*
@@ -75,20 +75,20 @@
    * borders rather than an icon font or an inline SVG — one less asset in a file
    * that has to work from `file://` with no network.
    */
-  plan-toc [data-part="dock"] {
+  doc-toc [data-part="dock"] {
     position: relative;
     flex: none;
     width: 1.75rem;
     height: 1.25rem;
     padding: 0;
-    border: var(--plan-border-width) solid var(--plan-border-2);
-    border-radius: var(--plan-radius-sm);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-sm);
     background: none;
-    color: var(--plan-text-3);
+    color: var(--doc-text-3);
     cursor: pointer;
   }
 
-  plan-toc [data-part="dock"]::before {
+  doc-toc [data-part="dock"]::before {
     content: "";
     position: absolute;
     inset-block: 2px;
@@ -98,77 +98,77 @@
     background: currentcolor;
   }
 
-  plan-toc [data-part="dock"]:hover {
-    border-color: var(--plan-accent-line);
-    color: var(--plan-text-1);
+  doc-toc [data-part="dock"]:hover {
+    border-color: var(--doc-accent-line);
+    color: var(--doc-text-1);
   }
 
-  plan-toc [data-part="dock"][aria-pressed="true"] {
-    border-color: var(--plan-accent-line);
-    background: var(--plan-accent-tint);
-    color: var(--plan-accent-text);
+  doc-toc [data-part="dock"][aria-pressed="true"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
   }
 
-  plan-toc [data-part="list"] {
+  doc-toc [data-part="list"] {
     display: none;
     flex: 1;
     margin: 0;
-    padding: 0 var(--plan-space-2) var(--plan-space-3);
+    padding: 0 var(--doc-space-2) var(--doc-space-3);
     overflow-y: auto;
     list-style: none;
   }
 
-  plan-doc:state(toc-open) plan-toc [data-part="list"] {
+  doc-page:state(toc-open) doc-toc [data-part="list"] {
     display: block;
   }
 
   /* Open, floating: a full-height overlay panel at a readable fixed width. */
-  plan-doc:state(toc-open) plan-toc {
-    inset-block: var(--plan-space-4);
-    width: var(--plan-toc-width);
-    box-shadow: var(--plan-shadow-2);
+  doc-page:state(toc-open) doc-toc {
+    inset-block: var(--doc-space-4);
+    width: var(--doc-toc-width);
+    box-shadow: var(--doc-shadow-2);
   }
 
-  plan-toc li {
+  doc-toc li {
     margin: 0;
   }
 
-  plan-toc li[data-depth="2"] {
-    padding-inline-start: var(--plan-space-3);
+  doc-toc li[data-depth="2"] {
+    padding-inline-start: var(--doc-space-3);
   }
 
-  plan-toc li[data-depth="3"] {
-    padding-inline-start: var(--plan-space-6);
+  doc-toc li[data-depth="3"] {
+    padding-inline-start: var(--doc-space-6);
   }
 
-  plan-toc [data-part="entry"] {
+  doc-toc [data-part="entry"] {
     display: flex;
-    gap: var(--plan-space-2);
-    padding: calc(var(--plan-space-unit) * 0.75) var(--plan-space-2);
-    border-radius: var(--plan-radius-sm);
-    color: var(--plan-text-2);
+    gap: var(--doc-space-2);
+    padding: calc(var(--doc-space-unit) * 0.75) var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+    color: var(--doc-text-2);
     text-decoration: none;
-    line-height: var(--plan-leading-tight);
+    line-height: var(--doc-leading-tight);
   }
 
-  plan-toc [data-part="entry"]:hover {
-    background: var(--plan-surface-2);
-    color: var(--plan-text-1);
+  doc-toc [data-part="entry"]:hover {
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
   }
 
-  plan-toc [data-part="entry"][aria-current] {
-    background: var(--plan-accent-tint);
-    color: var(--plan-accent-text);
+  doc-toc [data-part="entry"][aria-current] {
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
     font-weight: 600;
   }
 
-  plan-toc [data-part="entry-number"] {
+  doc-toc [data-part="entry-number"] {
     flex: none;
-    font-variant-numeric: var(--plan-numeric);
-    color: var(--plan-text-3);
+    font-variant-numeric: var(--doc-numeric);
+    color: var(--doc-text-3);
   }
 
-  plan-toc [data-part="entry"][aria-current] [data-part="entry-number"] {
+  doc-toc [data-part="entry"][aria-current] [data-part="entry-number"] {
     color: inherit;
   }
 
@@ -177,13 +177,13 @@
    * eat half the reading width, which is the problem docking exists to solve.
    */
   @media (min-width: 1280px) {
-    plan-doc:state(toc-docked) plan-toc {
+    doc-page:state(toc-docked) doc-toc {
       inset-block: 0;
       inset-inline-start: 0;
-      width: var(--plan-toc-width);
-      border-width: 0 var(--plan-border-width) 0 0;
+      width: var(--doc-toc-width);
+      border-width: 0 var(--doc-border-width) 0 0;
       border-radius: 0;
-      background: var(--plan-surface-1);
+      background: var(--doc-surface-1);
       backdrop-filter: none;
       box-shadow: none;
     }
@@ -191,16 +191,16 @@
 
   @media (max-width: 1279px) {
     /* Collapsed, sit at the bottom so the panel never covers the title. */
-    plan-toc {
+    doc-toc {
       inset-block-start: auto;
-      inset-block-end: var(--plan-space-4);
+      inset-block-end: var(--doc-space-4);
     }
 
-    plan-doc:state(toc-open) plan-toc {
-      width: min(var(--plan-toc-width), calc(100vw - var(--plan-space-8)));
+    doc-page:state(toc-open) doc-toc {
+      width: min(var(--doc-toc-width), calc(100vw - var(--doc-space-8)));
     }
 
-    plan-toc [data-part="dock"] {
+    doc-toc [data-part="dock"] {
       display: none;
     }
   }

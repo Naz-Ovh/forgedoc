@@ -6,7 +6,7 @@
  * one component.
  */
 
-/** A reader's answer to one `plan-choice`. */
+/** A reader's answer to one `doc-choice`. */
 export interface StoredAnswer {
   /** Selected option keys — letters `A`, `B`, `O`… or an author `value` override. */
   keys: string[];
@@ -24,7 +24,7 @@ export interface StoredAnswer {
  * excerpt gives two independent ways to find the text again.
  */
 export interface SerializedRange {
-  /** Id of the nearest `plan-*` ancestor that has one. */
+  /** Id of the nearest `doc-*` ancestor that has one. */
   anchorId: string;
   /** Character offset into the anchor's `textContent`. */
   start: number;
@@ -60,9 +60,9 @@ export interface FeedbackItem {
  * the reader explicitly removes or clears them. `collapse`, `tabs` and `checks`
  * are convenience; losing them is acceptable.
  */
-export interface PlanState {
+export interface DocState {
   version: 1;
-  planId: string;
+  docId: string;
   answers: Record<string, StoredAnswer>;
   feedback: FeedbackItem[];
   collapse: Record<string, boolean>;
@@ -71,16 +71,16 @@ export interface PlanState {
   /**
    * `open` — the entry list is showing. `docked` — the panel is pinned to the
    * side and pushes the reading column across instead of floating over it.
-   * Docking implies open; see `PlanDoc#setToc`.
+   * Docking implies open; see `DocPage#setToc`.
    */
   toc: { open: boolean; docked: boolean };
 }
 
-/** A fresh, empty state for `planId`. */
-export function emptyState(planId: string): PlanState {
+/** A fresh, empty state for `docId`. */
+export function emptyState(docId: string): DocState {
   return {
     version: 1,
-    planId,
+    docId,
     answers: {},
     feedback: [],
     collapse: {},
@@ -100,10 +100,10 @@ export function emptyState(planId: string): PlanState {
  * contract — so the bucket panel can use `$store` syntax with zero glue while
  * the vanilla components subscribe directly.
  */
-export interface PlanStore {
-  get<K extends keyof PlanState>(key: K): PlanState[K];
-  set<K extends keyof PlanState>(key: K, value: PlanState[K]): void;
-  subscribe(fn: (state: PlanState) => void): () => void;
+export interface DocStore {
+  get<K extends keyof DocState>(key: K): DocState[K];
+  set<K extends keyof DocState>(key: K, value: DocState[K]): void;
+  subscribe(fn: (state: DocState) => void): () => void;
   /** False when storage is blocked — Safari private mode, some `file://` origins. */
   readonly available: boolean;
   /** Discard everything for this plan id. */

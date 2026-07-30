@@ -1,4 +1,4 @@
-# PlanKit
+# ForgeDoc
 
 **A web component library for AI-authored interactive planning documents.**
 
@@ -7,28 +7,28 @@ poorly and cannot be answered. The alternative — having the agent hand-write
 bespoke HTML, CSS and JS every time — burns thousands of output tokens per plan
 and drifts from the intended design on every run.
 
-PlanKit ships the runtime once. The agent writes **only semantic markup**:
+ForgeDoc ships the runtime once. The agent writes **only semantic markup**:
 
 ```html
-<style>/*@PLAN_CSS@*/</style>   <!-- in <head>: styles land before the markup -->
+<style>/*@DOC_CSS@*/</style>   <!-- in <head>: styles land before the markup -->
 
-<plan-doc plan-id="vendor-orders" density="comfortable" accent="teal">
-  <plan-header kicker="Plan · Vendor dashboard">
+<doc-page doc-id="vendor-orders" density="comfortable" accent="teal">
+  <doc-header kicker="Plan · Vendor dashboard">
     Vendor orders experience
     <p slot="lede">Vendors get told the moment a new order lands.</p>
-  </plan-header>
+  </doc-header>
 
-  <plan-section title="What we are building">
+  <doc-section title="What we are building">
     <p>One feature, three faces…</p>
-  </plan-section>
+  </doc-section>
 
-  <plan-choice mode="single" question="Should read state be shared?">
-    <plan-option recommended>Yes — shared team inbox</plan-option>
-    <plan-option>No — per-person read state</plan-option>
-  </plan-choice>
-</plan-doc>
+  <doc-choice mode="single" question="Should read state be shared?">
+    <doc-option recommended>Yes — shared team inbox</doc-option>
+    <doc-option>No — per-person read state</doc-option>
+  </doc-choice>
+</doc-page>
 
-<script>//@PLAN_JS@</script>    <!-- last line of <body> -->
+<script>//@DOC_JS@</script>    <!-- last line of <body> -->
 ```
 
 No `<style>`, no `<script>`, no class names, no ids, no `A`/`B`/`C` option keys,
@@ -37,7 +37,7 @@ with layout, dark mode, persistence, and a feedback bucket the reader can paste
 straight back to the agent.
 
 ```sh
-plankit build PLAN_vendor-orders.html
+forgedoc build DOC_vendor-orders.html
 ```
 
 One `.html` of about 15 kB, linking a version-pinned CDN. Small enough to commit,
@@ -52,15 +52,15 @@ Add `--offline` when the document has to survive with no network at all.
 ### The usual path
 
 ```sh
-npm install -g plankit
-plankit new vendor-orders          # scaffold
-plankit build PLAN_vendor-orders.html
+npm install -g forgedoc
+forgedoc new vendor-orders          # scaffold
+forgedoc build DOC_vendor-orders.html
 ```
 
 ### Offline
 
 ```sh
-plankit build PLAN_vendor-orders.html --offline
+forgedoc build DOC_vendor-orders.html --offline
 ```
 
 Embeds the entire runtime, Mermaid included, so the document opens from
@@ -71,8 +71,8 @@ than commit a multi-megabyte HTML file.
 ### Direct from a CDN
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plankit@1.0.0/dist/plankit.css" />
-<script defer src="https://cdn.jsdelivr.net/npm/plankit@1.0.0/dist/plankit.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@1.0.0/dist/forgedoc.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/forgedoc@1.0.0/dist/forgedoc.iife.js"></script>
 ```
 
 Pin the exact version, never `@1` or `@latest`. A pinned path is served
@@ -86,8 +86,8 @@ element upgrades once, synchronously, with all of its children present.
 ### npm, for tooling
 
 ```js
-import { parseBucket, TAGS } from 'plankit';
-import 'plankit/style.css';
+import { parseBucket, TAGS } from 'forgedoc';
+import 'forgedoc/style.css';
 ```
 
 ## The agent skill
@@ -103,16 +103,16 @@ That installs the `better-plan` skill into whichever agents you pick — Claude 
 Cursor, Copilot, opencode, Amp, Antigravity, Windsurf. Add `-g` to install it once
 for every project on the machine instead of just this one.
 
-The skill still needs the `plankit` binary on PATH to build what it writes:
+The skill still needs the `forgedoc` binary on PATH to build what it writes:
 
 ```sh
-npm install -g plankit
+npm install -g forgedoc
 ```
 
 ## Docs
 
 |                                                                        |                                                                             |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+|------------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | [`skills/better-plan/SKILL.md`](skills/better-plan/SKILL.md)           | The skill itself, including the rules for reading a pasted feedback bucket. |
 | [`skills/better-plan/CHEATSHEET.md`](skills/better-plan/CHEATSHEET.md) | One page. The authoring agent's primary reference.                          |
 | [`skills/better-plan/REFERENCE.md`](skills/better-plan/REFERENCE.md)   | Full per-component API. Generated from the contract.                        |
@@ -121,10 +121,10 @@ npm install -g plankit
 ## CLI
 
 ```text
-plankit build <file.html> [--out <file>] [--offline] [--no-validate]
-plankit validate <file.html> [--format=json] [--built]
-plankit new <name> [--dir <path>]
-plankit version
+forgedoc build <file.html> [--out <file>] [--offline] [--no-validate]
+forgedoc validate <file.html> [--format=json] [--built]
+forgedoc new <name> [--dir <path>]
+forgedoc version
 ```
 
 `build` validates first and writes nothing if validation fails. Every finding
@@ -177,8 +177,8 @@ The suite has two halves.
 
 `npm run test:visual:ci` runs the deterministic half — reading-column centring at
 four widths, TOC docking geometry, the collapsed-panel size rule, the print
-rules, and the whole offline `file://` document. No baselines, no binaries, and
-it is what CI runs.
+rules, and the whole offline `file://` document. No baselines, no binaries, so
+it runs anywhere.
 
 `npm run test:visual` adds the `@pixel` tests, which compare full-page
 screenshots at 390 / 768 / 1280 / 2560 in both colour schemes, plus print.
@@ -197,10 +197,10 @@ npm run test:visual           # compares from here on
 
 1. `src/core/contract.ts` — the tag, its attributes, its doc strings.
 2. `src/components/<tag>.ts` — one file, named exactly after the tag.
-3. `src/styles/components/<name>.css` — inside `@layer plan.components`.
+3. `src/styles/components/<name>.css` — inside `@layer doc.components`.
 4. `src/index.ts` — register it.
-5. `tests/fixtures/kitchen-sink.html` — CI fails if you skip this.
-6. `npm run docs:reference` — CI fails if you skip this too.
+5. `tests/fixtures/kitchen-sink.html` — `npm test` fails if you skip this.
+6. `npm run docs:reference` — `npm test` fails if you skip this too.
 
 ## Licence
 

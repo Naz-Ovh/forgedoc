@@ -12,42 +12,42 @@
 
 import './styles/index.css';
 
-import { PlanAction } from './components/plan-action.js';
-import { PlanBlocker } from './components/plan-blocker.js';
-import { PlanBlocks } from './components/plan-blocks.js';
-import { PlanCaption } from './components/plan-caption.js';
-import { PlanChecklist } from './components/plan-checklist.js';
-import { PlanChip } from './components/plan-chip.js';
-import { PlanChips } from './components/plan-chips.js';
-import { PlanChoice } from './components/plan-choice.js';
-import { PlanCode } from './components/plan-code.js';
-import { PlanCollapse } from './components/plan-collapse.js';
-import { PlanCompare } from './components/plan-compare.js';
-import { PlanDiff } from './components/plan-diff.js';
-import { PlanDoc } from './components/plan-doc.js';
-import { PlanFigure } from './components/plan-figure.js';
-import { PlanFlow } from './components/plan-flow.js';
-import { PlanFlowNode } from './components/plan-flow-node.js';
-import { PlanHeader } from './components/plan-header.js';
-import { PlanList } from './components/plan-list.js';
-import { PlanNote } from './components/plan-note.js';
-import { PlanOption } from './components/plan-option.js';
-import { PlanQuote } from './components/plan-quote.js';
-import { PlanRef } from './components/plan-ref.js';
-import { PlanRoadmap } from './components/plan-roadmap.js';
-import { PlanSection } from './components/plan-section.js';
-import { PlanStage } from './components/plan-stage.js';
-import { PlanTab } from './components/plan-tab.js';
-import { PlanTable } from './components/plan-table.js';
-import { PlanTabs } from './components/plan-tabs.js';
-import { PlanTerm } from './components/plan-term.js';
-import { PlanToc } from './components/plan-toc.js';
-import { PlanTree } from './components/plan-tree.js';
-import { PlanWhy } from './components/plan-why.js';
+import { DocAction } from './components/doc-action.js';
+import { DocBlocker } from './components/doc-blocker.js';
+import { DocBlocks } from './components/doc-blocks.js';
+import { DocCaption } from './components/doc-caption.js';
+import { DocChecklist } from './components/doc-checklist.js';
+import { DocChip } from './components/doc-chip.js';
+import { DocChips } from './components/doc-chips.js';
+import { DocChoice } from './components/doc-choice.js';
+import { DocCode } from './components/doc-code.js';
+import { DocCollapse } from './components/doc-collapse.js';
+import { DocCompare } from './components/doc-compare.js';
+import { DocDiff } from './components/doc-diff.js';
+import { DocFigure } from './components/doc-figure.js';
+import { DocFlow } from './components/doc-flow.js';
+import { DocFlowNode } from './components/doc-flow-node.js';
+import { DocHeader } from './components/doc-header.js';
+import { DocList } from './components/doc-list.js';
+import { DocNote } from './components/doc-note.js';
+import { DocOption } from './components/doc-option.js';
+import { DocPage } from './components/doc-page.js';
+import { DocQuote } from './components/doc-quote.js';
+import { DocRef } from './components/doc-ref.js';
+import { DocRoadmap } from './components/doc-roadmap.js';
+import { DocSection } from './components/doc-section.js';
+import { DocStage } from './components/doc-stage.js';
+import { DocTab } from './components/doc-tab.js';
+import { DocTable } from './components/doc-table.js';
+import { DocTabs } from './components/doc-tabs.js';
+import { DocTerm } from './components/doc-term.js';
+import { DocToc } from './components/doc-toc.js';
+import { DocTree } from './components/doc-tree.js';
+import { DocWhy } from './components/doc-why.js';
 import { TAG_NAMES } from './core/contract.js';
 import { define, registeredTags } from './core/registry.js';
 import { storeFor } from './core/store.js';
-import type { PlanStore } from './core/types.js';
+import type { DocStore } from './core/types.js';
 
 /**
  * The whole vocabulary, tag name → constructor.
@@ -57,38 +57,38 @@ import type { PlanStore } from './core/types.js';
  * first. Listed alphabetically so a missing entry is obvious.
  */
 const ELEMENTS = {
-  'plan-action': PlanAction,
-  'plan-blocker': PlanBlocker,
-  'plan-blocks': PlanBlocks,
-  'plan-caption': PlanCaption,
-  'plan-checklist': PlanChecklist,
-  'plan-chip': PlanChip,
-  'plan-chips': PlanChips,
-  'plan-choice': PlanChoice,
-  'plan-code': PlanCode,
-  'plan-collapse': PlanCollapse,
-  'plan-compare': PlanCompare,
-  'plan-diff': PlanDiff,
-  'plan-doc': PlanDoc,
-  'plan-figure': PlanFigure,
-  'plan-flow': PlanFlow,
-  'plan-flow-node': PlanFlowNode,
-  'plan-header': PlanHeader,
-  'plan-list': PlanList,
-  'plan-note': PlanNote,
-  'plan-option': PlanOption,
-  'plan-quote': PlanQuote,
-  'plan-ref': PlanRef,
-  'plan-roadmap': PlanRoadmap,
-  'plan-section': PlanSection,
-  'plan-stage': PlanStage,
-  'plan-tab': PlanTab,
-  'plan-table': PlanTable,
-  'plan-tabs': PlanTabs,
-  'plan-term': PlanTerm,
-  'plan-toc': PlanToc,
-  'plan-tree': PlanTree,
-  'plan-why': PlanWhy,
+  'doc-action': DocAction,
+  'doc-blocker': DocBlocker,
+  'doc-blocks': DocBlocks,
+  'doc-caption': DocCaption,
+  'doc-checklist': DocChecklist,
+  'doc-chip': DocChip,
+  'doc-chips': DocChips,
+  'doc-choice': DocChoice,
+  'doc-code': DocCode,
+  'doc-collapse': DocCollapse,
+  'doc-compare': DocCompare,
+  'doc-diff': DocDiff,
+  'doc-page': DocPage,
+  'doc-figure': DocFigure,
+  'doc-flow': DocFlow,
+  'doc-flow-node': DocFlowNode,
+  'doc-header': DocHeader,
+  'doc-list': DocList,
+  'doc-note': DocNote,
+  'doc-option': DocOption,
+  'doc-quote': DocQuote,
+  'doc-ref': DocRef,
+  'doc-roadmap': DocRoadmap,
+  'doc-section': DocSection,
+  'doc-stage': DocStage,
+  'doc-tab': DocTab,
+  'doc-table': DocTable,
+  'doc-tabs': DocTabs,
+  'doc-term': DocTerm,
+  'doc-toc': DocToc,
+  'doc-tree': DocTree,
+  'doc-why': DocWhy,
 } as const;
 
 /** Register every element. Safe to call twice (§7.2). */
@@ -102,21 +102,21 @@ export function defineAll(): void {
  * ── The public API ──────────────────────────────────────────────────────────
  *
  * These are deliberately *top-level* named exports rather than members of a
- * `PlanKit` object.
+ * `ForgeDoc` object.
  *
- * why (§4.2): the IIFE builds emit `var PlanKit = (function (exports) { … })({})`,
- * so the global `PlanKit` **is** this module's namespace. Wrapping the API in an
- * inner object would make the documented call `PlanKit.chips.add(…)` resolve to
- * `PlanKit.PlanKit.chips.add(…)` — and assigning `window.PlanKit` from inside
+ * why (§4.2): the IIFE builds emit `var ForgeDoc = (function (exports) { … })({})`,
+ * so the global `ForgeDoc` **is** this module's namespace. Wrapping the API in an
+ * inner object would make the documented call `ForgeDoc.chips.add(…)` resolve to
+ * `ForgeDoc.ForgeDoc.chips.add(…)` — and assigning `window.ForgeDoc` from inside
  * the IIFE does not help, because the wrapper overwrites it the moment it
  * returns. That bug was caught by opening a built document from `file://`.
  *
- * Exporting the members directly makes `window.PlanKit.chips.add(…)` in an
- * offline document and `import { chips } from 'plankit'` in a bundler
+ * Exporting the members directly makes `window.ForgeDoc.chips.add(…)` in an
+ * offline document and `import { chips } from 'forgedoc'` in a bundler
  * exactly the same API.
  */
 
-export const version: string = __PLANKIT_VERSION__;
+export const version: string = __FORGEDOC_VERSION__;
 
 /** Tag names the contract knows about, including generated and child-only ones. */
 export const vocabulary: readonly string[] = TAG_NAMES;
@@ -129,11 +129,11 @@ export const chips = {
    * regenerates, previously answered questions surface as `confirmed` chips.
    * Tooling can do that without a full regeneration.
    */
-  add(chip: { kind: string; text: string }, planDoc?: Element): HTMLElement | null {
-    const root = planDoc ?? document.querySelector('plan-doc');
+  add(chip: { kind: string; text: string }, docPage?: Element): HTMLElement | null {
+    const root = docPage ?? document.querySelector('doc-page');
     if (!root) return null;
 
-    const chipRow = root.querySelector('plan-chips') as
+    const chipRow = root.querySelector('doc-chips') as
       | (Element & { addChip?: (kind: string, text: string) => HTMLElement })
       | null;
     if (!chipRow?.addChip) return null;
@@ -142,17 +142,17 @@ export const chips = {
 };
 
 /** The store for a document, for tooling that wants to read or seed state. */
-export function store(planDoc?: Element): PlanStore | null {
-  const root = planDoc ?? document.querySelector('plan-doc');
+export function store(docPage?: Element): DocStore | null {
+  const root = docPage ?? document.querySelector('doc-page');
   return root ? storeFor(root) : null;
 }
 
 defineAll();
 
 export { parseBucket, serializeBucket } from './bucket/serialize.js';
-export { PlanChoice } from './components/plan-choice.js';
-export { PlanDoc } from './components/plan-doc.js';
-export { PlanSection } from './components/plan-section.js';
+export { DocChoice } from './components/doc-choice.js';
+export { DocPage } from './components/doc-page.js';
+export { DocSection } from './components/doc-section.js';
 export { CODE_LANGUAGES, PRESET_AXES, TAG_NAMES, TAGS } from './core/contract.js';
 export * from './core/types.js';
 export { registeredTags };

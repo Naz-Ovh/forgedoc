@@ -13,31 +13,31 @@ import { bucketCount, collectBucket } from '../../src/bucket/collect.js';
 import { serializeSelection } from '../../src/bucket/selection.js';
 import { type BucketDocument, parseBucket, serializeBucket } from '../../src/bucket/serialize.js';
 import { storeFor } from '../../src/core/store.js';
-import type { FeedbackItem, PlanState, SerializedRange } from '../../src/core/types.js';
+import type { DocState, FeedbackItem, SerializedRange } from '../../src/core/types.js';
 import { mountPlan, settle } from '../helpers.js';
 
 const DOCUMENT = `
-  <plan-section title="What we are building">
+  <doc-section title="What we are building">
     <p id="lede-p">Vendors get told the moment a new order lands, without refreshing anything.</p>
-  </plan-section>
-  <plan-section title="Open questions">
-    <plan-choice mode="single" question="Should read state be shared across the team?">
-      <plan-option recommended>Yes — shared team inbox</plan-option>
-      <plan-option>No — per-person read state</plan-option>
-    </plan-choice>
-    <plan-choice mode="multi" question="Which delivery modes must ship in version one?">
-      <plan-option>Offline single file</plan-option>
-      <plan-option>CDN script tag</plan-option>
-      <plan-option>npm package</plan-option>
-    </plan-choice>
-  </plan-section>
+  </doc-section>
+  <doc-section title="Open questions">
+    <doc-choice mode="single" question="Should read state be shared across the team?">
+      <doc-option recommended>Yes — shared team inbox</doc-option>
+      <doc-option>No — per-person read state</doc-option>
+    </doc-choice>
+    <doc-choice mode="multi" question="Which delivery modes must ship in version one?">
+      <doc-option>Offline single file</doc-option>
+      <doc-option>CDN script tag</doc-option>
+      <doc-option>npm package</doc-option>
+    </doc-choice>
+  </doc-section>
 `;
 
-const stateOf = (planDoc: Element): PlanState => {
-  const store = storeFor(planDoc);
+const stateOf = (docPage: Element): DocState => {
+  const store = storeFor(docPage);
   return {
     version: 1,
-    planId: store.get('planId'),
+    docId: store.get('docId'),
     answers: store.get('answers'),
     feedback: store.get('feedback'),
     collapse: store.get('collapse'),
@@ -48,16 +48,16 @@ const stateOf = (planDoc: Element): PlanState => {
 };
 
 /** Answer question `index` by checking option `option`. */
-function answer(planDoc: Element, index: number, option: number): void {
-  const choice = planDoc.querySelectorAll('plan-choice')[index] as HTMLElement;
+function answer(docPage: Element, index: number, option: number): void {
+  const choice = docPage.querySelectorAll('doc-choice')[index] as HTMLElement;
   const input = choice.querySelectorAll('input')[option] as HTMLInputElement;
   input.checked = true;
   input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 /** Select a phrase in the lede and store a comment on it. */
-function comment(planDoc: HTMLElement, phrase: string, text: string): SerializedRange {
-  const paragraph = planDoc.querySelector('#lede-p') as HTMLElement;
+function comment(docPage: HTMLElement, phrase: string, text: string): SerializedRange {
+  const paragraph = docPage.querySelector('#lede-p') as HTMLElement;
   const node = paragraph.firstChild as Text;
   const start = node.data.indexOf(phrase);
 
@@ -68,8 +68,8 @@ function comment(planDoc: HTMLElement, phrase: string, text: string): Serialized
   selection?.removeAllRanges();
   selection?.addRange(range);
 
-  const serialized = serializeSelection(planDoc) as SerializedRange;
-  const store = storeFor(planDoc);
+  const serialized = serializeSelection(docPage) as SerializedRange;
+  const store = storeFor(docPage);
   const item: FeedbackItem = {
     id: `fb-${store.get('feedback').length}`,
     createdAt: '2026-07-28T10:22:31Z',
@@ -83,42 +83,42 @@ function comment(planDoc: HTMLElement, phrase: string, text: string): Serialized
 
 describe('the bucket panel', () => {
   it('mounts as a plain Svelte component into a sibling of the content', () => {
-    const planDoc = mountPlan(DOCUMENT);
-    const host = planDoc.querySelector('[data-part="bucket"]');
+    const docPage = mountPlan(DOCUMENT);
+    const host = docPage.querySelector('[data-part="bucket"]');
 
     expect(host).not.toBeNull();
-    expect(host?.parentElement).toBe(planDoc);
+    expect(host?.parentElement).toBe(docPage);
     // MUST (§10.1): a plain component, not a custom element — so its styles land
-    // in plankit.css rather than being inlined as a JavaScript string.
+    // in forgedoc.css rather than being inlined as a JavaScript string.
     expect(host?.tagName.toLowerCase()).toBe('div');
     expect(customElements.get('bucket-panel')).toBeUndefined();
   });
 
   it('shows a live count on the trigger', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    const count = planDoc.querySelector('[data-part="bucket-count"]') as HTMLElement;
+    const docPage = mountPlan(DOCUMENT);
+    const count = docPage.querySelector('[data-part="bucket-count"]') as HTMLElement;
 
     expect(count.textContent).toBe('0');
 
-    answer(planDoc, 0, 0);
+    answer(docPage, 0, 0);
     await settle(50);
     expect(count.textContent).toBe('1');
 
-    comment(planDoc, 'the moment a new order lands', 'webhook or order row?');
+    comment(docPage, 'the moment a new order lands', 'webhook or order row?');
     await settle(50);
     expect(count.textContent).toBe('2');
   });
 
   it('lists answers and comments, and removes one at a time', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    answer(planDoc, 0, 0);
-    comment(planDoc, 'the moment a new order lands', 'webhook or order row?');
+    const docPage = mountPlan(DOCUMENT);
+    answer(docPage, 0, 0);
+    comment(docPage, 'the moment a new order lands', 'webhook or order row?');
     await settle(50);
 
-    (planDoc.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
     await settle(50);
 
-    const items = planDoc.querySelectorAll('[data-part="bucket-item"]');
+    const items = docPage.querySelectorAll('[data-part="bucket-item"]');
     expect(items).toHaveLength(2);
     expect(items[0]?.getAttribute('data-kind')).toBe('answer');
     expect(items[1]?.getAttribute('data-kind')).toBe('comment');
@@ -126,26 +126,26 @@ describe('the bucket panel', () => {
     (items[1]!.querySelector('[data-part="bucket-item-remove"]') as HTMLElement).click();
     await settle(50);
 
-    expect(planDoc.querySelectorAll('[data-part="bucket-item"]')).toHaveLength(1);
-    expect(storeFor(planDoc).get('feedback')).toEqual([]);
+    expect(docPage.querySelectorAll('[data-part="bucket-item"]')).toHaveLength(1);
+    expect(storeFor(docPage).get('feedback')).toEqual([]);
   });
 
   it('opens a detail window rather than scrolling the document away', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    answer(planDoc, 0, 0);
-    comment(planDoc, 'the moment a new order lands', 'webhook or order row?');
+    const docPage = mountPlan(DOCUMENT);
+    answer(docPage, 0, 0);
+    comment(docPage, 'the moment a new order lands', 'webhook or order row?');
     await settle(50);
 
-    (planDoc.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
     await settle(50);
     expect(document.querySelector('[data-part="detail"]')).toBeNull();
 
-    const commentRow = planDoc.querySelectorAll('[data-part="bucket-item"]')[1] as HTMLElement;
+    const commentRow = docPage.querySelectorAll('[data-part="bucket-item"]')[1] as HTMLElement;
     (commentRow.querySelector('[data-part="bucket-item-body"]') as HTMLElement).click();
     await settle(50);
 
     // Both sides at once: what the document says, and what the reader said.
-    const detail = planDoc.querySelector('[data-part="detail"]') as HTMLElement;
+    const detail = docPage.querySelector('[data-part="detail"]') as HTMLElement;
     expect(detail).not.toBeNull();
     expect(detail.querySelector('[data-part="detail-quote"]')?.textContent).toBe(
       'the moment a new order lands',
@@ -154,24 +154,24 @@ describe('the bucket panel', () => {
       'webhook or order row?',
     );
     // The panel stays open behind it — the reader has not lost their place.
-    expect(planDoc.querySelector('[data-part="bucket-panel"]')).not.toBeNull();
+    expect(docPage.querySelector('[data-part="bucket-panel"]')).not.toBeNull();
 
     (detail.querySelector('[data-part="detail-close"]') as HTMLElement).click();
     await settle(50);
-    expect(planDoc.querySelector('[data-part="detail"]')).toBeNull();
+    expect(docPage.querySelector('[data-part="detail"]')).toBeNull();
   });
 
   it('shows every option of an answered question, chosen or not', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    answer(planDoc, 0, 0);
+    const docPage = mountPlan(DOCUMENT);
+    answer(docPage, 0, 0);
     await settle(50);
 
-    (planDoc.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
     await settle(50);
-    (planDoc.querySelector('[data-part="bucket-item-body"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-item-body"]') as HTMLElement).click();
     await settle(50);
 
-    const options = Array.from(planDoc.querySelectorAll('[data-part="detail-option"]'));
+    const options = Array.from(docPage.querySelectorAll('[data-part="detail-option"]'));
     // Two authored options plus the appended Other (§8.4).
     expect(options).toHaveLength(3);
     expect(options.filter((option) => option.hasAttribute('data-chosen'))).toHaveLength(1);
@@ -179,30 +179,30 @@ describe('the bucket panel', () => {
   });
 
   it('closes the detail window when its item is removed', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    comment(planDoc, 'the moment a new order lands', 'webhook or order row?');
+    const docPage = mountPlan(DOCUMENT);
+    comment(docPage, 'the moment a new order lands', 'webhook or order row?');
     await settle(50);
 
-    (planDoc.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
     await settle(50);
-    (planDoc.querySelector('[data-part="bucket-item-body"]') as HTMLElement).click();
-    await settle(50);
-
-    (planDoc.querySelector('[data-part="detail-remove"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-item-body"]') as HTMLElement).click();
     await settle(50);
 
-    expect(planDoc.querySelector('[data-part="detail"]')).toBeNull();
-    expect(storeFor(planDoc).get('feedback')).toEqual([]);
+    (docPage.querySelector('[data-part="detail-remove"]') as HTMLElement).click();
+    await settle(50);
+
+    expect(docPage.querySelector('[data-part="detail"]')).toBeNull();
+    expect(storeFor(docPage).get('feedback')).toEqual([]);
   });
 
   it('warns in the panel when storage is unavailable', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    (planDoc.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
+    const docPage = mountPlan(DOCUMENT);
+    (docPage.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
     await settle(50);
 
     // Storage works here, so no warning should be shown.
-    expect(planDoc.querySelector('[data-part="bucket-warning"]')).toBeNull();
-    expect(planDoc.querySelector('[data-part="bucket-empty"]')).not.toBeNull();
+    expect(docPage.querySelector('[data-part="bucket-warning"]')).toBeNull();
+    expect(docPage.querySelector('[data-part="bucket-empty"]')).not.toBeNull();
   });
 });
 
@@ -229,7 +229,7 @@ describe('the full reader journey', () => {
     const restoredState = stateOf(second);
     expect(bucketCount(second, restoredState)).toBe(3);
 
-    const choices = second.querySelectorAll('plan-choice');
+    const choices = second.querySelectorAll('doc-choice');
     expect((choices[0]!.querySelector('input') as HTMLInputElement).checked).toBe(true);
     expect(restoredState.answers[choices[1]?.id ?? '']?.keys).toEqual(['A', 'B']);
     expect(restoredState.answers[choices[0]?.id ?? '']?.note).toBe(
@@ -239,13 +239,13 @@ describe('the full reader journey', () => {
   });
 
   it('produces a bucket that parses back and round-trips', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    answer(planDoc, 0, 0);
-    answer(planDoc, 1, 1);
-    comment(planDoc, 'the moment a new order lands', 'webhook or order row?');
+    const docPage = mountPlan(DOCUMENT);
+    answer(docPage, 0, 0);
+    answer(docPage, 1, 1);
+    comment(docPage, 'the moment a new order lands', 'webhook or order row?');
     await settle();
 
-    const text = serializeBucket(collectBucket(planDoc, stateOf(planDoc), '2026-07-28T10:22:31Z'));
+    const text = serializeBucket(collectBucket(docPage, stateOf(docPage), '2026-07-28T10:22:31Z'));
 
     expect(text.startsWith('=== FB v1 · test-plan · 2026-07-28T10:22:31Z · 3 items ===')).toBe(
       true,
@@ -263,15 +263,15 @@ describe('the full reader journey', () => {
   });
 
   it('clears answers and feedback but keeps reading convenience state', async () => {
-    const planDoc = mountPlan(DOCUMENT);
-    answer(planDoc, 0, 0);
-    const store = storeFor(planDoc);
+    const docPage = mountPlan(DOCUMENT);
+    answer(docPage, 0, 0);
+    const store = storeFor(docPage);
     store.set('tabs', { 'tabs-x': 2 });
     await settle();
 
-    (planDoc.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-trigger"]') as HTMLElement).click();
     await settle(50);
-    (planDoc.querySelector('[data-part="bucket-clear"]') as HTMLElement).click();
+    (docPage.querySelector('[data-part="bucket-clear"]') as HTMLElement).click();
     await settle(50);
 
     expect(store.get('answers')).toEqual({});

@@ -12,8 +12,8 @@
  * what the document says, and what they said about it.
  */
 
-import { optionLabel, optionValue } from '../components/plan-option.js';
-import type { FeedbackItem, PlanState } from '../core/types.js';
+import { optionLabel, optionValue } from '../components/doc-option.js';
+import type { DocState, FeedbackItem } from '../core/types.js';
 import { type AnchoredContext, blockText, contextAround, isBlockItem } from './selection.js';
 import type { BucketAnswer } from './serialize.js';
 
@@ -49,15 +49,15 @@ export interface DetailView {
 
 /** Detail for one answered question, read back from the live document. */
 export function detailForAnswer(
-  planDoc: Element,
+  docPage: Element,
   answer: BucketAnswer,
-  state: PlanState,
+  state: DocState,
 ): DetailView {
   return {
     id: answer.anchorId,
     kind: 'answer',
     title: answer.question,
-    at: locationOf(planDoc, answer.anchorId),
+    at: locationOf(docPage, answer.anchorId),
     anchorId: answer.anchorId,
     // An answer's anchor is the question element; if that is gone the answer is
     // still perfectly readable, because the bucket carries the text verbatim.
@@ -65,7 +65,7 @@ export function detailForAnswer(
     scope: 'text',
     context: null,
     blockContent: '',
-    options: optionsOf(planDoc, answer.anchorId, state),
+    options: optionsOf(docPage, answer.anchorId, state),
     feedback: answer.labels.join('\n'),
     note: answer.note ?? '',
   };
@@ -73,7 +73,7 @@ export function detailForAnswer(
 
 /** Detail for one reader comment. */
 export function detailForComment(
-  planDoc: Element,
+  docPage: Element,
   item: FeedbackItem,
   orphaned: boolean,
 ): DetailView {
@@ -87,8 +87,8 @@ export function detailForComment(
     anchorId: item.range.anchorId,
     orphaned,
     scope: block ? 'block' : 'text',
-    context: block ? null : contextAround(planDoc, item.range),
-    blockContent: block ? blockText(planDoc, item.range.anchorId) : '',
+    context: block ? null : contextAround(docPage, item.range),
+    blockContent: block ? blockText(docPage, item.range.anchorId) : '',
     options: [],
     feedback: item.comment,
     note: '',
@@ -102,14 +102,14 @@ export function detailForComment(
  * was chosen. What the detail window adds is what was *not* — the reader
  * reviewing their own answer wants to see the alternatives they passed over.
  */
-function optionsOf(planDoc: Element, anchorId: string, state: PlanState): DetailOption[] {
-  const choice = planDoc.querySelector(`#${CSS.escape(anchorId)}`);
+function optionsOf(docPage: Element, anchorId: string, state: DocState): DetailOption[] {
+  const choice = docPage.querySelector(`#${CSS.escape(anchorId)}`);
   if (!choice) return [];
 
   const chosenKeys = state.answers[anchorId]?.keys ?? [];
   const options: DetailOption[] = [];
 
-  for (const option of Array.from(choice.querySelectorAll<HTMLElement>(':scope > plan-option'))) {
+  for (const option of Array.from(choice.querySelectorAll<HTMLElement>(':scope > doc-option'))) {
     const key = option.dataset.key ?? '';
     const label =
       option.dataset.part === 'other'
@@ -123,8 +123,8 @@ function optionsOf(planDoc: Element, anchorId: string, state: PlanState): Detail
 }
 
 /** `3.1 Data model` for whatever section an anchor lives in. */
-function locationOf(planDoc: Element, anchorId: string): string {
-  const section = planDoc.querySelector(`#${CSS.escape(anchorId)}`)?.closest('plan-section');
+function locationOf(docPage: Element, anchorId: string): string {
+  const section = docPage.querySelector(`#${CSS.escape(anchorId)}`)?.closest('doc-section');
   if (!section) return '';
 
   const number = section.getAttribute('data-number') ?? '';

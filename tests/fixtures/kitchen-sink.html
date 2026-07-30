@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PlanKit kitchen sink</title>
+<title>ForgeDoc kitchen sink</title>
 <!--
   §13.3 — this fixture is simultaneously the golden-file snapshot target, the
   manual QA page, the print/PDF check, and the example in REFERENCE.md.
@@ -13,116 +13,116 @@
   tag appears below.
 
   Preset *combinations* are exercised by `tests/components/presets.test.ts`,
-  which swaps the attributes on `plan-doc` at runtime — a document has exactly
-  one `plan-doc`, so it can only carry one combination at a time.
+  which swaps the attributes on `doc-page` at runtime — a document has exactly
+  one `doc-page`, so it can only carry one combination at a time.
 
-  Not formatted (see the ignore list in biome.jsonc): the content of `plan-code`,
-  `plan-diff` and `plan-tree` is whitespace-significant, and reflowing it changes
+  Not formatted (see the ignore list in biome.jsonc): the content of `doc-code`,
+  `doc-diff` and `doc-tree` is whitespace-significant, and reflowing it changes
   what those components render.
 -->
 </head>
 <body>
 
-<plan-doc plan-id="kitchen-sink" density="comfortable" scale="md" accent="teal" measure="default" code="auto" toc="docked" numbering="counter">
+<doc-page doc-id="kitchen-sink" density="comfortable" scale="md" accent="teal" measure="default" code="auto" toc="docked" numbering="counter">
 
-  <plan-header kicker="Plan · PlanKit self-test">
+  <doc-header kicker="Plan · ForgeDoc self-test">
     Every tag in the vocabulary
     <p slot="lede">This document exercises all 22 authored tags, all 9 child-only tags and the one generated tag, so that a regression in any of them shows up in one screenshot.</p>
-  </plan-header>
+  </doc-header>
 
-  <plan-chips>
-    <plan-chip kind="confirmed">Light DOM only — decided</plan-chip>
-    <plan-chip kind="info">Runtime injected at build time</plan-chip>
-    <plan-chip kind="action">Answer the questions inline, then send the bucket back</plan-chip>
-    <plan-chip kind="pending">Mermaid version pin still open</plan-chip>
-  </plan-chips>
+  <doc-chips>
+    <doc-chip kind="confirmed">Light DOM only — decided</doc-chip>
+    <doc-chip kind="info">Runtime injected at build time</doc-chip>
+    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
+    <doc-chip kind="pending">Mermaid version pin still open</doc-chip>
+  </doc-chips>
 
-  <plan-section title="What we are building">
-    <p>A component library for AI-authored planning documents. The agent writes <code>semantic markup</code> and nothing else — no <code>&lt;style&gt;</code>, no <code>&lt;script&gt;</code>, no class names, no section numbers. See <plan-ref to="sec-the-roadmap"></plan-ref> for delivery order.</p>
+  <doc-section title="What we are building">
+    <p>A component library for AI-authored planning documents. The agent writes <code>semantic markup</code> and nothing else — no <code>&lt;style&gt;</code>, no <code>&lt;script&gt;</code>, no class names, no section numbers. See <doc-ref to="sec-the-roadmap"></doc-ref> for delivery order.</p>
 
-    <p>The runtime handles <plan-term href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">web components</plan-term>, persistence and feedback collection. A second mention of <plan-term href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">web components</plan-term> renders more quietly than the first.</p>
+    <p>The runtime handles <doc-term href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">web components</doc-term>, persistence and feedback collection. A second mention of <doc-term href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">web components</doc-term> renders more quietly than the first.</p>
 
-    <plan-note kind="info" title="Why light DOM">
+    <doc-note kind="info" title="Why light DOM">
       <p>Selection APIs do not cross shadow boundaries cleanly, and the feedback bucket lets a reader select arbitrary text anywhere in the document.</p>
-    </plan-note>
+    </doc-note>
 
-    <plan-note kind="tip">
-      <p>Every token is prefixed <code>--plan-</code>, so Mermaid and Prism cannot collide with it.</p>
-    </plan-note>
+    <doc-note kind="tip">
+      <p>Every token is prefixed <code>--doc-</code>, so Mermaid and Prism cannot collide with it.</p>
+    </doc-note>
 
-    <plan-note kind="warn" title="Also fixed in this stage">
+    <doc-note kind="warn" title="Also fixed in this stage">
       <p>Table stacking below 1050px, which the reference document needs twice.</p>
-    </plan-note>
+    </doc-note>
 
-    <plan-note kind="danger" title="Do not do this">
+    <doc-note kind="danger" title="Do not do this">
       <p>Never call <code>attachShadow</code>. A lint rule enforces it.</p>
-    </plan-note>
+    </doc-note>
 
-    <plan-note kind="success" title="Already shipping">
+    <doc-note kind="success" title="Already shipping">
       <p>Validator, CLI and all four build artefacts.</p>
-    </plan-note>
+    </doc-note>
 
-    <plan-section title="Scope boundaries">
+    <doc-section title="Scope boundaries">
       <p>Depth two exists to prove the numbering. The number is at least as large as its heading and shrinks with depth.</p>
 
-      <plan-section title="Out of scope">
+      <doc-section title="Out of scope">
         <p>Depth three is the deepest level the vocabulary supports.</p>
-      </plan-section>
-    </plan-section>
-  </plan-section>
+      </doc-section>
+    </doc-section>
+  </doc-section>
 
-  <plan-section title="Where we are today">
-    <plan-compare columns="2">
-      <plan-list title="Already built" kind="positive" marker="check">
+  <doc-section title="Where we are today">
+    <doc-compare columns="2">
+      <doc-list title="Already built" kind="positive" marker="check">
         <li>Markup contract and validator</li>
         <li>Three build variants from one source tree</li>
         <li>Namespaced store with a real availability probe</li>
-      </plan-list>
-      <plan-list title="Missing (we build these)" kind="negative" marker="cross">
+      </doc-list>
+      <doc-list title="Missing (we build these)" kind="negative" marker="cross">
         <li>Visual regression baselines</li>
         <li>cdnjs submission</li>
-      </plan-list>
-    </plan-compare>
+      </doc-list>
+    </doc-compare>
 
-    <plan-list marker="arrow">
+    <doc-list marker="arrow">
       <li>Arrow markers, for sequences that are not comparisons</li>
       <li>Second item</li>
-    </plan-list>
+    </doc-list>
 
-    <plan-list marker="dot" kind="neutral" title="Still undecided">
+    <doc-list marker="dot" kind="neutral" title="Still undecided">
       <li>Dot markers are the default</li>
       <li>Second item</li>
-    </plan-list>
+    </doc-list>
 
-    <plan-list marker="number">
+    <doc-list marker="number">
       <li>Numbered markers come from a CSS counter</li>
       <li>Second item</li>
-    </plan-list>
+    </doc-list>
 
-    <plan-flow>
-      <plan-flow-node title="Agent writes">semantic markup only</plan-flow-node>
-      <plan-flow-node title="plankit build">validate, then inject</plan-flow-node>
-      <plan-flow-node title="Reader opens" active>one self-contained file</plan-flow-node>
-      <plan-flow-node title="Reader answers">bucket collects it</plan-flow-node>
-      <plan-flow-node title="Agent reads back">FB v1 block</plan-flow-node>
-    </plan-flow>
+    <doc-flow>
+      <doc-flow-node title="Agent writes">semantic markup only</doc-flow-node>
+      <doc-flow-node title="forgedoc build">validate, then inject</doc-flow-node>
+      <doc-flow-node title="Reader opens" active>one self-contained file</doc-flow-node>
+      <doc-flow-node title="Reader answers">bucket collects it</doc-flow-node>
+      <doc-flow-node title="Agent reads back">FB v1 block</doc-flow-node>
+    </doc-flow>
 
-    <plan-table size="md" stack="auto">
+    <doc-table size="md" stack="auto">
       <table>
         <caption>Build artefacts</caption>
         <thead>
           <tr><th>Output</th><th>Format</th><th>Contents</th><th>Used by</th></tr>
         </thead>
         <tbody>
-          <tr><td><code>plankit.iife.js</code></td><td>IIFE</td><td>Core + Prism</td><td>CDN viewer</td></tr>
-          <tr><td><code>plankit.standalone.iife.js</code></td><td>IIFE</td><td>Everything, Mermaid included</td><td>Offline <code>file://</code></td></tr>
-          <tr><td><code>plankit.js</code></td><td>ESM</td><td>Core, external deps</td><td>npm consumers</td></tr>
-          <tr><td><code>plankit.css</code></td><td>CSS</td><td>All layers, one file</td><td>Both</td></tr>
+          <tr><td><code>forgedoc.iife.js</code></td><td>IIFE</td><td>Core + Prism</td><td>CDN viewer</td></tr>
+          <tr><td><code>forgedoc.standalone.iife.js</code></td><td>IIFE</td><td>Everything, Mermaid included</td><td>Offline <code>file://</code></td></tr>
+          <tr><td><code>forgedoc.js</code></td><td>ESM</td><td>Core, external deps</td><td>npm consumers</td></tr>
+          <tr><td><code>forgedoc.css</code></td><td>CSS</td><td>All layers, one file</td><td>Both</td></tr>
         </tbody>
       </table>
-    </plan-table>
+    </doc-table>
 
-    <plan-table size="sm" stack="never">
+    <doc-table size="sm" stack="never">
       <table>
         <thead>
           <tr><th>Axis</th><th>Values</th><th>Default</th></tr>
@@ -132,204 +132,204 @@
           <tr><td>measure</td><td>narrow / default / wide</td><td>default</td></tr>
         </tbody>
       </table>
-    </plan-table>
+    </doc-table>
 
-    <plan-quote cite="§2.2, the build specification">
+    <doc-quote cite="§2.2, the build specification">
       Components receive DOM the agent wrote. Their job is to read it, wrap chrome around it, and wire behaviour — never to move it.
-    </plan-quote>
-  </plan-section>
+    </doc-quote>
+  </doc-section>
 
-  <plan-section title="Roadblocks">
-    <plan-blocker severity="high" title="localStorage is shared across all file:// documents in Chrome">
-      <plan-blocks>Two plans opened from disk see each other's answers, and one reader's feedback surfaces inside an unrelated document.</plan-blocks>
-      <plan-why>Chrome has historically treated every <code>file://</code> origin as one storage bucket.</plan-why>
-      <plan-action>Every key is namespaced <code>plankit:&lt;plan-id&gt;:state</code>, and the validator rejects a document without a <code>plan-id</code>.</plan-action>
-    </plan-blocker>
+  <doc-section title="Roadblocks">
+    <doc-blocker severity="high" title="localStorage is shared across all file:// documents in Chrome">
+      <doc-blocks>Two plans opened from disk see each other's answers, and one reader's feedback surfaces inside an unrelated document.</doc-blocks>
+      <doc-why>Chrome has historically treated every <code>file://</code> origin as one storage bucket.</doc-why>
+      <doc-action>Every key is namespaced <code>forgedoc:&lt;doc-id&gt;:state</code>, and the validator rejects a document without a <code>doc-id</code>.</doc-action>
+    </doc-blocker>
 
-    <plan-blocker severity="medium" title="CSS counters are not selectable">
-      <plan-blocks>A reader cannot copy "3.1" out of a heading.</plan-blocks>
-      <plan-action>The <code>numbering="text"</code> attribute renders real text nodes instead.</plan-action>
-    </plan-blocker>
+    <doc-blocker severity="medium" title="CSS counters are not selectable">
+      <doc-blocks>A reader cannot copy "3.1" out of a heading.</doc-blocks>
+      <doc-action>The <code>numbering="text"</code> attribute renders real text nodes instead.</doc-action>
+    </doc-blocker>
 
-    <plan-blocker severity="low" title="Mermaid is roughly one megabyte">
-      <plan-blocks>Bundling it into the CDN build punishes every reader.</plan-blocks>
-      <plan-why>The full diagram registry ships as one module.</plan-why>
-      <plan-action>Two builds: lazy from a pinned CDN URL online, bundled in the offline file.</plan-action>
-    </plan-blocker>
-  </plan-section>
+    <doc-blocker severity="low" title="Mermaid is roughly one megabyte">
+      <doc-blocks>Bundling it into the CDN build punishes every reader.</doc-blocks>
+      <doc-why>The full diagram registry ships as one module.</doc-why>
+      <doc-action>Two builds: lazy from a pinned CDN URL online, bundled in the offline file.</doc-action>
+    </doc-blocker>
+  </doc-section>
 
-  <plan-section title="How it looks in code">
-    <plan-code lang="ts" title="src/core/base.ts" highlight="3-5,9">
-      export abstract class PlanElement extends HTMLElement {
+  <doc-section title="How it looks in code">
+    <doc-code lang="ts" title="src/core/base.ts" highlight="3-5,9">
+      export abstract class DocElement extends HTMLElement {
         connectedCallback(): void {
-          if (this.dataset.planUp !== undefined) return;
-          this.dataset.planUp = '';
+          if (this.dataset.docUp !== undefined) return;
+          this.dataset.docUp = '';
           this.enhance();
         }
 
         protected abstract enhance(): void;
         protected teardown(): void {}
       }
-    </plan-code>
+    </doc-code>
 
-    <plan-code lang="bash" title="The whole toolchain">
-      plankit new vendor-orders
-      plankit validate PLAN_vendor-orders.html --format=json
-      plankit build PLAN_vendor-orders.html --out dist/plan.html
-    </plan-code>
+    <doc-code lang="bash" title="The whole toolchain">
+      forgedoc new vendor-orders
+      forgedoc validate DOC_vendor-orders.html --format=json
+      forgedoc build DOC_vendor-orders.html --out dist/plan.html
+    </doc-code>
 
-    <plan-code lang="css" wrap>
-      @layer plan.reset, plan.tokens, plan.preset, plan.base, plan.components, plan.utilities;
-    </plan-code>
+    <doc-code lang="css" wrap>
+      @layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.utilities;
+    </doc-code>
 
-    <plan-code lang="json">
-      { "name": "plankit", "type": "module" }
-    </plan-code>
+    <doc-code lang="json">
+      { "name": "forgedoc", "type": "module" }
+    </doc-code>
 
-    <plan-code lang="text">
+    <doc-code lang="text">
       Plain text needs no grammar, and says so rather than guessing.
-    </plan-code>
+    </doc-code>
 
-    <plan-diff lang="ts" filename="src/core/store.ts">
+    <doc-diff lang="ts" filename="src/core/store.ts">
       @@ -12,7 +12,9 @@
-       export function createStore(planId: string): PlanStore {
+       export function createStore(docId: string): DocStore {
       -  const storage = localStorage;
       +  const storage = probeStorage();
       +  // why: a typeof check passes in Safari private mode, then throws on write.
-         const key = storageKey(planId);
+         const key = storageKey(docId);
          return {
       -    available: true,
       +    available: storage !== null,
-    </plan-diff>
+    </doc-diff>
 
-    <plan-tree root="plankit/">
+    <doc-tree root="forgedoc/">
       src/
         core/
           base.ts
           store.ts
         components/
-          plan-doc.ts
-          plan-choice.ts
+          doc-page.ts
+          doc-choice.ts
         styles/
           layers.css
       tools/
         validate.ts
         cli.ts
-    </plan-tree>
+    </doc-tree>
 
-    <plan-tabs>
-      <plan-tab label="CDN" active>
-        <plan-code lang="html">
-          &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plankit@1.0.0/dist/plankit.css"&gt;
-          &lt;script defer src="https://cdn.jsdelivr.net/npm/plankit@1.0.0/dist/plankit.iife.js"&gt;&lt;/script&gt;
-        </plan-code>
-      </plan-tab>
-      <plan-tab label="Offline">
-        <p>End the document with the two placeholders and run <code>plankit build</code>.</p>
-      </plan-tab>
-      <plan-tab label="npm">
-        <plan-code lang="sh">npm install plankit</plan-code>
-      </plan-tab>
-    </plan-tabs>
+    <doc-tabs>
+      <doc-tab label="CDN" active>
+        <doc-code lang="html">
+          &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@1.0.0/dist/forgedoc.css"&gt;
+          &lt;script defer src="https://cdn.jsdelivr.net/npm/forgedoc@1.0.0/dist/forgedoc.iife.js"&gt;&lt;/script&gt;
+        </doc-code>
+      </doc-tab>
+      <doc-tab label="Offline">
+        <p>End the document with the two placeholders and run <code>forgedoc build</code>.</p>
+      </doc-tab>
+      <doc-tab label="npm">
+        <doc-code lang="sh">npm install forgedoc</doc-code>
+      </doc-tab>
+    </doc-tabs>
 
-    <plan-collapse title="Why not Svelte for the elements?" sticky>
+    <doc-collapse title="Why not Svelte for the elements?" sticky>
       <p>Its <code>shadow: "none"</code> mode — the only light-DOM option — does not support slots. Since every component here wraps agent-authored children, there is no way to render that content.</p>
-    </plan-collapse>
+    </doc-collapse>
 
-    <plan-collapse title="Why not Lit?" open>
+    <doc-collapse title="Why not Lit?" open>
       <p>Its template still owns the render root, so rendering into <code>this</code> overwrites the children you are trying to enhance.</p>
-    </plan-collapse>
-  </plan-section>
+    </doc-collapse>
+  </doc-section>
 
-  <plan-section title="Diagrams and figures">
-    <plan-figure type="mermaid" caption="How a plan travels from the agent to the reader and back">
+  <doc-section title="Diagrams and figures">
+    <doc-figure type="mermaid" caption="How a plan travels from the agent to the reader and back">
       flowchart LR
-        A[Agent writes markup] --> B[plankit build]
+        A[Agent writes markup] --> B[forgedoc build]
         B --> C[One self-contained file]
         C --> D[Reader answers inline]
         D --> E[FB v1 bucket]
         E --> A
-    </plan-figure>
+    </doc-figure>
 
-    <plan-figure type="svg">
+    <doc-figure type="svg">
       <svg viewBox="0 0 240 60" role="img" aria-label="Three connected boxes">
         <rect x="4" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
         <rect x="88" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
         <rect x="172" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
         <path d="M68 30h20M152 30h20" stroke="currentColor"></path>
       </svg>
-      <plan-caption>An inline <code>svg</code> figure, captioned with a rich <code>plan-caption</code> child rather than the <code>caption</code> attribute.</plan-caption>
-    </plan-figure>
+      <doc-caption>An inline <code>svg</code> figure, captioned with a rich <code>doc-caption</code> child rather than the <code>caption</code> attribute.</doc-caption>
+    </doc-figure>
 
-    <plan-figure type="image" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%2260%22%3E%3Crect%20width%3D%22240%22%20height%3D%2260%22%20fill%3D%22%2312907a%22%2F%3E%3C%2Fsvg%3E" alt="A solid teal rectangle" caption="An image figure, loaded from a data URI so the fixture works offline"></plan-figure>
+    <doc-figure type="image" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%2260%22%3E%3Crect%20width%3D%22240%22%20height%3D%2260%22%20fill%3D%22%2312907a%22%2F%3E%3C%2Fsvg%3E" alt="A solid teal rectangle" caption="An image figure, loaded from a data URI so the fixture works offline"></doc-figure>
 
-    <plan-figure type="html" caption="A UI wireframe, rendered inside an iframe srcdoc so its styles cannot leak">
+    <doc-figure type="html" caption="A UI wireframe, rendered inside an iframe srcdoc so its styles cannot leak">
       <div style="font: 13px system-ui; padding: 12px;">
         <div style="font-weight: 600; margin-bottom: 6px;">Order #1042</div>
         <div style="color: #666;">Paid · awaiting fulfilment</div>
       </div>
-    </plan-figure>
-  </plan-section>
+    </doc-figure>
+  </doc-section>
 
-  <plan-section title="The roadmap">
-    <plan-roadmap start="0">
-      <plan-stage title="Contract and harness" subtitle="validator, CLI, build" current>
-        <p>Ends with <code>plankit validate</code> correctly rejecting a malformed file.</p>
-        <plan-checklist>
-          <li>Validator rejects a document with no <code>plan-id</code></li>
+  <doc-section title="The roadmap">
+    <doc-roadmap start="0">
+      <doc-stage title="Contract and harness" subtitle="validator, CLI, build" current>
+        <p>Ends with <code>forgedoc validate</code> correctly rejecting a malformed file.</p>
+        <doc-checklist>
+          <li>Validator rejects a document with no <code>doc-id</code></li>
           <li>All four artefacts build from one source tree</li>
           <li>CI is green</li>
-        </plan-checklist>
-      </plan-stage>
+        </doc-checklist>
+      </doc-stage>
 
-      <plan-stage title="Shell" subtitle="numbering, slugs, TOC, layout">
+      <doc-stage title="Shell" subtitle="numbering, slugs, TOC, layout">
         <p>A document with only headings and paragraphs already looks like the reference.</p>
-      </plan-stage>
+      </doc-stage>
 
-      <plan-stage title="The eighty percent" subtitle="choice, note, blocker, table, code" open>
+      <doc-stage title="The eighty percent" subtitle="choice, note, blocker, table, code" open>
         <p>The reference document reproduced except roadmap, flow and figures.</p>
-      </plan-stage>
+      </doc-stage>
 
-      <plan-stage title="Bucket" subtitle="selection, highlights, wire format">
+      <doc-stage title="Bucket" subtitle="selection, highlights, wire format">
         <p>Select text, answer questions, reload, copy — output matches the golden file.</p>
-      </plan-stage>
-    </plan-roadmap>
-  </plan-section>
+      </doc-stage>
+    </doc-roadmap>
+  </doc-section>
 
-  <plan-section title="Open questions">
-    <plan-choice mode="single" question="Should section numbers be CSS counters or real text nodes?">
-      <plan-option recommended>
+  <doc-section title="Open questions">
+    <doc-choice mode="single" question="Should section numbers be CSS counters or real text nodes?">
+      <doc-option recommended>
         CSS counters
         <p slot="desc">Free renumbering, nothing to keep in sync. Not selectable or copyable.</p>
-      </plan-option>
-      <plan-option value="text-nodes">
+      </doc-option>
+      <doc-option value="text-nodes">
         Real text nodes
         <p slot="desc">Copyable, but the runtime has to rewrite them whenever the outline changes.</p>
-      </plan-option>
-    </plan-choice>
+      </doc-option>
+    </doc-choice>
 
-    <plan-choice mode="multi" question="Which delivery modes must ship in version one?">
-      <plan-option recommended>
+    <doc-choice mode="multi" question="Which delivery modes must ship in version one?">
+      <doc-option recommended>
         Offline single file
         <p slot="desc">The primary path, and the one that must never break.</p>
-      </plan-option>
-      <plan-option>
+      </doc-option>
+      <doc-option>
         CDN script tag
         <p slot="desc">Cheap to keep working once the offline build exists.</p>
-      </plan-option>
-      <plan-option>
+      </doc-option>
+      <doc-option>
         npm package for tooling
         <p slot="desc">Needed by any harness that wants to parse a bucket.</p>
-      </plan-option>
-    </plan-choice>
-  </plan-section>
+      </doc-option>
+    </doc-choice>
+  </doc-section>
 
-</plan-doc>
+</doc-page>
 
 <!--
   Dev/QA entry only. The module import pulls in `src/styles/index.css` through the
   module graph, so there is deliberately no <link> to the built stylesheet — two
-  copies of the cascade would let a stale `dist/plankit.css` silently override
+  copies of the cascade would let a stale `dist/forgedoc.css` silently override
   the source being edited.
 -->
 <script type="module" src="/src/index.ts"></script>

@@ -62,7 +62,7 @@ describe('CHEATSHEET.md', () => {
   });
 
   it('names the generated tag only as something never to write', () => {
-    expect(CHEATSHEET).toContain('Never write `plan-toc`');
+    expect(CHEATSHEET).toContain('Never write `doc-toc`');
   });
 
   it('lists the three override tiers in the documented order', () => {

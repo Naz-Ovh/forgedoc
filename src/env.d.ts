@@ -1,11 +1,11 @@
 /** Build-time constants replaced by the bundler. See `vite.config.ts`. */
-declare const __PLANKIT_VERSION__: string;
+declare const __FORGEDOC_VERSION__: string;
 
 /**
  * Version-pinned CDN origin for the published bundles, baked in at build time
  * from the package name and version so it can never drift from either.
  */
-declare const __PLANKIT_CDN_BASE__: string;
+declare const __FORGEDOC_CDN_BASE__: string;
 
 /**
  * True only in dev builds.
@@ -13,7 +13,7 @@ declare const __PLANKIT_CDN_BASE__: string;
  * why (§11.3): the in-page violation banner is gated on this literal so that
  * Minification dead-code-eliminates the whole reporter from production output.
  */
-declare const __PLANKIT_DEV__: boolean;
+declare const __FORGEDOC_DEV__: boolean;
 
 declare module '*.svelte' {
   import type { Component } from 'svelte';

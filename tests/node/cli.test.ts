@@ -17,7 +17,7 @@ let stdout: string;
 let stderr: string;
 
 beforeEach(async () => {
-  workspace = await mkdtemp(join(tmpdir(), 'plankit-cli-'));
+  workspace = await mkdtemp(join(tmpdir(), 'forgedoc-cli-'));
   stdout = '';
   stderr = '';
   vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
@@ -35,24 +35,24 @@ afterEach(async () => {
   await rm(workspace, { recursive: true, force: true });
 });
 
-describe('plankit new', () => {
+describe('forgedoc new', () => {
   it('scaffolds a document that validates', async () => {
     expect(await run(['new', 'Vendor Orders', '--dir', workspace])).toBe(0);
 
-    const path = join(workspace, 'PLAN_vendor-orders.html');
+    const path = join(workspace, 'DOC_vendor-orders.html');
     const contents = await readFile(path, 'utf8');
 
-    expect(contents).toContain('plan-id="vendor-orders"');
-    expect(contents).toContain('<style>/*@PLAN_CSS@*/</style>');
-    expect(contents).toContain('<script>//@PLAN_JS@</script>');
+    expect(contents).toContain('doc-id="vendor-orders"');
+    expect(contents).toContain('<style>/*@DOC_CSS@*/</style>');
+    expect(contents).toContain('<script>//@DOC_JS@</script>');
 
     // Each placeholder where its replacement belongs: styles in <head> so
     // nothing flashes unstyled, script last so children exist at upgrade.
-    expect(contents.indexOf('<style>/*@PLAN_CSS@*/</style>')).toBeLessThan(
+    expect(contents.indexOf('<style>/*@DOC_CSS@*/</style>')).toBeLessThan(
       contents.indexOf('</head>'),
     );
-    expect(contents.indexOf('<script>//@PLAN_JS@</script>')).toBeGreaterThan(
-      contents.indexOf('</plan-doc>'),
+    expect(contents.indexOf('<script>//@DOC_JS@</script>')).toBeGreaterThan(
+      contents.indexOf('</doc-page>'),
     );
 
     stdout = '';
@@ -61,10 +61,10 @@ describe('plankit new', () => {
   });
 });
 
-describe('plankit validate', () => {
+describe('forgedoc validate', () => {
   it('exits non-zero on an error', async () => {
     const path = join(workspace, 'bad.html');
-    await writeFile(path, '<plan-section title="No document"></plan-section>', 'utf8');
+    await writeFile(path, '<doc-section title="No document"></doc-section>', 'utf8');
 
     expect(await run(['validate', path])).toBe(1);
     expect(stdout).toContain('doc/missing');
@@ -72,7 +72,7 @@ describe('plankit validate', () => {
 
   it('emits JSON on --format=json', async () => {
     const path = join(workspace, 'bad.html');
-    await writeFile(path, '<plan-section title="No document"></plan-section>', 'utf8');
+    await writeFile(path, '<doc-section title="No document"></doc-section>', 'utf8');
 
     await run(['validate', path, '--format=json']);
     expect(() => JSON.parse(stdout) as unknown).not.toThrow();
@@ -84,12 +84,12 @@ describe('plankit validate', () => {
   });
 });
 
-describe('plankit build', () => {
+describe('forgedoc build', () => {
   it('writes no output when validation fails', async () => {
     const path = join(workspace, 'bad.html');
     await writeFile(
       path,
-      '<plan-doc><plan-section title="x"></plan-section></plan-doc>\n<style>/*@PLAN_CSS@*/</style>\n<script>//@PLAN_JS@</script>',
+      '<doc-page><doc-section title="x"></doc-section></doc-page>\n<style>/*@DOC_CSS@*/</style>\n<script>//@DOC_JS@</script>',
       'utf8',
     );
 
@@ -99,7 +99,7 @@ describe('plankit build', () => {
   });
 });
 
-describe('plankit version and help', () => {
+describe('forgedoc version and help', () => {
   it('prints a version', async () => {
     expect(await run(['version'])).toBe(0);
     expect(stdout.trim()).toMatch(/^\d+\.\d+\.\d+/);
@@ -107,7 +107,7 @@ describe('plankit version and help', () => {
 
   it('prints usage and exits non-zero with no command', async () => {
     expect(await run([])).toBe(1);
-    expect(stdout).toContain('plankit build');
+    expect(stdout).toContain('forgedoc build');
   });
 
   it('rejects an unknown command', async () => {

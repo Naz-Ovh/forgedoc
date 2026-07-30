@@ -3,7 +3,7 @@
  * in **both** colour schemes and on **every** accent.
  *
  * This is here because the first implementation shipped a diagram-shaped error
- * box in every dark-mode document. Reading `--plan-accent-tint` with
+ * box in every dark-mode document. Reading `--doc-accent-tint` with
  * `getComputedStyle().getPropertyValue()` returns the token stream, so Mermaid
  * received the literal text `color-mix(in oklab, #073d36 42%, #101214)`. Fixing
  * that to resolve through a real property then produced `oklab(…)`, which
@@ -38,11 +38,11 @@ describe('Mermaid theme variables', () => {
   for (const scheme of ['light', 'dark'] as const) {
     for (const accent of PRESET_AXES.accent) {
       it(`are parseable colours in ${scheme} mode on accent="${accent}"`, () => {
-        const planDoc = mountPlan(
-          '<plan-section title="Diagram host"><p>x</p></plan-section>',
-          `plan-id="mermaid-${scheme}-${accent}" accent="${accent}"`,
+        const docPage = mountPlan(
+          '<doc-section title="Diagram host"><p>x</p></doc-section>',
+          `doc-id="mermaid-${scheme}-${accent}" accent="${accent}"`,
         );
-        planDoc.style.colorScheme = scheme;
+        docPage.style.colorScheme = scheme;
 
         const variables = themeVariables();
 
@@ -63,21 +63,21 @@ describe('Mermaid theme variables', () => {
   }
 
   it('leaves no probe element behind', () => {
-    const planDoc = mountPlan('<plan-section title="x"><p>x</p></plan-section>');
-    const before = planDoc.childElementCount;
+    const docPage = mountPlan('<doc-section title="x"><p>x</p></doc-section>');
+    const before = docPage.childElementCount;
 
     themeVariables();
 
-    expect(planDoc.childElementCount).toBe(before);
-    expect(planDoc.querySelector('span[style*="display: none"]')).toBeNull();
+    expect(docPage.childElementCount).toBe(before);
+    expect(docPage.querySelector('span[style*="display: none"]')).toBeNull();
   });
 
   it('follows the accent preset rather than hardcoding teal', () => {
-    const teal = mountPlan('<p>x</p>', 'plan-id="mt-teal" accent="teal"');
+    const teal = mountPlan('<p>x</p>', 'doc-id="mt-teal" accent="teal"');
     const tealVariables = themeVariables();
     teal.remove();
 
-    mountPlan('<p>x</p>', 'plan-id="mt-plum" accent="plum"');
+    mountPlan('<p>x</p>', 'doc-id="mt-plum" accent="plum"');
     const plumVariables = themeVariables();
 
     expect(tealVariables.primaryBorderColor).not.toBe(plumVariables.primaryBorderColor);

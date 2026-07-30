@@ -4,7 +4,7 @@
  *
  * why: every rule the library ships lives inside one of these layers, and
  * unlayered CSS beats layered CSS regardless of specificity. That is the whole
- * override story — an author writes `plan-note { border-radius: 0 }` outside a
+ * override story — an author writes `doc-note { border-radius: 0 }` outside a
  * layer and wins, with no `!important` and no specificity arithmetic.
  */
-@layer plan.reset, plan.tokens, plan.preset, plan.base, plan.components, plan.utilities;
+@layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.utilities;

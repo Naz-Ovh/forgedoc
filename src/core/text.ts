@@ -1,7 +1,7 @@
 /**
  * Reading preformatted author text out of the DOM.
  *
- * Shared by `plan-code`, `plan-diff` and `plan-tree` — three components whose
+ * Shared by `doc-code`, `doc-diff` and `doc-tree` — three components whose
  * content is whitespace-significant text the agent wrote indented to match the
  * surrounding markup (§12: abstract at the third occurrence).
  */
@@ -13,13 +13,13 @@
  * why the dedent is not optional: the agent writes
  *
  * ```html
- *     <plan-code lang="ts">
+ *     <doc-code lang="ts">
  *       const x = 1;
- *     </plan-code>
+ *     </doc-code>
  * ```
  *
- * so every line arrives with six leading spaces. For `plan-code` that is merely
- * ugly; for `plan-diff` it is a correctness bug, because `+` and `-` no longer
+ * so every line arrives with six leading spaces. For `doc-code` that is merely
+ * ugly; for `doc-diff` it is a correctness bug, because `+` and `-` no longer
  * start the line and every row classifies as unchanged context.
  */
 export function readBlockText(element: Element): string {

@@ -13,13 +13,13 @@
 
 import { createPart } from './parts.js';
 
-/** Bubbles from the block to `plan-doc`, where the bucket picks it up. */
-export const BLOCK_FEEDBACK_EVENT = 'plan-block-feedback';
+/** Bubbles from the block to `doc-page`, where the bucket picks it up. */
+export const BLOCK_FEEDBACK_EVENT = 'doc-block-feedback';
 
 export interface BlockFeedbackDetail {
   /** Id of the element being commented on. Always present after this fires. */
   readonly anchorId: string;
-  /** Human-readable descriptor, e.g. `plan-figure · Store shape`. */
+  /** Human-readable descriptor, e.g. `doc-figure · Store shape`. */
   readonly label: string;
   /** Viewport rectangle of the button, for positioning the composer. */
   readonly rect: DOMRect;
@@ -76,11 +76,11 @@ const FURNITURE_SELECTOR = FURNITURE_PARTS.map((part) => `[data-part='${part}']`
 export function ensureFeedbackAnchor(element: HTMLElement): string {
   if (element.id) return element.id;
 
-  const scope = element.closest('plan-doc') ?? document;
+  const scope = element.closest('doc-page') ?? document;
   const tag = element.tagName.toLowerCase();
   const position = Array.from(scope.querySelectorAll(tag)).indexOf(element) + 1;
 
-  const base = `blk-${tag.replace(/^plan-/, '')}-${position}`;
+  const base = `blk-${tag.replace(/^doc-/, '')}-${position}`;
   element.id = document.getElementById(base) ? `${base}-${Date.now().toString(36)}` : base;
   return element.id;
 }
@@ -97,7 +97,7 @@ export function appendFeedbackButton(
   label: string,
   into?: HTMLElement | null,
 ): HTMLElement | null {
-  if (!element.closest('plan-doc')) return null;
+  if (!element.closest('doc-page')) return null;
   if (element.querySelector(':scope > [data-part="feedback"]')) return null;
 
   const anchorId = ensureFeedbackAnchor(element);

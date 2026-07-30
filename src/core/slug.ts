@@ -66,22 +66,22 @@ export function uniqueSlug(candidate: string, taken: Set<string>): string {
   return unique;
 }
 
-/** Id for a `<plan-section title="What we are building">` → `sec-what-we-are-building`. */
+/** Id for a `<doc-section title="What we are building">` → `sec-what-we-are-building`. */
 export function sectionId(title: string): string {
   return `sec-${slugify(title)}`;
 }
 
-/** Id for a `<plan-choice question="…">` → `q-<slug>`. */
+/** Id for a `<doc-choice question="…">` → `q-<slug>`. */
 export function questionId(question: string): string {
   return `q-${slugify(question)}`;
 }
 
-/** Id for a `<plan-stage title="…">` → `stage-<slug>`. */
+/** Id for a `<doc-stage title="…">` → `stage-<slug>`. */
 export function stageId(title: string): string {
   return `stage-${slugify(title)}`;
 }
 
-/** Id for a `<plan-collapse title="…">` → `col-<slug>`. */
+/** Id for a `<doc-collapse title="…">` → `col-<slug>`. */
 export function collapseId(title: string): string {
   return `col-${slugify(title)}`;
 }
@@ -98,7 +98,7 @@ export interface IdCandidate {
  * Resolve a document's ids in one pass.
  *
  * why: the browser runtime walks a live DOM and the Node validator walks a
- * parse5 tree, but both MUST land on identical ids or `plan-ref` resolution
+ * parse5 tree, but both MUST land on identical ids or `doc-ref` resolution
  * would pass validation and then break at runtime. Each side builds the
  * candidate list from its own tree and hands it to this one function.
  *

@@ -5,7 +5,7 @@
  * why this file exists rather than the constants living in both: the CLI tests
  * assert that a built document pins an exact CDN version, and they exercise the
  * *source* through Vite rather than the shipped bundle. When each config
- * computed `__PLANKIT_CDN_BASE__` for itself, the two were kept in step by a
+ * computed `__FORGEDOC_CDN_BASE__` for itself, the two were kept in step by a
  * comment — so a drift would have left the tests passing against a URL the real
  * build never emits. One definition makes that unrepresentable.
  */
@@ -41,7 +41,7 @@ export const CDN_BASE = `https://cdn.jsdelivr.net/npm/${packageJson.name}@${pack
  * the dev server and the test runner want it on.
  */
 export const defines = (dev: boolean): Record<string, string> => ({
-  __PLANKIT_VERSION__: JSON.stringify(packageJson.version),
-  __PLANKIT_CDN_BASE__: JSON.stringify(CDN_BASE),
-  __PLANKIT_DEV__: JSON.stringify(dev),
+  __FORGEDOC_VERSION__: JSON.stringify(packageJson.version),
+  __FORGEDOC_CDN_BASE__: JSON.stringify(CDN_BASE),
+  __FORGEDOC_DEV__: JSON.stringify(dev),
 });

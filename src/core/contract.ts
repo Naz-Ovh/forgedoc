@@ -43,7 +43,7 @@ export interface TagSpec {
 }
 
 /**
- * Attributes accepted on every `plan-*` tag.
+ * Attributes accepted on every `doc-*` tag.
  *
  * why: `id` is an author override for a derived id, `class` and `style` are
  * escape hatches the validator only *warns* about, and `hidden`/`lang`/`dir`
@@ -55,7 +55,7 @@ export const GLOBAL_ATTRIBUTES: Readonly<Record<string, AttributeSpec>> = {
     doc: 'Override the derived id. Prefer letting the runtime derive it.',
   },
   class: { kind: { type: 'string' }, doc: 'Author styling hook. Not used by the library.' },
-  style: { kind: { type: 'string' }, doc: 'Inline token override, e.g. `--plan-space-unit: 3px`.' },
+  style: { kind: { type: 'string' }, doc: 'Inline token override, e.g. `--doc-space-unit: 3px`.' },
   hidden: { kind: { type: 'boolean' }, doc: 'Standard HTML `hidden`.' },
   lang: { kind: { type: 'string' }, doc: 'Standard HTML `lang`.' },
   dir: { kind: { type: 'enum', values: ['ltr', 'rtl', 'auto'] }, doc: 'Standard HTML `dir`.' },
@@ -91,7 +91,7 @@ export const CODE_LANGUAGES = [
 
 export type CodeLanguage = (typeof CODE_LANGUAGES)[number];
 
-/** Preset axes on `plan-doc` (§6.3). Four orthogonal axes, never bundled into one attribute. */
+/** Preset axes on `doc-page` (§6.3). Four orthogonal axes, never bundled into one attribute. */
 export const PRESET_AXES = {
   density: ['compact', 'comfortable', 'spacious'],
   scale: ['sm', 'md', 'lg'],
@@ -115,10 +115,10 @@ const presetAttribute = (axis: keyof typeof PRESET_AXES, doc: string): Attribute
  */
 export const TAGS = {
   // ── Shell ──────────────────────────────────────────────────────────────────
-  'plan-doc': {
+  'doc-page': {
     doc: 'The root, and the only authored root. Owns the store, the layout column, the TOC and the bucket.',
     attributes: {
-      'plan-id': {
+      'doc-id': {
         kind: { type: 'slug' },
         required: true,
         doc: 'Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket.',
@@ -139,14 +139,14 @@ export const TAGS = {
     },
   },
 
-  'plan-header': {
+  'doc-header': {
     doc: 'Document title block. Heading text is the default content; an optional `<p slot="lede">` follows.',
     attributes: {
       kicker: { kind: { type: 'string' }, doc: 'Small-caps eyebrow line above the title.' },
     },
   },
 
-  'plan-section': {
+  'doc-section': {
     doc: 'A numbered section. Nests to depth 3. Number, id and TOC entry are all derived.',
     attributes: {
       title: {
@@ -157,21 +157,21 @@ export const TAGS = {
     },
   },
 
-  'plan-toc': {
+  'doc-toc': {
     doc: 'Generated table of contents. Never write this tag — the runtime creates it.',
     generated: true,
     attributes: {},
   },
 
   // ── Meta ───────────────────────────────────────────────────────────────────
-  'plan-chips': {
+  'doc-chips': {
     doc: 'The pill row under the lede: locked decisions and reader instructions.',
     attributes: {},
   },
 
-  'plan-chip': {
+  'doc-chip': {
     doc: 'One pill. Carries real meaning, not decoration.',
-    onlyInside: ['plan-chips'],
+    onlyInside: ['doc-chips'],
     attributes: {
       kind: {
         kind: { type: 'enum', values: ['confirmed', 'info', 'action', 'pending'] },
@@ -181,7 +181,7 @@ export const TAGS = {
   },
 
   // ── Prose and callouts ─────────────────────────────────────────────────────
-  'plan-note': {
+  'doc-note': {
     doc: 'Coloured callout.',
     attributes: {
       kind: {
@@ -192,9 +192,9 @@ export const TAGS = {
     },
   },
 
-  'plan-blocker': {
+  'doc-blocker': {
     doc: 'A roadblock with an enforced shape: what it blocks, why, and the action that resolves it.',
-    requiresChild: ['plan-blocks', 'plan-action'],
+    requiresChild: ['doc-blocks', 'doc-action'],
     attributes: {
       severity: {
         kind: { type: 'enum', values: ['low', 'medium', 'high'] },
@@ -208,40 +208,40 @@ export const TAGS = {
     },
   },
 
-  'plan-blocks': {
-    doc: 'What the roadblock breaks. Required inside `plan-blocker`.',
-    onlyInside: ['plan-blocker'],
+  'doc-blocks': {
+    doc: 'What the roadblock breaks. Required inside `doc-blocker`.',
+    onlyInside: ['doc-blocker'],
     attributes: {},
   },
 
-  'plan-why': {
+  'doc-why': {
     doc: 'Why the roadblock happens. Optional.',
-    onlyInside: ['plan-blocker'],
+    onlyInside: ['doc-blocker'],
     attributes: {},
   },
 
-  'plan-action': {
+  'doc-action': {
     doc: 'The action that resolves the roadblock. Required — a roadblock without a resolution is the failure this library prevents.',
-    onlyInside: ['plan-blocker'],
+    onlyInside: ['doc-blocker'],
     attributes: {},
   },
 
-  'plan-list': {
+  'doc-list': {
     doc: 'A marked list. Children are plain `<li>`.',
     attributes: {
       marker: {
         kind: { type: 'enum', values: ['check', 'cross', 'arrow', 'dot', 'number'] },
         doc: 'Bullet glyph. Defaults to `dot`.',
       },
-      title: { kind: { type: 'string' }, doc: 'Column heading, used inside `plan-compare`.' },
+      title: { kind: { type: 'string' }, doc: 'Column heading, used inside `doc-compare`.' },
       kind: {
         kind: { type: 'enum', values: ['positive', 'negative', 'neutral'] },
-        doc: 'Tone of the column inside `plan-compare`. Defaults to `neutral`.',
+        doc: 'Tone of the column inside `doc-compare`. Defaults to `neutral`.',
       },
     },
   },
 
-  'plan-term': {
+  'doc-term': {
     doc: 'Inline technical term, hyperlinked. First mention is styled differently from repeats.',
     inline: true,
     attributes: {
@@ -249,7 +249,7 @@ export const TAGS = {
     },
   },
 
-  'plan-ref': {
+  'doc-ref': {
     doc: 'Inline cross-reference. Resolves to the live number at mount, so nothing goes stale when sections shift.',
     inline: true,
     attributes: {
@@ -257,14 +257,14 @@ export const TAGS = {
     },
   },
 
-  'plan-quote': {
+  'doc-quote': {
     doc: 'Pull quote with a distinct typographic role.',
     attributes: {
       cite: { kind: { type: 'string' }, doc: 'Attribution line.' },
     },
   },
 
-  'plan-table': {
+  'doc-table': {
     doc: 'Wraps a plain `<table>`. Header styling, first-column emphasis, tabular numerals.',
     requiresChild: ['table'],
     attributes: {
@@ -280,9 +280,9 @@ export const TAGS = {
   },
 
   // ── Interactive ────────────────────────────────────────────────────────────
-  'plan-choice': {
+  'doc-choice': {
     doc: 'A question with lettered options. Letter keys, the Other option, the note field and ARIA are all derived.',
-    requiresChild: ['plan-option'],
+    requiresChild: ['doc-option'],
     attributes: {
       mode: {
         kind: { type: 'enum', values: ['single', 'multi'] },
@@ -296,9 +296,9 @@ export const TAGS = {
     },
   },
 
-  'plan-option': {
+  'doc-option': {
     doc: 'One answer. Label text is the default content; an optional `<p slot="desc">` follows.',
-    onlyInside: ['plan-choice'],
+    onlyInside: ['doc-choice'],
     attributes: {
       recommended: {
         kind: { type: 'boolean' },
@@ -311,7 +311,7 @@ export const TAGS = {
     },
   },
 
-  'plan-collapse': {
+  'doc-collapse': {
     doc: 'Generic disclosure, built on `<details>`/`<summary>`.',
     attributes: {
       title: { kind: { type: 'string' }, required: true, doc: 'Summary text.' },
@@ -320,53 +320,53 @@ export const TAGS = {
     },
   },
 
-  'plan-tabs': {
+  'doc-tabs': {
     doc: 'Tab strip. Arrow-key navigation and roving tabindex are built in; flattens in print.',
-    requiresChild: ['plan-tab'],
+    requiresChild: ['doc-tab'],
     attributes: {},
   },
 
-  'plan-tab': {
+  'doc-tab': {
     doc: 'One tab panel.',
-    onlyInside: ['plan-tabs'],
+    onlyInside: ['doc-tabs'],
     attributes: {
       label: { kind: { type: 'string' }, required: true, doc: 'Tab strip label.' },
       active: { kind: { type: 'boolean' }, doc: 'Initially selected tab.' },
     },
   },
 
-  'plan-checklist': {
+  'doc-checklist': {
     doc: 'Persistent reader-facing ticks. Children are plain `<li>`.',
     attributes: {},
   },
 
   // ── Structure ──────────────────────────────────────────────────────────────
-  'plan-flow': {
+  'doc-flow': {
     doc: 'A horizontal chain of steps. Not a Mermaid job — it must sit inline at reading width.',
-    requiresChild: ['plan-flow-node'],
+    requiresChild: ['doc-flow-node'],
     attributes: {},
   },
 
-  'plan-flow-node': {
-    doc: 'One step in a `plan-flow`. Child text is the subtitle.',
-    onlyInside: ['plan-flow'],
+  'doc-flow-node': {
+    doc: 'One step in a `doc-flow`. Child text is the subtitle.',
+    onlyInside: ['doc-flow'],
     attributes: {
       title: { kind: { type: 'string' }, required: true, doc: 'Step name.' },
       active: { kind: { type: 'boolean' }, doc: 'The emphasised dark node.' },
     },
   },
 
-  'plan-roadmap': {
+  'doc-roadmap': {
     doc: 'A numbered sequence of collapsible stages with a current-position marker.',
-    requiresChild: ['plan-stage'],
+    requiresChild: ['doc-stage'],
     attributes: {
       start: { kind: { type: 'integer' }, doc: 'First stage number. Defaults to 0.' },
     },
   },
 
-  'plan-stage': {
+  'doc-stage': {
     doc: 'One stage. Number badge, rail and current-stage treatment are all derived.',
-    onlyInside: ['plan-roadmap'],
+    onlyInside: ['doc-roadmap'],
     attributes: {
       title: { kind: { type: 'string' }, required: true, doc: 'Stage name.' },
       subtitle: { kind: { type: 'string' }, doc: 'Secondary line beside the title.' },
@@ -376,7 +376,7 @@ export const TAGS = {
   },
 
   // ── Content ────────────────────────────────────────────────────────────────
-  'plan-code': {
+  'doc-code': {
     doc: 'A syntax-highlighted code block.',
     attributes: {
       lang: {
@@ -390,7 +390,7 @@ export const TAGS = {
     },
   },
 
-  'plan-diff': {
+  'doc-diff': {
     doc: 'A unified diff with +/- gutters and aligned line numbers.',
     attributes: {
       lang: {
@@ -401,7 +401,7 @@ export const TAGS = {
     },
   },
 
-  'plan-figure': {
+  'doc-figure': {
     doc: 'One framed box for a diagram, image, Mermaid source or isolated HTML mock.',
     attributes: {
       type: {
@@ -412,27 +412,27 @@ export const TAGS = {
       alt: { kind: { type: 'string' }, doc: 'Alternative text, for `type="image"`.' },
       caption: {
         kind: { type: 'string' },
-        doc: 'Plain caption. Use `<plan-caption>` for a rich one.',
+        doc: 'Plain caption. Use `<doc-caption>` for a rich one.',
       },
     },
   },
 
-  'plan-caption': {
-    doc: 'Rich caption for a `plan-figure`, as an alternative to the `caption` attribute.',
-    onlyInside: ['plan-figure'],
+  'doc-caption': {
+    doc: 'Rich caption for a `doc-figure`, as an alternative to the `caption` attribute.',
+    onlyInside: ['doc-figure'],
     attributes: {},
   },
 
-  'plan-tree': {
+  'doc-tree': {
     doc: 'A directory tree drawn from indented plain text.',
     attributes: {
       root: { kind: { type: 'string' }, doc: 'Label for the root node.' },
     },
   },
 
-  'plan-compare': {
-    doc: 'A two-column comparison panel. Children are `plan-list` blocks with a `title`.',
-    requiresChild: ['plan-list'],
+  'doc-compare': {
+    doc: 'A two-column comparison panel. Children are `doc-list` blocks with a `title`.',
+    requiresChild: ['doc-list'],
     attributes: {
       columns: { kind: { type: 'integer' }, doc: 'Column count. Defaults to 2.' },
     },

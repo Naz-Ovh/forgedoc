@@ -32,7 +32,7 @@ describe('FB v1 wire format', () => {
   it('reads the header fields', () => {
     const parsed = parseBucket(GOLDEN).document as BucketDocument;
 
-    expect(parsed.planId).toBe('vendor-orders');
+    expect(parsed.docId).toBe('vendor-orders');
     expect(parsed.timestamp).toBe('2026-07-28T10:22:31Z');
     expect(parsed.entries).toHaveLength(4);
   });
@@ -79,7 +79,7 @@ describe('FB v1 wire format', () => {
 
   it('omits the note line when there is no note', () => {
     const text = serializeBucket({
-      planId: 'p',
+      docId: 'p',
       timestamp: '2026-01-01T00:00:00Z',
       entries: [{ kind: 'answer', anchorId: 'q-x', question: 'X?', labels: ['A'] }],
     });
@@ -90,7 +90,7 @@ describe('FB v1 wire format', () => {
 
   it('serialises an Other answer as the reader’s own text', () => {
     const text = serializeBucket({
-      planId: 'p',
+      docId: 'p',
       timestamp: '2026-01-01T00:00:00Z',
       entries: [
         {
@@ -107,7 +107,7 @@ describe('FB v1 wire format', () => {
 
   it('survives a note whose own line begins with the continuation prefix', () => {
     const document: BucketDocument = {
-      planId: 'p',
+      docId: 'p',
       timestamp: '2026-01-01T00:00:00Z',
       entries: [
         {

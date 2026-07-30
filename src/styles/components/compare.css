@@ -1,45 +1,45 @@
 /*
- * `plan-compare` — the two-column panel.
+ * `doc-compare` — the two-column panel.
  *
  * MUST (§8.6): stacks vertically below 1050px.
  */
 
-@layer plan.components {
-  plan-compare {
+@layer doc.components {
+  doc-compare {
     display: grid;
-    grid-template-columns: repeat(var(--plan-compare-columns, 2), minmax(0, 1fr));
-    gap: var(--plan-space-4);
-    margin-block: var(--plan-space-6);
+    grid-template-columns: repeat(var(--doc-compare-columns, 2), minmax(0, 1fr));
+    gap: var(--doc-space-4);
+    margin-block: var(--doc-space-6);
     break-inside: avoid;
   }
 
-  plan-compare > [data-part="column"] {
+  doc-compare > [data-part="column"] {
     margin-block: 0;
-    padding: var(--plan-space-4) var(--plan-space-5);
-    border: var(--plan-rule);
-    border-radius: var(--plan-radius);
-    background: var(--plan-surface-1);
+    padding: var(--doc-space-4) var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
     break-inside: avoid;
   }
 
-  plan-compare > [data-part="column"][kind="positive"] {
-    border-color: color-mix(in oklab, var(--plan-success-400) 45%, transparent);
+  doc-compare > [data-part="column"][kind="positive"] {
+    border-color: color-mix(in oklab, var(--doc-success-400) 45%, transparent);
     background: light-dark(
-      var(--plan-success-50),
-      color-mix(in oklab, var(--plan-success-900) 30%, #101214)
+      var(--doc-success-50),
+      color-mix(in oklab, var(--doc-success-900) 30%, #101214)
     );
   }
 
-  plan-compare > [data-part="column"][kind="negative"] {
-    border-color: color-mix(in oklab, var(--plan-danger-400) 45%, transparent);
+  doc-compare > [data-part="column"][kind="negative"] {
+    border-color: color-mix(in oklab, var(--doc-danger-400) 45%, transparent);
     background: light-dark(
-      var(--plan-danger-50),
-      color-mix(in oklab, var(--plan-danger-900) 30%, #101214)
+      var(--doc-danger-50),
+      color-mix(in oklab, var(--doc-danger-900) 30%, #101214)
     );
   }
 
   @media (max-width: 1049px) {
-    plan-compare {
+    doc-compare {
       grid-template-columns: 1fr;
     }
   }

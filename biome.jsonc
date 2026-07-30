@@ -14,8 +14,8 @@
       "!skills/better-plan/REFERENCE.md",
       "!docs/PLAN.md",
 
-      // Test data. Whitespace is significant — the content of plan-code,
-      // plan-diff and plan-tree is rendered verbatim, and the validator tests
+      // Test data. Whitespace is significant — the content of doc-code,
+      // doc-diff and doc-tree is rendered verbatim, and the validator tests
       // assert exact line numbers — so reformatting these silently changes what
       // they test.
       "!tests/fixtures"

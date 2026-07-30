@@ -1,4 +1,4 @@
-# PlanKit reference
+# ForgeDoc reference
 
 The complete per-component API. For the one-page version an authoring agent
 should keep open, see [CHEATSHEET.md](./CHEATSHEET.md).
@@ -18,27 +18,27 @@ internal and will change.
   element of their own. In the recommended authoring form that content arrives as
   a bare text node, and wrapping it would mean moving author content, which the
   runtime never does. Those components carry the typography on the host element
-  instead — style `plan-quote` itself, not `plan-quote [data-part="body"]`.
+  instead — style `doc-quote` itself, not `doc-quote [data-part="body"]`.
 
 ## The three override tiers
 
 In order of preference (§6.6):
 
-1. **Preset attributes** — `<plan-doc density="compact">`. Validated against an
+1. **Preset attributes** — `<doc-page density="compact">`. Validated against an
    enum, switchable at runtime with one `setAttribute`, and reachable from the
    print stylesheet.
-2. **Token override** — `plan-note { --plan-accent-600: #8b5cf6 }`. Semantic, and
+2. **Token override** — `doc-note { --doc-accent-600: #8b5cf6 }`. Semantic, and
    survives a library upgrade. Custom properties inherit, so this works on any
-   subtree: `<plan-table style="--plan-space-unit: 3px">`.
-3. **Raw CSS** — `plan-note [data-part="title"] { letter-spacing: .02em }`.
+   subtree: `<doc-table style="--doc-space-unit: 3px">`.
+3. **Raw CSS** — `doc-note [data-part="title"] { letter-spacing: .02em }`.
 
 Tier 3 needs no `!important` and no specificity arithmetic. Every rule the
-library ships lives inside `@layer plan.*`, and unlayered author CSS beats layered
+library ships lives inside `@layer doc.*`, and unlayered author CSS beats layered
 CSS outright:
 
 ```css
 /* wins against every shipped rule */
-plan-note {
+doc-note {
   border-radius: 0;
 }
 ```
@@ -54,13 +54,13 @@ markup the agent has to remember and out of the DOM an author might edit.
 
 ## Global attributes
 
-Accepted on every `plan-*` tag.
+Accepted on every `doc-*` tag.
 
 | Attribute | Values | Notes |
 | --- | --- | --- |
 | `id` | slug — lowercase, digits, hyphens | Override the derived id. Prefer letting the runtime derive it. |
 | `class` | string | Author styling hook. Not used by the library. |
-| `style` | string | Inline token override, e.g. `--plan-space-unit: 3px`. |
+| `style` | string | Inline token override, e.g. `--doc-space-unit: 3px`. |
 | `hidden` | boolean (present or absent) | Standard HTML `hidden`. |
 | `lang` | string | Standard HTML `lang`. |
 | `dir` | `ltr` \| `rtl` \| `auto` | Standard HTML `dir`. |
@@ -69,13 +69,13 @@ Any `data-*` attribute is accepted and ignored.
 
 ## Shell
 
-### `<plan-doc>`
+### `<doc-page>`
 
 The root, and the only authored root. Owns the store, the layout column, the TOC and the bucket.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
-| `plan-id` | **yes** | slug — lowercase, digits, hyphens | Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket. |
+| `doc-id` | **yes** | slug — lowercase, digits, hyphens | Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket. |
 | `density` | no | `compact` \| `comfortable` \| `spacious` | Spacing unit, line-height and component padding. |
 | `scale` | no | `sm` \| `md` \| `lg` | Type scale base size and ratio. |
 | `accent` | no | `teal` \| `indigo` \| `slate` \| `plum` \| `amber` | Accent ramp and derived tints. |
@@ -88,7 +88,7 @@ The root, and the only authored root. Owns the store, the layout column, the TOC
 
 **States:** `:state(toc-open)`, `:state(toc-docked)`
 
-### `<plan-header>`
+### `<doc-header>`
 
 Document title block. Heading text is the default content; an optional `<p slot="lede">` follows.
 
@@ -98,7 +98,7 @@ Document title block. Heading text is the default content; an optional `<p slot=
 
 **Parts:** `kicker`, `lede`, `title*`
 
-### `<plan-section>`
+### `<doc-section>`
 
 A numbered section. Nests to depth 3. Number, id and TOC entry are all derived.
 
@@ -108,7 +108,7 @@ A numbered section. Nests to depth 3. Number, id and TOC entry are all derived.
 
 **Parts:** `heading`, `number`, `title`, `body`
 
-### `<plan-toc>`
+### `<doc-toc>`
 
 Generated table of contents. Never write this tag — the runtime creates it.
 
@@ -120,17 +120,17 @@ _No attributes beyond the global ones._
 
 ## Meta
 
-### `<plan-chips>`
+### `<doc-chips>`
 
 The pill row under the lede: locked decisions and reader instructions.
 
 _No attributes beyond the global ones._
 
-### `<plan-chip>`
+### `<doc-chip>`
 
 One pill. Carries real meaning, not decoration.
 
-> Only valid inside `<plan-chips>`.
+> Only valid inside `<doc-chips>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -140,7 +140,7 @@ One pill. Carries real meaning, not decoration.
 
 ## Prose and callouts
 
-### `<plan-note>`
+### `<doc-note>`
 
 Coloured callout.
 
@@ -151,11 +151,11 @@ Coloured callout.
 
 **Parts:** `icon`, `title`, `body`
 
-### `<plan-blocker>`
+### `<doc-blocker>`
 
 A roadblock with an enforced shape: what it blocks, why, and the action that resolves it.
 
-> Requires `<plan-blocks>` and `<plan-action>`.
+> Requires `<doc-blocks>` and `<doc-action>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -164,49 +164,49 @@ A roadblock with an enforced shape: what it blocks, why, and the action that res
 
 **Parts:** `header`, `sequence`, `severity`, `title`
 
-### `<plan-blocks>`
+### `<doc-blocks>`
 
-What the roadblock breaks. Required inside `plan-blocker`.
+What the roadblock breaks. Required inside `doc-blocker`.
 
-> Only valid inside `<plan-blocker>`.
+> Only valid inside `<doc-blocker>`.
 
 _No attributes beyond the global ones._
 
 **Parts:** `label`, `body`
 
-### `<plan-why>`
+### `<doc-why>`
 
 Why the roadblock happens. Optional.
 
-> Only valid inside `<plan-blocker>`.
+> Only valid inside `<doc-blocker>`.
 
 _No attributes beyond the global ones._
 
 **Parts:** `label`, `body`
 
-### `<plan-action>`
+### `<doc-action>`
 
 The action that resolves the roadblock. Required — a roadblock without a resolution is the failure this library prevents.
 
-> Only valid inside `<plan-blocker>`.
+> Only valid inside `<doc-blocker>`.
 
 _No attributes beyond the global ones._
 
 **Parts:** `label`, `body`
 
-### `<plan-list>`
+### `<doc-list>`
 
 A marked list. Children are plain `<li>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
 | `marker` | no | `check` \| `cross` \| `arrow` \| `dot` \| `number` | Bullet glyph. Defaults to `dot`. |
-| `title` | no | string | Column heading, used inside `plan-compare`. |
-| `kind` | no | `positive` \| `negative` \| `neutral` | Tone of the column inside `plan-compare`. Defaults to `neutral`. |
+| `title` | no | string | Column heading, used inside `doc-compare`. |
+| `kind` | no | `positive` \| `negative` \| `neutral` | Tone of the column inside `doc-compare`. Defaults to `neutral`. |
 
 **Parts:** `title`, `item`, `marker`
 
-### `<plan-term>`
+### `<doc-term>`
 
 Inline technical term, hyperlinked. First mention is styled differently from repeats.
 
@@ -216,7 +216,7 @@ Inline technical term, hyperlinked. First mention is styled differently from rep
 
 **States:** `:state(first-mention)`
 
-### `<plan-ref>`
+### `<doc-ref>`
 
 Inline cross-reference. Resolves to the live number at mount, so nothing goes stale when sections shift.
 
@@ -224,7 +224,7 @@ Inline cross-reference. Resolves to the live number at mount, so nothing goes st
 | --- | --- | --- | --- |
 | `to` | **yes** | slug — lowercase, digits, hyphens | Id of a section, stage or question. |
 
-### `<plan-quote>`
+### `<doc-quote>`
 
 Pull quote with a distinct typographic role.
 
@@ -234,7 +234,7 @@ Pull quote with a distinct typographic role.
 
 **Parts:** `cite`, `body*`
 
-### `<plan-table>`
+### `<doc-table>`
 
 Wraps a plain `<table>`. Header styling, first-column emphasis, tabular numerals.
 
@@ -249,11 +249,11 @@ Wraps a plain `<table>`. Header styling, first-column emphasis, tabular numerals
 
 ## Interactive
 
-### `<plan-choice>`
+### `<doc-choice>`
 
 A question with lettered options. Letter keys, the Other option, the note field and ARIA are all derived.
 
-> Requires `<plan-option>`.
+> Requires `<doc-option>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -264,11 +264,11 @@ A question with lettered options. Letter keys, the Other option, the note field 
 
 **States:** `:state(answered)`, `:state(note-open)`, `:state(other-open)`
 
-### `<plan-option>`
+### `<doc-option>`
 
 One answer. Label text is the default content; an optional `<p slot="desc">` follows.
 
-> Only valid inside `<plan-choice>`.
+> Only valid inside `<doc-choice>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -277,7 +277,7 @@ One answer. Label text is the default content; an optional `<p slot="desc">` fol
 
 **Parts:** `control`, `input`, `key`, `desc`, `recommended`, `other-label`, `other-hint`, `other-text`
 
-### `<plan-collapse>`
+### `<doc-collapse>`
 
 Generic disclosure, built on `<details>`/`<summary>`.
 
@@ -291,21 +291,21 @@ Generic disclosure, built on `<details>`/`<summary>`.
 
 **States:** `:state(open)`
 
-### `<plan-tabs>`
+### `<doc-tabs>`
 
 Tab strip. Arrow-key navigation and roving tabindex are built in; flattens in print.
 
-> Requires `<plan-tab>`.
+> Requires `<doc-tab>`.
 
 _No attributes beyond the global ones._
 
 **Parts:** `strip`, `tab`
 
-### `<plan-tab>`
+### `<doc-tab>`
 
 One tab panel.
 
-> Only valid inside `<plan-tabs>`.
+> Only valid inside `<doc-tabs>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -314,7 +314,7 @@ One tab panel.
 
 **Parts:** `body`
 
-### `<plan-checklist>`
+### `<doc-checklist>`
 
 Persistent reader-facing ticks. Children are plain `<li>`.
 
@@ -324,21 +324,21 @@ _No attributes beyond the global ones._
 
 ## Structure
 
-### `<plan-flow>`
+### `<doc-flow>`
 
 A horizontal chain of steps. Not a Mermaid job — it must sit inline at reading width.
 
-> Requires `<plan-flow-node>`.
+> Requires `<doc-flow-node>`.
 
 _No attributes beyond the global ones._
 
 **Parts:** `arrow`
 
-### `<plan-flow-node>`
+### `<doc-flow-node>`
 
-One step in a `plan-flow`. Child text is the subtitle.
+One step in a `doc-flow`. Child text is the subtitle.
 
-> Only valid inside `<plan-flow>`.
+> Only valid inside `<doc-flow>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -349,21 +349,21 @@ One step in a `plan-flow`. Child text is the subtitle.
 
 **States:** `:state(active)`
 
-### `<plan-roadmap>`
+### `<doc-roadmap>`
 
 A numbered sequence of collapsible stages with a current-position marker.
 
-> Requires `<plan-stage>`.
+> Requires `<doc-stage>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
 | `start` | no | whole number | First stage number. Defaults to 0. |
 
-### `<plan-stage>`
+### `<doc-stage>`
 
 One stage. Number badge, rail and current-stage treatment are all derived.
 
-> Only valid inside `<plan-roadmap>`.
+> Only valid inside `<doc-roadmap>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |
@@ -378,7 +378,7 @@ One stage. Number badge, rail and current-stage treatment are all derived.
 
 ## Content
 
-### `<plan-code>`
+### `<doc-code>`
 
 A syntax-highlighted code block.
 
@@ -391,7 +391,7 @@ A syntax-highlighted code block.
 
 **Parts:** `header`, `title`, `lang`, `copy`, `code`, `gutter`, `line-number`, `lines`, `line`, `feedback`
 
-### `<plan-diff>`
+### `<doc-diff>`
 
 A unified diff with +/- gutters and aligned line numbers.
 
@@ -402,7 +402,7 @@ A unified diff with +/- gutters and aligned line numbers.
 
 **Parts:** `header`, `filename`, `stat-add`, `stat-remove`, `code`, `row`, `old-number`, `new-number`, `sign`, `text`, `feedback`
 
-### `<plan-figure>`
+### `<doc-figure>`
 
 One framed box for a diagram, image, Mermaid source or isolated HTML mock.
 
@@ -411,19 +411,19 @@ One framed box for a diagram, image, Mermaid source or isolated HTML mock.
 | `type` | no | `svg` \| `image` \| `mermaid` \| `html` | What the child content is. Defaults to `svg`. |
 | `src` | no | URL | Image source, for `type="image"`. |
 | `alt` | no | string | Alternative text, for `type="image"`. |
-| `caption` | no | string | Plain caption. Use `<plan-caption>` for a rich one. |
+| `caption` | no | string | Plain caption. Use `<doc-caption>` for a rich one. |
 
 **Parts:** `content`, `caption`, `diagram-error`, `feedback`
 
-### `<plan-caption>`
+### `<doc-caption>`
 
-Rich caption for a `plan-figure`, as an alternative to the `caption` attribute.
+Rich caption for a `doc-figure`, as an alternative to the `caption` attribute.
 
-> Only valid inside `<plan-figure>`.
+> Only valid inside `<doc-figure>`.
 
 _No attributes beyond the global ones._
 
-### `<plan-tree>`
+### `<doc-tree>`
 
 A directory tree drawn from indented plain text.
 
@@ -433,11 +433,11 @@ A directory tree drawn from indented plain text.
 
 **Parts:** `list`, `node`, `connector`, `label`, `feedback`
 
-### `<plan-compare>`
+### `<doc-compare>`
 
-A two-column comparison panel. Children are `plan-list` blocks with a `title`.
+A two-column comparison panel. Children are `doc-list` blocks with a `title`.
 
-> Requires `<plan-list>`.
+> Requires `<doc-list>`.
 
 | Attribute | Required | Values | Notes |
 | --- | --- | --- | --- |

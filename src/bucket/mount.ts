@@ -4,7 +4,7 @@
  * MUST (§10.1): mounted as a plain Svelte 5 component via `mount()`, **not** as
  * a custom element. In custom element mode Svelte inlines component styles as a
  * JavaScript string rather than emitting a CSS file, which would put the panel's
- * styles outside `@layer` and out of reach of both `--plan-*` tokens and the
+ * styles outside `@layer` and out of reach of both `--doc-*` tokens and the
  * author's escape hatch.
  */
 
@@ -17,10 +17,10 @@ export interface BucketHandle {
 }
 
 /** Mount the panel into `host`, a `<div>` appended as a sibling of the content. */
-export function mountBucket(host: HTMLElement, planDoc: HTMLElement): BucketHandle {
+export function mountBucket(host: HTMLElement, docPage: HTMLElement): BucketHandle {
   const app = mount(BucketPanel, {
     target: host,
-    props: { planDoc, store: storeFor(planDoc) },
+    props: { docPage, store: storeFor(docPage) },
   });
 
   return {

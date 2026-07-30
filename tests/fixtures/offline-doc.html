@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline delivery check</title>
+<style>/*@DOC_CSS@*/</style>
+</head>
+<body>
+
+<doc-page doc-id="offline-check" density="comfortable" accent="teal">
+
+  <doc-header kicker="Plan · Offline delivery">
+    One file, no network
+    <p slot="lede">This fixture exists to prove the primary delivery mode: a single self-contained document opened with xdg-open on a machine with no network.</p>
+  </doc-header>
+
+  <doc-chips>
+    <doc-chip kind="action">Answer the question below, then use Copy</doc-chip>
+  </doc-chips>
+
+  <doc-section title="What is being checked">
+    <p>After <code>forgedoc build</code>, this file must contain no external reference of any kind — no CDN script, no stylesheet link, no web font, no image URL.</p>
+    <doc-note kind="info" title="Why this matters">
+      <p>The offline build is the one that must never break. A CDN build also ships, but it is the secondary path.</p>
+    </doc-note>
+  </doc-section>
+
+  <doc-section title="Open questions">
+    <doc-choice mode="single" question="Should the offline bundle include Mermaid?">
+      <doc-option recommended>
+        Yes — bundle it
+        <p slot="desc">Roughly a megabyte, but the offline promise holds for diagrams too.</p>
+      </doc-option>
+      <doc-option>
+        No — skip diagrams offline
+        <p slot="desc">Smaller file, but a type="mermaid" figure would render an error box.</p>
+      </doc-option>
+    </doc-choice>
+  </doc-section>
+
+</doc-page>
+
+<script>//@DOC_JS@</script>
+</body>
+</html>

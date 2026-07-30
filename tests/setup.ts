@@ -16,8 +16,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  for (const planDoc of Array.from(document.querySelectorAll('plan-doc'))) {
-    planDoc.remove();
+  for (const docPage of Array.from(document.querySelectorAll('doc-page'))) {
+    docPage.remove();
   }
   localStorage.clear();
 });

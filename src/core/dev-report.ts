@@ -1,7 +1,7 @@
 /**
  * The in-page violation banner (§11.3).
  *
- * Dev builds only — every call site is guarded by `__PLANKIT_DEV__`, a literal
+ * Dev builds only — every call site is guarded by `__FORGEDOC_DEV__`, a literal
  * the bundler replaces, so the whole module is dead-code-eliminated from production
  * output.
  *
@@ -23,27 +23,27 @@ interface DevViolation {
 }
 
 /** Check the live document and, if anything is wrong, prepend a red banner. */
-export function reportDevViolations(planDoc: HTMLElement): void {
+export function reportDevViolations(docPage: HTMLElement): void {
   const violations = [
-    ...checkTags(planDoc),
-    ...checkChoices(planDoc),
-    ...checkBlockers(planDoc),
-    ...checkReferences(planDoc),
+    ...checkTags(docPage),
+    ...checkChoices(docPage),
+    ...checkBlockers(docPage),
+    ...checkReferences(docPage),
   ];
   if (violations.length === 0) return;
 
-  planDoc.prepend(renderBanner(violations));
+  docPage.prepend(renderBanner(violations));
   for (const violation of violations) {
-    console.warn(`[plankit] ${violation.ruleId}: ${violation.message}`, violation.element);
+    console.warn(`[forgedoc] ${violation.ruleId}: ${violation.message}`, violation.element);
   }
 }
 
-function checkTags(planDoc: HTMLElement): DevViolation[] {
+function checkTags(docPage: HTMLElement): DevViolation[] {
   const violations: DevViolation[] = [];
 
-  for (const element of Array.from(planDoc.querySelectorAll('*'))) {
+  for (const element of Array.from(docPage.querySelectorAll('*'))) {
     const tagName = element.tagName.toLowerCase();
-    if (!tagName.startsWith('plan-')) continue;
+    if (!tagName.startsWith('doc-')) continue;
 
     if (!isKnownTag(tagName)) {
       violations.push({
@@ -103,42 +103,42 @@ function checkAttributes(element: Element, tagName: string, spec: TagSpec): DevV
   return violations;
 }
 
-function checkChoices(planDoc: HTMLElement): DevViolation[] {
-  return Array.from(planDoc.querySelectorAll('plan-choice'))
+function checkChoices(docPage: HTMLElement): DevViolation[] {
+  return Array.from(docPage.querySelectorAll('doc-choice'))
     .filter((choice) => authoredOptionCount(choice) < 2)
     .map((choice) => ({
       ruleId: 'choice/too-few-options',
-      message: 'A <plan-choice> needs at least two <plan-option> children.',
+      message: 'A <doc-choice> needs at least two <doc-option> children.',
       element: choice,
     }));
 }
 
 function authoredOptionCount(choice: Element): number {
-  return Array.from(choice.querySelectorAll(':scope > plan-option')).filter(
-    (option) => (option as HTMLElement).dataset.planChrome === undefined,
+  return Array.from(choice.querySelectorAll(':scope > doc-option')).filter(
+    (option) => (option as HTMLElement).dataset.docChrome === undefined,
   ).length;
 }
 
-function checkBlockers(planDoc: HTMLElement): DevViolation[] {
-  return Array.from(planDoc.querySelectorAll('plan-blocker'))
-    .filter((blocker) => !blocker.querySelector('plan-action'))
+function checkBlockers(docPage: HTMLElement): DevViolation[] {
+  return Array.from(docPage.querySelectorAll('doc-blocker'))
+    .filter((blocker) => !blocker.querySelector('doc-action'))
     .map((blocker) => ({
       ruleId: 'child/missing-required',
       message:
-        '<plan-blocker> has no <plan-action>. A roadblock without a resolution is exactly the failure this library prevents.',
+        '<doc-blocker> has no <doc-action>. A roadblock without a resolution is exactly the failure this library prevents.',
       element: blocker,
     }));
 }
 
-function checkReferences(planDoc: HTMLElement): DevViolation[] {
-  return Array.from(planDoc.querySelectorAll('plan-ref'))
+function checkReferences(docPage: HTMLElement): DevViolation[] {
+  return Array.from(docPage.querySelectorAll('doc-ref'))
     .filter((reference) => {
       const target = reference.getAttribute('to');
-      return !target || !planDoc.querySelector(`#${CSS.escape(target)}`);
+      return !target || !docPage.querySelector(`#${CSS.escape(target)}`);
     })
     .map((reference) => ({
       ruleId: 'ref/unresolvable',
-      message: `<plan-ref to="${reference.getAttribute('to') ?? ''}"> points at an id that does not exist.`,
+      message: `<doc-ref to="${reference.getAttribute('to') ?? ''}"> points at an id that does not exist.`,
       element: reference,
     }));
 }
@@ -148,7 +148,7 @@ function renderBanner(violations: readonly DevViolation[]): HTMLElement {
   banner.setAttribute('role', 'alert');
   banner.append(
     createPart('dev-banner-title', 'strong', {
-      text: `plankit dev — ${violations.length} contract violation${violations.length === 1 ? '' : 's'}`,
+      text: `forgedoc dev — ${violations.length} contract violation${violations.length === 1 ? '' : 's'}`,
     }),
   );
 

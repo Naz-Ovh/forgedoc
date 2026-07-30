@@ -21,126 +21,126 @@ interface ComponentCase {
 
 const CASES: readonly ComponentCase[] = [
   {
-    tag: 'plan-header',
-    markup: `<plan-header kicker="Plan · X">Title text<p slot="lede">Lede.</p></plan-header>`,
+    tag: 'doc-header',
+    markup: `<doc-header kicker="Plan · X">Title text<p slot="lede">Lede.</p></doc-header>`,
     parts: ['kicker', 'lede'],
   },
   {
-    tag: 'plan-section',
-    markup: `<plan-section title="What we are building"><p>Body.</p></plan-section>`,
+    tag: 'doc-section',
+    markup: `<doc-section title="What we are building"><p>Body.</p></doc-section>`,
     parts: ['heading', 'number', 'title', 'body'],
   },
   {
-    tag: 'plan-chips',
-    markup: `<plan-chips><plan-chip kind="confirmed">Locked</plan-chip></plan-chips>`,
+    tag: 'doc-chips',
+    markup: `<doc-chips><doc-chip kind="confirmed">Locked</doc-chip></doc-chips>`,
     parts: [],
   },
   {
-    tag: 'plan-note',
-    markup: `<plan-note kind="warn" title="Careful"><p>Body.</p></plan-note>`,
+    tag: 'doc-note',
+    markup: `<doc-note kind="warn" title="Careful"><p>Body.</p></doc-note>`,
     parts: ['icon', 'title', 'body'],
   },
   {
-    tag: 'plan-blocker',
-    markup: `<plan-blocker severity="high" title="Blocked">
-      <plan-blocks>It breaks.</plan-blocks>
-      <plan-why>Because.</plan-why>
-      <plan-action>Fix it.</plan-action>
-    </plan-blocker>`,
+    tag: 'doc-blocker',
+    markup: `<doc-blocker severity="high" title="Blocked">
+      <doc-blocks>It breaks.</doc-blocks>
+      <doc-why>Because.</doc-why>
+      <doc-action>Fix it.</doc-action>
+    </doc-blocker>`,
     parts: ['header', 'sequence', 'severity', 'title'],
   },
   {
-    tag: 'plan-list',
-    markup: `<plan-list marker="check" title="Done"><li>One</li><li>Two</li></plan-list>`,
+    tag: 'doc-list',
+    markup: `<doc-list marker="check" title="Done"><li>One</li><li>Two</li></doc-list>`,
     parts: ['title', 'item', 'marker'],
   },
   {
-    tag: 'plan-compare',
-    markup: `<plan-compare columns="2">
-      <plan-list title="A" kind="positive" marker="check"><li>One</li></plan-list>
-      <plan-list title="B" kind="negative" marker="cross"><li>Two</li></plan-list>
-    </plan-compare>`,
+    tag: 'doc-compare',
+    markup: `<doc-compare columns="2">
+      <doc-list title="A" kind="positive" marker="check"><li>One</li></doc-list>
+      <doc-list title="B" kind="negative" marker="cross"><li>Two</li></doc-list>
+    </doc-compare>`,
     parts: ['column'],
   },
   {
-    tag: 'plan-table',
-    markup: `<plan-table size="sm"><table><thead><tr><th>H</th></tr></thead><tbody><tr><td>V</td></tr></tbody></table></plan-table>`,
+    tag: 'doc-table',
+    markup: `<doc-table size="sm"><table><thead><tr><th>H</th></tr></thead><tbody><tr><td>V</td></tr></tbody></table></doc-table>`,
     parts: ['table', 'scroll-hint'],
   },
   {
-    tag: 'plan-choice',
-    markup: `<plan-choice mode="single" question="Which way?">
-      <plan-option recommended>First<p slot="desc">Why.</p></plan-option>
-      <plan-option>Second</plan-option>
-    </plan-choice>`,
+    tag: 'doc-choice',
+    markup: `<doc-choice mode="single" question="Which way?">
+      <doc-option recommended>First<p slot="desc">Why.</p></doc-option>
+      <doc-option>Second</doc-option>
+    </doc-choice>`,
     parts: ['sequence', 'question', 'note-toggle', 'note', 'other'],
   },
   {
-    tag: 'plan-collapse',
-    markup: `<plan-collapse title="More detail"><p>Hidden body.</p></plan-collapse>`,
+    tag: 'doc-collapse',
+    markup: `<doc-collapse title="More detail"><p>Hidden body.</p></doc-collapse>`,
     parts: ['summary', 'chevron', 'body'],
   },
   {
-    tag: 'plan-tabs',
-    markup: `<plan-tabs><plan-tab label="One" active><p>A</p></plan-tab><plan-tab label="Two"><p>B</p></plan-tab></plan-tabs>`,
+    tag: 'doc-tabs',
+    markup: `<doc-tabs><doc-tab label="One" active><p>A</p></doc-tab><doc-tab label="Two"><p>B</p></doc-tab></doc-tabs>`,
     parts: ['strip', 'tab'],
   },
   {
-    tag: 'plan-checklist',
-    markup: `<plan-checklist><li>Check one</li><li>Check two</li></plan-checklist>`,
+    tag: 'doc-checklist',
+    markup: `<doc-checklist><li>Check one</li><li>Check two</li></doc-checklist>`,
     parts: ['item', 'check'],
   },
   {
-    tag: 'plan-flow',
+    tag: 'doc-flow',
     // No `subtitle` part: the subtitle is a bare author text node, so naming it
     // would mean wrapping it (§2.2). The host carries its typography instead.
-    markup: `<plan-flow><plan-flow-node title="A">first</plan-flow-node><plan-flow-node title="B" active>second</plan-flow-node></plan-flow>`,
+    markup: `<doc-flow><doc-flow-node title="A">first</doc-flow-node><doc-flow-node title="B" active>second</doc-flow-node></doc-flow>`,
     parts: ['arrow', 'title'],
   },
   {
-    tag: 'plan-roadmap',
-    markup: `<plan-roadmap start="0"><plan-stage title="Zero" subtitle="next" current><p>Body.</p></plan-stage><plan-stage title="One"><p>Body.</p></plan-stage></plan-roadmap>`,
+    tag: 'doc-roadmap',
+    markup: `<doc-roadmap start="0"><doc-stage title="Zero" subtitle="next" current><p>Body.</p></doc-stage><doc-stage title="One"><p>Body.</p></doc-stage></doc-roadmap>`,
     parts: ['header', 'badge', 'heading', 'title'],
   },
   {
-    tag: 'plan-code',
-    markup: `<plan-code lang="ts" title="a.ts" highlight="1">const x = 1;</plan-code>`,
+    tag: 'doc-code',
+    markup: `<doc-code lang="ts" title="a.ts" highlight="1">const x = 1;</doc-code>`,
     parts: ['header', 'lang', 'copy', 'code', 'gutter', 'lines'],
   },
   {
-    tag: 'plan-diff',
-    markup: `<plan-diff lang="ts" filename="a.ts">@@ -1,2 +1,2 @@
+    tag: 'doc-diff',
+    markup: `<doc-diff lang="ts" filename="a.ts">@@ -1,2 +1,2 @@
 -const x = 1;
-+const x = 2;</plan-diff>`,
++const x = 2;</doc-diff>`,
     parts: ['header', 'filename', 'stat-add', 'stat-remove', 'code', 'row'],
   },
   {
-    tag: 'plan-figure',
-    markup: `<plan-figure type="svg" caption="A figure"><svg viewBox="0 0 10 10"></svg></plan-figure>`,
+    tag: 'doc-figure',
+    markup: `<doc-figure type="svg" caption="A figure"><svg viewBox="0 0 10 10"></svg></doc-figure>`,
     parts: ['content', 'caption'],
   },
   {
-    tag: 'plan-tree',
-    markup: `<plan-tree root="src/">
+    tag: 'doc-tree',
+    markup: `<doc-tree root="src/">
   core/
     base.ts
-  index.ts</plan-tree>`,
+  index.ts</doc-tree>`,
     parts: ['list', 'node', 'label'],
   },
   {
-    tag: 'plan-quote',
-    // Same as plan-flow-node: a bare text body has no element to name.
-    markup: `<plan-quote cite="The spec">Never move author content.</plan-quote>`,
+    tag: 'doc-quote',
+    // Same as doc-flow-node: a bare text body has no element to name.
+    markup: `<doc-quote cite="The spec">Never move author content.</doc-quote>`,
     parts: ['cite'],
   },
   {
-    tag: 'plan-term',
-    markup: `<p>Uses <plan-term href="https://example.com/a">ElementInternals</plan-term> here.</p>`,
+    tag: 'doc-term',
+    markup: `<p>Uses <doc-term href="https://example.com/a">ElementInternals</doc-term> here.</p>`,
     parts: [],
   },
   {
-    tag: 'plan-ref',
-    markup: `<plan-section title="Target"><p>See <plan-ref to="sec-target"></plan-ref>.</p></plan-section>`,
+    tag: 'doc-ref',
+    markup: `<doc-section title="Target"><p>See <doc-ref to="sec-target"></doc-ref>.</p></doc-section>`,
     parts: [],
   },
 ];
@@ -149,7 +149,7 @@ describe('every component', () => {
   it('has a case in this table', () => {
     const authored = TAG_NAMES.filter((name) => {
       const spec = TAGS[name] as TagSpec;
-      return !spec.generated && !spec.onlyInside && name !== 'plan-doc';
+      return !spec.generated && !spec.onlyInside && name !== 'doc-page';
     });
     const covered = new Set(CASES.map((testCase) => testCase.tag));
 
@@ -159,8 +159,8 @@ describe('every component', () => {
   for (const testCase of CASES) {
     describe(testCase.tag, () => {
       it('produces its documented parts', () => {
-        const planDoc = mountPlan(testCase.markup);
-        const element = planDoc.querySelector(testCase.tag);
+        const docPage = mountPlan(testCase.markup);
+        const element = docPage.querySelector(testCase.tag);
         expect(element).not.toBeNull();
 
         for (const part of testCase.parts) {
@@ -173,11 +173,11 @@ describe('every component', () => {
 
       it('upgrades idempotently — no duplicate chrome', () => {
         const once = mountPlan(testCase.markup);
-        const onceChrome = once.querySelectorAll('[data-plan-chrome]').length;
+        const onceChrome = once.querySelectorAll('[data-doc-chrome]').length;
         once.remove();
 
         const twice = mountTwice(testCase.markup);
-        const twiceChrome = twice.querySelectorAll('[data-plan-chrome]').length;
+        const twiceChrome = twice.querySelectorAll('[data-doc-chrome]').length;
 
         expect(twiceChrome).toBe(onceChrome);
       });
@@ -192,20 +192,20 @@ describe('every component', () => {
        */
       it('never moves an author node', () => {
         const holder = document.createElement('div');
-        holder.innerHTML = `<plan-doc plan-id="identity">${testCase.markup}</plan-doc>`;
-        const planDoc = holder.firstElementChild as HTMLElement;
+        holder.innerHTML = `<doc-page doc-id="identity">${testCase.markup}</doc-page>`;
+        const docPage = holder.firstElementChild as HTMLElement;
 
-        const before = authorNodesOf(planDoc);
+        const before = authorNodesOf(docPage);
         const parentsBefore = before.map((node) => node.parentNode);
 
-        document.body.append(planDoc);
+        document.body.append(docPage);
 
-        const after = authorNodesOf(planDoc);
+        const after = authorNodesOf(docPage);
         for (const [index, node] of before.entries()) {
-          // plan-code and plan-diff replace their own raw text — the one
+          // doc-code and doc-diff replace their own raw text — the one
           // documented exception, flagged in docs/DECISIONS.md.
-          if (testCase.tag === 'plan-code' || testCase.tag === 'plan-diff') break;
-          if (testCase.tag === 'plan-tree') break;
+          if (testCase.tag === 'doc-code' || testCase.tag === 'doc-diff') break;
+          if (testCase.tag === 'doc-tree') break;
 
           expect(after).toContain(node);
           if (node.nodeType === Node.TEXT_NODE) continue;
@@ -221,11 +221,11 @@ describe('every component', () => {
 describe('shadow DOM', () => {
   /* Acceptance 14, checked at runtime as well as by the lint rule. */
   it('is never attached anywhere in a mounted document', () => {
-    const planDoc = mountPlan(CASES.map((testCase) => testCase.markup).join('\n'));
+    const docPage = mountPlan(CASES.map((testCase) => testCase.markup).join('\n'));
 
-    for (const element of Array.from(planDoc.querySelectorAll('*'))) {
+    for (const element of Array.from(docPage.querySelectorAll('*'))) {
       expect(element.shadowRoot, `${element.tagName} has a shadow root`).toBeNull();
     }
-    expect(planDoc.shadowRoot).toBeNull();
+    expect(docPage.shadowRoot).toBeNull();
   });
 });

@@ -97,34 +97,34 @@ export interface DocumentIndex {
 }
 
 /** Tags that take part in the document id namespace. Mirrors the validator. */
-const ID_BEARING_SELECTOR = 'plan-section, plan-choice, plan-stage, plan-collapse';
+const ID_BEARING_SELECTOR = 'doc-section, doc-choice, doc-stage, doc-collapse';
 
 const indexes = new WeakMap<Element, DocumentIndex>();
 
 /**
- * Build (or return the cached) index for a `plan-doc`.
+ * Build (or return the cached) index for a `doc-page`.
  *
- * why lazily and cached rather than eagerly in `plan-doc.enhance()`: components
+ * why lazily and cached rather than eagerly in `doc-page.enhance()`: components
  * upgrade in whatever order `index.ts` happens to define them, and a
- * `plan-section` that upgraded first still needs its number. Whoever asks first
+ * `doc-section` that upgraded first still needs its number. Whoever asks first
  * pays for the walk; everyone else gets the same object.
  */
-export function indexFor(planDoc: Element): DocumentIndex {
-  const cached = indexes.get(planDoc);
+export function indexFor(docPage: Element): DocumentIndex {
+  const cached = indexes.get(docPage);
   if (cached) return cached;
 
-  const built = buildIndex(planDoc);
-  indexes.set(planDoc, built);
+  const built = buildIndex(docPage);
+  indexes.set(docPage, built);
   return built;
 }
 
 /** Drop the cached index. Used by tests and by tooling that rewrites the DOM. */
-export function invalidateIndex(planDoc: Element): void {
-  indexes.delete(planDoc);
+export function invalidateIndex(docPage: Element): void {
+  indexes.delete(docPage);
 }
 
-function buildIndex(planDoc: Element): DocumentIndex {
-  const elements = Array.from(planDoc.querySelectorAll<HTMLElement>(ID_BEARING_SELECTOR));
+function buildIndex(docPage: Element): DocumentIndex {
+  const elements = Array.from(docPage.querySelectorAll<HTMLElement>(ID_BEARING_SELECTOR));
 
   const candidates: IdCandidate[] = elements.map((element) => ({
     explicitId: element.getAttribute('id'),
@@ -138,7 +138,7 @@ function buildIndex(planDoc: Element): DocumentIndex {
     if (id) ids.set(element, id);
   });
 
-  return { outline: buildOutline(planDoc, ids), ids };
+  return { outline: buildOutline(docPage, ids), ids };
 }
 
 /** The id the runtime derives for one element. Mirrors `tools/validate.ts`. */
@@ -146,13 +146,13 @@ function derivedIdFor(element: HTMLElement): string {
   const title = element.getAttribute('title')?.trim() ?? '';
 
   switch (element.tagName.toLowerCase()) {
-    case 'plan-section':
+    case 'doc-section':
       return sectionId(title);
-    case 'plan-choice':
+    case 'doc-choice':
       return questionId(element.getAttribute('question')?.trim() ?? '');
-    case 'plan-stage':
+    case 'doc-stage':
       return stageId(title);
-    case 'plan-collapse':
+    case 'doc-collapse':
       return collapseId(title);
     default:
       return slugify(title);
@@ -166,13 +166,13 @@ function derivedIdFor(element: HTMLElement): string {
  * pushes a zero; returning to a shallower level truncates, which is what resets
  * `1.2.1` back to `2` when the next top-level section starts.
  */
-function buildOutline(planDoc: Element, ids: ReadonlyMap<Element, string>): OutlineEntry[] {
-  const sections = Array.from(planDoc.querySelectorAll<HTMLElement>('plan-section'));
+function buildOutline(docPage: Element, ids: ReadonlyMap<Element, string>): OutlineEntry[] {
+  const sections = Array.from(docPage.querySelectorAll<HTMLElement>('doc-section'));
   const counters: number[] = [];
   const outline: OutlineEntry[] = [];
 
   for (const element of sections) {
-    const depth = sectionDepth(element, planDoc);
+    const depth = sectionDepth(element, docPage);
 
     counters.length = depth;
     counters[depth - 1] = (counters[depth - 1] ?? 0) + 1;
@@ -193,11 +193,11 @@ function buildOutline(planDoc: Element, ids: ReadonlyMap<Element, string>): Outl
 }
 
 /** 1-based nesting depth of a section within its document. */
-function sectionDepth(element: HTMLElement, planDoc: Element): number {
+function sectionDepth(element: HTMLElement, docPage: Element): number {
   let depth = 1;
   let ancestor = element.parentElement;
-  while (ancestor && ancestor !== planDoc) {
-    if (ancestor.tagName.toLowerCase() === 'plan-section') depth += 1;
+  while (ancestor && ancestor !== docPage) {
+    if (ancestor.tagName.toLowerCase() === 'doc-section') depth += 1;
     ancestor = ancestor.parentElement;
   }
   return depth;

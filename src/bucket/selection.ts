@@ -16,9 +16,9 @@ import { blockContentText } from '../core/feedback.js';
 import type { FeedbackItem, SerializedRange } from '../core/types.js';
 
 /** Highlight group for stored comments. */
-const HIGHLIGHT_NAME = 'plan-feedback';
+const HIGHLIGHT_NAME = 'doc-feedback';
 /** Highlight group for the comment the reader is currently looking at. */
-const ACTIVE_HIGHLIGHT_NAME = 'plan-feedback-active';
+const ACTIVE_HIGHLIGHT_NAME = 'doc-feedback-active';
 
 /** Longest excerpt kept as the fallback locator. */
 const MAX_QUOTE_LENGTH = 240;
@@ -26,16 +26,16 @@ const MAX_QUOTE_LENGTH = 240;
 /**
  * Marks the bucket's own chrome.
  *
- * why it exists: the composer is rendered *inside* `plan-doc`, so clicking into
+ * why it exists: the composer is rendered *inside* `doc-page`, so clicking into
  * its textarea is a `pointerup` inside the document with a collapsed selection —
  * which read as "the reader deselected everything" and closed the composer the
  * instant they tried to type in it. Events from anything carrying this attribute
  * are not selection activity and never change the pending selection.
  */
-const BUCKET_UI_SELECTOR = '[data-plan-ui]';
+const BUCKET_UI_SELECTOR = '[data-doc-ui]';
 
 /** Set on the element a block comment names, so CSS can outline it. */
-const BLOCK_MARK = 'data-plan-commented';
+const BLOCK_MARK = 'data-doc-commented';
 
 interface HighlightRegistryLike {
   set(name: string, highlight: object): void;
@@ -68,11 +68,11 @@ export function highlightApi(): {
 /**
  * Turn the reader's current selection into a resilient anchor.
  *
- * The anchor is the nearest `plan-*` ancestor that has an id, plus a character
+ * The anchor is the nearest `doc-*` ancestor that has an id, plus a character
  * offset into that element's `textContent`, plus the quoted excerpt. Two
  * independent locators means a document that gained a paragraph still resolves.
  */
-export function serializeSelection(planDoc: Element): SerializedRange | null {
+export function serializeSelection(docPage: Element): SerializedRange | null {
   // why `window.getSelection()` works at all here (§2.1): there is no shadow
   // root anywhere in this library, so the selection is not scoped away from us
   // and `getComposedRanges()` with per-root bookkeeping is not needed.
@@ -83,7 +83,7 @@ export function serializeSelection(planDoc: Element): SerializedRange | null {
   const quote = range.toString().trim();
   if (quote === '') return null;
 
-  const anchor = nearestAnchor(range.commonAncestorContainer, planDoc);
+  const anchor = nearestAnchor(range.commonAncestorContainer, docPage);
   if (!anchor) return null;
 
   const start = offsetWithin(anchor, range.startContainer, range.startOffset);
@@ -98,18 +98,18 @@ export function serializeSelection(planDoc: Element): SerializedRange | null {
   };
 }
 
-/** Nearest ancestor-or-self `plan-*` element carrying an id. */
-function nearestAnchor(node: Node, planDoc: Element): Element | null {
+/** Nearest ancestor-or-self `doc-*` element carrying an id. */
+function nearestAnchor(node: Node, docPage: Element): Element | null {
   let current: Element | null =
     node instanceof Element ? node : (node.parentElement as Element | null);
 
   while (current) {
-    if (current.tagName.toLowerCase().startsWith('plan-') && current.id) return current;
-    if (current === planDoc) break;
+    if (current.tagName.toLowerCase().startsWith('doc-') && current.id) return current;
+    if (current === docPage) break;
     current = current.parentElement;
   }
 
-  return planDoc.id ? planDoc : null;
+  return docPage.id ? docPage : null;
 }
 
 /** Character offset of (node, offset) within `root`'s text, or -1 if outside. */
@@ -130,10 +130,10 @@ function offsetWithin(root: Element, node: Node, nodeOffset: number): number {
  * Every text node under `root`, in document order, skipping the bucket's own UI.
  *
  * why the exclusion matters: the review panel renders each stored quote back as
- * text, and it lives *inside* `plan-doc`. Without this, a comment whose offsets
+ * text, and it lives *inside* `doc-page`. Without this, a comment whose offsets
  * had shifted would fall back to searching for its quote and find it in the
  * panel listing itself — painting the reader's highlight onto the bucket rather
- * than onto the document. It also keeps offsets into `plan-doc` stable whether
+ * than onto the document. It also keeps offsets into `doc-page` stable whether
  * the panel happens to be open or closed.
  */
 function textNodesOf(root: Element): Text[] {
@@ -162,7 +162,7 @@ function textNodesOf(root: Element): Text[] {
  */
 export function locationLabel(node: Node): string {
   const element = node instanceof Element ? node : node.parentElement;
-  const section = element?.closest('plan-section');
+  const section = element?.closest('doc-section');
   if (!section) return '';
 
   const number = section.getAttribute('data-number') ?? '';
@@ -186,9 +186,9 @@ export function isBlockItem(item: Pick<FeedbackItem, 'scope'>): boolean {
 }
 
 /** The element a block comment names, or null once it has left the document. */
-export function blockAnchor(planDoc: Element, anchorId: string): HTMLElement | null {
+export function blockAnchor(docPage: Element, anchorId: string): HTMLElement | null {
   if (!anchorId) return null;
-  return planDoc.querySelector<HTMLElement>(`#${CSS.escape(anchorId)}`);
+  return docPage.querySelector<HTMLElement>(`#${CSS.escape(anchorId)}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -202,8 +202,8 @@ export function blockAnchor(planDoc: Element, anchorId: string): HTMLElement | n
  * quoted text second. Returns null when neither locator finds the text, which
  * the panel reports as an orphaned comment rather than dropping.
  */
-export function resolveRange(planDoc: Element, stored: SerializedRange): Range | null {
-  const anchor = planDoc.querySelector(`#${CSS.escape(stored.anchorId)}`) ?? planDoc;
+export function resolveRange(docPage: Element, stored: SerializedRange): Range | null {
+  const anchor = docPage.querySelector(`#${CSS.escape(stored.anchorId)}`) ?? docPage;
 
   const byOffset = rangeFromOffsets(anchor, stored.start, stored.end);
   if (byOffset && normalise(byOffset.toString()) === normalise(stored.quote)) return byOffset;
@@ -213,7 +213,7 @@ export function resolveRange(planDoc: Element, stored: SerializedRange): Range |
   // occupies those characters. Painting a reader's comment over an unrelated
   // sentence is worse than telling them the anchor is gone, so this returns null
   // and the panel flags the item as orphaned.
-  return rangeFromQuote(anchor, stored.quote) ?? rangeFromQuote(planDoc, stored.quote);
+  return rangeFromQuote(anchor, stored.quote) ?? rangeFromQuote(docPage, stored.quote);
 }
 
 /** Collapse whitespace so a reflowed paragraph still matches its stored quote. */
@@ -268,14 +268,14 @@ function rangeFromQuote(root: Element, quote: string): Range | null {
  * query. Keeping them apart lets the panel *derive* the orphan list from the
  * feedback array instead of writing it back out of a side effect.
  */
-export function findOrphans(planDoc: Element, items: readonly FeedbackItem[]): string[] {
-  return items.filter((item) => !isAnchored(planDoc, item)).map((item) => item.id);
+export function findOrphans(docPage: Element, items: readonly FeedbackItem[]): string[] {
+  return items.filter((item) => !isAnchored(docPage, item)).map((item) => item.id);
 }
 
 /** Whether an item's anchor still resolves — by element for blocks, by range otherwise. */
-function isAnchored(planDoc: Element, item: FeedbackItem): boolean {
-  if (isBlockItem(item)) return blockAnchor(planDoc, item.range.anchorId) !== null;
-  return resolveRange(planDoc, item.range) !== null;
+function isAnchored(docPage: Element, item: FeedbackItem): boolean {
+  if (isBlockItem(item)) return blockAnchor(docPage, item.range.anchorId) !== null;
+  return resolveRange(docPage, item.range) !== null;
 }
 
 /** Options for one painting pass. */
@@ -299,7 +299,7 @@ export interface PaintOptions {
  * longer resolve are skipped and returned so the panel can mark them orphaned.
  */
 export function paintHighlights(
-  planDoc: Element,
+  docPage: Element,
   items: readonly FeedbackItem[],
   options: PaintOptions = {},
 ): { orphaned: string[] } {
@@ -309,15 +309,15 @@ export function paintHighlights(
   const ranges: Range[] = [];
   const activeRanges: Range[] = [];
 
-  markBlockAnchors(planDoc, items, activeId, pending);
+  markBlockAnchors(docPage, items, activeId, pending);
 
   for (const item of items) {
     if (isBlockItem(item)) {
-      if (!blockAnchor(planDoc, item.range.anchorId)) orphaned.push(item.id);
+      if (!blockAnchor(docPage, item.range.anchorId)) orphaned.push(item.id);
       continue;
     }
 
-    const range = resolveRange(planDoc, item.range);
+    const range = resolveRange(docPage, item.range);
     if (!range) {
       orphaned.push(item.id);
       continue;
@@ -329,11 +329,11 @@ export function paintHighlights(
   // Resolving one here would fall through to a quote search and paint whatever
   // text happened to match the block's descriptor.
   const pendingRange =
-    pending && pending.scope === 'text' ? resolveRange(planDoc, pending.range) : null;
+    pending && pending.scope === 'text' ? resolveRange(docPage, pending.range) : null;
   if (pendingRange) activeRanges.push(pendingRange);
 
   if (!api) {
-    paintWithMarkFallback(planDoc, ranges.concat(activeRanges));
+    paintWithMarkFallback(docPage, ranges.concat(activeRanges));
     return { orphaned };
   }
 
@@ -350,23 +350,23 @@ export function paintHighlights(
  * lets `feedback.css` draw a border round the element itself.
  */
 function markBlockAnchors(
-  planDoc: Element,
+  docPage: Element,
   items: readonly FeedbackItem[],
   activeId: string | null,
   pending: PaintOptions['pending'],
 ): void {
-  for (const marked of Array.from(planDoc.querySelectorAll(`[${BLOCK_MARK}]`))) {
+  for (const marked of Array.from(docPage.querySelectorAll(`[${BLOCK_MARK}]`))) {
     marked.removeAttribute(BLOCK_MARK);
   }
 
   for (const item of items) {
     if (!isBlockItem(item)) continue;
-    const element = blockAnchor(planDoc, item.range.anchorId);
+    const element = blockAnchor(docPage, item.range.anchorId);
     element?.setAttribute(BLOCK_MARK, item.id === activeId ? 'active' : '');
   }
 
   if (pending?.scope !== 'block') return;
-  blockAnchor(planDoc, pending.range.anchorId)?.setAttribute(BLOCK_MARK, 'active');
+  blockAnchor(docPage, pending.range.anchorId)?.setAttribute(BLOCK_MARK, 'active');
 }
 
 /**
@@ -377,15 +377,15 @@ function markBlockAnchors(
  * already been resolved, so the offsets it would otherwise corrupt have already
  * been consumed. It deliberately gives up on overlapping ranges.
  */
-function paintWithMarkFallback(planDoc: Element, ranges: readonly Range[]): void {
-  for (const existing of Array.from(planDoc.querySelectorAll('mark[data-plan-highlight]'))) {
+function paintWithMarkFallback(docPage: Element, ranges: readonly Range[]): void {
+  for (const existing of Array.from(docPage.querySelectorAll('mark[data-doc-highlight]'))) {
     existing.replaceWith(...Array.from(existing.childNodes));
   }
 
   for (const range of ranges) {
     try {
       const mark = document.createElement('mark');
-      mark.dataset.planHighlight = '';
+      mark.dataset.docHighlight = '';
       range.surroundContents(mark);
     } catch {
       // Range spans element boundaries; surroundContents refuses. Skipping one
@@ -395,17 +395,17 @@ function paintWithMarkFallback(planDoc: Element, ranges: readonly Range[]): void
 }
 
 /** Scroll a stored comment into view and flash it as active. */
-export function revealFeedback(planDoc: Element, items: readonly FeedbackItem[], id: string): void {
+export function revealFeedback(docPage: Element, items: readonly FeedbackItem[], id: string): void {
   const item = items.find((candidate) => candidate.id === id);
   if (!item) return;
 
   const target = isBlockItem(item)
-    ? blockAnchor(planDoc, item.range.anchorId)
-    : (resolveRange(planDoc, item.range)?.startContainer.parentElement ?? null);
+    ? blockAnchor(docPage, item.range.anchorId)
+    : (resolveRange(docPage, item.range)?.startContainer.parentElement ?? null);
   if (!target) return;
 
   target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  paintHighlights(planDoc, items, { activeId: id });
+  paintHighlights(docPage, items, { activeId: id });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -433,13 +433,13 @@ export interface AnchoredContext {
  * that is the whole point of comparing it against what they said about it.
  */
 export function contextAround(
-  planDoc: Element,
+  docPage: Element,
   stored: SerializedRange,
   radius = CONTEXT_RADIUS,
 ): AnchoredContext {
   const missing: AnchoredContext = { before: '', quote: stored.quote, after: '', resolved: false };
 
-  const anchor = planDoc.querySelector(`#${CSS.escape(stored.anchorId)}`);
+  const anchor = docPage.querySelector(`#${CSS.escape(stored.anchorId)}`);
   const text = anchor?.textContent ?? '';
   if (text === '') return missing;
 
@@ -466,8 +466,8 @@ function locateQuote(text: string, stored: SerializedRange): { start: number; en
 }
 
 /** The visible text of a whole block, for a block comment's detail view. */
-export function blockText(planDoc: Element, anchorId: string, limit = 900): string {
-  const element = blockAnchor(planDoc, anchorId);
+export function blockText(docPage: Element, anchorId: string, limit = 900): string {
+  const element = blockAnchor(docPage, anchorId);
   return element ? blockContentText(element, limit) : '';
 }
 
@@ -502,7 +502,7 @@ export interface SelectionEvent {
  * intermediate selection.
  */
 export function watchSelection(
-  planDoc: Element,
+  docPage: Element,
   onSelect: (event: SelectionEvent | null) => void,
 ): () => void {
   const controller = new AbortController();
@@ -516,12 +516,12 @@ export function watchSelection(
 
     const selection = window.getSelection();
     const anchorNode = selection?.anchorNode;
-    if (!anchorNode || !planDoc.contains(anchorNode)) {
+    if (!anchorNode || !docPage.contains(anchorNode)) {
       onSelect(null);
       return;
     }
 
-    const range = serializeSelection(planDoc);
+    const range = serializeSelection(docPage);
     if (!range || !selection || selection.rangeCount === 0) {
       onSelect(null);
       return;

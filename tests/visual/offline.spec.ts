@@ -2,7 +2,7 @@
  * Acceptance 3 and 6, end to end, against a real `file://` document.
  *
  * why this lives with the Playwright suite rather than with the browser unit
- * tests: those run the *source* through Vite. This one runs `plankit build`,
+ * tests: those run the *source* through Vite. This one runs `forgedoc build`,
  * opens the resulting single file from disk with **every network request
  * blocked**, and drives it like a reader would. It is the only test that
  * exercises the primary delivery mode as delivered.
@@ -17,13 +17,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { expect, type Page, test } from '@playwright/test';
 
 const CLI = fileURLToPath(new URL('../../dist/cli.js', import.meta.url));
-const FIXTURE = fileURLToPath(new URL('../fixtures/offline-plan.html', import.meta.url));
+const FIXTURE = fileURLToPath(new URL('../fixtures/offline-doc.html', import.meta.url));
 
 let workspace: string;
 let builtFile: string;
 
 test.beforeAll(() => {
-  workspace = mkdtempSync(join(tmpdir(), 'plankit-offline-'));
+  workspace = mkdtempSync(join(tmpdir(), 'forgedoc-offline-'));
   builtFile = join(workspace, 'offline.built.html');
   // `--offline` is explicit: the default flavour links a pinned CDN, which is
   // exactly what this suite blocks. Without the flag every assertion below
@@ -54,7 +54,7 @@ async function openOffline(page: Page): Promise<{ attempted: string[]; errors: s
   });
 
   await page.goto(pathToFileURL(builtFile).href);
-  await page.locator('plan-doc[data-plan-up]').waitFor();
+  await page.locator('doc-page[data-doc-up]').waitFor();
   return { attempted, errors };
 }
 
@@ -68,29 +68,29 @@ test('opens from file:// with no network and no errors', async ({ page }) => {
 test('derives numbering, ids, letter keys and the TOC', async ({ page }) => {
   await openOffline(page);
 
-  await expect(page.locator('plan-section').first()).toHaveAttribute('data-number', '1');
-  await expect(page.locator('plan-section').first()).toHaveAttribute(
+  await expect(page.locator('doc-section').first()).toHaveAttribute('data-number', '1');
+  await expect(page.locator('doc-section').first()).toHaveAttribute(
     'id',
     'sec-what-is-being-checked',
   );
-  await expect(page.locator('plan-toc [data-part="entry"]')).toHaveCount(2);
+  await expect(page.locator('doc-toc [data-part="entry"]')).toHaveCount(2);
 
   const keys = await page
-    .locator('plan-option')
+    .locator('doc-option')
     .evaluateAll((options) => options.map((option) => (option as HTMLElement).dataset.key));
   expect(keys).toEqual(['A', 'B', 'O']);
 });
 
 /*
  * MUST (§5.4 / §8.2): the global is the API. The IIFE wrapper makes the module
- * namespace *be* `window.PlanKit`, so `PlanKit.chips.add(…)` — the call
+ * namespace *be* `window.ForgeDoc`, so `ForgeDoc.chips.add(…)` — the call
  * documented in SKILL.md — has to resolve without an extra hop.
  */
 test('exposes the documented global API', async ({ page }) => {
   await openOffline(page);
 
   const api = await page.evaluate(() => {
-    const kit = (window as unknown as { PlanKit?: Record<string, unknown> }).PlanKit;
+    const kit = (window as unknown as { ForgeDoc?: Record<string, unknown> }).ForgeDoc;
     return {
       version: typeof kit?.version,
       chipsAdd: typeof (kit?.chips as { add?: unknown })?.add,
@@ -107,51 +107,51 @@ test('exposes the documented global API', async ({ page }) => {
   });
 });
 
-test('stamps the version onto plan-doc', async ({ page }) => {
+test('stamps the version onto doc-page', async ({ page }) => {
   await openOffline(page);
-  await expect(page.locator('plan-doc')).toHaveAttribute('data-plankit', /^\d+\.\d+\.\d+/);
+  await expect(page.locator('doc-page')).toHaveAttribute('data-forgedoc', /^\d+\.\d+\.\d+/);
 });
 
 test('keeps an answer across a reload', async ({ page }) => {
   await openOffline(page);
 
   await expect(page.locator('[data-part="bucket-count"]')).toHaveText('0');
-  await page.locator('plan-option').first().click();
+  await page.locator('doc-option').first().click();
   await expect(page.locator('[data-part="bucket-count"]')).toHaveText('1');
 
   // The store debounces writes; give it its window before navigating away.
   await page.waitForTimeout(400);
   await page.reload();
-  await page.locator('plan-doc[data-plan-up]').waitFor();
+  await page.locator('doc-page[data-doc-up]').waitFor();
 
-  await expect(page.locator('plan-option input').first()).toBeChecked();
+  await expect(page.locator('doc-option input').first()).toBeChecked();
   await expect(page.locator('[data-part="bucket-count"]')).toHaveText('1');
 });
 
 test('produces a valid FB v1 block from the panel', async ({ page }) => {
   await openOffline(page);
-  await page.locator('plan-option').first().click();
+  await page.locator('doc-option').first().click();
   await page.waitForTimeout(400);
 
   const block = await page.evaluate(() => {
     const kit = window as unknown as {
-      PlanKit: {
+      ForgeDoc: {
         serializeBucket: (doc: unknown) => string;
         store: () => { get: (key: string) => unknown } | null;
       };
     };
-    const planDoc = document.querySelector('plan-doc');
-    const store = kit.PlanKit.store();
-    if (!planDoc || !store) return '';
+    const docPage = document.querySelector('doc-page');
+    const store = kit.ForgeDoc.store();
+    if (!docPage || !store) return '';
 
-    return kit.PlanKit.serializeBucket({
-      planId: store.get('planId'),
+    return kit.ForgeDoc.serializeBucket({
+      docId: store.get('docId'),
       timestamp: '2026-07-28T10:22:31Z',
       entries: [
         {
           kind: 'answer',
-          anchorId: document.querySelector('plan-choice')?.id ?? '',
-          question: document.querySelector('plan-choice')?.getAttribute('question') ?? '',
+          anchorId: document.querySelector('doc-choice')?.id ?? '',
+          question: document.querySelector('doc-choice')?.getAttribute('question') ?? '',
           labels: ['Yes — bundle it'],
         },
       ],

@@ -8,8 +8,8 @@
  * authoritative over the option key when the two disagree.
  */
 
-import type { PlanChoice } from '../components/plan-choice.js';
-import type { PlanState, PlanStore } from '../core/types.js';
+import type { DocChoice } from '../components/doc-choice.js';
+import type { DocState, DocStore } from '../core/types.js';
 import type { BucketAnswer, BucketComment, BucketDocument, BucketEntry } from './serialize.js';
 
 /** ISO 8601 to seconds precision. Milliseconds add noise to a human-read file. */
@@ -19,29 +19,29 @@ export function timestampNow(): string {
 
 /** Everything the reader has said about this document, in document order. */
 export function collectBucket(
-  planDoc: Element,
-  state: PlanState,
+  docPage: Element,
+  state: DocState,
   timestamp: string = timestampNow(),
 ): BucketDocument {
   return {
-    planId: state.planId,
+    docId: state.docId,
     timestamp,
-    entries: [...collectAnswers(planDoc, state), ...collectComments(state)],
+    entries: [...collectAnswers(docPage, state), ...collectComments(state)],
   };
 }
 
 /** Answered questions, in document order. Exported so the panel can list them. */
-export function collectAnswers(planDoc: Element, state: PlanState): BucketAnswer[] {
+export function collectAnswers(docPage: Element, state: DocState): BucketAnswer[] {
   const entries: BucketAnswer[] = [];
 
-  for (const element of Array.from(planDoc.querySelectorAll('plan-choice'))) {
+  for (const element of Array.from(docPage.querySelectorAll('doc-choice'))) {
     const stored = state.answers[element.id];
     if (!stored) continue;
     if (stored.keys.length === 0 && !stored.note) continue;
 
     // Duck-typed rather than instanceof: the element may not have upgraded yet
     // when tooling calls this, and the store still holds a usable answer.
-    const choice = element as unknown as PlanChoice;
+    const choice = element as unknown as DocChoice;
     const labels =
       typeof choice.labelsForKeys === 'function' ? choice.labelsForKeys(stored.keys) : stored.keys;
 
@@ -58,7 +58,7 @@ export function collectAnswers(planDoc: Element, state: PlanState): BucketAnswer
 }
 
 /** Reader comments, in the order they were made. */
-export function collectComments(state: PlanState): BucketComment[] {
+export function collectComments(state: DocState): BucketComment[] {
   return state.feedback.map((item) => ({
     kind: 'comment' as const,
     anchorId: item.range.anchorId,
@@ -69,14 +69,14 @@ export function collectComments(state: PlanState): BucketComment[] {
 }
 
 /** Number of things the reader has contributed, for the trigger's count badge. */
-export function bucketCount(planDoc: Element, state: PlanState): number {
-  return collectAnswers(planDoc, state).length + state.feedback.length;
+export function bucketCount(docPage: Element, state: DocState): number {
+  return collectAnswers(docPage, state).length + state.feedback.length;
 }
 
 export type { BucketEntry };
 
 /** Drop answers and feedback, leaving reading convenience state alone. */
-export function clearBucket(store: PlanStore): void {
+export function clearBucket(store: DocStore): void {
   store.set('answers', {});
   store.set('feedback', []);
 }

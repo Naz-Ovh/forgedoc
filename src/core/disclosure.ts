@@ -10,7 +10,7 @@
  *   · find-in-page      → `hidden="until-found"` plus the `beforematch` event
  *   · print expansion   → `print.css` force-expands every disclosure (§8.8)
  *
- * Used by `plan-collapse`, `plan-stage` and `plan-tabs` — three occurrences, so
+ * Used by `doc-collapse`, `doc-stage` and `doc-tabs` — three occurrences, so
  * extracting it is warranted (§12).
  */
 
@@ -26,7 +26,7 @@ const UNTIL_FOUND = 'until-found';
 export function setContentHidden(owner: Element, hidden: boolean): void {
   for (const child of Array.from(owner.children)) {
     if (!(child instanceof HTMLElement)) continue;
-    if (child.dataset.planChrome !== undefined) continue;
+    if (child.dataset.docChrome !== undefined) continue;
 
     if (!hidden) {
       child.removeAttribute('hidden');
@@ -52,7 +52,7 @@ export function revealOnFindInPage(owner: Element, reveal: () => void): void {
 export function isContentHidden(owner: Element): boolean {
   for (const child of Array.from(owner.children)) {
     if (!(child instanceof HTMLElement)) continue;
-    if (child.dataset.planChrome !== undefined) continue;
+    if (child.dataset.docChrome !== undefined) continue;
     if (child.hasAttribute('hidden')) return true;
   }
   return false;

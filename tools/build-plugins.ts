@@ -27,11 +27,11 @@ export const mermaidSource = (variantName: string, modulePath: string): ResolveP
   // MUST be unique per variant: rolldown merges plugins that share a name, so a
   // single shared name silently gives every variant whichever instance sorts
   // first — three byte-identical bundles that all ship the cdn source.
-  name: `plankit:mermaid-source:${variantName}`,
+  name: `forgedoc:mermaid-source:${variantName}`,
   resolveId: (id) => (id === '@mermaid-source' ? modulePath : null),
 });
 
-const ENV = '\0plankit:env:';
+const ENV = '\0forgedoc:env:';
 
 /**
  * Resolve Svelte's environment flags to literals so its dev code can be
@@ -63,7 +63,7 @@ const ENV = '\0plankit:env:';
  * 90 bytes of the output this plugin produces.
  */
 export const productionEnv: ResolvePlugin = {
-  name: 'plankit:production-env',
+  name: 'forgedoc:production-env',
   resolveId: (id) => {
     if (id === 'esm-env/development') return `${ENV}false`;
     if (id === 'esm-env/browser') return `${ENV}true`;

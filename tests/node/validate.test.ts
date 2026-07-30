@@ -24,9 +24,9 @@ const ruleIds = (diagnostics: readonly Diagnostic[]): string[] =>
 
 /** Each broken fixture, the rule it must trigger, and where. */
 const BROKEN_CASES = [
-  { file: 'no-plan-doc.html', ruleId: 'doc/missing', line: 1 },
-  { file: 'missing-plan-id.html', ruleId: 'doc/missing-plan-id', line: 3 },
-  { file: 'duplicate-plan-doc.html', ruleId: 'doc/duplicate', line: 6 },
+  { file: 'no-doc-page.html', ruleId: 'doc/missing', line: 1 },
+  { file: 'missing-doc-id.html', ruleId: 'doc/missing-doc-id', line: 3 },
+  { file: 'duplicate-doc-page.html', ruleId: 'doc/duplicate', line: 6 },
   { file: 'one-option.html', ruleId: 'choice/too-few-options', line: 5 },
   { file: 'blocker-without-action.html', ruleId: 'child/missing-required', line: 5 },
   { file: 'term-without-href.html', ruleId: 'attr/missing-required', line: 5 },
@@ -95,12 +95,12 @@ describe('validator — the kitchen sink', () => {
 });
 
 describe('validator — warnings', () => {
-  const WITH_WARNINGS = `<plan-doc plan-id="warned">
-  <plan-section title="Same name"><p>One.</p></plan-section>
-  <plan-section title="Same name"><p>Two.</p></plan-section>
-  <plan-figure type="svg"><svg></svg></plan-figure>
-  <plan-note kind="info" style="--plan-space-unit: 3px"><p>Inline style.</p></plan-note>
-</plan-doc>`;
+  const WITH_WARNINGS = `<doc-page doc-id="warned">
+  <doc-section title="Same name"><p>One.</p></doc-section>
+  <doc-section title="Same name"><p>Two.</p></doc-section>
+  <doc-figure type="svg"><svg></svg></doc-figure>
+  <doc-note kind="info" style="--doc-space-unit: 3px"><p>Inline style.</p></doc-note>
+</doc-page>`;
 
   it('warns without failing the build', () => {
     const result = validateHtml(WITH_WARNINGS, { file: 'warnings.html' });
@@ -118,12 +118,12 @@ describe('validator — warnings', () => {
   });
 
   it('warns on a section nested deeper than three levels', () => {
-    const tooDeep = `<plan-doc plan-id="deep">
-  <plan-section title="One"><plan-section title="Two"><plan-section title="Three">
-    <plan-section title="Four"><p>Too deep.</p></plan-section>
-  </plan-section></plan-section></plan-section>
-  <plan-choice question="Q?"><plan-option>A</plan-option><plan-option>B</plan-option></plan-choice>
-</plan-doc>`;
+    const tooDeep = `<doc-page doc-id="deep">
+  <doc-section title="One"><doc-section title="Two"><doc-section title="Three">
+    <doc-section title="Four"><p>Too deep.</p></doc-section>
+  </doc-section></doc-section></doc-section>
+  <doc-choice question="Q?"><doc-option>A</doc-option><doc-option>B</doc-option></doc-choice>
+</doc-page>`;
 
     const result = validateHtml(tooDeep, { file: 'deep.html' });
     expect(ruleIds(result.diagnostics)).toContain('section/too-deep');

@@ -1,4 +1,4 @@
-# PlanKit reference
+# ForgeDoc reference
 
 The complete per-component API. For the one-page version an authoring agent
 should keep open, see [CHEATSHEET.md](./CHEATSHEET.md).
@@ -18,27 +18,27 @@ internal and will change.
   element of their own. In the recommended authoring form that content arrives as
   a bare text node, and wrapping it would mean moving author content, which the
   runtime never does. Those components carry the typography on the host element
-  instead — style `plan-quote` itself, not `plan-quote [data-part="body"]`.
+  instead — style `doc-quote` itself, not `doc-quote [data-part="body"]`.
 
 ## The three override tiers
 
 In order of preference (§6.6):
 
-1. **Preset attributes** — `<plan-doc density="compact">`. Validated against an
+1. **Preset attributes** — `<doc-page density="compact">`. Validated against an
    enum, switchable at runtime with one `setAttribute`, and reachable from the
    print stylesheet.
-2. **Token override** — `plan-note { --plan-accent-600: #8b5cf6 }`. Semantic, and
+2. **Token override** — `doc-note { --doc-accent-600: #8b5cf6 }`. Semantic, and
    survives a library upgrade. Custom properties inherit, so this works on any
-   subtree: `<plan-table style="--plan-space-unit: 3px">`.
-3. **Raw CSS** — `plan-note [data-part="title"] { letter-spacing: .02em }`.
+   subtree: `<doc-table style="--doc-space-unit: 3px">`.
+3. **Raw CSS** — `doc-note [data-part="title"] { letter-spacing: .02em }`.
 
 Tier 3 needs no `!important` and no specificity arithmetic. Every rule the
-library ships lives inside `@layer plan.*`, and unlayered author CSS beats layered
+library ships lives inside `@layer doc.*`, and unlayered author CSS beats layered
 CSS outright:
 
 ```css
 /* wins against every shipped rule */
-plan-note {
+doc-note {
   border-radius: 0;
 }
 ```

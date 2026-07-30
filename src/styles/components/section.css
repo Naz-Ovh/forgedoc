@@ -1,5 +1,5 @@
 /*
- * `plan-section` — hierarchical numbering.
+ * `doc-section` — hierarchical numbering.
  *
  * MUST (§8.1): the number is at least as large as its heading text and shrinks
  * with depth. It is never small chrome beside a big heading.
@@ -11,95 +11,95 @@
  * way to keep the three levels independent.
  */
 
-@layer plan.components {
-  plan-doc {
-    counter-reset: plan-sec-1 plan-sec-2 plan-sec-3;
+@layer doc.components {
+  doc-page {
+    counter-reset: doc-sec-1 doc-sec-2 doc-sec-3;
   }
 
-  plan-section[data-depth="1"] {
-    counter-increment: plan-sec-1;
-    counter-reset: plan-sec-2 plan-sec-3;
+  doc-section[data-depth="1"] {
+    counter-increment: doc-sec-1;
+    counter-reset: doc-sec-2 doc-sec-3;
   }
 
-  plan-section[data-depth="2"] {
-    counter-increment: plan-sec-2;
-    counter-reset: plan-sec-3;
+  doc-section[data-depth="2"] {
+    counter-increment: doc-sec-2;
+    counter-reset: doc-sec-3;
   }
 
-  plan-section[data-depth="3"] {
-    counter-increment: plan-sec-3;
+  doc-section[data-depth="3"] {
+    counter-increment: doc-sec-3;
   }
 
-  plan-section {
-    margin-block-start: var(--plan-space-10);
-    scroll-margin-block-start: var(--plan-space-6);
+  doc-section {
+    margin-block-start: var(--doc-space-10);
+    scroll-margin-block-start: var(--doc-space-6);
   }
 
-  plan-section plan-section {
-    margin-block-start: var(--plan-space-8);
+  doc-section doc-section {
+    margin-block-start: var(--doc-space-8);
   }
 
-  plan-section > [data-part="heading"] {
+  doc-section > [data-part="heading"] {
     display: flex;
     align-items: baseline;
-    gap: var(--plan-space-3);
-    margin-block-end: var(--plan-space-4);
+    gap: var(--doc-space-3);
+    margin-block-end: var(--doc-space-4);
     font-weight: 660;
   }
 
-  plan-section > [data-part="heading"] [data-part="number"] {
+  doc-section > [data-part="heading"] [data-part="number"] {
     flex: none;
-    color: var(--plan-accent-line);
-    font-variant-numeric: var(--plan-numeric);
+    color: var(--doc-accent-line);
+    font-variant-numeric: var(--doc-numeric);
     font-weight: 700;
     letter-spacing: -0.03em;
   }
 
   /* Counter mode: the digits are rendered by CSS, one selector per depth. */
-  plan-section[data-depth="1"]
+  doc-section[data-depth="1"]
     > [data-part="heading"]
     [data-part="number"]:not([data-numbering-mode])::before {
-    content: counter(plan-sec-1);
+    content: counter(doc-sec-1);
   }
 
-  plan-section[data-depth="2"]
+  doc-section[data-depth="2"]
     > [data-part="heading"]
     [data-part="number"]:not([data-numbering-mode])::before {
-    content: counter(plan-sec-1) "." counter(plan-sec-2);
+    content: counter(doc-sec-1) "." counter(doc-sec-2);
   }
 
-  plan-section[data-depth="3"]
+  doc-section[data-depth="3"]
     > [data-part="heading"]
     [data-part="number"]:not([data-numbering-mode])::before {
-    content: counter(plan-sec-1) "." counter(plan-sec-2) "." counter(plan-sec-3);
+    content: counter(doc-sec-1) "." counter(doc-sec-2) "." counter(doc-sec-3);
   }
 
   /* Depth 1 is the largest; the number leads, never trails. */
-  plan-section[data-depth="1"] > [data-part="heading"] {
-    font-size: var(--plan-text-2xl);
+  doc-section[data-depth="1"] > [data-part="heading"] {
+    font-size: var(--doc-text-2xl);
   }
 
-  plan-section[data-depth="1"] > [data-part="heading"] [data-part="number"] {
-    font-size: var(--plan-text-3xl);
+  doc-section[data-depth="1"] > [data-part="heading"] [data-part="number"] {
+    font-size: var(--doc-text-3xl);
   }
 
-  plan-section[data-depth="2"] > [data-part="heading"] {
-    font-size: var(--plan-text-xl);
+  doc-section[data-depth="2"] > [data-part="heading"] {
+    font-size: var(--doc-text-xl);
   }
 
-  plan-section[data-depth="2"] > [data-part="heading"] [data-part="number"] {
-    font-size: var(--plan-text-xl);
+  doc-section[data-depth="2"] > [data-part="heading"] [data-part="number"] {
+    font-size: var(--doc-text-xl);
   }
 
-  plan-section[data-depth="3"] > [data-part="heading"] {
-    font-size: var(--plan-text-lg);
+  doc-section[data-depth="3"] > [data-part="heading"] {
+    font-size: var(--doc-text-lg);
   }
 
-  plan-section[data-depth="3"] > [data-part="heading"] [data-part="number"] {
-    font-size: var(--plan-text-lg);
+  doc-section[data-depth="3"] > [data-part="heading"] [data-part="number"] {
+    font-size: var(--doc-text-lg);
   }
 
-  plan-section > [data-part="body"] + [data-part="body"] {
-    margin-block-start: var(--plan-space-3);
+  doc-section > [data-part="body"] + [data-part="body"] {
+    margin-block-start: var(--doc-space-3);
   }
 }

@@ -6,20 +6,20 @@ import { describe, expect, it } from 'vitest';
 
 import { InjectionError, injectAssets, usesMermaid } from '../../tools/inject.js';
 
-const SOURCE = `<plan-doc plan-id="x"></plan-doc>
-<style>/*@PLAN_CSS@*/</style>
-<script>//@PLAN_JS@</script>`;
+const SOURCE = `<doc-page doc-id="x"></doc-page>
+<style>/*@DOC_CSS@*/</style>
+<script>//@DOC_JS@</script>`;
 
-/** The canonical shape `plankit new` writes: styles in <head>, script last. */
+/** The canonical shape `forgedoc new` writes: styles in <head>, script last. */
 const DOCUMENT = `<!doctype html>
 <html lang="en">
 <head>
 <title>x</title>
-<style>/*@PLAN_CSS@*/</style>
+<style>/*@DOC_CSS@*/</style>
 </head>
 <body>
-<plan-doc plan-id="x"></plan-doc>
-<script>//@PLAN_JS@</script>
+<doc-page doc-id="x"></doc-page>
+<script>//@DOC_JS@</script>
 </body>
 </html>`;
 
@@ -34,9 +34,9 @@ const LEGACY_DOCUMENT = `<!doctype html>
 <title>x</title>
 </head>
 <body>
-<plan-doc plan-id="x"></plan-doc>
-<style>/*@PLAN_CSS@*/</style>
-<script>//@PLAN_JS@</script>
+<doc-page doc-id="x"></doc-page>
+<style>/*@DOC_CSS@*/</style>
+<script>//@DOC_JS@</script>
 </body>
 </html>`;
 
@@ -45,12 +45,12 @@ const link = (cssHref: string, jsSrc: string) => ({ mode: 'link', cssHref, jsSrc
 
 describe('injectAssets', () => {
   it('replaces both placeholders', () => {
-    const output = injectAssets(SOURCE, embed('plan-doc{color:red}', 'console.log(1)'));
+    const output = injectAssets(SOURCE, embed('doc-page{color:red}', 'console.log(1)'));
 
-    expect(output).toContain('<style>plan-doc{color:red}</style>');
+    expect(output).toContain('<style>doc-page{color:red}</style>');
     expect(output).toContain('<script>console.log(1)</script>');
-    expect(output).not.toContain('@PLAN_CSS@');
-    expect(output).not.toContain('@PLAN_JS@');
+    expect(output).not.toContain('@DOC_CSS@');
+    expect(output).not.toContain('@DOC_JS@');
   });
 
   /*
@@ -59,30 +59,30 @@ describe('injectAssets', () => {
    * problem, so the embedded <style> is hoisted too.
    */
   it('keeps the embedded styles in <head> and the script last', () => {
-    const output = injectAssets(DOCUMENT, embed('plan-doc{color:red}', 'console.log(1)'));
+    const output = injectAssets(DOCUMENT, embed('doc-page{color:red}', 'console.log(1)'));
 
-    expect(output.indexOf('<style>plan-doc{color:red}</style>')).toBeLessThan(
+    expect(output.indexOf('<style>doc-page{color:red}</style>')).toBeLessThan(
       output.indexOf('</head>'),
     );
     expect(output.indexOf('<script>console.log(1)</script>')).toBeGreaterThan(
-      output.indexOf('<plan-doc'),
+      output.indexOf('<doc-page'),
     );
     // Lifted and re-emitted, not copied: exactly one stylesheet in the output.
     expect(output.split('<style>').length - 1).toBe(1);
   });
 
   it('hoists the styles out of a body-end placeholder written the old way', () => {
-    const output = injectAssets(LEGACY_DOCUMENT, embed('plan-doc{color:red}', 'console.log(1)'));
+    const output = injectAssets(LEGACY_DOCUMENT, embed('doc-page{color:red}', 'console.log(1)'));
 
-    expect(output.indexOf('<style>plan-doc{color:red}</style>')).toBeLessThan(
+    expect(output.indexOf('<style>doc-page{color:red}</style>')).toBeLessThan(
       output.indexOf('</head>'),
     );
     expect(output.split('<style>').length - 1).toBe(1);
-    expect(output).not.toContain('@PLAN_CSS@');
+    expect(output).not.toContain('@DOC_CSS@');
   });
 
   it('does not treat $& in the embedded CSS as a replacement pattern', () => {
-    const hostile = 'plan-doc{--a:"$&";--b:"$1";--c:"$\'";--d:"$$"}';
+    const hostile = 'doc-page{--a:"$&";--b:"$1";--c:"$\'";--d:"$$"}';
     const output = injectAssets(DOCUMENT, embed(hostile, ''));
 
     expect(output).toContain(`<style>${hostile}</style>`);
@@ -104,14 +104,14 @@ describe('injectAssets', () => {
   });
 
   it('explains what to add when a placeholder is missing', () => {
-    expect(() => injectAssets('<plan-doc plan-id="x"></plan-doc>', embed('', ''))).toThrow(
+    expect(() => injectAssets('<doc-page doc-id="x"></doc-page>', embed('', ''))).toThrow(
       InjectionError,
     );
 
     try {
-      injectAssets('<plan-doc plan-id="x"></plan-doc>', embed('', ''));
+      injectAssets('<doc-page doc-id="x"></doc-page>', embed('', ''));
     } catch (error) {
-      expect((error as InjectionError).fix).toContain('<style>/*@PLAN_CSS@*/</style>');
+      expect((error as InjectionError).fix).toContain('<style>/*@DOC_CSS@*/</style>');
     }
   });
 
@@ -121,8 +121,8 @@ describe('injectAssets', () => {
 
       expect(output).toContain('<link rel="stylesheet" href="https://cdn/x.css">');
       expect(output).toContain('<script src="https://cdn/x.js" defer></script>');
-      expect(output).not.toContain('@PLAN_CSS@');
-      expect(output).not.toContain('@PLAN_JS@');
+      expect(output).not.toContain('@DOC_CSS@');
+      expect(output).not.toContain('@DOC_JS@');
       // The empty <style> shell must go too, not just its contents.
       expect(output).not.toContain('<style>');
     });
@@ -147,7 +147,7 @@ describe('injectAssets', () => {
     });
 
     it('still refuses a document with no placeholders', () => {
-      expect(() => injectAssets('<plan-doc plan-id="x"></plan-doc>', link('a', 'b'))).toThrow(
+      expect(() => injectAssets('<doc-page doc-id="x"></doc-page>', link('a', 'b'))).toThrow(
         InjectionError,
       );
     });
@@ -156,15 +156,15 @@ describe('injectAssets', () => {
 
 describe('usesMermaid', () => {
   it('finds a Mermaid figure however the attributes are ordered', () => {
-    expect(usesMermaid('<plan-figure type="mermaid">')).toBe(true);
-    expect(usesMermaid('<plan-figure caption="x" type="mermaid">')).toBe(true);
-    expect(usesMermaid("<plan-figure type='mermaid'>")).toBe(true);
-    expect(usesMermaid('<plan-figure\n  type="mermaid"\n>')).toBe(true);
+    expect(usesMermaid('<doc-figure type="mermaid">')).toBe(true);
+    expect(usesMermaid('<doc-figure caption="x" type="mermaid">')).toBe(true);
+    expect(usesMermaid("<doc-figure type='mermaid'>")).toBe(true);
+    expect(usesMermaid('<doc-figure\n  type="mermaid"\n>')).toBe(true);
   });
 
   it('does not fire on other figure types or on the word alone', () => {
-    expect(usesMermaid('<plan-figure type="svg">')).toBe(false);
+    expect(usesMermaid('<doc-figure type="svg">')).toBe(false);
     expect(usesMermaid('<p>We considered mermaid and rejected it.</p>')).toBe(false);
-    expect(usesMermaid('<plan-figure type="mermaidish">')).toBe(false);
+    expect(usesMermaid('<doc-figure type="mermaidish">')).toBe(false);
   });
 });

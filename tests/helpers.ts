@@ -8,26 +8,26 @@
  * children exist at upgrade time.
  */
 
-/** Build a `plan-doc` from markup and attach it, returning the upgraded root. */
-export function mountPlan(innerMarkup: string, attributes = 'plan-id="test-plan"'): HTMLElement {
+/** Build a `doc-page` from markup and attach it, returning the upgraded root. */
+export function mountPlan(innerMarkup: string, attributes = 'doc-id="test-plan"'): HTMLElement {
   const holder = document.createElement('div');
-  holder.innerHTML = `<plan-doc ${attributes}>${innerMarkup}</plan-doc>`;
+  holder.innerHTML = `<doc-page ${attributes}>${innerMarkup}</doc-page>`;
 
-  const planDoc = holder.firstElementChild as HTMLElement;
-  document.body.append(planDoc);
-  return planDoc;
+  const docPage = holder.firstElementChild as HTMLElement;
+  document.body.append(docPage);
+  return docPage;
 }
 
 /** Mount, then run the runtime over the same document a second time. */
 export function mountTwice(innerMarkup: string, attributes?: string): HTMLElement {
-  const planDoc = mountPlan(innerMarkup, attributes);
+  const docPage = mountPlan(innerMarkup, attributes);
 
   // MUST (§7.2): re-running the runtime on a live document changes nothing.
   // Re-attaching fires connectedCallback again on every element in the subtree.
-  planDoc.remove();
-  document.body.append(planDoc);
-  customElements.upgrade(planDoc);
-  return planDoc;
+  docPage.remove();
+  document.body.append(docPage);
+  customElements.upgrade(docPage);
+  return docPage;
 }
 
 /** Every element and text node in the subtree, for identity comparisons. */
@@ -51,7 +51,7 @@ export function snapshotNodes(root: Element): Node[] {
 export function authorNodesOf(root: Element): Node[] {
   return snapshotNodes(root).filter((node) => {
     if (!(node instanceof HTMLElement)) return true;
-    return node.dataset.planChrome === undefined;
+    return node.dataset.docChrome === undefined;
   });
 }
 

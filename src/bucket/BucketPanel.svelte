@@ -10,7 +10,7 @@
    */
   
   import { BLOCK_FEEDBACK_EVENT, type BlockFeedbackDetail } from '../core/feedback.js';
-  import type { FeedbackItem, PlanState, PlanStore } from '../core/types.js';
+  import type { DocState, DocStore, FeedbackItem } from '../core/types.js';
 import BucketDetail from './BucketDetail.svelte';
   import BucketItem from './BucketItem.svelte';
   import { clearBucket, collectAnswers, collectBucket, timestampNow } from './collect.js';
@@ -27,11 +27,11 @@ import BucketDetail from './BucketDetail.svelte';
   import { serializeBucket } from './serialize.js';
 
   interface Props {
-    planDoc: HTMLElement;
-    store: PlanStore;
+    docPage: HTMLElement;
+    store: DocStore;
   }
 
-  const { planDoc, store }: Props = $props();
+  const { docPage, store }: Props = $props();
 
   let panelOpen = $state(false);
   let pendingSelection = $state<SelectionEvent | null>(null);
@@ -49,14 +49,14 @@ import BucketDetail from './BucketDetail.svelte';
    * unsubscribe function, which is exactly what Svelte requires, so there is no
    * adapter, no wrapper store and no manual lifecycle here.
    */
-  const planState = $derived<PlanState>($store);
+  const docState = $derived<DocState>($store);
 
-  $effect(() => watchSelection(planDoc, (event) => (pendingSelection = event)));
+  $effect(() => watchSelection(docPage, (event) => (pendingSelection = event)));
 
   /*
    * A block's own button opens the same composer as a text selection.
    *
-   * why an event rather than the components calling in: `plan-figure` should not
+   * why an event rather than the components calling in: `doc-figure` should not
    * know the bucket exists, and the bucket should not have to enumerate which
    * tags can be commented on. One bubbling event and neither side has to change
    * when the other does.
@@ -64,24 +64,24 @@ import BucketDetail from './BucketDetail.svelte';
   $effect(() => {
     const handler = (event: Event): void => {
       const block = (event as CustomEvent<BlockFeedbackDetail>).detail;
-      const element = planDoc.querySelector(`#${CSS.escape(block.anchorId)}`);
+      const element = docPage.querySelector(`#${CSS.escape(block.anchorId)}`);
 
       draftComment = '';
       pendingSelection = {
         range: { anchorId: block.anchorId, start: 0, end: 0, quote: block.label },
         rect: block.rect,
-        at: locationLabel(element ?? planDoc),
+        at: locationLabel(element ?? docPage),
         scope: 'block',
       };
     };
 
-    planDoc.addEventListener(BLOCK_FEEDBACK_EVENT, handler);
-    return () => planDoc.removeEventListener(BLOCK_FEEDBACK_EVENT, handler);
+    docPage.addEventListener(BLOCK_FEEDBACK_EVENT, handler);
+    return () => docPage.removeEventListener(BLOCK_FEEDBACK_EVENT, handler);
   });
 
   // Repaint whenever the feedback list, the open detail or the draft changes.
   $effect(() => {
-    paintHighlights(planDoc, planState.feedback, {
+    paintHighlights(docPage, docState.feedback, {
       activeId: openDetailId,
       pending: pendingSelection
         ? { range: pendingSelection.range, scope: pendingSelection.scope }
@@ -96,21 +96,21 @@ import BucketDetail from './BucketDetail.svelte';
     if (pendingSelection && composer) composer.focus();
   });
 
-  const answers = $derived(collectAnswers(planDoc, planState));
-  const comments = $derived(planState.feedback);
+  const answers = $derived(collectAnswers(docPage, docState));
+  const comments = $derived(docState.feedback);
   const count = $derived(answers.length + comments.length);
   // Anchors that no longer resolve are flagged in the list rather than dropped —
   // a comment the reader wrote is never silently discarded (§9.1).
-  const orphanedIds = $derived(findOrphans(planDoc, planState.feedback));
+  const orphanedIds = $derived(findOrphans(docPage, docState.feedback));
 
   const detail = $derived.by<DetailView | null>(() => {
     if (openDetailId === null) return null;
 
     const answer = answers.find((candidate) => candidate.anchorId === openDetailId);
-    if (answer) return detailForAnswer(planDoc, answer, planState);
+    if (answer) return detailForAnswer(docPage, answer, docState);
 
     const comment = comments.find((candidate) => candidate.id === openDetailId);
-    if (comment) return detailForComment(planDoc, comment, orphanedIds.includes(comment.id));
+    if (comment) return detailForComment(docPage, comment, orphanedIds.includes(comment.id));
 
     // The item was removed while its window was open.
     return null;
@@ -122,7 +122,7 @@ import BucketDetail from './BucketDetail.svelte';
     if (!selection || text === '') return;
 
     const item: FeedbackItem = {
-      id: `fb-${selection.range.anchorId}-${selection.range.start}-${planState.feedback.length}`,
+      id: `fb-${selection.range.anchorId}-${selection.range.start}-${docState.feedback.length}`,
       createdAt: timestampNow(),
       range: selection.range,
       comment: text,
@@ -130,7 +130,7 @@ import BucketDetail from './BucketDetail.svelte';
       ...(selection.scope === 'block' ? { scope: 'block' as const } : {}),
     };
 
-    store.set('feedback', [...planState.feedback, item]);
+    store.set('feedback', [...docState.feedback, item]);
     cancelComment();
   }
 
@@ -151,7 +151,7 @@ import BucketDetail from './BucketDetail.svelte';
   }
 
   function removeAnswer(anchorId: string): void {
-    const remaining = { ...planState.answers };
+    const remaining = { ...docState.answers };
     delete remaining[anchorId];
     store.set('answers', remaining);
     if (openDetailId === anchorId) openDetailId = null;
@@ -160,7 +160,7 @@ import BucketDetail from './BucketDetail.svelte';
   function removeComment(id: string): void {
     store.set(
       'feedback',
-      planState.feedback.filter((item) => item.id !== id),
+      docState.feedback.filter((item) => item.id !== id),
     );
     if (openDetailId === id) openDetailId = null;
   }
@@ -170,10 +170,10 @@ import BucketDetail from './BucketDetail.svelte';
     openDetailId = null;
 
     if (view.kind === 'comment') {
-      revealFeedback(planDoc, planState.feedback, view.id);
+      revealFeedback(docPage, docState.feedback, view.id);
       return;
     }
-    planDoc
+    docPage
       .querySelector(`#${CSS.escape(view.anchorId)}`)
       ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -187,7 +187,7 @@ import BucketDetail from './BucketDetail.svelte';
   }
 
   async function copy(alsoClear: boolean): Promise<void> {
-    const text = serializeBucket(collectBucket(planDoc, planState, timestampNow()));
+    const text = serializeBucket(collectBucket(docPage, docState, timestampNow()));
     try {
       await navigator.clipboard.writeText(text);
       copyLabel = alsoClear ? 'Copied & cleared' : 'Copied';
@@ -202,12 +202,12 @@ import BucketDetail from './BucketDetail.svelte';
 <!--
   MUST (§8.8): the whole bucket is hidden in print. See print.css.
 
-  `data-plan-ui` marks every part of it as the runtime's own interface. The
+  `data-doc-ui` marks every part of it as the runtime's own interface. The
   selection watcher ignores events from inside it — without that, clicking into
   the composer reads as "the reader selected nothing" and closes the composer
   before a single character can be typed.
 -->
-<div data-part="bucket-root" data-plan-ui data-open={panelOpen ? '' : undefined}>
+<div data-part="bucket-root" data-doc-ui data-open={panelOpen ? '' : undefined}>
   <button
     data-part="bucket-trigger"
     type="button"
@@ -295,10 +295,10 @@ import BucketDetail from './BucketDetail.svelte';
 {#if pendingSelection}
   <div
     data-part="bucket-popover"
-    data-plan-ui
+    data-doc-ui
     data-scope={pendingSelection.scope}
-    style="--plan-popover-top: {pendingSelection.rect.bottom + window.scrollY}px;
-           --plan-popover-left: {pendingSelection.rect.left + window.scrollX}px"
+    style="--doc-popover-top: {pendingSelection.rect.bottom + window.scrollY}px;
+           --doc-popover-left: {pendingSelection.rect.left + window.scrollX}px"
   >
     <p data-part="bucket-popover-target">
       Commenting on
@@ -337,7 +337,7 @@ import BucketDetail from './BucketDetail.svelte';
   No <style> block, deliberately.
 
   why (§10.1): panel styles live in `styles/components/bucket.css` inside
-  `@layer plan.components`, where the `--plan-*` tokens reach them and where an
+  `@layer doc.components`, where the `--doc-*` tokens reach them and where an
   author's unlayered CSS still beats them. In *custom element* mode Svelte would
   inline component styles as a JavaScript string instead of emitting CSS at all;
   mounting as a normal component and keeping styles in the sheet avoids that

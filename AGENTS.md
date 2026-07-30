@@ -11,23 +11,23 @@ send a decision back. The workaround is to have the agent hand-write bespoke
 HTML, CSS and JS every time: roughly **25,000 output tokens per plan**,
 inconsistent, and drifting from the intended design on every run.
 
-PlanKit ships the runtime once, so the agent writes **only semantic markup** —
+ForgeDoc ships the runtime once, so the agent writes **only semantic markup** —
 about **4,000 tokens** for the same document. Everything else is derived:
 
 ```html
-<style>/*@PLAN_CSS@*/</style>   <!-- in <head> -->
-<plan-doc plan-id="vendor-orders" accent="teal">
-  <plan-section title="What we are building">…</plan-section>
-  <plan-choice mode="single" question="Should read state be shared?">
-    <plan-option recommended>Yes — shared team inbox</plan-option>
-    <plan-option>No — per-person read state</plan-option>
-  </plan-choice>
-</plan-doc>
-<script>//@PLAN_JS@</script>    <!-- last line of <body> -->
+<style>/*@DOC_CSS@*/</style>   <!-- in <head> -->
+<doc-page doc-id="vendor-orders" accent="teal">
+  <doc-section title="What we are building">…</doc-section>
+  <doc-choice mode="single" question="Should read state be shared?">
+    <doc-option recommended>Yes — shared team inbox</doc-option>
+    <doc-option>No — per-person read state</doc-option>
+  </doc-choice>
+</doc-page>
+<script>//@DOC_JS@</script>    <!-- last line of <body> -->
 ```
 
 No `<style>`, no `<script>`, no classes, no ids, no `A`/`B` keys, no `1.2.1`
-numbers. `plankit build` validates the markup and swaps those two placeholders
+numbers. `forgedoc build` validates the markup and swaps those two placeholders
 for the real runtime, producing **one self-contained `.html`** that opens from
 `file://` with no network. The reader answers inline; the answers persist; they
 press Copy and paste a `=== FB v1 ·` block back to the agent.
@@ -37,9 +37,9 @@ agent regenerates.** Every design decision below serves that loop.
 
 ## Identity
 
-- npm package **`plankit`** · CLI binary `plankit` · IIFE global `PlanKit`
+- npm package **`forgedoc`** · CLI binary `forgedoc` · IIFE global `ForgeDoc`
 - Skill **`better-plan`**, installed with `npx skills add MrBns/plankit`
-- The binary, global and `plankit.*` filenames are documented API — do not rename
+- The binary, global and `forgedoc.*` filenames are documented API — do not rename
 
 ## Commands
 
@@ -55,7 +55,7 @@ npm run test:visual      # adds @pixel screenshot comparison (baselines are loca
 
 **Pixel baselines are not in the repo.** They are generated, so `test:visual`
 needs `npm run test:visual:update` once on a fresh checkout before it can
-compare. CI runs `test:visual:ci`, which needs nothing.
+`test:visual:ci` needs nothing, which is why it is the half worth running.
 
 **Vite does not build.** `npm run build` is tsdown; Vite is the dev server and
 the Vitest runner only, and never writes to `dist/`.
@@ -83,7 +83,7 @@ Every unusual decision traces to one of these. Full rationale in
 ## Layout
 
 ```text
-src/core/          PlanElement base, store, slug, numbering, registry
+src/core/          DocElement base, store, slug, numbering, registry
 src/components/    one file per tag, named exactly after it
 src/bucket/        selection, serialise, and the three .svelte files
 src/styles/        index.css imports 29 files IN ORDER; layers.css first
@@ -93,7 +93,7 @@ docs/              PLAN.md, DECISIONS.md — repo-only, never shipped
 ```
 
 Adding a component touches six places; `tools/gen-reference.mjs` and the
-kitchen-sink fixture both fail CI if you skip them. See PLAN.md §14.
+kitchen-sink fixture both fail `npm test` if you skip them. See PLAN.md §14.
 
 ## Sharp edges
 
@@ -120,10 +120,10 @@ Each of these builds green and produces wrong output. They cost real time.
 - **Every root config file must be in `tsconfig.json` `include`.** One left out
   loses `types: ["node"]`, so `npm run typecheck` passes while the editor
   reports `Cannot find name 'node:fs'`.
-- **`tests/fixtures/` is never formatted.** `plan-code`, `plan-diff` and
-  `plan-tree` render their content verbatim and the validator tests assert exact
+- **`tests/fixtures/` is never formatted.** `doc-code`, `doc-diff` and
+  `doc-tree` render their content verbatim and the validator tests assert exact
   line numbers.
-- **Do not assert on minifier output.** A test pinned to `dataset.plankit="1.0.0"`
+- **Do not assert on minifier output.** A test pinned to `dataset.forgedoc="1.0.0"`
   broke when oxc emitted a template literal instead. Match behaviour, not quoting.
 
 ## Conventions

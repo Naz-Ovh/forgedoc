@@ -36,9 +36,9 @@ const SCHEMES = ['light', 'dark'] as const;
 
 /** Wait until every component has upgraded and Mermaid has drawn. */
 async function ready(page: Page): Promise<void> {
-  await page.waitForFunction(() => customElements.get('plan-doc') !== undefined);
-  await page.locator('plan-doc[data-plan-up]').first().waitFor();
-  await expect(page.locator('plan-figure[type="mermaid"] [data-part="content"] svg')).toBeVisible({
+  await page.waitForFunction(() => customElements.get('doc-page') !== undefined);
+  await page.locator('doc-page[data-doc-up]').first().waitFor();
+  await expect(page.locator('doc-figure[type="mermaid"] [data-part="content"] svg')).toBeVisible({
     timeout: 20_000,
   });
   // Fonts settle after layout; without this the first screenshot of a run
@@ -76,9 +76,9 @@ test('kitchen sink · print hides chrome and expands disclosures', async ({ page
   await page.emulateMedia({ media: 'print' });
 
   await expect(page.locator('[data-part="bucket-trigger"]')).toBeHidden();
-  await expect(page.locator('plan-tabs [data-part="strip"]')).toBeHidden();
-  await expect(page.locator('plan-collapse > [data-part="body"]').first()).toBeVisible();
-  await expect(page.locator('plan-toc [data-part="list"]')).toBeVisible();
+  await expect(page.locator('doc-tabs [data-part="strip"]')).toBeHidden();
+  await expect(page.locator('doc-collapse > [data-part="body"]').first()).toBeVisible();
+  await expect(page.locator('doc-toc [data-part="list"]')).toBeVisible();
 });
 
 test('kitchen sink · print', { tag: '@pixel' }, async ({ page }) => {
@@ -96,14 +96,14 @@ test('the reading column is centred at every width', async ({ page }) => {
 
   // The fixture ships docked, which is the point of the next test. Float it so
   // this one measures the plain centring rule.
-  await page.locator('plan-toc [data-part="dock"]').click();
-  await page.locator('plan-toc [data-part="toggle"]').click();
+  await page.locator('doc-toc [data-part="dock"]').click();
+  await page.locator('doc-toc [data-part="toggle"]').click();
 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
-    const box = await page.locator('plan-header').boundingBox();
-    if (!box) throw new Error('plan-header has no box');
+    const box = await page.locator('doc-header').boundingBox();
+    if (!box) throw new Error('doc-header has no box');
 
     const leftGap = box.x;
     const rightGap = viewport.width - (box.x + box.width);
@@ -130,8 +130,8 @@ test('a docked contents panel pushes the column and re-centres it', async ({ pag
   await page.goto(PAGE);
   await ready(page);
 
-  const rail = await page.locator('plan-toc').boundingBox();
-  const docked = await page.locator('plan-header').boundingBox();
+  const rail = await page.locator('doc-toc').boundingBox();
+  const docked = await page.locator('doc-header').boundingBox();
   if (!rail || !docked) throw new Error('no box');
 
   // Clear of the rail entirely — nothing behind it.
@@ -143,8 +143,8 @@ test('a docked contents panel pushes the column and re-centres it', async ({ pag
   expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(2);
 
   // Floating it puts the column back in the middle of the whole viewport.
-  await page.locator('plan-toc [data-part="dock"]').click();
-  const floating = await page.locator('plan-header').boundingBox();
+  await page.locator('doc-toc [data-part="dock"]').click();
+  const floating = await page.locator('doc-header').boundingBox();
   if (!floating) throw new Error('no box');
   expect(Math.abs(floating.x - (1440 - (floating.x + floating.width)))).toBeLessThanOrEqual(2);
 });
@@ -155,10 +155,10 @@ test('a collapsed contents panel stays the size of its own header', async ({ pag
   await page.goto(PAGE);
   await ready(page);
 
-  await page.locator('plan-toc [data-part="toggle"]').click();
+  await page.locator('doc-toc [data-part="toggle"]').click();
 
-  const collapsed = await page.locator('plan-toc').boundingBox();
-  if (!collapsed) throw new Error('plan-toc has no box');
+  const collapsed = await page.locator('doc-toc').boundingBox();
+  if (!collapsed) throw new Error('doc-toc has no box');
 
   // Before the chrome marker was added this measured ~1296px — 90% of the
   // viewport — because the reading-column rule matched the panel.

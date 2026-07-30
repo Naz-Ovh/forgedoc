@@ -8,10 +8,10 @@
  * whole document would go blank because you refreshed at the wrong moment.
  */
 
-import type { PlanElement } from './base.js';
+import type { DocElement } from './base.js';
 
-type PlanElementConstructor = CustomElementConstructor & {
-  prototype: PlanElement;
+type DocElementConstructor = CustomElementConstructor & {
+  prototype: DocElement;
 };
 
 const registered = new Set<string>();
@@ -22,7 +22,7 @@ const registered = new Set<string>();
  * Returns true when this call performed the registration, so `index.ts` can
  * report how much of the vocabulary is live.
  */
-export function define(tagName: string, elementConstructor: PlanElementConstructor): boolean {
+export function define(tagName: string, elementConstructor: DocElementConstructor): boolean {
   if (registered.has(tagName)) return false;
   registered.add(tagName);
 
@@ -41,7 +41,7 @@ export function registeredTags(): string[] {
  *
  * why (§5.2): elements are defined after the document is parsed, so upgrades
  * normally happen once, synchronously, with all children present. `upgrade()`
- * covers the one case that misses — a `plan-doc` inserted into an already-live
+ * covers the one case that misses — a `doc-page` inserted into an already-live
  * document by tooling or by a test.
  */
 export function upgradeSubtree(root: Element): void {

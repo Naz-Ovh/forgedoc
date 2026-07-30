@@ -14,6 +14,6 @@ run(process.argv.slice(2))
     process.exitCode = code;
   })
   .catch((error: unknown) => {
-    process.stderr.write(`plankit: ${String(error)}\n`);
+    process.stderr.write(`forgedoc: ${String(error)}\n`);
     process.exitCode = 1;
   });

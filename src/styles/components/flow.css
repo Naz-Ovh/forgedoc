@@ -1,23 +1,23 @@
 /*
- * `plan-flow` — the horizontal chain.
+ * `doc-flow` — the horizontal chain.
  *
  * MUST (§8.5): wraps to multiple rows below 1050px, with the arrows rotating to
  * point down rather than dangling at the end of a row.
  */
 
-@layer plan.components {
-  plan-flow {
+@layer doc.components {
+  doc-flow {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
-    gap: var(--plan-space-2);
-    margin-block: var(--plan-space-6);
+    gap: var(--doc-space-2);
+    margin-block: var(--doc-space-6);
   }
 
-  plan-flow [data-part="arrow"] {
+  doc-flow [data-part="arrow"] {
     align-self: center;
-    color: var(--plan-text-3);
-    font-size: var(--plan-text-lg);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-lg);
   }
 
   /*
@@ -27,61 +27,61 @@
    * is no element to name without moving it. The title is generated from an
    * attribute and overrides these values below.
    */
-  plan-flow-node {
+  doc-flow-node {
     flex: 1 1 8rem;
     min-width: 7rem;
-    padding: var(--plan-space-3);
-    border: var(--plan-rule);
-    border-radius: var(--plan-radius);
-    background: var(--plan-surface-1);
-    color: var(--plan-text-3);
-    font-size: var(--plan-text-xs);
-    line-height: var(--plan-leading-tight);
+    padding: var(--doc-space-3);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    line-height: var(--doc-leading-tight);
   }
 
-  plan-flow-node [data-part="title"] {
+  doc-flow-node [data-part="title"] {
     display: block;
-    margin-block-end: var(--plan-space-1);
-    color: var(--plan-text-1);
-    font-size: var(--plan-text-sm);
+    margin-block-end: var(--doc-space-1);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-sm);
     font-weight: 640;
-    line-height: var(--plan-leading-tight);
+    line-height: var(--doc-leading-tight);
   }
 
-  plan-flow-node [data-part="subtitle"] {
+  doc-flow-node [data-part="subtitle"] {
     display: block;
-    margin-block-start: var(--plan-space-1);
-    color: var(--plan-text-3);
-    font-size: var(--plan-text-xs);
-    line-height: var(--plan-leading-tight);
+    margin-block-start: var(--doc-space-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    line-height: var(--doc-leading-tight);
   }
 
   /* The emphasised dark node. */
-  plan-flow-node:state(active) {
-    border-color: var(--plan-accent-line);
-    background: light-dark(var(--plan-accent-900), var(--plan-accent-tint));
-    color: light-dark(#f3fbf8, var(--plan-accent-text));
+  doc-flow-node:state(active) {
+    border-color: var(--doc-accent-line);
+    background: light-dark(var(--doc-accent-900), var(--doc-accent-tint));
+    color: light-dark(#f3fbf8, var(--doc-accent-text));
     print-color-adjust: exact;
   }
 
   /* The title sets an explicit colour, so it has to be told to invert too —
      otherwise it stays dark text on the dark node. */
-  plan-flow-node:state(active) [data-part="title"] {
+  doc-flow-node:state(active) [data-part="title"] {
     color: inherit;
   }
 
-  plan-flow-node:state(active) [data-part="subtitle"] {
-    color: light-dark(var(--plan-accent-200), var(--plan-text-2));
+  doc-flow-node:state(active) [data-part="subtitle"] {
+    color: light-dark(var(--doc-accent-200), var(--doc-text-2));
   }
 
   @media (max-width: 1049px) {
-    plan-flow {
+    doc-flow {
       flex-direction: column;
     }
 
-    plan-flow [data-part="arrow"] {
+    doc-flow [data-part="arrow"] {
       align-self: start;
-      margin-inline-start: var(--plan-space-4);
+      margin-inline-start: var(--doc-space-4);
       rotate: 90deg;
     }
   }

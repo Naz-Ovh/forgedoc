@@ -5,9 +5,9 @@ coverage/
 .DS_Store
 
 # Scratch plans built while poking at the CLI.
-.plankit-demo/
+.forgedoc-demo/
 
-# Where `plankit build --offline` writes. Embedded runtime, megabytes of it —
+# Where `forgedoc build --offline` writes. Embedded runtime, megabytes of it —
 # a build artefact, never a source file.
 .temp/
 

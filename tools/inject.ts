@@ -5,8 +5,8 @@
  * The authoring agent ends its HTML with exactly:
  *
  * ```html
- * <style>/*@PLAN_CSS@*\/</style>
- * <script>//@PLAN_JS@</script>
+ * <style>/*@DOC_CSS@*\/</style>
+ * <script>//@DOC_JS@</script>
  * ```
  *
  * and this module swaps both for the real bundle contents. The runtime is never
@@ -17,8 +17,8 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const CSS_PLACEHOLDER = '/*@PLAN_CSS@*/';
-export const JS_PLACEHOLDER = '//@PLAN_JS@';
+export const CSS_PLACEHOLDER = '/*@DOC_CSS@*/';
+export const JS_PLACEHOLDER = '//@DOC_JS@';
 
 /**
  * The whole placeholder tags, for the `link` mode that replaces them outright.
@@ -31,8 +31,8 @@ export const JS_PLACEHOLDER = '//@PLAN_JS@';
 // Takes the line's newline with it: the tag is lifted out of wherever it was
 // written and re-emitted in <head>, and leaving the blank line behind would show
 // up in the built file as a gap the author never typed.
-const CSS_TAG = /<style\b[^>]*>\s*\/\*@PLAN_CSS@\*\/\s*<\/style>\n?/;
-const JS_TAG = /<script\b[^>]*>\s*\/\/@PLAN_JS@\s*<\/script>/;
+const CSS_TAG = /<style\b[^>]*>\s*\/\*@DOC_CSS@\*\/\s*<\/style>\n?/;
+const JS_TAG = /<script\b[^>]*>\s*\/\/@DOC_JS@\s*<\/script>/;
 
 /**
  * Where a built document gets its runtime.
@@ -70,11 +70,11 @@ export type InjectionAssets = EmbeddedAssets | LinkedAssets;
  * defeat that cache and silently re-render already-published plans with a
  * runtime they were never checked against.
  */
-declare const __PLANKIT_CDN_BASE__: string;
+declare const __FORGEDOC_CDN_BASE__: string;
 export const CDN_BASE =
-  typeof __PLANKIT_CDN_BASE__ === 'string'
-    ? __PLANKIT_CDN_BASE__
-    : 'https://cdn.jsdelivr.net/npm/plankit@latest/dist';
+  typeof __FORGEDOC_CDN_BASE__ === 'string'
+    ? __FORGEDOC_CDN_BASE__
+    : 'https://cdn.jsdelivr.net/npm/forgedoc@latest/dist';
 
 /**
  * Does this document contain a Mermaid figure?
@@ -85,7 +85,7 @@ export const CDN_BASE =
  * needed before the document is known to be valid.
  */
 export function usesMermaid(html: string): boolean {
-  return /<plan-figure\b[^>]*\btype\s*=\s*["']?mermaid\b/i.test(html);
+  return /<doc-figure\b[^>]*\btype\s*=\s*["']?mermaid\b/i.test(html);
 }
 
 export class InjectionError extends Error {
@@ -107,15 +107,15 @@ export class InjectionError extends Error {
  * corrupt the output.
  */
 export function injectAssets(html: string, assets: InjectionAssets): string {
-  requirePlaceholder(html, CSS_PLACEHOLDER, '<style>/*@PLAN_CSS@*/</style>');
-  requirePlaceholder(html, JS_PLACEHOLDER, '<script>//@PLAN_JS@</script>');
+  requirePlaceholder(html, CSS_PLACEHOLDER, '<style>/*@DOC_CSS@*/</style>');
+  requirePlaceholder(html, JS_PLACEHOLDER, '<script>//@DOC_JS@</script>');
 
   // The script stays where the placeholder was: end of body for the embedded
   // bundle, `defer` for the linked one. Either way elements upgrade once, after
   // parse, with every child present (§5.2). The styles are *placed*, not left —
   // both flavours put them in <head>, so the reader never sees a frame of
   // unstyled semantic markup. The skeleton already writes that placeholder in
-  // <head>, which makes the hoist a no-op for anything `plankit new` produced;
+  // <head>, which makes the hoist a no-op for anything `forgedoc new` produced;
   // it earns its keep on documents authored against the older end-of-body shape,
   // which are already committed in people's repositories.
   if (assets.mode === 'embed') {
@@ -178,14 +178,14 @@ export async function resolveAssets(
   if (flavour === 'cdn') {
     return {
       mode: 'link',
-      cssHref: `${CDN_BASE}/plankit.css`,
-      jsSrc: `${CDN_BASE}/plankit.iife.js`,
+      cssHref: `${CDN_BASE}/forgedoc.css`,
+      jsSrc: `${CDN_BASE}/forgedoc.iife.js`,
     };
   }
 
   const [css, js] = await Promise.all([
-    readBundle(resolve(from, 'plankit.css')),
-    readBundle(resolve(from, 'plankit.standalone.iife.js')),
+    readBundle(resolve(from, 'forgedoc.css')),
+    readBundle(resolve(from, 'forgedoc.standalone.iife.js')),
   ]);
 
   return { mode: 'embed', css, js };
@@ -198,7 +198,7 @@ async function readBundle(path: string): Promise<string> {
   } catch {
     throw new InjectionError(
       `Cannot read the built bundle at ${path}.`,
-      'Run `pnpm build` in the plankit checkout first, or install the package from npm.',
+      'Run `pnpm build` in the forgedoc checkout first, or install the package from npm.',
     );
   }
 }

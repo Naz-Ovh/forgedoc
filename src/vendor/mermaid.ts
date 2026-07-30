@@ -5,7 +5,7 @@
  * ESM builds differ by exactly one aliased import. `@mermaid-source` is rewritten
  * per build mode in `vite.config.ts`; the source tree is never forked.
  *
- * Mermaid is themed from `--plan-*` tokens so diagrams match the document
+ * Mermaid is themed from `--doc-*` tokens so diagrams match the document
  * instead of arriving in Mermaid's own palette (§8.6).
  */
 
@@ -26,13 +26,13 @@ let diagramCounter = 0;
  * Render one diagram to SVG markup.
  *
  * Rejects when Mermaid is unavailable (offline in the CDN build, or an
- * uninstalled peer dependency), which `plan-figure` renders as a visible,
+ * uninstalled peer dependency), which `doc-figure` renders as a visible,
  * explanatory failure rather than an empty box.
  */
 export async function renderMermaid(source: string): Promise<string> {
   const mermaid = await loadMermaid();
   diagramCounter += 1;
-  const { svg } = await mermaid.render(`plan-mermaid-${diagramCounter}`, source);
+  const { svg } = await mermaid.render(`doc-mermaid-${diagramCounter}`, source);
   return svg;
 }
 
@@ -56,7 +56,7 @@ function loadMermaid(): Promise<MermaidApi> {
 }
 
 /**
- * Map `--plan-*` tokens onto Mermaid's theme variables.
+ * Map `--doc-*` tokens onto Mermaid's theme variables.
  *
  * why read from the live document rather than hardcode: the accent preset and
  * the light/dark scheme are both resolved at runtime, so a diagram in an
@@ -67,18 +67,18 @@ export function themeVariables(): Record<string, string> {
 
   try {
     return {
-      background: probe.color('--plan-surface-1', '#ffffff'),
-      primaryColor: probe.color('--plan-accent-tint', '#edfaf6'),
-      primaryTextColor: probe.color('--plan-text-1', '#1b1d1f'),
-      primaryBorderColor: probe.color('--plan-accent-line', '#12907a'),
-      lineColor: probe.color('--plan-border-2', '#ccc9c0'),
-      secondaryColor: probe.color('--plan-surface-2', '#f5f4f0'),
-      tertiaryColor: probe.color('--plan-surface-3', '#eceae4'),
-      textColor: probe.color('--plan-text-1', '#1b1d1f'),
-      mainBkg: probe.color('--plan-accent-tint', '#edfaf6'),
-      nodeBorder: probe.color('--plan-accent-line', '#12907a'),
-      clusterBkg: probe.color('--plan-surface-2', '#f5f4f0'),
-      fontSize: probe.length('--plan-text-sm', '14px'),
+      background: probe.color('--doc-surface-1', '#ffffff'),
+      primaryColor: probe.color('--doc-accent-tint', '#edfaf6'),
+      primaryTextColor: probe.color('--doc-text-1', '#1b1d1f'),
+      primaryBorderColor: probe.color('--doc-accent-line', '#12907a'),
+      lineColor: probe.color('--doc-border-2', '#ccc9c0'),
+      secondaryColor: probe.color('--doc-surface-2', '#f5f4f0'),
+      tertiaryColor: probe.color('--doc-surface-3', '#eceae4'),
+      textColor: probe.color('--doc-text-1', '#1b1d1f'),
+      mainBkg: probe.color('--doc-accent-tint', '#edfaf6'),
+      nodeBorder: probe.color('--doc-accent-line', '#12907a'),
+      clusterBkg: probe.color('--doc-surface-2', '#f5f4f0'),
+      fontSize: probe.length('--doc-text-sm', '14px'),
     };
   } finally {
     probe.dispose();
@@ -89,18 +89,18 @@ export function themeVariables(): Record<string, string> {
 function readFontFamily(): string {
   const probe = new TokenProbe();
   try {
-    return probe.read('font-family', '--plan-font-sans', 'system-ui, sans-serif');
+    return probe.read('font-family', '--doc-font-sans', 'system-ui, sans-serif');
   } finally {
     probe.dispose();
   }
 }
 
 /**
- * Resolves a `--plan-*` token to a concrete value.
+ * Resolves a `--doc-*` token to a concrete value.
  *
- * why a probe element rather than `getComputedStyle(planDoc).getPropertyValue()`
+ * why a probe element rather than `getComputedStyle(docPage).getPropertyValue()`
  * — this was a real bug, and a subtle one: an unregistered custom property
- * computes to its *token stream*, so reading `--plan-accent-tint` in dark mode
+ * computes to its *token stream*, so reading `--doc-accent-tint` in dark mode
  * hands back the literal string `color-mix(in oklab, #073d36 42%, #101214)`.
  * Mermaid's colour parser rejects that outright ("Unsupported color format"),
  * so every diagram in every dark-mode document rendered an error box instead.
@@ -115,7 +115,7 @@ class TokenProbe {
 
   constructor() {
     this.#element.style.display = 'none';
-    const host = document.querySelector('plan-doc') ?? document.body;
+    const host = document.querySelector('doc-page') ?? document.body;
     host.append(this.#element);
   }
 

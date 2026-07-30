@@ -1,4 +1,4 @@
-# PlanKit — Build Specification
+# ForgeDoc — Build Specification
 
 **A web component library for AI-authored interactive planning documents.**
 
@@ -28,16 +28,16 @@ An AI coding agent, when asked to plan work, currently emits a Markdown file. Ma
 Ship a component library. The agent writes **only semantic markup**. All styling, layout, interactivity, state persistence, and feedback collection come from a prebuilt runtime.
 
 ```html
-<plan-doc plan-id="vendor-orders" density="comfortable" accent="teal">
-  <plan-header kicker="Plan · Universabile vendor dashboard">
+<doc-page doc-id="vendor-orders" density="comfortable" accent="teal">
+  <doc-header kicker="Plan · Universabile vendor dashboard">
     Vendor orders experience
     <p slot="lede">Vendors get told the moment a new order lands…</p>
-  </plan-header>
+  </doc-header>
 
-  <plan-section title="What we are building">
+  <doc-section title="What we are building">
     <p>One feature, three faces…</p>
-  </plan-section>
-</plan-doc>
+  </doc-section>
+</doc-page>
 ```
 
 That is the entire authoring surface. No `<style>`, no `<script>`, no class names, no ids, no `A`/`B`/`C` option keys, no `1.2.1` section numbers. Every one of those is derived by the runtime.
@@ -66,7 +66,7 @@ Everything shadow DOM would have given you has a replacement:
 
 | Shadow DOM feature | Replacement |
 | --- | --- |
-| Style encapsulation | CSS cascade layers + `--plan-*` prefix |
+| Style encapsulation | CSS cascade layers + `--doc-*` prefix |
 | `::part()` | Direct selection — you already have more access |
 | `<slot>` | Children are already in the right place; enhance in situ |
 
@@ -115,8 +115,8 @@ Svelte **is** used, but only for the bucket panel (§10), which is runtime-creat
 ## 3. Repository layout
 
 ```text
-plankit/
-├── package.json              # npm name: plankit
+forgedoc/
+├── package.json              # npm name: forgedoc
 ├── AGENTS.md                 # loaded every session — start here
 ├── tsdown.config.ts          # builds every shipped artefact
 ├── vite.config.ts            # dev server + Vitest only
@@ -125,16 +125,16 @@ plankit/
 ├── src/
 │   ├── index.ts              # entry: imports everything, defines elements
 │   ├── core/
-│   │   ├── base.ts           # PlanElement base class
+│   │   ├── base.ts           # DocElement base class
 │   │   ├── registry.ts       # define() helper + upgrade guard
 │   │   ├── store.ts          # namespaced persistent store
 │   │   ├── slug.ts           # heading → stable id
 │   │   ├── numbering.ts      # section / stage / option sequencing
 │   │   └── parts.ts          # data-part query helpers
 │   ├── components/
-│   │   ├── plan-doc.ts
-│   │   ├── plan-section.ts
-│   │   ├── plan-choice.ts
+│   │   ├── doc-page.ts
+│   │   ├── doc-section.ts
+│   │   ├── doc-choice.ts
 │   │   └── …                 # one file per component, no exceptions
 │   ├── bucket/
 │   │   ├── mount.ts          # creates host div, mounts Svelte app
@@ -156,7 +156,7 @@ plankit/
 ├── tools/
 │   ├── validate.ts           # markup contract validator
 │   ├── inject.ts             # placeholder replacement
-│   └── cli.ts                # `plankit build|validate|new`
+│   └── cli.ts                # `forgedoc build|validate|new`
 ├── tests/
 │   ├── components/*.test.ts
 │   ├── fixtures/kitchen-sink.html
@@ -171,7 +171,7 @@ plankit/
     └── DECISIONS.md          # deviations, dependency register, change log
 ```
 
-**MUST:** one component per file, named exactly after its tag. No barrel files that re-export with renaming. An agent (or human) reading `src/components/plan-choice.ts` should find everything about `<plan-choice>` there.
+**MUST:** one component per file, named exactly after its tag. No barrel files that re-export with renaming. An agent (or human) reading `src/components/doc-choice.ts` should find everything about `<doc-choice>` there.
 
 ---
 
@@ -202,10 +202,10 @@ Three JS bundles and one CSS file, from one source tree:
 
 | Output | Format | Contents | Used by |
 | --- | --- | --- | --- |
-| `dist/plankit.iife.js` | IIFE, global `PlanKit` | Core + Prism. Mermaid lazy-loaded from CDN. | CDN / hosted viewer |
-| `dist/plankit.standalone.iife.js` | IIFE | Everything, Mermaid included | Offline `file://` injection |
-| `dist/plankit.js` | ESM | Core, external deps | npm consumers, tooling |
-| `dist/plankit.css` | CSS | All layers, one file | Both |
+| `dist/forgedoc.iife.js` | IIFE, global `ForgeDoc` | Core + Prism. Mermaid lazy-loaded from CDN. | CDN / hosted viewer |
+| `dist/forgedoc.standalone.iife.js` | IIFE | Everything, Mermaid included | Offline `file://` injection |
+| `dist/forgedoc.js` | ESM | Core, external deps | npm consumers, tooling |
+| `dist/forgedoc.css` | CSS | All layers, one file | Both |
 
 Mermaid is ~1 MB. Bundling it into the CDN build punishes every reader; omitting it from the offline build breaks the offline promise. Two builds resolves this cleanly. The lazy loader in `vendor/mermaid.ts` must be a single swappable module so the two builds differ by one import.
 
@@ -215,7 +215,7 @@ The build is an array of configs — one per shipped artefact — which tsdown r
 **concurrently**. Each requirement below survived the move off Vite lib mode.
 
 **MUST:** one CSS file, always (`css.splitting: false`, `css.fileName:
-'plankit.css'`). Per-component CSS files that ship separately would break the
+'forgedoc.css'`). Per-component CSS files that ship separately would break the
 layer ordering guarantee (§4.4).
 
 **MUST:** the variants differ by exactly one aliased module — `@mermaid-source`
@@ -241,7 +241,7 @@ debuggable dist is part of that.
 `src/styles/layers.css` contains exactly one statement and **MUST** be the first import in `index.css`:
 
 ```css
-@layer plan.reset, plan.tokens, plan.preset, plan.base, plan.components, plan.utilities;
+@layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.utilities;
 ```
 
 Every rule the library ships **MUST** live inside one of those layers. Nothing outside a layer.
@@ -250,7 +250,7 @@ This is the mechanism that makes the library both opinionated and fully overrida
 
 ```css
 /* author's escape hatch — no !important, no specificity math */
-plan-note { border-radius: 0; }
+doc-note { border-radius: 0; }
 ```
 
 This also solves the classic component-library problem the frontend-design guidance warns about — type selectors and class selectors cancelling each other unpredictably. Inside layers, order is explicit.
@@ -261,29 +261,29 @@ This also solves the classic component-library problem the frontend-design guida
 
 ### 5.1 Package
 
-Publish as `plankit` on npm. `unpkg` and `jsdelivr` serve from npm automatically. Submitting to cdnjs is optional and can wait for v1.1 — flag it, don't block on it.
+Publish as `forgedoc` on npm. `unpkg` and `jsdelivr` serve from npm automatically. Submitting to cdnjs is optional and can wait for v1.1 — flag it, don't block on it.
 
 ```json
 {
-  "name": "plankit",
+  "name": "forgedoc",
   "type": "module",
-  "main": "./dist/plankit.js",
+  "main": "./dist/forgedoc.js",
   "types": "./dist/index.d.ts",
-  "bin": { "plankit": "./dist/cli.js" },
+  "bin": { "forgedoc": "./dist/cli.js" },
   "exports": {
-    ".":            { "types": "./dist/index.d.ts", "import": "./dist/plankit.js" },
-    "./style.css":  "./dist/plankit.css",
-    "./standalone": "./dist/plankit.standalone.iife.js"
+    ".":            { "types": "./dist/index.d.ts", "import": "./dist/forgedoc.js" },
+    "./style.css":  "./dist/forgedoc.css",
+    "./standalone": "./dist/forgedoc.standalone.iife.js"
   },
-  "sideEffects": ["*.css", "./dist/plankit.iife.js", "./dist/plankit.standalone.iife.js"]
+  "sideEffects": ["*.css", "./dist/forgedoc.iife.js", "./dist/forgedoc.standalone.iife.js"]
 }
 ```
 
 ### 5.2 CDN mode
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plankit@1.0.0/dist/plankit.css">
-<script defer src="https://cdn.jsdelivr.net/npm/plankit@1.0.0/dist/plankit.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@1.0.0/dist/forgedoc.css">
+<script defer src="https://cdn.jsdelivr.net/npm/forgedoc@1.0.0/dist/forgedoc.iife.js"></script>
 ```
 
 **MUST** use `defer` (or place the tag at end of `<body>`). Elements are defined after the document is parsed, so every element upgrades once, synchronously, with all of its children already present. This eliminates the classic light-DOM footfun where `connectedCallback` fires mid-parse and the component sees an incomplete subtree. Write the components assuming children exist at upgrade time — no `MutationObserver` gymnastics, no `setTimeout(0)`.
@@ -293,11 +293,11 @@ Publish as `plankit` on npm. `unpkg` and `jsdelivr` serve from npm automatically
 The authoring agent writes two placeholders, byte for byte — the first in `<head>`, the second as the last line of `<body>`:
 
 ```html
-<style>/*@PLAN_CSS@*/</style>
-<script>//@PLAN_JS@</script>
+<style>/*@DOC_CSS@*/</style>
+<script>//@DOC_JS@</script>
 ```
 
-Then runs `plankit build PLAN_foo.html`, which validates (§11) and replaces both placeholders with file contents. Output: one self-contained `.html`, no network, no CDN, no dependencies.
+Then runs `forgedoc build DOC_foo.html`, which validates (§11) and replaces both placeholders with file contents. Output: one self-contained `.html`, no network, no CDN, no dependencies.
 
 **MUST:** use a replacement *function* (`.replace(needle, () => content)`) not a string. A `$&` or `$1` sequence anywhere in the minified bundle will corrupt the output if you pass a string.
 
@@ -305,7 +305,7 @@ Then runs `plankit build PLAN_foo.html`, which validates (§11) and replaces bot
 
 ### 5.4 Version stamp
 
-`plan-doc` **MUST** set `data-plankit="<version>"` on itself at upgrade. Injected into the bundle at build time from `package.json`. When a user pastes a feedback bucket back into a fresh session, the version tells the agent which markup contract was in force.
+`doc-page` **MUST** set `data-forgedoc="<version>"` on itself at upgrade. Injected into the bundle at build time from `package.json`. When a user pastes a feedback bucket back into a fresh session, the version tells the agent which markup contract was in force.
 
 ---
 
@@ -313,27 +313,27 @@ Then runs `plankit build PLAN_foo.html`, which validates (§11) and replaces bot
 
 ### 6.1 Rules
 
-- **Every** token is prefixed `--plan-`. Non-negotiable: Mermaid and Prism both inject stylesheets and read root-scoped values. An unprefixed `--border` or `--radius` is a collision waiting to happen.
-- Defaults live on `:root` inside `@layer plan.tokens`.
-- Presets are **attribute selectors** on `plan-doc` inside `@layer plan.preset`. State lives in the DOM — one source of truth, validatable against an enum, switchable at runtime with a single `setAttribute`, and reachable from the print stylesheet.
-- Custom properties inherit, so a subtree override works anywhere: `<plan-table style="--plan-space-unit: 3px">`.
+- **Every** token is prefixed `--doc-`. Non-negotiable: Mermaid and Prism both inject stylesheets and read root-scoped values. An unprefixed `--border` or `--radius` is a collision waiting to happen.
+- Defaults live on `:root` inside `@layer doc.tokens`.
+- Presets are **attribute selectors** on `doc-page` inside `@layer doc.preset`. State lives in the DOM — one source of truth, validatable against an enum, switchable at runtime with a single `setAttribute`, and reachable from the print stylesheet.
+- Custom properties inherit, so a subtree override works anywhere: `<doc-table style="--doc-space-unit: 3px">`.
 
 ### 6.2 Derive from units, not from lists
 
 **MUST:** the spacing scale derives from one unit and the type scale from one base + one ratio. If a preset has to restate forty values, presets drift apart within a month and every new component means editing every preset.
 
 ```css
-@layer plan.tokens {
+@layer doc.tokens {
   :root {
-    --plan-space-unit: 4px;
-    --plan-space-1: calc(var(--plan-space-unit) * 1);
-    --plan-space-2: calc(var(--plan-space-unit) * 2);
-    /* … through --plan-space-12 */
+    --doc-space-unit: 4px;
+    --doc-space-1: calc(var(--doc-space-unit) * 1);
+    --doc-space-2: calc(var(--doc-space-unit) * 2);
+    /* … through --doc-space-12 */
 
-    --plan-text-base: 16px;
-    --plan-text-ratio: 1.2;
-    --plan-text-sm:  calc(var(--plan-text-base) / var(--plan-text-ratio));
-    --plan-text-lg:  calc(var(--plan-text-base) * var(--plan-text-ratio));
+    --doc-text-base: 16px;
+    --doc-text-ratio: 1.2;
+    --doc-text-sm:  calc(var(--doc-text-base) / var(--doc-text-ratio));
+    --doc-text-lg:  calc(var(--doc-text-base) * var(--doc-text-ratio));
     /* … */
   }
 }
@@ -345,18 +345,18 @@ Four orthogonal axes. A "compact" document must be able to have a wide measure a
 
 | Attribute | Values | Default | Controls |
 | --- | --- | --- | --- |
-| `density` | `compact` `comfortable` `spacious` | `comfortable` | `--plan-space-unit`, line-height, component padding |
-| `scale` | `sm` `md` `lg` | `md` | `--plan-text-base`, `--plan-text-ratio` |
+| `density` | `compact` `comfortable` `spacious` | `comfortable` | `--doc-space-unit`, line-height, component padding |
+| `scale` | `sm` `md` `lg` | `md` | `--doc-text-base`, `--doc-text-ratio` |
 | `accent` | `teal` `indigo` `slate` `plum` `amber` | `teal` | accent ramp + derived tints |
-| `measure` | `narrow` `default` `wide` | `default` | `--plan-measure` (720 / 1200 / 1600px) |
+| `measure` | `narrow` `default` `wide` | `default` | `--doc-measure` (720 / 1200 / 1600px) |
 | `code` | `auto` `light` `dark` | `auto` | Prism theme tokens |
 
 ```css
-@layer plan.preset {
-  plan-doc[density="compact"]  { --plan-space-unit: 3px; --plan-leading: 1.55; }
-  plan-doc[density="spacious"] { --plan-space-unit: 5px; --plan-leading: 1.85; }
-  plan-doc[measure="wide"]     { --plan-measure: 1600px; }
-  plan-doc[accent="plum"]      { --plan-accent-600: …; --plan-accent-50: …; }
+@layer doc.preset {
+  doc-page[density="compact"]  { --doc-space-unit: 3px; --doc-leading: 1.55; }
+  doc-page[density="spacious"] { --doc-space-unit: 5px; --doc-leading: 1.85; }
+  doc-page[measure="wide"]     { --doc-measure: 1600px; }
+  doc-page[accent="plum"]      { --doc-accent-600: …; --doc-accent-50: …; }
 }
 ```
 
@@ -366,16 +366,16 @@ Named *bundles* (e.g. "presentation" = `density="spacious" scale="lg" measure="n
 
 Single ramp definition per accent (50 / 100 / 200 / 400 / 600 / 800 / 900) plus neutral, plus four semantic ramps (info, success, warning, danger) that do **not** change with `accent`.
 
-**MUST:** use `light-dark()` on one token set with `color-scheme: light dark` on `plan-doc`. No `@media (prefers-color-scheme)` duplication, no theme toggle, no two-stylesheet approach.
+**MUST:** use `light-dark()` on one token set with `color-scheme: light dark` on `doc-page`. No `@media (prefers-color-scheme)` duplication, no theme toggle, no two-stylesheet approach.
 
 ```css
---plan-surface-1: light-dark(#ffffff, #16181a);
---plan-text-1:    light-dark(#1b1d1f, #e6e4dd);
+--doc-surface-1: light-dark(#ffffff, #16181a);
+--doc-text-1:    light-dark(#1b1d1f, #e6e4dd);
 ```
 
 ### 6.5 Typography
 
-**MUST NOT** use serif faces for body, headings, or code — a hard rule inherited from the existing skill. Serif is permitted only if the author explicitly sets `--plan-font-display`.
+**MUST NOT** use serif faces for body, headings, or code — a hard rule inherited from the existing skill. Serif is permitted only if the author explicitly sets `--doc-font-display`.
 
 Stack: a geometric/neo-grotesque sans for display and body, a legible mono for code. Ship **no web fonts** in the offline build — use a well-chosen system stack with `font-feature-settings` tuned for tabular numerals in tables and code. The CDN build may optionally `@import` a font; flag this and default to system stack.
 
@@ -383,25 +383,25 @@ Stack: a geometric/neo-grotesque sans for display and body, a legible mono for c
 
 Three tiers, documented in `CHEATSHEET.md` in this order:
 
-1. **Preset attributes** — `<plan-doc density="compact">`. Validatable. Preferred.
-2. **Token override** — `plan-note { --plan-accent-600: #8b5cf6; }`. Semantic, survives upgrades.
-3. **Raw CSS** — `plan-note [data-part="title"] { letter-spacing: .02em; }`. Wins automatically via layers. Only `data-part` selectors are public API (§7.3); internal class names are not, and will change.
+1. **Preset attributes** — `<doc-page density="compact">`. Validatable. Preferred.
+2. **Token override** — `doc-note { --doc-accent-600: #8b5cf6; }`. Semantic, survives upgrades.
+3. **Raw CSS** — `doc-note [data-part="title"] { letter-spacing: .02em; }`. Wins automatically via layers. Only `data-part` selectors are public API (§7.3); internal class names are not, and will change.
 
 ---
 
 ## 7. The base class
 
-### 7.1 `PlanElement`
+### 7.1 `DocElement`
 
 Roughly 40 lines. Every component extends it. It provides:
 
 ```ts
-export abstract class PlanElement extends HTMLElement {
+export abstract class DocElement extends HTMLElement {
   protected internals = this.attachInternals();
 
   connectedCallback(): void {
-    if (this.dataset.planUp) return;   // idempotency guard — see 7.2
-    this.dataset.planUp = '';
+    if (this.dataset.docUp) return;   // idempotency guard — see 7.2
+    this.dataset.docUp = '';
     this.enhance();
   }
 
@@ -446,8 +446,8 @@ this.setState('open', true);
 ```
 
 ```css
-@layer plan.components {
-  plan-collapse:state(open) [data-part="body"] { display: block; }
+@layer doc.components {
+  doc-collapse:state(open) [data-part="body"] { display: block; }
 }
 ```
 
@@ -456,20 +456,20 @@ this.setState('open', true);
 Because there is no shadow DOM, authors *can* select internal class names — which means they *will*, and a refactor will then break existing plans. Prevent that by exposing a deliberate surface:
 
 ```html
-<plan-note kind="warn">
+<doc-note kind="warn">
   <div data-part="icon">…</div>
   <div data-part="title">…</div>
   <div data-part="body">…</div>
-</plan-note>
+</doc-note>
 ```
 
 `data-part` values are documented, stable, and covered by semver. Everything else is internal. This gives `::part()` ergonomics with no shadow root and full freedom to restructure.
 
-**MUST:** `part()` must not match parts of nested components. Scope the query to descendants whose nearest `plan-*` ancestor is `this`.
+**MUST:** `part()` must not match parts of nested components. Scope the query to descendants whose nearest `doc-*` ancestor is `this`.
 
 ### 7.5 Display defaults
 
-**MUST:** the very first rule in `@layer plan.base` sets `display: block` on every `plan-*` tag. Unknown and un-upgraded elements default to `display: inline`, which produces a broken flash of layout before the script runs.
+**MUST:** the very first rule in `@layer doc.base` sets `display: block` on every `doc-*` tag. Unknown and un-upgraded elements default to `display: inline`, which produces a broken flash of layout before the script runs.
 
 ---
 
@@ -483,32 +483,32 @@ For every component: **Attributes** are what the agent writes. **Parts** are the
 
 ---
 
-#### `<plan-doc>` — the root, and the only authored root
+#### `<doc-page>` — the root, and the only authored root
 
 **Attributes**
 
 | Name | Values | Req | Notes |
 | --- | --- | --- | --- |
-| `plan-id` | slug | **yes** | Storage namespace. Validator rejects a doc without it. See §9.3. |
+| `doc-id` | slug | **yes** | Storage namespace. Validator rejects a doc without it. See §9.3. |
 | `density` `scale` `accent` `measure` `code` | see §6.3 | no | Preset axes |
 | `toc` | `open` `closed` `off` | no | Default `closed` on narrow, `open` ≥1280px |
 
-**Derived:** `data-plankit` version stamp, `color-scheme`, the centred reading column, the TOC sidebar, the bucket mount point, all persisted state.
+**Derived:** `data-forgedoc` version stamp, `color-scheme`, the centred reading column, the TOC sidebar, the bucket mount point, all persisted state.
 
 **Layout — MUST:**
 
 - Reading column is horizontally centred at every viewport. Never left-hugging on ultrawide.
-- Container never exceeds `--plan-measure` (default 1200px). Above 2560px viewport it may widen to 1600px.
+- Container never exceeds `--doc-measure` (default 1200px). Above 2560px viewport it may widen to 1600px.
 - From 1050px up, use 90% of viewport width, still capped and centred.
 - Below 1050px, full width with comfortable horizontal padding.
 
-**Implementation note — MUST NOT reparent.** Do not wrap children in a generated `<div class="column">`. Style the column directly via `plan-doc > *` and append the TOC and bucket as *siblings* of that content. Reparenting invalidates live ranges and highlight restore runs immediately after mount (§2.2).
+**Implementation note — MUST NOT reparent.** Do not wrap children in a generated `<div class="column">`. Style the column directly via `doc-page > *` and append the TOC and bucket as *siblings* of that content. Reparenting invalidates live ranges and highlight restore runs immediately after mount (§2.2).
 
-**Ownership:** `plan-doc` owns the single store instance (§9) and the print stylesheet behaviour (§8.8). Exactly one per document; validator errors on two.
+**Ownership:** `doc-page` owns the single store instance (§9) and the print stylesheet behaviour (§8.8). Exactly one per document; validator errors on two.
 
 ---
 
-#### `<plan-header>`
+#### `<doc-header>`
 
 **Attributes:** `kicker` (small caps eyebrow line).
 **Children:** heading text as the default content; an optional `<p slot="lede">`.
@@ -518,7 +518,7 @@ Note: `slot` here is a plain attribute used as a selector hook, not a shadow slo
 
 ---
 
-#### `<plan-section>`
+#### `<doc-section>`
 
 **Attributes:** `title` (string, required), `id` (optional override).
 **Nesting:** sections nest to depth 3.
@@ -538,27 +538,27 @@ Note: `slot` here is a plain attribute used as a selector hook, not a shadow slo
 
 ---
 
-#### `<plan-toc>` — generated, never authored
+#### `<doc-toc>` — generated, never authored
 
-Built from the `plan-section` tree at mount. Collapsible, sticky, scroll-spy highlighting the current section. The validator **errors** if the agent writes this tag manually.
+Built from the `doc-section` tree at mount. Collapsible, sticky, scroll-spy highlighting the current section. The validator **errors** if the agent writes this tag manually.
 
 ---
 
 ### 8.2 Meta
 
-#### `<plan-chips>` / `<plan-chip>`
+#### `<doc-chips>` / `<doc-chip>`
 
 The pill row under the lede. Carries real meaning: locked decisions and reader instructions.
 
-**`plan-chip` attributes:** `kind` = `confirmed` | `info` | `action` | `pending`.
+**`doc-chip` attributes:** `kind` = `confirmed` | `info` | `action` | `pending`.
 
-**Runtime hook:** when a feedback bucket is pasted back and the agent regenerates, previously answered questions should surface here as `confirmed` chips. Expose `PlanKit.chips.add({kind, text})` so tooling can do this without a full regeneration.
+**Runtime hook:** when a feedback bucket is pasted back and the agent regenerates, previously answered questions should surface here as `confirmed` chips. Expose `ForgeDoc.chips.add({kind, text})` so tooling can do this without a full regeneration.
 
 ---
 
 ### 8.3 Prose and callouts
 
-#### `<plan-note>`
+#### `<doc-note>`
 
 **Attributes:** `kind` = `info` | `tip` | `warn` | `danger` | `success`; `title` (optional).
 **Parts:** `icon`, `title`, `body`.
@@ -567,35 +567,35 @@ Reference uses at minimum a teal explainer and an amber "also fixed in this stag
 
 ---
 
-#### `<plan-blocker>`
+#### `<doc-blocker>`
 
 Structurally distinct from a note because the shape is **enforced**. The source skill requires that every roadblock states what it blocks and what action resolves it; making that a validated structure is the point.
 
 ```html
-<plan-blocker severity="high" title="SSE stream loses CORS headers on takeover">
-  <plan-blocks>The browser silently drops the stream — bell never updates.</plan-blocks>
-  <plan-why>The route takes over the raw connection; plugin headers are lost.</plan-why>
-  <plan-action>The stream route writes the CORS headers itself.</plan-action>
-</plan-blocker>
+<doc-blocker severity="high" title="SSE stream loses CORS headers on takeover">
+  <doc-blocks>The browser silently drops the stream — bell never updates.</doc-blocks>
+  <doc-why>The route takes over the raw connection; plugin headers are lost.</doc-why>
+  <doc-action>The stream route writes the CORS headers itself.</doc-action>
+</doc-blocker>
 ```
 
 **Attributes:** `severity` = `low` | `medium` | `high` (drives colour), `title` (required).
-**Children:** `<plan-blocks>` required, `<plan-why>` optional, `<plan-action>` **required**.
+**Children:** `<doc-blocks>` required, `<doc-why>` optional, `<doc-action>` **required**.
 **Derived:** sequence number within the document.
 
-**Validator MUST error** on a `plan-blocker` with no `plan-action`. A roadblock without a resolution is exactly the failure this library exists to prevent.
+**Validator MUST error** on a `doc-blocker` with no `doc-action`. A roadblock without a resolution is exactly the failure this library exists to prevent.
 
 ---
 
-#### `<plan-list>`
+#### `<doc-list>`
 
 **Attributes:** `marker` = `check` | `cross` | `arrow` | `dot` | `number`.
 
-The atom underneath `plan-compare`, exposed separately so ✓/✗ lists work outside a two-column layout. Children are plain `<li>`.
+The atom underneath `doc-compare`, exposed separately so ✓/✗ lists work outside a two-column layout. Children are plain `<li>`.
 
 ---
 
-#### `<plan-term>`
+#### `<doc-term>`
 
 **Attributes:** `href` (**required**).
 
@@ -603,7 +603,7 @@ Inline. Wraps a technical term and links it out. The source skill mandates hyper
 
 ---
 
-#### `<plan-ref>`
+#### `<doc-ref>`
 
 **Attributes:** `to` (a section / stage / question id).
 
@@ -611,14 +611,14 @@ Inline cross-reference that resolves to the live number at build time. Once numb
 
 ---
 
-#### `<plan-quote>`
+#### `<doc-quote>`
 
 **Attributes:** `cite` (optional).
 Distinct typographic role, per the source skill.
 
 ---
 
-#### `<plan-table>`
+#### `<doc-table>`
 
 Wraps a plain `<table>`. Header row styling, first-column emphasis, inline `<code>` and links inside cells, tabular numerals.
 
@@ -630,25 +630,25 @@ Wraps a plain `<table>`. Header row styling, first-column emphasis, inline `<cod
 
 ### 8.4 Interactive
 
-#### `<plan-choice>` / `<plan-option>`
+#### `<doc-choice>` / `<doc-option>`
 
 The most important interactive component. **Every rule the authoring agent currently has to remember becomes a runtime default here.**
 
 ```html
-<plan-choice mode="single" question="When one team member reads a notification, should it show as read for the whole vendor team?">
-  <plan-option recommended>
+<doc-choice mode="single" question="When one team member reads a notification, should it show as read for the whole vendor team?">
+  <doc-option recommended>
     Yes — shared team inbox
     <p slot="desc">"Unread" means nobody handled it yet. Simplest.</p>
-  </plan-option>
-  <plan-option>
+  </doc-option>
+  <doc-option>
     No — each person has their own read state
     <p slot="desc">More personal, but needs an extra table.</p>
-  </plan-option>
-</plan-choice>
+  </doc-option>
+</doc-choice>
 ```
 
 **Attributes:** `mode` = `single` | `multi`; `question` (required); `id` (optional override).
-**`plan-option` attributes:** `recommended` (boolean badge), `value` (optional override).
+**`doc-option` attributes:** `recommended` (boolean badge), `value` (optional override).
 
 **Derived — the agent writes none of this:**
 
@@ -667,7 +667,7 @@ The most important interactive component. **Every rule the authoring agent curre
 
 ---
 
-#### `<plan-collapse>`
+#### `<doc-collapse>`
 
 **Attributes:** `title` (required), `open` (boolean, initial), `sticky` (persist state).
 **Parts:** `summary`, `body`.
@@ -677,17 +677,17 @@ Implement with `<details>`/`<summary>` underneath where possible — free keyboa
 
 ---
 
-#### `<plan-tabs>` / `<plan-tab>`
+#### `<doc-tabs>` / `<doc-tab>`
 
-**`plan-tab` attributes:** `label` (required), `active` (boolean).
-**Persistence:** active tab index stored per `plan-tabs` id.
+**`doc-tab` attributes:** `label` (required), `active` (boolean).
+**Persistence:** active tab index stored per `doc-tabs` id.
 
 **MUST:** arrow-key navigation, roving tabindex, `aria-selected` via internals.
 **MUST:** in print, tabs flatten into sequential sections with their labels as sub-headings.
 
 ---
 
-#### `<plan-checklist>`
+#### `<doc-checklist>`
 
 Persistent ticks in the store. The reference's "how we verify it works" list is something a reader actually works through. Children are plain `<li>`.
 
@@ -697,24 +697,24 @@ Persistent ticks in the store. The reference's "how we verify it works" list is 
 
 ### 8.5 Structure
 
-#### `<plan-flow>` / `<plan-flow-node>`
+#### `<doc-flow>` / `<doc-flow-node>`
 
 The horizontal chain: `Customer pays → Server settles → Notification → Bell + toast → Table → drawer`.
 
 **Not a Mermaid job.** Each node has a title plus a subtitle, one node can be emphasised, and it must sit inline at reading width without an SVG layout engine.
 
-**`plan-flow-node` attributes:** `title` (required), `active` (boolean, the emphasised dark node).
+**`doc-flow-node` attributes:** `title` (required), `active` (boolean, the emphasised dark node).
 **Children:** subtitle text.
 **MUST:** wraps to multiple rows below 1050px with the arrows rotating or being replaced by vertical connectors.
 
 ---
 
-#### `<plan-roadmap>` / `<plan-stage>`
+#### `<doc-roadmap>` / `<doc-stage>`
 
-**`plan-stage` attributes:** `title` (required), `subtitle`, `current` (boolean), `open` (boolean).
+**`doc-stage` attributes:** `title` (required), `subtitle`, `current` (boolean), `open` (boolean).
 **Derived:** stage numbers, auto-incrementing from 0. The circular number badge, the sequence rail, and the dark "current stage" treatment are all runtime.
 
-Distinct from `plan-collapse` — this is a numbered sequence with a current-position marker, not a generic disclosure.
+Distinct from `doc-collapse` — this is a numbered sequence with a current-position marker, not a generic disclosure.
 
 **Stage numbering starts at 0** by default (`start` attribute to change), matching the reference where Stage 0 is the next deliverable.
 
@@ -722,7 +722,7 @@ Distinct from `plan-collapse` — this is a numbered sequence with a current-pos
 
 ### 8.6 Content
 
-#### `<plan-code>`
+#### `<doc-code>`
 
 **Attributes:** `lang` (required), `title`, `wrap`, `highlight` (line ranges, e.g. `3-5,9`).
 
@@ -734,28 +734,28 @@ Starting allowlist: `ts js tsx jsx html css json bash sh sql rust python yaml to
 
 ---
 
-#### `<plan-diff>`
+#### `<doc-diff>`
 
 **Attributes:** `lang`, `filename`.
 **Content:** unified diff text.
 
-Renders with +/- gutters and aligned line numbers. Faking this with `plan-tabs` + two `plan-code` blocks loses the alignment that makes a diff useful.
+Renders with +/- gutters and aligned line numbers. Faking this with `doc-tabs` + two `doc-code` blocks loses the alignment that makes a diff useful.
 
 ---
 
-#### `<plan-figure>` — merged from `plan-figure` / `plan-image` / `plan-mermaid-diagram`
+#### `<doc-figure>` — merged from `doc-figure` / `doc-image` / `doc-mermaid-diagram`
 
 **Attributes:** `type` = `svg` | `image` | `mermaid` | `html`; `src` (for `image`); `caption`.
-**Child:** `<plan-caption>` (alternative to the attribute, for rich captions).
+**Child:** `<doc-caption>` (alternative to the attribute, for rich captions).
 
 One box, one caption treatment, one width behaviour. Three tags for what is visually the same frame is vocabulary the agent has to memorise for no benefit.
 
-- `type="mermaid"`: the child text is Mermaid source. **The single biggest token saving in the library** — five lines of Mermaid replaces a few hundred lines of hand-placed SVG, and the model is far more reliable writing it. Theme Mermaid from `--plan-*` tokens so diagrams match the document.
+- `type="mermaid"`: the child text is Mermaid source. **The single biggest token saving in the library** — five lines of Mermaid replaces a few hundred lines of hand-placed SVG, and the model is far more reliable writing it. Theme Mermaid from `--doc-*` tokens so diagrams match the document.
 - `type="html"`: for UI wireframes like the reference's drawer mock. **MUST** render inside `<iframe srcdoc>`, not inline. This is the one place isolation genuinely matters — arbitrary markup with its own styles and possibly scripts. Shadow DOM would not have helped here anyway, since it does not isolate JS.
 
 ---
 
-#### `<plan-tree>`
+#### `<doc-tree>`
 
 Directory and file layouts from indented text. Plans reference paths constantly; a real tree beats prose paths and the agent writing indented text is cheap.
 
@@ -764,21 +764,21 @@ Directory and file layouts from indented text. Plans reference paths constantly;
 
 ---
 
-#### `<plan-compare>`
+#### `<doc-compare>`
 
 Two-column panel — the reference's "Already built" / "Missing (we build these)".
 
 **Attributes:** `columns` (default 2).
-**Children:** two or more `<plan-list>` blocks each with a `title` and optional `kind` = `positive` | `negative` | `neutral`.
+**Children:** two or more `<doc-list>` blocks each with a `title` and optional `kind` = `positive` | `negative` | `neutral`.
 **MUST:** stacks vertically below 1050px.
 
 ---
 
 ### 8.7 What NOT to build
 
-**MUST NOT** create tags for inline `<code>`, `<a>`, `<strong>`, `<em>`, `<ul>`, `<ol>`, `<li>`, `<p>`, `<h*>`, `<table>`. Style them globally in `@layer plan.base`. The reference uses all of them heavily and none needs a custom element. Every unnecessary tag is a line on a cheatsheet that has to fit on one page.
+**MUST NOT** create tags for inline `<code>`, `<a>`, `<strong>`, `<em>`, `<ul>`, `<ol>`, `<li>`, `<p>`, `<h*>`, `<table>`. Style them globally in `@layer doc.base`. The reference uses all of them heavily and none needs a custom element. Every unnecessary tag is a line on a cheatsheet that has to fit on one page.
 
-### 8.8 Print is a `plan-doc` responsibility
+### 8.8 Print is a `doc-page` responsibility
 
 The PDF is a real deliverable, not an afterthought. Build this early — retrofitting print across 22 components later is miserable.
 
@@ -786,9 +786,9 @@ The PDF is a real deliverable, not an afterthought. Build this early — retrofi
 
 - Bucket hidden entirely.
 - TOC either hidden or flattened into a real contents page with page numbers.
-- Every `plan-collapse` and `plan-stage` force-expanded.
-- `plan-tabs` flattened to sequential sections with labels as headings.
-- `break-inside: avoid` on `plan-note`, `plan-blocker`, `plan-choice`, `plan-figure`, and `plan-compare` panels so they never split mid-box.
+- Every `doc-collapse` and `doc-stage` force-expanded.
+- `doc-tabs` flattened to sequential sections with labels as headings.
+- `break-inside: avoid` on `doc-note`, `doc-blocker`, `doc-choice`, `doc-figure`, and `doc-compare` panels so they never split mid-box.
 - Link URLs printed after link text for external `href`s.
 - Background colours preserved via `print-color-adjust: exact` on callouts and code blocks.
 
@@ -798,12 +798,12 @@ The PDF is a real deliverable, not an afterthought. Build this early — retrofi
 
 ### 9.1 One store, one blob
 
-`plan-doc` owns a single store instance. **MUST NOT** let components each reach for `localStorage` — one read on mount, one debounced write (250ms) on change.
+`doc-page` owns a single store instance. **MUST NOT** let components each reach for `localStorage` — one read on mount, one debounced write (250ms) on change.
 
 ```ts
-interface PlanState {
+interface DocState {
   version: 1;
-  planId: string;
+  docId: string;
   answers:   Record<string, { keys: string[]; otherText?: string; note?: string }>;
   feedback:  FeedbackItem[];
   collapse:  Record<string, boolean>;
@@ -820,10 +820,10 @@ Feedback and answers **MUST** survive reload and are never dropped unless the re
 A tiny observable. No framework dependency — the Svelte panel adapts it via a store contract, the vanilla components subscribe directly.
 
 ```ts
-export interface PlanStore {
-  get<K extends keyof PlanState>(key: K): PlanState[K];
-  set<K extends keyof PlanState>(key: K, value: PlanState[K]): void;
-  subscribe(fn: (s: PlanState) => void): () => void;
+export interface DocStore {
+  get<K extends keyof DocState>(key: K): DocState[K];
+  set<K extends keyof DocState>(key: K, value: DocState[K]): void;
+  subscribe(fn: (s: DocState) => void): () => void;
   readonly available: boolean;   // false when storage is blocked
 }
 ```
@@ -836,7 +836,7 @@ Browsers treat `file://` origins inconsistently. Chrome has historically shared 
 
 Two required mitigations:
 
-1. **`plan-id` is mandatory** and every storage key is namespaced: `plankit:<plan-id>:<field>`. The validator rejects a `plan-doc` without one.
+1. **`doc-id` is mandatory** and every storage key is namespaced: `forgedoc:<doc-id>:<field>`. The validator rejects a `doc-page` without one.
 2. **Detect unavailable storage** with a real write/read/delete probe in a `try/catch` — not a `typeof` check, which passes in Safari private mode and then throws on write. When unavailable, show a persistent, non-dismissible banner: *"Your answers won't survive a reload — use Copy before closing."*
 
 Silent data loss on a feedback tool is the worst possible failure mode. Everything degrades loudly.
@@ -857,11 +857,11 @@ Why this is the right call and the elements are not:
 - No slots are needed, so the Svelte light-DOM slot limitation (§2.5) is irrelevant.
 - It is genuinely stateful reactive UI — list rendering, transitions, derived counts. This is what Svelte is for.
 
-**Caveat to work around:** in *custom element* mode Svelte inlines component styles as a JavaScript string rather than emitting a CSS file. Mounting as a normal component avoids that entirely — the panel's styles land in `plankit.css` where `@layer` and `--plan-*` tokens reach them. Use `:global()` sparingly and keep panel styles inside `@layer plan.components`.
+**Caveat to work around:** in *custom element* mode Svelte inlines component styles as a JavaScript string rather than emitting a CSS file. Mounting as a normal component avoids that entirely — the panel's styles land in `forgedoc.css` where `@layer` and `--doc-*` tokens reach them. Use `:global()` sparingly and keep panel styles inside `@layer doc.components`.
 
 ### 10.2 Selection, highlighting, and ranges
 
-`bucket/selection.ts` handles: selection popover, range serialisation to a resilient anchor (nearest `plan-*` ancestor id + text offset + a quoted excerpt for fallback matching), highlight painting, and restore on load.
+`bucket/selection.ts` handles: selection popover, range serialisation to a resilient anchor (nearest `doc-*` ancestor id + text offset + a quoted excerpt for fallback matching), highlight painting, and restore on load.
 
 **MUST** use the CSS Custom Highlight API (`CSS.highlights`) rather than wrapping selections in `<mark>` elements. Wrapping mutates the DOM the reader is selecting from, which breaks subsequent offsets, nests badly on overlapping highlights, and violates §2.2. `CSS.highlights` paints ranges without touching the DOM at all — it is the correct tool and is why the whole light-DOM decision holds together.
 
@@ -900,26 +900,26 @@ Runs on the raw HTML with `linkedom` or `parse5` — the Node validator **MUST N
 
 **Errors** (build fails, no output written):
 
-- `plan-doc` missing, duplicated, or without `plan-id`
+- `doc-page` missing, duplicated, or without `doc-id`
 - Duplicate id anywhere
-- `plan-choice` with fewer than two `plan-option` children
-- `plan-blocker` without `plan-action`
-- `plan-term` without `href`
-- `plan-ref` with an unresolvable `to`
-- `plan-code` with a `lang` outside the allowlist
-- `plan-section` without `title`
-- A `plan-toc` written by hand
-- Unknown `plan-*` tag (catches typos like `plan-callout`)
+- `doc-choice` with fewer than two `doc-option` children
+- `doc-blocker` without `doc-action`
+- `doc-term` without `href`
+- `doc-ref` with an unresolvable `to`
+- `doc-code` with a `lang` outside the allowlist
+- `doc-section` without `title`
+- A `doc-toc` written by hand
+- Unknown `doc-*` tag (catches typos like `doc-callout`)
 - Unknown attribute on a known tag, or an out-of-enum preset value
-- Unreplaced `@PLAN_CSS@` / `@PLAN_JS@` placeholder in a supposedly built file
+- Unreplaced `@DOC_CSS@` / `@DOC_JS@` placeholder in a supposedly built file
 
 **Warnings** (build succeeds, message printed):
 
 - Duplicate section slug
-- `plan-figure` without a caption
+- `doc-figure` without a caption
 - A section deeper than level 3
-- A document with no `plan-choice` at all (a plan with no questions collects no feedback)
-- Inline `style=` on a `plan-*` element (works, but suggests a missing preset)
+- A document with no `doc-choice` at all (a plan with no questions collects no feedback)
+- Inline `style=` on a `doc-*` element (works, but suggests a missing preset)
 
 **Output format:** file, line, column, rule id, message, and a suggested fix. Machine-parseable with `--format=json` so an agent harness can consume it directly.
 
@@ -930,10 +930,10 @@ In dev builds only, render violations as a red banner at the top of the document
 ### 11.4 CLI surface
 
 ```text
-plankit build <file.html> [--out <file>] [--cdn] [--no-validate]
-plankit validate <file.html> [--format=json]
-plankit new <name> [--dir <path>]     # scaffold with the required skeleton
-plankit version
+forgedoc build <file.html> [--out <file>] [--cdn] [--no-validate]
+forgedoc validate <file.html> [--format=json]
+forgedoc new <name> [--dir <path>]     # scaffold with the required skeleton
+forgedoc version
 ```
 
 `build` = validate → inject CSS → inject JS → write. Exit non-zero on any error.
@@ -976,7 +976,7 @@ Playwright provider, real Chromium. **jsdom and happy-dom are not options**: nei
 - **Per component:** upgrade is idempotent (mount twice, assert no duplicate chrome); author children are not moved (capture node identity before and after); parts exist; attributes reflect to state.
 - **Numbering:** nested sections produce correct `1.2.1`; letter keys skip correctly; stage numbers start at 0.
 - **Slugs:** stable across regeneration; duplicates get suffixes.
-- **Store:** namespacing by `plan-id`; two docs in one origin do not collide; unavailable-storage path shows the banner and never throws.
+- **Store:** namespacing by `doc-id`; two docs in one origin do not collide; unavailable-storage path shows the banner and never throws.
 - **Bucket:** round-trip a `FB v1` block through serialise → parse → serialise and assert byte equality against a checked-in golden file.
 - **Selection:** a range survives a reload cycle via the anchor scheme.
 
@@ -1003,14 +1003,14 @@ Ship in this order. Each milestone ends with something demonstrable.
 
 **M1 — Contract and harness.**
 `docs/CHEATSHEET.md` with the full tag vocabulary frozen. Validator + CLI. Vite 8 config producing all four artefacts from a stub entry. Layer file. Token file. CI green.
-*Demo:* `plankit validate` correctly rejects a malformed file.
+*Demo:* `forgedoc validate` correctly rejects a malformed file.
 
 **M2 — Shell.**
-`PlanElement`, store, `plan-doc`, `plan-header`, `plan-section`, `plan-toc`. Numbering, slugs, TOC, centred layout, presets, dark mode.
+`DocElement`, store, `doc-page`, `doc-header`, `doc-section`, `doc-toc`. Numbering, slugs, TOC, centred layout, presets, dark mode.
 *Demo:* a document with only headings and paragraphs already looks like the reference.
 
 **M3 — The 80%.**
-`plan-choice` / `plan-option`, `plan-note`, `plan-blocker`, `plan-list`, `plan-compare`, `plan-table`, `plan-code`.
+`doc-choice` / `doc-option`, `doc-note`, `doc-blocker`, `doc-list`, `doc-compare`, `doc-table`, `doc-code`.
 *Demo:* the reference document reproduced except roadmap, flow, and figures.
 
 **M4 — Bucket.**
@@ -1018,7 +1018,7 @@ Selection, highlights, Svelte panel, wire format, persistence, round-trip test.
 *Demo:* select text, answer questions, reload, copy — output matches the golden file.
 
 **M5 — Everything else.**
-`plan-roadmap`, `plan-flow`, `plan-collapse`, `plan-tabs`, `plan-figure`, `plan-tree`, `plan-diff`, `plan-checklist`, `plan-chips`, `plan-term`, `plan-ref`, `plan-quote`.
+`doc-roadmap`, `doc-flow`, `doc-collapse`, `doc-tabs`, `doc-figure`, `doc-tree`, `doc-diff`, `doc-checklist`, `doc-chips`, `doc-term`, `doc-ref`, `doc-quote`.
 
 **M6 — Polish and publish.**
 `print.css`, visual regression suite, `REFERENCE.md`, `SKILL.md`, npm publish, CDN smoke test from a clean machine.
@@ -1031,7 +1031,7 @@ Testable statements. All must hold before v1.0.
 
 1. The reference document is reproduced using **only** library tags — no `<style>`, no `<script>`, no class attributes, no manual ids, no manual numbers — and is visually equivalent.
 2. That markup is **under 4,000 tokens**.
-3. `plankit build` on it produces one `.html` that opens correctly from `file://` on a machine with **no network**, in Chrome, Firefox, and Safari.
+3. `forgedoc build` on it produces one `.html` that opens correctly from `file://` on a machine with **no network**, in Chrome, Firefox, and Safari.
 4. `Ctrl+F` finds text inside every component, including collapsed and non-active tab content where the browser supports it.
 5. Print to PDF produces a clean document: no bucket, expanded disclosures, no box split across a page break.
 6. Select text → comment → answer three questions → reload → **all state intact**. Copy produces a valid `FB v1` block.
@@ -1053,6 +1053,6 @@ Write these into `docs/DECISIONS.md` with your recommendation; do not silently p
 1. **Section numbers as CSS counters vs. real text.** Counters are cheaper and automatic but not selectable. Default: counters.
 2. **Web fonts in the CDN build.** Better typography vs. a second network dependency and a divergence from the offline build. Default: system stack in both.
 3. **cdnjs submission.** unpkg and jsdelivr are automatic from npm; cdnjs needs a PR to their repo. Default: defer to v1.1.
-4. **`plan-checklist` scope.** Reader-facing ticks only, or also feeding progress into the bucket? Default: local only.
+4. **`doc-checklist` scope.** Reader-facing ticks only, or also feeding progress into the bucket? Default: local only.
 5. **Mermaid version pinning** in the CDN lazy-loader — a floating major will eventually break diagram rendering in already-published plans. Default: pin exact, bump deliberately.
 6. **Anything in §2 you believe is wrong.** Those five constraints shape everything downstream. If you find a real problem with one, stop and raise it rather than working around it.

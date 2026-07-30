@@ -1,99 +1,98 @@
 /*
- * `plan-note` — the coloured callout.
+ * `doc-note` — the coloured callout.
  *
  * One ramp variable set per kind, so the layout rules below are written once.
  */
 
-@layer plan.components {
+@layer doc.components {
   /*
    * why a hanging indent rather than a two-column grid: a callout's body is
    * author content, and an author may legitimately write bare text or inline
    * markup rather than a `<p>`. In a grid container each inline element child
    * becomes its own grid item, which would tear the sentence apart.
    */
-  plan-note {
-    --plan-note-line: var(--plan-accent-line);
-    --plan-note-tint: var(--plan-accent-tint);
-    --plan-note-text: var(--plan-accent-text);
+  doc-note {
+    --doc-note-line: var(--doc-accent-line);
+    --doc-note-tint: var(--doc-accent-tint);
+    --doc-note-text: var(--doc-accent-text);
 
     position: relative;
-    margin-block: var(--plan-space-5);
-    padding: var(--plan-space-4) var(--plan-space-5);
-    padding-inline-start: calc(var(--plan-space-5) + 2.25rem);
-    border: var(--plan-border-width) solid
-      color-mix(in oklab, var(--plan-note-line) 34%, transparent);
-    border-inline-start: 3px solid var(--plan-note-line);
-    border-radius: var(--plan-radius);
-    background: var(--plan-note-tint);
+    margin-block: var(--doc-space-5);
+    padding: var(--doc-space-4) var(--doc-space-5);
+    padding-inline-start: calc(var(--doc-space-5) + 2.25rem);
+    border: var(--doc-border-width) solid color-mix(in oklab, var(--doc-note-line) 34%, transparent);
+    border-inline-start: 3px solid var(--doc-note-line);
+    border-radius: var(--doc-radius);
+    background: var(--doc-note-tint);
     /* MUST (§8.8): never split across a page break. */
     break-inside: avoid;
     print-color-adjust: exact;
   }
 
-  plan-note[kind="info"] {
-    --plan-note-line: var(--plan-info-600);
-    --plan-note-text: light-dark(var(--plan-info-900), var(--plan-info-200));
-    --plan-note-tint: light-dark(
-      var(--plan-info-50),
-      color-mix(in oklab, var(--plan-info-900) 42%, #101214)
+  doc-note[kind="info"] {
+    --doc-note-line: var(--doc-info-600);
+    --doc-note-text: light-dark(var(--doc-info-900), var(--doc-info-200));
+    --doc-note-tint: light-dark(
+      var(--doc-info-50),
+      color-mix(in oklab, var(--doc-info-900) 42%, #101214)
     );
   }
 
-  plan-note[kind="success"] {
-    --plan-note-line: var(--plan-success-600);
-    --plan-note-text: light-dark(var(--plan-success-900), var(--plan-success-200));
-    --plan-note-tint: light-dark(
-      var(--plan-success-50),
-      color-mix(in oklab, var(--plan-success-900) 42%, #101214)
+  doc-note[kind="success"] {
+    --doc-note-line: var(--doc-success-600);
+    --doc-note-text: light-dark(var(--doc-success-900), var(--doc-success-200));
+    --doc-note-tint: light-dark(
+      var(--doc-success-50),
+      color-mix(in oklab, var(--doc-success-900) 42%, #101214)
     );
   }
 
-  plan-note[kind="warn"] {
-    --plan-note-line: var(--plan-warn-600);
-    --plan-note-text: light-dark(var(--plan-warn-900), var(--plan-warn-200));
-    --plan-note-tint: light-dark(
-      var(--plan-warn-50),
-      color-mix(in oklab, var(--plan-warn-900) 42%, #101214)
+  doc-note[kind="warn"] {
+    --doc-note-line: var(--doc-warn-600);
+    --doc-note-text: light-dark(var(--doc-warn-900), var(--doc-warn-200));
+    --doc-note-tint: light-dark(
+      var(--doc-warn-50),
+      color-mix(in oklab, var(--doc-warn-900) 42%, #101214)
     );
   }
 
-  plan-note[kind="danger"] {
-    --plan-note-line: var(--plan-danger-600);
-    --plan-note-text: light-dark(var(--plan-danger-900), var(--plan-danger-200));
-    --plan-note-tint: light-dark(
-      var(--plan-danger-50),
-      color-mix(in oklab, var(--plan-danger-900) 42%, #101214)
+  doc-note[kind="danger"] {
+    --doc-note-line: var(--doc-danger-600);
+    --doc-note-text: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    --doc-note-tint: light-dark(
+      var(--doc-danger-50),
+      color-mix(in oklab, var(--doc-danger-900) 42%, #101214)
     );
   }
 
-  plan-note [data-part="icon"] {
+  doc-note [data-part="icon"] {
     position: absolute;
-    inset-inline-start: var(--plan-space-4);
-    inset-block-start: var(--plan-space-4);
+    inset-inline-start: var(--doc-space-4);
+    inset-block-start: var(--doc-space-4);
     display: grid;
     place-items: center;
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
-    background: var(--plan-note-line);
-    color: var(--plan-accent-on-solid);
-    font-size: var(--plan-text-sm);
+    background: var(--doc-note-line);
+    color: var(--doc-accent-on-solid);
+    font-size: var(--doc-text-sm);
     font-weight: 700;
     line-height: 1;
   }
 
-  plan-note [data-part="title"] {
-    margin-block-end: var(--plan-space-2);
-    color: var(--plan-note-text);
+  doc-note [data-part="title"] {
+    margin-block-end: var(--doc-space-2);
+    color: var(--doc-note-text);
     font-weight: 660;
-    line-height: var(--plan-leading-tight);
+    line-height: var(--doc-leading-tight);
   }
 
-  plan-note [data-part="body"] {
-    color: var(--plan-text-1);
+  doc-note [data-part="body"] {
+    color: var(--doc-text-1);
   }
 
-  plan-note [data-part="body"] + [data-part="body"] {
-    margin-block-start: var(--plan-space-2);
+  doc-note [data-part="body"] + [data-part="body"] {
+    margin-block-start: var(--doc-space-2);
   }
 }

@@ -1,70 +1,70 @@
-/* `plan-figure` — one frame for SVG, images, Mermaid and isolated HTML. */
+/* `doc-figure` — one frame for SVG, images, Mermaid and isolated HTML. */
 
-@layer plan.components {
-  plan-figure {
+@layer doc.components {
+  doc-figure {
     /* Positioned so the block's own Comment button can sit in its corner. */
     position: relative;
-    margin-block: var(--plan-space-6);
-    padding: var(--plan-space-4);
-    border: var(--plan-rule);
-    border-radius: var(--plan-radius);
-    background: var(--plan-surface-1);
+    margin-block: var(--doc-space-6);
+    padding: var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
     break-inside: avoid;
   }
 
-  plan-figure [data-part="content"] {
+  doc-figure [data-part="content"] {
     display: block;
     width: 100%;
     max-width: 100%;
     margin-inline: auto;
   }
 
-  plan-figure[data-figure-type="mermaid"] [data-part="content"] svg {
+  doc-figure[data-figure-type="mermaid"] [data-part="content"] svg {
     width: 100%;
     height: auto;
   }
 
-  plan-figure[data-figure-type="html"] [data-part="content"] {
+  doc-figure[data-figure-type="html"] [data-part="content"] {
     min-height: 12rem;
-    border: var(--plan-rule);
-    border-radius: var(--plan-radius-sm);
-    background: var(--plan-surface-0);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-0);
   }
 
-  plan-figure :where([data-part="caption"], plan-caption) {
+  doc-figure :where([data-part="caption"], doc-caption) {
     display: block;
-    margin-block-start: var(--plan-space-3);
-    padding-block-start: var(--plan-space-3);
-    border-block-start: var(--plan-rule);
-    color: var(--plan-text-2);
-    font-size: var(--plan-text-sm);
+    margin-block-start: var(--doc-space-3);
+    padding-block-start: var(--doc-space-3);
+    border-block-start: var(--doc-rule);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-sm);
     text-wrap: pretty;
   }
 
-  plan-figure [data-part="diagram-error"] {
-    padding: var(--plan-space-3);
-    border: var(--plan-border-width) solid var(--plan-danger-400);
-    border-radius: var(--plan-radius-sm);
+  doc-figure [data-part="diagram-error"] {
+    padding: var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-danger-400);
+    border-radius: var(--doc-radius-sm);
     background: light-dark(
-      var(--plan-danger-50),
-      color-mix(in oklab, var(--plan-danger-900) 45%, #101214)
+      var(--doc-danger-50),
+      color-mix(in oklab, var(--doc-danger-900) 45%, #101214)
     );
-    color: light-dark(var(--plan-danger-900), var(--plan-danger-200));
-    font-size: var(--plan-text-sm);
+    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    font-size: var(--doc-text-sm);
   }
 
-  plan-figure [data-part="diagram-error-title"] {
+  doc-figure [data-part="diagram-error-title"] {
     font-weight: 660;
   }
 
-  plan-figure [data-part="diagram-error-source"] {
-    margin-block-start: var(--plan-space-2);
-    padding: var(--plan-space-2);
-    border-radius: var(--plan-radius-sm);
-    background: var(--plan-code-surface);
-    color: var(--plan-code-text);
-    font-family: var(--plan-font-mono);
-    font-size: var(--plan-text-xs);
+  doc-figure [data-part="diagram-error-source"] {
+    margin-block-start: var(--doc-space-2);
+    padding: var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
     overflow-x: auto;
   }
 }

@@ -8,39 +8,39 @@
  * the only parts a reader cannot argue with.
  */
 
-@layer plan.components {
+@layer doc.components {
   [data-part="feedback"] {
-    padding: var(--plan-space-1) var(--plan-space-2);
-    border: var(--plan-border-width) solid var(--plan-border-2);
-    border-radius: var(--plan-radius-sm);
-    background: var(--plan-surface-1);
-    color: var(--plan-text-2);
-    font-size: var(--plan-text-xs);
+    padding: var(--doc-space-1) var(--doc-space-2);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-xs);
     font-weight: 560;
     line-height: 1.4;
     cursor: pointer;
   }
 
   [data-part="feedback"]:hover {
-    border-color: var(--plan-accent-line);
-    background: var(--plan-accent-tint);
-    color: var(--plan-accent-text);
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
   }
 
   /* In a block that already has a header row, the button joins it. */
-  plan-code [data-part="header"] [data-part="feedback"],
-  plan-diff [data-part="header"] [data-part="feedback"] {
+  doc-code [data-part="header"] [data-part="feedback"],
+  doc-diff [data-part="header"] [data-part="feedback"] {
     flex: none;
     background: none;
     font-size: inherit;
   }
 
-  plan-diff [data-part="header"] [data-part="feedback"] {
+  doc-diff [data-part="header"] [data-part="feedback"] {
     margin-inline-start: auto;
   }
 
-  plan-code [data-part="header"] [data-part="feedback"] {
-    border-color: var(--plan-code-border);
+  doc-code [data-part="header"] [data-part="feedback"] {
+    border-color: var(--doc-code-border);
   }
 
   /*
@@ -48,35 +48,35 @@
    * until the reader looks at the block. It is always visible without a pointer,
    * because "hover to discover" is not an interaction a touch reader has.
    */
-  plan-figure > [data-part="feedback"],
-  plan-tree > [data-part="feedback"] {
+  doc-figure > [data-part="feedback"],
+  doc-tree > [data-part="feedback"] {
     position: absolute;
-    inset-block-start: var(--plan-space-2);
-    inset-inline-end: var(--plan-space-2);
+    inset-block-start: var(--doc-space-2);
+    inset-inline-end: var(--doc-space-2);
     z-index: 1;
     opacity: 0;
-    transition: opacity var(--plan-transition);
+    transition: opacity var(--doc-transition);
   }
 
-  plan-figure:hover > [data-part="feedback"],
-  plan-figure:focus-within > [data-part="feedback"],
-  plan-tree:hover > [data-part="feedback"],
-  plan-tree:focus-within > [data-part="feedback"],
-  plan-figure > [data-part="feedback"]:focus-visible,
-  plan-tree > [data-part="feedback"]:focus-visible {
+  doc-figure:hover > [data-part="feedback"],
+  doc-figure:focus-within > [data-part="feedback"],
+  doc-tree:hover > [data-part="feedback"],
+  doc-tree:focus-within > [data-part="feedback"],
+  doc-figure > [data-part="feedback"]:focus-visible,
+  doc-tree > [data-part="feedback"]:focus-visible {
     opacity: 1;
   }
 
   @media (hover: none) {
-    plan-figure > [data-part="feedback"],
-    plan-tree > [data-part="feedback"] {
+    doc-figure > [data-part="feedback"],
+    doc-tree > [data-part="feedback"] {
       opacity: 1;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    plan-figure > [data-part="feedback"],
-    plan-tree > [data-part="feedback"] {
+    doc-figure > [data-part="feedback"],
+    doc-tree > [data-part="feedback"] {
       transition: none;
     }
   }
@@ -87,13 +87,13 @@
    * why an outline rather than a highlight: `CSS.highlights` paints text ranges,
    * and the whole point of a block comment is that there is no text to paint.
    */
-  [data-plan-commented] {
-    outline: 2px solid var(--plan-accent-edge);
+  [data-doc-commented] {
+    outline: 2px solid var(--doc-accent-edge);
     outline-offset: 2px;
   }
 
-  [data-plan-commented="active"] {
-    outline-color: var(--plan-accent-solid);
+  [data-doc-commented="active"] {
+    outline-color: var(--doc-accent-solid);
   }
 
   @media print {
@@ -101,7 +101,7 @@
       display: none;
     }
 
-    [data-plan-commented] {
+    [data-doc-commented] {
       outline: none;
     }
   }

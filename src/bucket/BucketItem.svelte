@@ -63,7 +63,7 @@
   No <style> block, deliberately.
 
   why (§10.1): the panel's styles live in `styles/components/bucket.css` inside
-  `@layer plan.components`, where the `--plan-*` tokens reach them and where an
+  `@layer doc.components`, where the `--doc-*` tokens reach them and where an
   author's unlayered CSS still beats them. Svelte's component styles would be
   scoped behind a generated hash and sit outside that cascade — and in custom
   element mode Svelte inlines them as a JavaScript string rather than emitting

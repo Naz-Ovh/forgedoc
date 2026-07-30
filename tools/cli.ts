@@ -1,5 +1,5 @@
 /**
- * `plankit build | validate | new | version`
+ * `forgedoc build | validate | new | version`
  *
  * The authoring agent's whole toolchain: write markup, run one command (§2.4).
  * Every path exits non-zero on any validation error so an agent harness can
@@ -19,12 +19,12 @@ import {
 } from './inject.js';
 import { formatJson, formatText, validateHtml } from './validate.js';
 
-declare const __PLANKIT_VERSION__: string;
-const VERSION = typeof __PLANKIT_VERSION__ === 'string' ? __PLANKIT_VERSION__ : '0.0.0-dev';
+declare const __FORGEDOC_VERSION__: string;
+const VERSION = typeof __FORGEDOC_VERSION__ === 'string' ? __FORGEDOC_VERSION__ : '0.0.0-dev';
 
-const USAGE = `plankit ${VERSION}
+const USAGE = `forgedoc ${VERSION}
 
-  plankit build <file.html> [--out <file>] [--offline] [--no-validate]
+  forgedoc build <file.html> [--out <file>] [--offline] [--no-validate]
       Validate, then wire the runtime into the placeholders.
       Default: link a version-pinned CDN. The document stays a few kB and is
       safe to commit.
@@ -32,13 +32,13 @@ const USAGE = `plankit ${VERSION}
       never touches the network. Large — it defaults to writing into .temp/,
       which you should gitignore rather than commit.
 
-  plankit validate <file.html> [--format=json] [--built]
+  forgedoc validate <file.html> [--format=json] [--built]
       Check the markup contract. Exits non-zero on any error.
 
-  plankit new <name> [--dir <path>]
-      Scaffold PLAN_<name>.html with the required skeleton.
+  forgedoc new <name> [--dir <path>]
+      Scaffold DOC_<name>.html with the required skeleton.
 
-  plankit version
+  forgedoc version
 `;
 
 interface ParsedArguments {
@@ -70,7 +70,7 @@ export async function run(argv: readonly string[]): Promise<number> {
       process.stdout.write(USAGE);
       return parsed.command === '' ? 1 : 0;
     default:
-      process.stderr.write(`plankit: unknown command \`${parsed.command}\`\n\n${USAGE}`);
+      process.stderr.write(`forgedoc: unknown command \`${parsed.command}\`\n\n${USAGE}`);
       return 1;
   }
 }
@@ -118,7 +118,7 @@ const VALUE_FLAGS = new Set(['out', 'dir', 'format']);
 async function runBuild(parsed: ParsedArguments): Promise<number> {
   const inputPath = parsed.positionals[0];
   if (!inputPath) {
-    process.stderr.write(`plankit build: expected a file.\n\n${USAGE}`);
+    process.stderr.write(`forgedoc build: expected a file.\n\n${USAGE}`);
     return 1;
   }
 
@@ -129,7 +129,7 @@ async function runBuild(parsed: ParsedArguments): Promise<number> {
     const result = validateHtml(source, { file: inputPath });
     process.stderr.write(`${formatText(result)}\n`);
     if (!result.ok) {
-      process.stderr.write('\nplankit build: no output written.\n');
+      process.stderr.write('\nforgedoc build: no output written.\n');
       return 1;
     }
   }
@@ -163,7 +163,7 @@ async function runBuild(parsed: ParsedArguments): Promise<number> {
   await writeFile(outputPath, output, 'utf8');
 
   const kilobytes = Math.round(Buffer.byteLength(output, 'utf8') / 1024);
-  process.stdout.write(`plankit build: wrote ${outputPath} (${kilobytes} kB, ${flavour})\n`);
+  process.stdout.write(`forgedoc build: wrote ${outputPath} (${kilobytes} kB, ${flavour})\n`);
   if (flavour === 'offline') warnAboutOfflineWeight(source, kilobytes, parsed.flags.get('out'));
   return 0;
 }
@@ -182,16 +182,16 @@ function warnAboutOfflineWeight(
 ): void {
   if (usesMermaid(source)) {
     process.stderr.write(
-      `\nplankit build: this document embeds Mermaid, which is most of the ${kilobytes} kB.\n` +
+      `\nforgedoc build: this document embeds Mermaid, which is most of the ${kilobytes} kB.\n` +
         '    Mermaid ships every diagram type in one file because an IIFE cannot code-split.\n' +
-        '    A plan with no `<plan-figure type="mermaid">` embeds roughly 160 kB instead.\n',
+        '    A plan with no `<doc-figure type="mermaid">` embeds roughly 160 kB instead.\n',
     );
   }
 
   if (typeof outFlag === 'string') return;
   process.stderr.write(
     `    Do not commit this file — add \`${TEMP_DIRECTORY}/\` to .gitignore and send it directly.\n` +
-      '    The committed plan should be the CDN build: `plankit build <file.html>`.\n',
+      '    The committed plan should be the CDN build: `forgedoc build <file.html>`.\n',
   );
 }
 
@@ -223,7 +223,7 @@ function resolveOutputPath(
 async function runValidate(parsed: ParsedArguments): Promise<number> {
   const inputPath = parsed.positionals[0];
   if (!inputPath) {
-    process.stderr.write(`plankit validate: expected a file.\n\n${USAGE}`);
+    process.stderr.write(`forgedoc validate: expected a file.\n\n${USAGE}`);
     return 1;
   }
 
@@ -247,20 +247,20 @@ async function runValidate(parsed: ParsedArguments): Promise<number> {
 async function runNew(parsed: ParsedArguments): Promise<number> {
   const name = parsed.positionals[0];
   if (!name) {
-    process.stderr.write(`plankit new: expected a name.\n\n${USAGE}`);
+    process.stderr.write(`forgedoc new: expected a name.\n\n${USAGE}`);
     return 1;
   }
 
-  const planId = slugify(name);
+  const docId = slugify(name);
   const directoryFlag = parsed.flags.get('dir');
   const directory = typeof directoryFlag === 'string' ? directoryFlag : '.';
-  const outputPath = join(directory, `PLAN_${planId}.html`);
+  const outputPath = join(directory, `DOC_${docId}.html`);
 
   await mkdir(directory, { recursive: true });
-  await writeFile(outputPath, skeleton(name, planId), 'utf8');
+  await writeFile(outputPath, skeleton(name, docId), 'utf8');
 
   process.stdout.write(
-    `plankit new: wrote ${outputPath}\n  next: edit it, then run \`plankit build ${outputPath}\`\n`,
+    `forgedoc new: wrote ${outputPath}\n  next: edit it, then run \`forgedoc build ${outputPath}\`\n`,
   );
   return 0;
 }
@@ -275,48 +275,48 @@ async function runNew(parsed: ParsedArguments): Promise<number> {
  * document written before this shape still builds correctly — but the skeleton
  * is what agents copy, so it should not need the rescue.
  */
-function skeleton(title: string, planId: string): string {
+function skeleton(title: string, docId: string): string {
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
-<style>/*@PLAN_CSS@*/</style>
+<style>/*@DOC_CSS@*/</style>
 </head>
 <body>
 
-<plan-doc plan-id="${planId}" density="comfortable" accent="teal">
+<doc-page doc-id="${docId}" density="comfortable" accent="teal">
 
-  <plan-header kicker="Plan">
+  <doc-header kicker="Plan">
     ${escapeHtml(title)}
     <p slot="lede">One or two sentences on what this plan is for and who reads it.</p>
-  </plan-header>
+  </doc-header>
 
-  <plan-chips>
-    <plan-chip kind="action">Answer the questions inline, then send the bucket back</plan-chip>
-  </plan-chips>
+  <doc-chips>
+    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
+  </doc-chips>
 
-  <plan-section title="What we are building">
+  <doc-section title="What we are building">
     <p>Replace this with the shape of the work.</p>
-  </plan-section>
+  </doc-section>
 
-  <plan-section title="Open questions">
-    <plan-choice mode="single" question="Replace this with a real decision you need made">
-      <plan-option recommended>
+  <doc-section title="Open questions">
+    <doc-choice mode="single" question="Replace this with a real decision you need made">
+      <doc-option recommended>
         First answer
         <p slot="desc">Why this one is the recommendation.</p>
-      </plan-option>
-      <plan-option>
+      </doc-option>
+      <doc-option>
         Second answer
         <p slot="desc">What it costs instead.</p>
-      </plan-option>
-    </plan-choice>
-  </plan-section>
+      </doc-option>
+    </doc-choice>
+  </doc-section>
 
-</plan-doc>
+</doc-page>
 
-<script>//@PLAN_JS@</script>
+<script>//@DOC_JS@</script>
 </body>
 </html>
 `;
@@ -338,15 +338,15 @@ async function readSource(path: string): Promise<string | null> {
   try {
     return await readFile(path, 'utf8');
   } catch {
-    process.stderr.write(`plankit: cannot read ${path}\n`);
+    process.stderr.write(`forgedoc: cannot read ${path}\n`);
     return null;
   }
 }
 
 function reportInjectionError(error: unknown): void {
   if (error instanceof InjectionError) {
-    process.stderr.write(`plankit build: ${error.message}\n    fix: ${error.fix}\n`);
+    process.stderr.write(`forgedoc build: ${error.message}\n    fix: ${error.fix}\n`);
     return;
   }
-  process.stderr.write(`plankit build: ${String(error)}\n`);
+  process.stderr.write(`forgedoc build: ${String(error)}\n`);
 }

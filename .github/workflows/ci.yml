@@ -1,9 +1,15 @@
 name: CI
 
+# Manual only. The two jobs below install Chromium and pull a pinned Playwright
+# container, which is the expensive part of the bill, and `npm run check` already
+# runs the same gate locally — so paying Actions minutes on every push buys
+# nothing today. Re-enable by restoring the two triggers under `on:`:
+#
+#   push:
+#     branches: [main]
+#   pull_request:
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
