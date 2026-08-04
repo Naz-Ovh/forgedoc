@@ -1,0 +1,27 @@
+/*
+ * `doc-note` — the coloured callout.
+ *
+ * One ramp variable set per kind, so the layout rules below are written once.
+ */
+
+@layer doc.components {
+  /*
+  * why a hanging indent rather than a two-column grid: a callout's body is
+  * author content, and an author may legitimately write bare text or inline
+  * markup rather than a `<p>`. In a grid container each inline element child
+  * becomes its own grid item, which would tear the sentence apart.
+  */
+  doc-note {
+    position: relative;
+    /* MUST (§8.8): never split across a page break. */
+    break-inside: avoid;
+  }
+
+  doc-note [data-part="icon"] {
+    position: absolute;
+    inset-inline-start: var(--doc-space-4);
+    inset-block-start: var(--doc-space-4);
+    display: grid;
+    place-items: center;
+  }
+}

@@ -1,0 +1,39 @@
+/* `doc-blocker` and its three enforced children. */
+
+@layer doc.components {
+  doc-blocker {
+    break-inside: avoid;
+  }
+
+  doc-blocker [data-part="header"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+
+  doc-blocker [data-part="title"] {
+    flex: 1 1 100%;
+  }
+
+  /*
+  * why the label is positioned rather than a grid column: the author's text is
+  * *inline* content — "Every key is namespaced <code>…</code>, and the
+  * validator rejects…" — and every inline element child of a grid container
+  * becomes its own grid item. A two-column grid would therefore tear a sentence
+  * containing `<code>` into three cells. A hanging indent with an absolutely
+  * positioned label holds any mix of inline content.
+  */
+  doc-blocks,
+  doc-why,
+  doc-action {
+    position: relative;
+  }
+
+  doc-blocks [data-part="label"],
+  doc-why [data-part="label"],
+  doc-action [data-part="label"] {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: var(--doc-space-2);
+  }
+}

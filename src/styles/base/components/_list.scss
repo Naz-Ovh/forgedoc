@@ -1,0 +1,44 @@
+/* `doc-list` — the marked list, and the atom underneath `doc-compare`. */
+
+@layer doc.components {
+  doc-list {
+    counter-reset: doc-list-item;
+  }
+
+  /*
+  * why a hanging indent rather than a two-column grid: an `<li>` is inline
+  * content, and every inline element child of a grid container becomes its own
+  * grid item — so a bullet containing `<code>` or a link would be torn into
+  * separate cells. This holds any mix of inline content.
+  */
+  /*
+  * why `display: block`: an `<li>` keeps `display: list-item` from the UA
+  * stylesheet even when its parent is a custom element rather than a `<ul>`, so
+  * the browser draws its own bullet next to the glyph the runtime added. The
+  * reset in base.css only reaches `<li>` inside a real `<ul>`/`<ol>`.
+  */
+  doc-list > li,
+  doc-list > [data-part="item"] {
+    display: block;
+  }
+
+  doc-list > [data-part="item"] {
+    position: relative;
+  }
+
+  doc-list > [data-part="item"] > [data-part="marker"] {
+    position: absolute;
+    inset-inline-start: 0;
+  }
+
+  /* `marker="number"` uses a counter — no glyph element is generated. */
+  doc-list[marker="number"] > [data-part="item"] {
+    counter-increment: doc-list-item;
+  }
+
+  doc-list[marker="number"] > [data-part="item"]::before {
+    content: counter(doc-list-item) ".";
+    position: absolute;
+    inset-inline-start: 0;
+  }
+}

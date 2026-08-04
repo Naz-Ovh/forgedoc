@@ -19,8 +19,10 @@ let stylesheet: HTMLLinkElement | HTMLStyleElement | null = null;
 beforeEach(async () => {
   if (stylesheet) return;
   // Vite serves the source stylesheet through the module graph in dev/test.
-  await import('../../src/styles/index.css');
-  stylesheet = document.querySelector('style[data-vite-dev-id*="index.css"]');
+  // The reference theme is the compile entry; the presets it asserts on are
+  // token values, which every theme has to define (see check-style-layers).
+  await import('../../src/styles/themes/forgedoc/index.scss');
+  stylesheet = document.querySelector('style[data-vite-dev-id*="forgedoc/index.scss"]');
 });
 
 /** The raw token stream, e.g. `calc(var(--doc-space-unit) * 4)`. */

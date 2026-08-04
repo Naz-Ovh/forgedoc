@@ -1,0 +1,49 @@
+/*
+ * `doc-roadmap` / `doc-stage` — a numbered sequence with a current marker.
+ *
+ * The rail is a single pseudo-element on the roadmap rather than a border per
+ * stage, so it runs unbroken behind the number badges.
+ */
+
+@layer doc.components {
+  doc-roadmap {
+    position: relative;
+  }
+
+  doc-roadmap::before {
+    content: "";
+    position: absolute;
+    inset-block: var(--doc-space-5);
+    inset-inline-start: calc(var(--doc-space-9) / 2 + 2px);
+  }
+
+  doc-stage {
+    position: relative;
+    break-inside: avoid;
+  }
+
+  doc-stage > [data-part="header"] {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  doc-stage [data-part="badge"] {
+    position: absolute;
+    inset-inline-start: calc(var(--doc-space-9) * -1);
+    display: grid;
+    place-items: center;
+  }
+
+  doc-stage [data-part="heading"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+
+  @media (max-width: 720px) {
+    doc-stage [data-part="badge"] {
+      inset-inline-start: calc(var(--doc-space-7) * -1);
+    }
+  }
+}

@@ -1,0 +1,48 @@
+/*
+ * The `forgedoc` theme — the reference look, and the one every other theme is
+ * measured against.
+ *
+ * This file is the compile entry: `npm run build:styles` turns it into
+ * `dist/themes/forgedoc.css`. A new theme is this same nine-line file with its
+ * own `_tokens.scss` beside it.
+ *
+ * Order is the cascade. `layers` first (§4.4), then the token set the whole
+ * document derives from, then the shared headless base, then everything this
+ * theme paints on top of it in `doc.theme`.
+ */
+
+@use "../../layers";
+@use "tokens";
+@use "presets";
+
+// Structure, shared with every other theme.
+@use "../../base";
+
+// Everything this theme paints, in doc.theme.
+@use "elements";
+
+@use "components/doc";
+@use "components/toc";
+@use "components/header";
+@use "components/section";
+@use "components/chips";
+@use "components/note";
+@use "components/blocker";
+@use "components/list";
+@use "components/compare";
+@use "components/table";
+@use "components/choice";
+@use "components/collapse";
+@use "components/roadmap";
+@use "components/tabs";
+@use "components/checklist";
+@use "components/flow";
+@use "components/code";
+@use "components/diff";
+@use "components/figure";
+@use "components/tree";
+@use "components/quote";
+@use "components/feedback";
+@use "components/bucket";
+
+@use "print";

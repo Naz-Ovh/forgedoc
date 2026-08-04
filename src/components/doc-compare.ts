@@ -4,7 +4,7 @@
  * The reference's "Already built" / "Missing (we build these)". Children are
  * `doc-list` blocks, each with its own `title` and `kind` (§8.6).
  *
- * MUST: stacks vertically below 1050px — see `styles/components/compare.css`.
+ * MUST: stacks vertically below 1050px — see `styles/base/components/_compare.scss`.
  */
 
 import { DocElement } from '../core/base.js';

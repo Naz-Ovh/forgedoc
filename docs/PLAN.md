@@ -238,11 +238,13 @@ debuggable dist is part of that.
 
 ### 4.4 CSS layer ordering
 
-`src/styles/layers.css` contains exactly one statement and **MUST** be the first import in `index.css`:
+`src/styles/layers.scss` contains exactly one statement and **MUST** be the first thing each theme's `index.scss` loads:
 
 ```css
-@layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.utilities;
+@layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.theme, doc.utilities;
 ```
+
+`doc.theme` sits immediately after `doc.components`: `src/styles/base/` ships structure into `doc.components`, and each `src/styles/themes/<name>/` ships everything visual into `doc.theme`. That one position is what lets a theme override any base declaration — including a structural one — at equal or lower specificity, with no `!important`. It sits *before* `doc.utilities` so the author's own escape hatch still wins over whichever theme was compiled in.
 
 Every rule the library ships **MUST** live inside one of those layers. Nothing outside a layer.
 

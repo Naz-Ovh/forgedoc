@@ -68,7 +68,8 @@ export interface ValidateOptions {
   readonly expectBuilt?: boolean;
 }
 
-const CSS_PLACEHOLDER = '/*@DOC_CSS@*/';
+/** Matches both the bare placeholder and the themed `/*@DOC_CSS:geist@*\/`. */
+const CSS_PLACEHOLDER = /\/\*@DOC_CSS(?::[a-z0-9-]+)?@\*\//;
 const JS_PLACEHOLDER = '//@DOC_JS@';
 
 /** `doc-id`, section ids and `doc-ref to` targets must all look like this. */
@@ -641,8 +642,18 @@ function checkPlaceholders(
 ): void {
   if (!expectBuilt) return;
 
-  for (const placeholder of [CSS_PLACEHOLDER, JS_PLACEHOLDER]) {
-    if (!html.includes(placeholder)) continue;
+  // The CSS placeholder may name a theme — `/*@DOC_CSS:geist@*\/` — so this
+  // matches the shape rather than the one default spelling. A themed
+  // placeholder surviving injection is the same failure and has to report as
+  // one; matching only the bare form would let exactly the documents that ask
+  // for a non-default theme ship unstyled.
+  const survivors = [
+    CSS_PLACEHOLDER.exec(html)?.[0],
+    html.includes(JS_PLACEHOLDER) ? JS_PLACEHOLDER : undefined,
+  ];
+
+  for (const placeholder of survivors) {
+    if (!placeholder) continue;
 
     collector.error(
       'build/unreplaced-placeholder',

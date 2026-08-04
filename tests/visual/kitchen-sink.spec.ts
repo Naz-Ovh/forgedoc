@@ -165,3 +165,92 @@ test('a collapsed contents panel stays the size of its own header', async ({ pag
   expect(collapsed.width).toBeLessThan(280);
   expect(collapsed.height).toBeLessThan(80);
 });
+
+/**
+ * A rendered diagram is legible in both colour schemes.
+ *
+ * This is the only place the question can be asked. The jsdom suite resolves
+ * neither `light-dark()` nor `color-mix()` nor `rgb(from …)`, so every token
+ * there collapses to one fallback and both schemes come out identical — which
+ * is how a dark document shipped drawing light node fills under light text
+ * while `tests/components/mermaid-theme.test.ts` stayed green.
+ *
+ * Untagged, so it runs in CI: it measures colour, not pixels.
+ */
+for (const scheme of SCHEMES) {
+  test(`a mermaid diagram is legible in ${scheme} mode`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.setViewportSize({ width: 1280, height: 1400 });
+    await page.goto(PAGE);
+    await ready(page);
+
+    const measured = await page.evaluate(() => {
+      const figure = document.querySelector<HTMLElement>('doc-figure[type="mermaid"]');
+      if (!figure) throw new Error('the fixture has no mermaid figure');
+      const svg = figure.querySelector('svg');
+      if (!svg) throw new Error('the mermaid figure did not render');
+
+      const shape = svg.querySelector('.node rect, .node polygon, .node path');
+      const label = svg.querySelector('.nodeLabel, .node .label');
+      const edge = svg.querySelector('.flowchart-link, .edgePath .path');
+      if (!shape || !label || !edge) throw new Error('the diagram has no node, label or edge');
+
+      return {
+        page: getComputedStyle(figure).backgroundColor,
+        fill: getComputedStyle(shape).fill,
+        ink: getComputedStyle(label).color,
+        edge: getComputedStyle(edge).stroke,
+      };
+    });
+
+    const channels = (colour: string): number[] => {
+      const match = /(-?[\d.]+)[,\s]+(-?[\d.]+)[,\s]+(-?[\d.]+)/.exec(colour);
+      if (!match) throw new Error(`cannot read the colour "${colour}"`);
+      const parsed = [match[1], match[2], match[3]].map(Number);
+      // `color(srgb …)` is 0–1 per channel; `rgb()` is 0–255.
+      return colour.startsWith('color(') ? parsed.map((value) => value * 255) : parsed;
+    };
+
+    const luminance = (colour: string): number => {
+      const [red = 0, green = 0, blue = 0] = channels(colour).map((value) => {
+        const channel = value / 255;
+        return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    };
+
+    const contrast = (a: string, b: string): number => {
+      const [lighter, darker] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return ((lighter ?? 0) + 0.05) / ((darker ?? 0) + 0.05);
+    };
+
+    // The reported bug: the node fill resolved from the light palette while the
+    // label resolved from the dark one, so light text sat on a light box.
+    expect(
+      contrast(measured.ink, measured.fill),
+      `node label ${measured.ink} on fill ${measured.fill}`,
+    ).toBeGreaterThan(4.5);
+
+    // A node fill is a tint of the page, not a slab of another scheme's palette.
+    expect(
+      contrast(measured.fill, measured.page),
+      `node fill ${measured.fill} against page ${measured.page}`,
+    ).toBeLessThan(2);
+
+    // …and it is genuinely the *accent* tint. Both surfaces are near-neutral
+    // and both tints are visibly biased toward the accent hue, so a fill that
+    // has gone grey means the token stopped resolving and quietly fell back —
+    // legible, on-scheme, and no longer the document's colour.
+    const [red = 0, green = 0, blue = 0] = channels(measured.fill);
+    expect(
+      Math.max(red, green, blue) - Math.min(red, green, blue),
+      `node fill ${measured.fill} has no accent hue left in it`,
+    ).toBeGreaterThan(6);
+
+    // Edges carry meaning. `--doc-border-2`, the original choice, is 1.7:1 here.
+    expect(
+      contrast(measured.edge, measured.page),
+      `edge ${measured.edge} against page ${measured.page}`,
+    ).toBeGreaterThan(3);
+  });
+}

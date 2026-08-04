@@ -1,0 +1,29 @@
+/* `doc-tree` — directory layouts drawn from indented text. */
+
+@layer doc.components {
+  doc-tree {
+    /* Positioned so the block's own Comment button can sit in its corner. */
+    position: relative;
+    break-inside: avoid;
+  }
+
+  /*
+  * The scroll container is the list, not the element.
+  *
+  * why it moved: an absolutely positioned corner button inside a scrolling box
+  * is placed against the *scrollable* area, so a wide tree parked it far off to
+  * the right where nobody would find it.
+  */
+  doc-tree [data-part="list"] {
+    overflow-x: auto;
+  }
+
+  doc-tree [data-part="node"] {
+    display: flex;
+    white-space: nowrap;
+  }
+
+  doc-tree [data-part="connector"] {
+    user-select: none;
+  }
+}

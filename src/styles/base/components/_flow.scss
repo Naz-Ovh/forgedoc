@@ -1,0 +1,48 @@
+/*
+ * `doc-flow` — the horizontal chain.
+ *
+ * MUST (§8.5): wraps to multiple rows below 1050px, with the arrows rotating to
+ * point down rather than dangling at the end of a row.
+ */
+
+@layer doc.components {
+  doc-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  doc-flow [data-part="arrow"] {
+    align-self: center;
+  }
+
+  /*
+  * The host carries the *subtitle* typography, not the title's.
+  *
+  * why (§8.5 + §2.2): the subtitle arrives as a bare author text node, so there
+  * is no element to name without moving it. The title is generated from an
+  * attribute and overrides these values below.
+  */
+  doc-flow-node {
+    flex: 1 1 8rem;
+  }
+
+  doc-flow-node [data-part="title"] {
+    display: block;
+  }
+
+  doc-flow-node [data-part="subtitle"] {
+    display: block;
+  }
+
+  @media (max-width: 1049px) {
+    doc-flow {
+      flex-direction: column;
+    }
+
+    doc-flow [data-part="arrow"] {
+      align-self: start;
+      rotate: 90deg;
+    }
+  }
+}

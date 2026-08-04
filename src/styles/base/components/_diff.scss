@@ -1,0 +1,31 @@
+/* `doc-diff` — +/- gutters and aligned line numbers. */
+
+@layer doc.components {
+  doc-diff {
+    overflow: hidden;
+    break-inside: avoid;
+  }
+
+  doc-diff [data-part="header"] {
+    display: flex;
+    align-items: center;
+  }
+
+  doc-diff [data-part="code"] {
+    overflow-x: auto;
+  }
+
+  doc-diff [data-part="row"] {
+    display: grid;
+    grid-template-columns: 3.2em 3.2em 1.2em 1fr;
+    white-space: pre;
+  }
+
+  doc-diff :where([data-part="old-number"], [data-part="new-number"]) {
+    user-select: none;
+  }
+
+  doc-diff [data-part="sign"] {
+    user-select: none;
+  }
+}

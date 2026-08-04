@@ -1,0 +1,115 @@
+/*
+ * Print — a `doc-page` responsibility (§8.8).
+ *
+ * The PDF is a real deliverable, not an afterthought. Every MUST from §8.8 is
+ * implemented here; retrofitting print across 22 components later is miserable,
+ * which is why this file exists from the start rather than at the end.
+ */
+
+@layer doc.components {
+  @media print {
+    /* Bucket hidden entirely. */
+    [data-part="bucket-trigger"],
+    [data-part="bucket-panel"],
+    [data-part="bucket-popover"],
+    doc-page > [data-part="bucket"],
+    doc-page > [data-part="dev-banner"] {
+      display: none !important;
+    }
+
+    /* TOC flattened into a real contents page, whatever the on-screen state. */
+    doc-toc,
+    doc-page:state(toc-open) doc-toc,
+    doc-page:state(toc-docked) doc-toc {
+      position: static;
+      overflow: visible;
+      break-after: page;
+    }
+
+    doc-toc [data-part="dock"] {
+      display: none;
+    }
+
+    doc-toc [data-part="toggle"]::before {
+      content: none;
+    }
+
+    /* Force the list open regardless of the reader's on-screen preference, and
+    drop the scroll container — a printed contents page cannot scroll. */
+    doc-toc [data-part="list"] {
+      display: block !important;
+      overflow: visible;
+    }
+
+    doc-toc [data-part="entry"]::after {
+      /* Page numbers, where the engine supports target-counter. */
+      content: " " target-counter(attr(href), page);
+    }
+
+    /* Every disclosure force-expanded. */
+    doc-collapse > [data-part="body"],
+    doc-stage > [data-part="body"],
+    doc-tab,
+    doc-tab > [data-part="body"] {
+      display: block !important;
+      content-visibility: visible !important;
+    }
+
+    doc-collapse [hidden],
+    doc-stage [hidden],
+    doc-tabs [hidden] {
+      display: block !important;
+    }
+
+    doc-collapse [data-part="chevron"],
+    doc-tabs [data-part="strip"] {
+      display: none;
+    }
+
+    /* Tabs flatten to sequential sections with their labels as sub-headings. */
+    doc-tab::before {
+      content: attr(label);
+      display: block;
+    }
+
+    /* Never split a box across a page break. */
+    doc-note,
+    doc-blocker,
+    doc-choice,
+    doc-figure,
+    doc-compare,
+    doc-compare > [data-part="column"],
+    doc-code,
+    doc-diff,
+    doc-stage,
+    doc-tree {
+      break-inside: avoid;
+    }
+
+    doc-section[data-depth="1"] {
+      break-before: page;
+    }
+
+    doc-section > [data-part="heading"] {
+      break-after: avoid;
+    }
+
+    /* Link URLs printed after the link text, for external hrefs only. */
+    doc-page a[href^="http"]::after {
+      content: " (" attr(href) ")";
+      word-break: break-all;
+    }
+
+    doc-term::after {
+      content: " (" attr(data-href) ")";
+      word-break: break-all;
+    }
+
+    /* An unanswered question wastes half a page of interactive chrome. */
+    doc-choice [data-part="note-toggle"],
+    doc-choice [data-part="note"]:not([data-has-text]),
+    doc-code [data-part="copy"] {
+      display: none;
+    }
+  }
+}

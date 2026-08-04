@@ -1,0 +1,75 @@
+/*
+ * `doc-flow` — the horizontal chain.
+ *
+ * MUST (§8.5): wraps to multiple rows below 1050px, with the arrows rotating to
+ * point down rather than dangling at the end of a row.
+ */
+
+@layer doc.theme {
+  doc-flow {
+    gap: var(--doc-space-2);
+    margin-block: var(--doc-space-6);
+  }
+
+  doc-flow [data-part="arrow"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-lg);
+  }
+
+  /*
+  * The host carries the *subtitle* typography, not the title's.
+  *
+  * why (§8.5 + §2.2): the subtitle arrives as a bare author text node, so there
+  * is no element to name without moving it. The title is generated from an
+  * attribute and overrides these values below.
+  */
+  doc-flow-node {
+    min-width: 7rem;
+    padding: var(--doc-space-3);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-flow-node [data-part="title"] {
+    margin-block-end: var(--doc-space-1);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-sm);
+    font-weight: 640;
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-flow-node [data-part="subtitle"] {
+    margin-block-start: var(--doc-space-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    line-height: var(--doc-leading-tight);
+  }
+
+  /* The emphasised dark node. */
+  doc-flow-node:state(active) {
+    border-color: var(--doc-accent-line);
+    background: light-dark(var(--doc-accent-900), var(--doc-accent-tint));
+    color: light-dark(var(--doc-ink-on-accent), var(--doc-accent-text));
+    print-color-adjust: exact;
+  }
+
+  /* The title sets an explicit colour, so it has to be told to invert too —
+  otherwise it stays dark text on the dark node. */
+  doc-flow-node:state(active) [data-part="title"] {
+    color: inherit;
+  }
+
+  doc-flow-node:state(active) [data-part="subtitle"] {
+    color: light-dark(var(--doc-accent-200), var(--doc-text-2));
+  }
+
+  @media (max-width: 1049px) {
+    doc-flow [data-part="arrow"] {
+      margin-inline-start: var(--doc-space-4);
+    }
+  }
+}

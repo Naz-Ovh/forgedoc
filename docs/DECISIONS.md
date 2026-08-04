@@ -28,9 +28,10 @@ callouts, a numbered roadmap of collapsible stages, question cards with lettered
 options, and a floating feedback bucket.
 
 **What to do with the real prototype:** open `tests/fixtures/kitchen-sink.html`
-side by side with it and adjust `src/styles/`. No component logic should need to
-change — every visual decision lives in `src/styles/tokens.css`,
-`src/styles/presets.css` and `src/styles/components/*.css`.
+side by side with it and adjust `src/styles/themes/forgedoc/`. No component
+logic should need to change, and neither should `src/styles/base/` — every
+visual decision lives in the theme's `_tokens.scss`, `_presets.scss` and
+`components/*.scss`.
 
 ### A2. `bucket_format.txt` (§10.3)
 
@@ -320,6 +321,82 @@ Small choices not covered by the specification.
 | `doc-list` accepts `title` and `kind`.                                                                                     | §8.6 requires them for `doc-compare` columns, but §8.3 lists only `marker`.                                                                                                                                                                                                                                                                                                          |
 | `doc-page` sets `role="article"` and takes its label from the header title.                                                | §2.2 blocks a `heading` role on `doc-header` — the title is a bare text node beside the lede, and a heading whose accessible name swallowed the lede would be worse than none. Section headings still provide navigation.                                                                                                                                                            |
 | Derived tokens are declared on `doc-page, doc-page *`, primitives on `:root, doc-page`.                                    | A `var()` inside a custom property is substituted where it is _declared_. Declaring the whole scale on `:root` bakes in the root's unit, so `density="compact"` and `<doc-table style="--doc-space-unit:9px">` would both silently do nothing. This was caught by `tests/components/presets.test.ts`. The cost is a universal selector carrying ~30 declarations, paid deliberately. |
+
+---
+
+## F. The base/theme split
+
+§4.3 and §6.4 describe one stylesheet built from one token set, using
+`light-dark()` so a document follows the reader's colour scheme. That is still
+true of any _single_ build. What changed is that there is now more than one
+possible token set, because the library is growing a family of themes
+(`forgedoc`, and `geist` / `mintlify` / `vite` / `notion` to follow) rather than
+one look with an accent knob.
+
+### F1. A theme is chosen at build time, not at runtime
+
+`forgedoc build --theme <name>` compiles exactly one theme into the document,
+and the document can name its own in the placeholder —
+`<style>/_@DOC_CSS:geist@_/</style>` — so the choice travels with the file and a
+rebuild months later produces the same thing. The flag overrides it.
+
+why not a runtime switch: a document ships one stylesheet. Shipping five so the
+reader can pick would send four they never see, and the CDN flavour's whole
+argument is that a plan stays a few kB in git. It also keeps the Mermaid theming
+honest — `vendor/mermaid.ts` reads the resolved `--doc-*` tokens once, at first
+render, which is correct precisely because they cannot change afterwards.
+
+### F2. `base/` is headless; the theme owns everything visual
+
+`src/styles/base/` holds structure and behaviour. `src/styles/themes/<name>/`
+holds colour, sizing, spacing and typography. The partition is by **property
+name** — the list is `tools/style-properties.mjs` — and never by how a value
+looks, because "is `14px` a size or a layout constant?" is a judgement call and
+judgement calls rot. Grid _track definitions_ stay in base for the same reason:
+`grid-template-columns` describes structure even though it carries lengths.
+
+Measured on the 23 component stylesheets at the time of the split: 1,355
+declarations, of which 324 were structural and 1,031 visual. Roughly one in
+four.
+
+why not a full copy per theme, which was the first instinct: the structural
+quarter is the half that carries the bugs worth fixing once — focus order, print
+behaviour, reduced motion, RTL, `hidden="until-found"`. Five copies means fixing
+each of those five times, and four of the copies drift. A theme that genuinely
+needs different structure overrides it from `doc.theme` instead, which outranks
+everything base ships.
+
+### F3. `doc.theme` sits between `doc.components` and `doc.utilities`
+
+That single position is the whole override story: a theme rule beats the
+matching base rule at equal or lower specificity, so a theme never needs
+`!important` and never has to reproduce a base selector just to outrank it. It
+is deliberately _before_ `doc.utilities`, because the author's own per-document
+escape hatch must still win over whichever theme was compiled in, and unlayered
+author CSS still beats all of it (§4.4).
+
+The reset and prose layers do **not** move. `doc.reset` exists to be beaten — it
+zeroes `margin` on every heading so components can set their own — and promoting
+its theme half to the last layer would invert that. A theme owns the _values_ in
+those layers; it does not get to move them up the cascade.
+
+### F4. The boundary is enforced, not documented
+
+`npm run lint` runs `tools/check-style-layers.mjs`, which fails if a visual
+property or a colour literal appears in `base/`, or if a theme is missing a token
+the reference theme declares. Both failures are silent otherwise: the first looks
+completely fine until someone writes the second theme and one component refuses
+to change; the second renders a component against `unset`, which usually means
+invisible text on exactly one component.
+
+### F5. The split was verified against the pre-split render
+
+The migration moved ~1,300 declarations between files, which no unit test would
+have caught. It was checked by loading the kitchen sink twice in Chromium — once
+with the compiled theme, once with the stylesheet reconstructed from the previous
+commit — and diffing every computed property of all 840 elements, in both colour
+schemes. It found one real regression (a token rewritten into a self-reference)
+and, once fixed, reported the two renders identical.
 
 ---
 

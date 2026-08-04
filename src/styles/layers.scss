@@ -1,0 +1,23 @@
+/*
+ * The layer order. This file contains exactly one statement and MUST be the
+ * first thing every theme's `index.scss` loads (§4.4).
+ *
+ * why: every rule the library ships lives inside one of these layers, and
+ * unlayered CSS beats layered CSS regardless of specificity. That is the whole
+ * override story — an author writes `doc-note { border-radius: 0 }` outside a
+ * layer and wins, with no `!important` and no specificity arithmetic.
+ *
+ * ── doc.theme ───────────────────────────────────────────────────────────────
+ *
+ * `base/` ships structure in `doc.components`; a theme ships everything visual
+ * in `doc.theme`, which sits immediately after it. That one position is what
+ * makes the split work: a theme rule beats the matching base rule at *equal or
+ * lower* specificity, so a theme never needs `!important` and never needs to
+ * reproduce a base selector just to outrank it. It can override any base
+ * declaration, including a structural one.
+ *
+ * It sits *before* `doc.utilities` deliberately. Utilities are the author's
+ * per-document escape hatch and must still win over whichever theme is
+ * compiled in.
+ */
+@layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.theme, doc.utilities;

@@ -1,0 +1,20 @@
+/* `doc-tabs` / `doc-tab`. Flattened entirely in print — see print.css. */
+
+@layer doc.components {
+  doc-tabs {
+    overflow: hidden;
+  }
+
+  doc-tabs [data-part="strip"] {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  doc-tabs [data-part="tab"] {
+    cursor: pointer;
+  }
+
+  doc-tab[hidden] {
+    display: none;
+  }
+}

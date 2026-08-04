@@ -1,0 +1,88 @@
+/*
+ * `doc-choice` / `doc-option` — the question card.
+ *
+ * MUST (§8.4): every free-text field shares one visual style — same border,
+ * padding, radius and background. `--doc-field-*` below is that one style, used
+ * by the Other textarea, the note textarea and the bucket's comment composer.
+ */
+
+@layer doc.components {
+  doc-choice {
+    break-inside: avoid;
+  }
+
+  doc-option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    cursor: pointer;
+    transition:
+    border-color var(--doc-transition),
+    background-color var(--doc-transition);
+  }
+
+  doc-option [data-part="control"] {
+    display: inline-flex;
+    align-items: center;
+    grid-row: 1;
+  }
+
+  doc-option [data-part="key"] {
+    display: grid;
+    place-items: center;
+  }
+
+  doc-option [data-part="desc"] {
+    grid-column: 2;
+  }
+
+  doc-option [data-part="recommended"] {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  /* ── The appended Other option ──────────────────────────────────────────── */
+  doc-option[data-part="other"] [data-part="other-label"] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  /* MUST (§8.4): the hint is smaller and on the same line as the label. */
+  doc-option[data-part="other"] [data-part="other-hint"] {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+  }
+
+  /*
+  * The textarea lives *inside* the Other block so it reads as part of that
+  * choice — never as a stray field below the list.
+  */
+  doc-option[data-part="other"] [data-part="other-text"] {
+    display: none;
+    grid-column: 2;
+  }
+
+  doc-choice:state(other-open) doc-option[data-part="other"] [data-part="other-text"] {
+    display: block;
+  }
+
+  /* ── The note field ─────────────────────────────────────────────────────── */
+  doc-choice [data-part="note-toggle"] {
+    cursor: pointer;
+  }
+
+  doc-choice [data-part="note"] {
+    display: none;
+  }
+
+  doc-choice:state(note-open) [data-part="note"] {
+    display: block;
+  }
+
+  /* ── The one shared field style ─────────────────────────────────────────── */
+  doc-choice textarea {
+    resize: vertical;
+  }
+}

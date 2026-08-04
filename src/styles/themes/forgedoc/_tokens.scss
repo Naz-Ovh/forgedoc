@@ -1,0 +1,275 @@
+/*
+ * Design tokens.
+ *
+ * Rules (§6.1):
+ *   · Every token is prefixed `--doc-`. Non-negotiable — Mermaid and Prism both
+ *     inject stylesheets and read root-scoped values, so an unprefixed
+ *     `--border` or `--radius` is a collision waiting to happen.
+ *   · Scales derive from one unit and one ratio (§6.2). A preset that had to
+ *     restate forty values would drift within a month.
+ *   · Colour uses `light-dark()` on a single token set (§6.4) — no
+ *     `prefers-color-scheme` duplication, no theme toggle, no second stylesheet.
+ *
+ * ── Why this file is in two blocks ──────────────────────────────────────────
+ *
+ * A `var()` inside a custom property is substituted at computed-value time on
+ * the element that *declares* it, and the result is what inherits. So a derived
+ * token declared only on `:root` bakes in the root's primitives, and neither
+ * `doc-page[density="compact"]` nor `<doc-table style="--doc-space-unit:9px">`
+ * can move it afterwards — the preset would change the unit and every step would
+ * quietly keep the old value.
+ *
+ * PRIMITIVES therefore sit on `:root, doc-page`, so a preset can override them
+ * on the document root. DERIVED tokens are re-declared on `doc-page, doc-page *`
+ * so they re-substitute at every element, which is exactly what makes both
+ * `density="compact"` (§6.3) and a subtree token override (§6.1) work.
+ *
+ * The cost is a universal selector carrying ~30 declarations. That is a real
+ * price, paid deliberately: without it, two of the three documented override
+ * tiers in §6.6 silently do nothing.
+ */
+
+@layer doc.tokens {
+  /* ═══ Primitives ═══════════════════════════════════════════════════════════
+     Everything a preset or an author may want to move. No var() references. */
+  :root,
+  doc-page {
+    /* Spacing: one unit. */
+    --doc-space-unit: 4px;
+
+    /* Type: one base, one ratio. */
+    --doc-text-base: 16px;
+    --doc-text-ratio: 1.2;
+
+    --doc-leading: 1.7;
+    --doc-leading-tight: 1.25;
+    --doc-leading-heading: 1.15;
+    --doc-tracking-tight: -0.011em;
+    --doc-tracking-wide: 0.08em;
+
+    /* Fonts (§6.5). MUST NOT use serif for body, headings or code. Serif is
+       permitted only if the author explicitly sets --doc-font-display. No web
+       fonts ship in either build. */
+    --doc-font-sans:
+      ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    --doc-font-mono:
+      ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", "Cascadia Mono", "Roboto Mono",
+      Menlo, Consolas, "Liberation Mono", monospace;
+    /* Tabular numerals in tables, code and every derived number. */
+    --doc-numeric: tabular-nums lining-nums;
+
+    /* Layout. */
+    --doc-measure: 1200px;
+    --doc-measure-prose: 74ch;
+    /* Width of the contents panel, and of the gap it pushes open when docked. */
+    --doc-toc-width: 19rem;
+    --doc-radius-sm: 4px;
+    --doc-radius: 8px;
+    --doc-radius-lg: 14px;
+    --doc-radius-pill: 999px;
+    --doc-border-width: 1px;
+
+    /* Accent ramp. One definition per accent; dark mode picks other steps
+       rather than restating the ramp. */
+    --doc-accent-50: #edfaf6;
+    --doc-accent-100: #d3f3ea;
+    --doc-accent-200: #a7e6d6;
+    --doc-accent-400: #4dc7ab;
+    --doc-accent-600: #12907a;
+    --doc-accent-800: #0b5c50;
+    --doc-accent-900: #073d36;
+
+    /* The colour every dark-mode tint mixes toward.
+
+       It is the dark step of `--doc-surface-0`, and it was written out as the
+       literal `#101214` in eleven component files before it was a token. A
+       theme that moves its dark surface has to move its tints with it, and
+       eleven copies is eleven chances to forget one. */
+    --doc-shade-base: #101214;
+
+    /* Ink for text sitting on a saturated fill rather than on a surface.
+       Scheme-independent on purpose: the fills these sit on — a 600-step ramp,
+       a 900-step accent — are the same in light and dark, so the ink must be
+       too, or it inverts against an unchanged background. */
+    --doc-ink-on-solid: #ffffff;
+    --doc-ink-on-accent: #f3fbf8;
+
+    /* Surfaces and text. */
+    --doc-surface-0: light-dark(#fbfaf7, var(--doc-shade-base));
+    --doc-surface-1: light-dark(#ffffff, #16181a);
+    --doc-surface-2: light-dark(#f5f4f0, #1c1f22);
+    --doc-surface-3: light-dark(#eceae4, #23272b);
+    --doc-text-1: light-dark(#1b1d1f, #e6e4dd);
+    --doc-text-2: light-dark(#4b4f53, #b0aea6);
+    --doc-text-3: light-dark(#767a7d, #85857f);
+    --doc-text-inverse: light-dark(#fbfaf7, #101214);
+    --doc-border-1: light-dark(#e4e2db, #2a2e32);
+    --doc-border-2: light-dark(#ccc9c0, #3b4046);
+    --doc-shadow-1: light-dark(0 1px 2px rgb(20 20 18 / 6%), 0 1px 2px rgb(0 0 0 / 40%));
+    --doc-shadow-2:
+      light-dark(0 2px 4px rgb(20 20 18 / 5%), 0 2px 6px rgb(0 0 0 / 45%)),
+      light-dark(0 12px 28px rgb(20 20 18 / 8%), 0 14px 34px rgb(0 0 0 / 45%));
+
+    /* Three extra categorical hues. A scale — pie slices, journey bands, class
+       fill types — needs more distinguishable colours than the accent plus the
+       four semantic ramps supply, and reusing a semantic ramp for "the fifth
+       category" would say danger where none is meant. One 600/400 pair each,
+       the same shape as every ramp above, so a theme moves them the same way. */
+    --doc-series-a-600: #6d4fc4;
+    --doc-series-a-400: #a992ea;
+    --doc-series-b-600: #0f6f8a;
+    --doc-series-b-400: #62c0d8;
+    --doc-series-c-600: #a3554f;
+    --doc-series-c-400: #e09189;
+
+    /* Semantic ramps. MUST NOT change with `accent` (§6.4). */
+    --doc-info-600: #2563c9;
+    --doc-info-400: #6f9ff0;
+    --doc-info-200: #b9d1f8;
+    --doc-info-50: #eaf1fd;
+    --doc-info-900: #12305f;
+
+    --doc-success-600: #1f8a4c;
+    --doc-success-400: #46b877;
+    --doc-success-200: #b2e2c6;
+    --doc-success-50: #e9f7ee;
+    --doc-success-900: #0f4126;
+
+    --doc-warn-600: #b5760d;
+    --doc-warn-400: #e0a33a;
+    --doc-warn-200: #f5d9a4;
+    --doc-warn-50: #fdf5e7;
+    --doc-warn-900: #57370a;
+
+    --doc-danger-600: #c33a34;
+    --doc-danger-400: #e57a72;
+    --doc-danger-200: #f6cac6;
+    --doc-danger-50: #fdeeed;
+    --doc-danger-900: #5d1a17;
+
+    /* Code theme (§6.3, the `code` axis). */
+    --doc-code-surface: light-dark(#f7f6f2, #14181b);
+    --doc-code-text: light-dark(#26292c, #dcdad2);
+    --doc-code-border: light-dark(#e4e2db, #262b2f);
+    --doc-code-gutter: light-dark(#9b9992, #61665f);
+    --doc-code-comment: light-dark(#7c8a84, #6f7f79);
+    --doc-code-keyword: light-dark(#9235a4, #d59ae2);
+    --doc-code-string: light-dark(#0f7a5f, #66c8a5);
+    --doc-code-number: light-dark(#b5560d, #e2a25f);
+    --doc-code-function: light-dark(#2260bf, #7fb0ee);
+    --doc-code-punctuation: light-dark(#6b706e, #91968f);
+    --doc-code-highlight-row: light-dark(#fff5d6, #2b2a1c);
+
+    --doc-highlight-text: light-dark(#3b2c07, #f4e9cf);
+
+    /* Elevation. */
+    --doc-z-toc: 40;
+    --doc-z-popover: 60;
+    --doc-z-bucket: 70;
+    --doc-z-banner: 80;
+
+    --doc-transition: 140ms cubic-bezier(0.32, 0.72, 0.32, 1);
+  }
+
+  /* ═══ Derived ══════════════════════════════════════════════════════════════
+     Re-substituted at every element so a preset on `doc-page` and a token
+     override on any subtree both reach the whole scale. */
+  doc-page,
+  doc-page * {
+    --doc-space-0: 0px;
+    --doc-space-1: calc(var(--doc-space-unit) * 1);
+    --doc-space-2: calc(var(--doc-space-unit) * 2);
+    --doc-space-3: calc(var(--doc-space-unit) * 3);
+    --doc-space-4: calc(var(--doc-space-unit) * 4);
+    --doc-space-5: calc(var(--doc-space-unit) * 5);
+    --doc-space-6: calc(var(--doc-space-unit) * 6);
+    --doc-space-7: calc(var(--doc-space-unit) * 7);
+    --doc-space-8: calc(var(--doc-space-unit) * 8);
+    --doc-space-9: calc(var(--doc-space-unit) * 9);
+    --doc-space-10: calc(var(--doc-space-unit) * 10);
+    --doc-space-11: calc(var(--doc-space-unit) * 11);
+    --doc-space-12: calc(var(--doc-space-unit) * 12);
+    --doc-space-16: calc(var(--doc-space-unit) * 16);
+    --doc-space-20: calc(var(--doc-space-unit) * 20);
+
+    --doc-text-xs: calc(var(--doc-text-base) / var(--doc-text-ratio) / var(--doc-text-ratio));
+    --doc-text-sm: calc(var(--doc-text-base) / var(--doc-text-ratio));
+    --doc-text-md: var(--doc-text-base);
+    --doc-text-lg: calc(var(--doc-text-base) * var(--doc-text-ratio));
+    --doc-text-xl: calc(var(--doc-text-lg) * var(--doc-text-ratio));
+    --doc-text-2xl: calc(var(--doc-text-xl) * var(--doc-text-ratio));
+    --doc-text-3xl: calc(var(--doc-text-2xl) * var(--doc-text-ratio));
+    --doc-text-4xl: calc(var(--doc-text-3xl) * var(--doc-text-ratio));
+
+    --doc-gutter: var(--doc-space-5);
+    --doc-rule: var(--doc-border-width) solid var(--doc-border-1);
+
+    /* Accent, resolved against the current colour scheme. Components use these,
+       not the raw ramp, so one ramp serves both schemes. */
+    --doc-accent-text: light-dark(var(--doc-accent-800), var(--doc-accent-200));
+    --doc-accent-line: light-dark(var(--doc-accent-600), var(--doc-accent-400));
+    --doc-accent-solid: light-dark(var(--doc-accent-600), var(--doc-accent-400));
+    --doc-accent-on-solid: light-dark(#ffffff, #06201c);
+    --doc-accent-tint: light-dark(
+      var(--doc-accent-50),
+      color-mix(in oklab, var(--doc-accent-900) 42%, #101214)
+    );
+    --doc-accent-edge: light-dark(
+      var(--doc-accent-200),
+      color-mix(in oklab, var(--doc-accent-400) 34%, #101214)
+    );
+
+    /* Semantic tints, in the same shape as `--doc-accent-tint`. Callouts and
+       diagrams both need "the 50 step, or a dark surface tinted toward the 900
+       step"; it was written out four times in `note.css` before a Mermaid gantt
+       needed the danger one too. */
+    --doc-info-tint: light-dark(
+      var(--doc-info-50),
+      color-mix(in oklab, var(--doc-info-900) 42%, #101214)
+    );
+    --doc-success-tint: light-dark(
+      var(--doc-success-50),
+      color-mix(in oklab, var(--doc-success-900) 42%, #101214)
+    );
+    --doc-warn-tint: light-dark(
+      var(--doc-warn-50),
+      color-mix(in oklab, var(--doc-warn-900) 42%, #101214)
+    );
+    --doc-danger-tint: light-dark(
+      var(--doc-danger-50),
+      color-mix(in oklab, var(--doc-danger-900) 42%, #101214)
+    );
+
+    /* Categorical series — pie slices, journey sections, class fill types.
+       Nothing in the document reads a *ramp step* directly, so these follow the
+       same `light-dark(600, 400)` shape as `--doc-accent-line`: a hue that is
+       dark enough to read on paper and light enough to read on a dark page.
+       Series 1 tracks the accent preset; the rest are the semantic ramps plus
+       two extra hues, because a five-slice pie needs five distinguishable
+       colours and the semantic ramps only supply four. Diagrams cycle. */
+    --doc-series-1: light-dark(var(--doc-accent-600), var(--doc-accent-400));
+    --doc-series-2: light-dark(var(--doc-info-600), var(--doc-info-400));
+    --doc-series-3: light-dark(var(--doc-warn-600), var(--doc-warn-400));
+    --doc-series-4: light-dark(var(--doc-success-600), var(--doc-success-400));
+    --doc-series-5: light-dark(var(--doc-danger-600), var(--doc-danger-400));
+    --doc-series-6: light-dark(var(--doc-series-a-600), var(--doc-series-a-400));
+    --doc-series-7: light-dark(var(--doc-series-b-600), var(--doc-series-b-400));
+    --doc-series-8: light-dark(var(--doc-series-c-600), var(--doc-series-c-400));
+
+    /* Feedback highlight (CSS Custom Highlight API, §10.2). */
+    --doc-highlight-bg: light-dark(
+      color-mix(in oklab, var(--doc-warn-200) 70%, transparent),
+      rgb(160 120 20 / 42%)
+    );
+  }
+
+  /* The highlight pseudo-element is painted at the document level, not inside
+     `doc-page`, so it needs the token on the root as well. */
+  :root {
+    --doc-highlight-bg: light-dark(
+      color-mix(in oklab, #f5d9a4 70%, transparent),
+      rgb(160 120 20 / 42%)
+    );
+  }
+}

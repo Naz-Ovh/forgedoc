@@ -30,6 +30,11 @@ the cheatsheet leaves a question open.
    The styles go up top so the reader never sees a frame of unstyled markup;
    the script goes last so every element upgrades with its children present.
 
+   If the user asked for a particular theme, name it in that first line —
+   `<style>/*@DOC_CSS:geist@*/</style>`. The build then compiles that theme in.
+   Leave it bare unless they asked; the default is `forgedoc`. Run
+   `forgedoc build --theme wrong` to see the list of themes that exist.
+
 2. Write the document inside a single `<doc-page doc-id="a-unique-slug">`.
    The `doc-id` is mandatory — it namespaces the reader's stored answers, and
    without it two plans opened from disk can overwrite each other.

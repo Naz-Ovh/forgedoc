@@ -8,6 +8,23 @@
  * received the literal text `color-mix(in oklab, #073d36 42%, #101214)`. Fixing
  * that to resolve through a real property then produced `oklab(…)`, which
  * Mermaid also rejects. Only forcing sRGB gets there.
+ *
+ * Then it broke a second time, quietly. `rgb(from … r g b)` does produce sRGB,
+ * but Chrome *serialises* a non-sRGB origin as `color(srgb 0.06 0.13 0.13)` —
+ * which Mermaid also rejects, so every affected variable fell through to its
+ * hardcoded light-mode fallback. Dark documents drew light mint node fills
+ * under light body text. The first failure was loud; this one rendered a
+ * perfectly valid diagram that nobody could read, which is why the assertions
+ * below check the *scheme* the value came from and not only its format.
+ *
+ * **This file cannot catch that second failure, and neither could its first
+ * version.** jsdom resolves neither `light-dark()` nor `color-mix()` nor
+ * relative colour syntax, so every token here falls through to the same
+ * fallback and both schemes produce identical output — the assertions below
+ * pass just as happily with the bug reintroduced. What they do guard is the
+ * *shape* of the map: a key added without a parseable value. The scheme itself
+ * is asserted in `tests/visual/kitchen-sink.spec.ts`, against real Chromium,
+ * because that is the only place the question can be asked.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -19,20 +36,15 @@ import { mountPlan } from '../helpers.js';
 /** The colour formats Mermaid's parser accepts. */
 const PARSEABLE = /^(#[0-9a-f]{3,8}|rgba?\(|hsla?\()/i;
 
-/** Theme variables that carry a colour rather than a length or a font stack. */
-const COLOUR_KEYS = [
-  'background',
-  'primaryColor',
-  'primaryTextColor',
-  'primaryBorderColor',
-  'lineColor',
-  'secondaryColor',
-  'tertiaryColor',
-  'textColor',
-  'mainBkg',
-  'nodeBorder',
-  'clusterBkg',
-];
+/**
+ * Every key the map sets, minus the handful that carry a length, a font stack
+ * or an opacity. Read off the result rather than listed by hand: a variable
+ * added without a matching format is exactly the bug this file exists for.
+ */
+function colourKeys(variables: Record<string, string>): string[] {
+  const notColours = ['fontSize', 'pieOpacity'];
+  return Object.keys(variables).filter((key) => !notColours.includes(key));
+}
 
 describe('Mermaid theme variables', () => {
   for (const scheme of ['light', 'dark'] as const) {
@@ -45,8 +57,9 @@ describe('Mermaid theme variables', () => {
         docPage.style.colorScheme = scheme;
 
         const variables = themeVariables();
+        expect(colourKeys(variables).length).toBeGreaterThan(60);
 
-        for (const key of COLOUR_KEYS) {
+        for (const key of colourKeys(variables)) {
           const value = variables[key] ?? '';
           expect(
             PARSEABLE.test(value),
@@ -59,6 +72,7 @@ describe('Mermaid theme variables', () => {
 
         expect(variables.fontSize).toMatch(/^[\d.]+px$/);
       });
+
     }
   }
 

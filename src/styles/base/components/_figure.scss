@@ -1,0 +1,21 @@
+/* `doc-figure` — one frame for SVG, images, Mermaid and isolated HTML. */
+
+@layer doc.components {
+  doc-figure {
+    /* Positioned so the block's own Comment button can sit in its corner. */
+    position: relative;
+    break-inside: avoid;
+  }
+
+  doc-figure [data-part="content"] {
+    display: block;
+  }
+
+  doc-figure :where([data-part="caption"], doc-caption) {
+    display: block;
+  }
+
+  doc-figure [data-part="diagram-error-source"] {
+    overflow-x: auto;
+  }
+}

@@ -1,0 +1,185 @@
+/*
+ * Element resets, prose and typography.
+ *
+ * §8.7: there are deliberately no custom tags for `<code>`, `<a>`, `<strong>`,
+ * `<em>`, `<ul>`, `<ol>`, `<li>`, `<p>`, `<h*>` or `<table>`. The reference
+ * document uses all of them heavily and none needs a custom element — they are
+ * styled here instead. Every unnecessary tag is a line on a cheatsheet that has
+ * to fit on one page.
+ *
+ * Everything is scoped under `doc-page` so the CDN build can sit inside a host
+ * page without redecorating it.
+ */
+
+@layer doc.reset {
+  /* Only claim the page when the document *is* a plan. */
+  html:has(doc-page) {
+    background: var(--doc-surface-0);
+  }
+
+  body:has(doc-page) {
+    margin: 0;
+    background: var(--doc-surface-0);
+  }
+
+  doc-page :where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, figure, blockquote, pre) {
+    margin: 0;
+  }
+
+  doc-page :where(ul, ol) {
+    padding: 0;
+    list-style: none;
+  }
+
+  doc-page :where(img, svg, video, canvas, iframe) {
+    max-width: 100%;
+  }
+
+  doc-page :where(button, input, textarea, select) {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+@layer doc.base {
+  /* ── Document frame ───────────────────────────────────────────────────────── */
+  doc-page {
+    /* MUST (§6.4): one token set, `light-dark()`, no media-query duplication. */
+    color-scheme: light dark;
+    font-family: var(--doc-font-sans);
+    font-size: var(--doc-text-md);
+    line-height: var(--doc-leading);
+    color: var(--doc-text-1);
+    background: var(--doc-surface-0);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    hanging-punctuation: first;
+  }
+
+  /* ── Prose ────────────────────────────────────────────────────────────────── */
+  doc-page :where(p) {
+    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-3) 0;
+    text-wrap: pretty;
+  }
+
+  doc-page :where(p):first-child {
+    margin-block-start: 0;
+  }
+
+  doc-page :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--doc-font-display);
+    font-weight: 640;
+    line-height: var(--doc-leading-heading);
+    letter-spacing: var(--doc-tracking-tight);
+    color: var(--doc-text-1);
+    text-wrap: balance;
+  }
+
+  doc-page :where(strong, b) {
+    font-weight: 660;
+    color: var(--doc-text-1);
+  }
+
+  doc-page :where(em, i) {
+    font-style: italic;
+  }
+
+  doc-page :where(a) {
+    color: var(--doc-accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-color: var(--doc-accent-edge);
+    border-radius: 2px;
+  }
+
+  doc-page :where(a):hover {
+    text-decoration-color: var(--doc-accent-line);
+  }
+
+  doc-page :where(code, kbd, samp) {
+    font-family: var(--doc-font-mono);
+    font-size: 0.88em;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  /* Inline code only — `doc-code` and `doc-diff` restyle their own `<code>`. */
+  doc-page :where(:not(pre) > code) {
+    padding: 0.12em 0.36em;
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+  }
+
+  doc-page :where(ul, ol):not(doc-list *, doc-checklist *, doc-toc *) {
+    margin-block: var(--doc-space-3) 0;
+    padding-inline-start: var(--doc-space-6);
+    list-style: revert;
+  }
+
+  doc-page :where(li):not(doc-list > li, doc-checklist > li, doc-toc *) {
+    margin-block: var(--doc-space-1);
+    max-width: var(--doc-measure-prose);
+  }
+
+  doc-page :where(hr) {
+    height: 0;
+    margin-block: var(--doc-space-8);
+    border: 0;
+    border-top: var(--doc-rule);
+  }
+
+  doc-page :where(small) {
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-2);
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────────── */
+  doc-page :where(:focus-visible) {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  /* ── Selection ────────────────────────────────────────────────────────────── */
+  doc-page ::selection {
+    background: color-mix(in oklab, var(--doc-accent-400) 34%, transparent);
+  }
+
+  /* ── Feedback highlights (§10.2) ──────────────────────────────────────────── */
+  /*
+  * MUST: highlights are painted with the CSS Custom Highlight API, never by
+  * wrapping ranges in <mark>. Wrapping mutates the DOM the reader is selecting
+  * from, which invalidates every offset captured afterwards and nests badly on
+  * overlapping highlights.
+  */
+  ::highlight(doc-feedback) {
+    background-color: var(--doc-highlight-bg);
+    color: var(--doc-highlight-text);
+  }
+
+  ::highlight(doc-feedback-active) {
+    background-color: color-mix(in oklab, var(--doc-accent-400) 46%, transparent);
+    color: var(--doc-text-1);
+  }
+
+  /* The <mark> fallback, used only where CSS.highlights is unavailable. */
+  doc-page mark[data-doc-highlight] {
+    background: var(--doc-highlight-bg);
+    color: var(--doc-highlight-text);
+    border-radius: 2px;
+  }
+}
+
+@layer doc.utilities {
+  /* Visually hidden but reachable by assistive tech and by find-in-page. */
+  doc-page [data-doc-visually-hidden] {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    clip-path: inset(50%);
+  }
+}

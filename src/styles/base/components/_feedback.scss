@@ -1,0 +1,48 @@
+/*
+ * Block-level feedback: the Comment button, and the mark left on a block that
+ * has one.
+ *
+ * why blocks get their own affordance (§10.2): the bucket collects comments from
+ * a text selection, and there is nothing to select in an image, an `<svg>` or a
+ * rendered Mermaid chart. Without a button the most arguable parts of a plan are
+ * the only parts a reader cannot argue with.
+ */
+
+@layer doc.components {
+  [data-part="feedback"] {
+    cursor: pointer;
+  }
+
+  /* In a block that already has a header row, the button joins it. */
+  doc-code [data-part="header"] [data-part="feedback"],
+  doc-diff [data-part="header"] [data-part="feedback"] {
+    flex: none;
+  }
+
+  /*
+  * In a block with no header, the button floats in the corner and stays quiet
+  * until the reader looks at the block. It is always visible without a pointer,
+  * because "hover to discover" is not an interaction a touch reader has.
+  */
+  doc-figure > [data-part="feedback"],
+  doc-tree > [data-part="feedback"] {
+    position: absolute;
+    inset-block-start: var(--doc-space-2);
+    inset-inline-end: var(--doc-space-2);
+    z-index: 1;
+    transition: opacity var(--doc-transition);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    doc-figure > [data-part="feedback"],
+    doc-tree > [data-part="feedback"] {
+      transition: none;
+    }
+  }
+
+  @media print {
+    [data-part="feedback"] {
+      display: none;
+    }
+  }
+}

@@ -8,7 +8,7 @@
  * an SVG layout engine deciding where things go.
  *
  * MUST: wraps to multiple rows below 1050px, with the arrows rotating — see
- * `styles/components/flow.css`.
+ * `styles/base/components/_flow.scss` and its theme half.
  */
 
 import { DocElement } from '../core/base.js';

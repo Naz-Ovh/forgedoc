@@ -1,0 +1,18 @@
+/* `doc-chips` / `doc-chip` — the pill row under the lede. */
+
+@layer doc.components {
+  doc-chips {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  doc-chip {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-chip [data-part="icon"] {
+    display: inline-grid;
+    place-items: center;
+  }
+}

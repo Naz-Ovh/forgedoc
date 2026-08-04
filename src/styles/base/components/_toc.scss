@@ -1,0 +1,108 @@
+/*
+ * `doc-toc` — a floating panel by default, a docked rail on request.
+ *
+ * why fixed positioning rather than a grid column (§8.1): a grid would need the
+ * content and the TOC to share a wrapper, and creating that wrapper would mean
+ * reparenting the author's document. Docking is done by *padding* `doc-page`
+ * instead — the reading column already centres itself in whatever width is left,
+ * so pushing the padding across re-centres it in the remaining space with no
+ * wrapper and no reflow of the author's markup.
+ *
+ * Three states, all driven from `doc-page`:
+ *   · floating + collapsed — the default. A header-sized pill in the corner.
+ *   · floating + open      — a full-height overlay panel.
+ *   · docked   + open      — pinned to the edge; `doc.css` pads the content over.
+ */
+
+@layer doc.components {
+  doc-toc {
+    position: fixed;
+    inset-block-start: var(--doc-space-4);
+    inset-inline-start: var(--doc-space-4);
+    z-index: var(--doc-z-toc);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  doc-toc [data-part="header"] {
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
+
+  doc-toc [data-part="toggle"] {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+  }
+
+  doc-toc [data-part="toggle"]::before {
+    content: "☰";
+  }
+
+  /*
+  * The dock control. The glyph is a panel with its side rail filled, drawn from
+  * borders rather than an icon font or an inline SVG — one less asset in a file
+  * that has to work from `file://` with no network.
+  */
+  doc-toc [data-part="dock"] {
+    position: relative;
+    flex: none;
+    cursor: pointer;
+  }
+
+  doc-toc [data-part="dock"]::before {
+    content: "";
+    position: absolute;
+    inset-block: 2px;
+    inset-inline-start: 2px;
+  }
+
+  doc-toc [data-part="list"] {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  doc-page:state(toc-open) doc-toc [data-part="list"] {
+    display: block;
+  }
+
+  /* Open, floating: a full-height overlay panel at a readable fixed width. */
+  doc-page:state(toc-open) doc-toc {
+    inset-block: var(--doc-space-4);
+  }
+
+  doc-toc [data-part="entry"] {
+    display: flex;
+  }
+
+  doc-toc [data-part="entry-number"] {
+    flex: none;
+  }
+
+  /*
+  * Docked. Only offered from the dock breakpoint up — below it the panel would
+  * eat half the reading width, which is the problem docking exists to solve.
+  */
+  @media (min-width: 1280px) {
+    doc-page:state(toc-docked) doc-toc {
+      inset-block: 0;
+      inset-inline-start: 0;
+    }
+  }
+
+  @media (max-width: 1279px) {
+    /* Collapsed, sit at the bottom so the panel never covers the title. */
+    doc-toc {
+      inset-block-start: auto;
+      inset-block-end: var(--doc-space-4);
+    }
+
+    doc-toc [data-part="dock"] {
+      display: none;
+    }
+  }
+}

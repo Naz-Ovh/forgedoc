@@ -12,9 +12,11 @@ import process from 'node:process';
 import { slugify } from '../src/core/slug.js';
 import {
   type BundleFlavour,
+  DEFAULT_THEME,
   InjectionError,
   injectAssets,
   resolveAssets,
+  themeFromPlaceholder,
   usesMermaid,
 } from './inject.js';
 import { formatJson, formatText, validateHtml } from './validate.js';
@@ -24,8 +26,12 @@ const VERSION = typeof __FORGEDOC_VERSION__ === 'string' ? __FORGEDOC_VERSION__ 
 
 const USAGE = `forgedoc ${VERSION}
 
-  forgedoc build <file.html> [--out <file>] [--offline] [--no-validate]
+  forgedoc build <file.html> [--out <file>] [--offline] [--theme <name>] [--no-validate]
       Validate, then wire the runtime into the placeholders.
+      --theme picks the stylesheet. Default: whatever the document's own
+      placeholder names -- <style>/*@DOC_CSS:geist@*/</style> -- and
+      "${DEFAULT_THEME}" if it names none, so the choice travels with the
+      document and a rebuild months later produces the same thing.
       Default: link a version-pinned CDN. The document stays a few kB and is
       safe to commit.
       --offline embeds the whole runtime instead, for a file:// document that
@@ -109,7 +115,7 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
   return { command, positionals, flags };
 }
 
-const VALUE_FLAGS = new Set(['out', 'dir', 'format']);
+const VALUE_FLAGS = new Set(['out', 'dir', 'format', 'theme']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // build
@@ -139,9 +145,15 @@ async function runBuild(parsed: ParsedArguments): Promise<number> {
   // for when the document has to survive with no network at all.
   const flavour: BundleFlavour = parsed.flags.get('offline') === true ? 'offline' : 'cdn';
 
+  // The flag wins over the document, and the document wins over the default:
+  // `--theme` is the deliberate one-off, the placeholder is what was authored.
+  const flagged = parsed.flags.get('theme');
+  const theme =
+    typeof flagged === 'string' ? flagged : (themeFromPlaceholder(source) ?? DEFAULT_THEME);
+
   let output: string;
   try {
-    const assets = await resolveAssets(flavour);
+    const assets = await resolveAssets(flavour, undefined, theme);
     output = injectAssets(source, assets);
   } catch (error) {
     reportInjectionError(error);
@@ -163,7 +175,9 @@ async function runBuild(parsed: ParsedArguments): Promise<number> {
   await writeFile(outputPath, output, 'utf8');
 
   const kilobytes = Math.round(Buffer.byteLength(output, 'utf8') / 1024);
-  process.stdout.write(`forgedoc build: wrote ${outputPath} (${kilobytes} kB, ${flavour})\n`);
+  process.stdout.write(
+    `forgedoc build: wrote ${outputPath} (${kilobytes} kB, ${flavour}, theme "${theme}")\n`,
+  );
   if (flavour === 'offline') warnAboutOfflineWeight(source, kilobytes, parsed.flags.get('out'));
   return 0;
 }

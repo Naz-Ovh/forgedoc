@@ -1,0 +1,26 @@
+/*
+ * `doc-page` — the reading column.
+ *
+ * MUST NOT reparent (§8.1): there is no generated `<div class="column">`. The
+ * column is produced by styling `doc-page > *` directly, and the TOC and bucket
+ * are siblings of the content that opt out with `[data-doc-chrome]`.
+ */
+
+@layer doc.components {
+  doc-page {
+    transition: padding-inline-start var(--doc-transition);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    doc-page {
+      transition: none;
+    }
+  }
+
+  /* MUST (§9.3): loud, permanent, non-dismissible. */
+  doc-page > [data-part="storage-warning"] {
+    position: sticky;
+    top: 0;
+    z-index: var(--doc-z-banner);
+  }
+}

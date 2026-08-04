@@ -1,0 +1,46 @@
+/*
+ * The headless layer: structure and behaviour, shared by every theme.
+ *
+ * Nothing here decides how the library *looks*. Colour, sizing, spacing and
+ * typography belong to a theme (`themes/<name>/`); this file's graph carries
+ * only the declarations that would break a component if they were removed —
+ * `display`, `position`, `overflow`, `cursor`, `transform`, `[hidden]`. The
+ * split is by property, not by judgement, and `tools/check-style-layers.mjs`
+ * enforces it on every lint run.
+ *
+ * why one shared copy rather than a copy per theme: 46% of the original
+ * component CSS was this, and it is the half that carries the bugs worth fixing
+ * once — focus order, print behaviour, reduced motion, RTL. A theme that
+ * genuinely needs different structure overrides it from `doc.theme`, which
+ * outranks everything here.
+ *
+ * Import order matches the layer order, so reading top to bottom matches the
+ * cascade.
+ */
+
+@use "elements";
+
+@use "components/doc";
+@use "components/toc";
+@use "components/section";
+@use "components/chips";
+@use "components/note";
+@use "components/blocker";
+@use "components/list";
+@use "components/compare";
+@use "components/table";
+@use "components/choice";
+@use "components/collapse";
+@use "components/roadmap";
+@use "components/tabs";
+@use "components/checklist";
+@use "components/flow";
+@use "components/code";
+@use "components/diff";
+@use "components/figure";
+@use "components/tree";
+@use "components/quote";
+@use "components/feedback";
+@use "components/bucket";
+
+@use "print";

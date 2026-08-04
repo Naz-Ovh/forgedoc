@@ -110,7 +110,7 @@ const presetAttribute = (axis: keyof typeof PRESET_AXES, doc: string): Attribute
  *
  * Adding a tag here is not enough — it also needs a file in `src/components/`
  * named exactly after it, an entry in `src/index.ts`, a stylesheet in
- * `src/styles/components/`, and a use in `tests/fixtures/kitchen-sink.html`
+ * `src/styles/base/components/`, and a use in `tests/fixtures/kitchen-sink.html`
  * (CI fails otherwise, §13.3).
  */
 export const TAGS = {

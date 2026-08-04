@@ -197,7 +197,11 @@ npm run test:visual           # compares from here on
 
 1. `src/core/contract.ts` — the tag, its attributes, its doc strings.
 2. `src/components/<tag>.ts` — one file, named exactly after the tag.
-3. `src/styles/components/<name>.css` — inside `@layer doc.components`.
+3. `src/styles/base/components/_<name>.scss` — structure only, inside
+   `@layer doc.components`. Then `src/styles/themes/forgedoc/components/_<name>.scss`
+   for everything visual, inside `@layer doc.theme`. `npm run lint` fails if a
+   colour, size, spacing or typography property lands in the base half.
+   Add both to the matching `index.scss`.
 4. `src/index.ts` — register it.
 5. `tests/fixtures/kitchen-sink.html` — `npm test` fails if you skip this.
 6. `npm run docs:reference` — `npm test` fails if you skip this too.

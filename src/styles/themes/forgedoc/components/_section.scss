@@ -1,0 +1,64 @@
+/*
+ * `doc-section` — hierarchical numbering.
+ *
+ * MUST (§8.1): the number is at least as large as its heading text and shrinks
+ * with depth. It is never small chrome beside a big heading.
+ *
+ * The digits come from CSS counters by default (§16.1). One counter per depth
+ * rather than `counters()`: a single counter cannot be both reset and
+ * incremented on the same element, and nested sections *are* descendants of
+ * their parent, so the depth attribute the runtime already sets is the cleanest
+ * way to keep the three levels independent.
+ */
+
+@layer doc.theme {
+  doc-section {
+    margin-block-start: var(--doc-space-10);
+  }
+
+  doc-section doc-section {
+    margin-block-start: var(--doc-space-8);
+  }
+
+  doc-section > [data-part="heading"] {
+    gap: var(--doc-space-3);
+    margin-block-end: var(--doc-space-4);
+    font-weight: 660;
+  }
+
+  doc-section > [data-part="heading"] [data-part="number"] {
+    color: var(--doc-accent-line);
+    font-variant-numeric: var(--doc-numeric);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  /* Depth 1 is the largest; the number leads, never trails. */
+  doc-section[data-depth="1"] > [data-part="heading"] {
+    font-size: var(--doc-text-2xl);
+  }
+
+  doc-section[data-depth="1"] > [data-part="heading"] [data-part="number"] {
+    font-size: var(--doc-text-3xl);
+  }
+
+  doc-section[data-depth="2"] > [data-part="heading"] {
+    font-size: var(--doc-text-xl);
+  }
+
+  doc-section[data-depth="2"] > [data-part="heading"] [data-part="number"] {
+    font-size: var(--doc-text-xl);
+  }
+
+  doc-section[data-depth="3"] > [data-part="heading"] {
+    font-size: var(--doc-text-lg);
+  }
+
+  doc-section[data-depth="3"] > [data-part="heading"] [data-part="number"] {
+    font-size: var(--doc-text-lg);
+  }
+
+  doc-section > [data-part="body"] + [data-part="body"] {
+    margin-block-start: var(--doc-space-3);
+  }
+}

@@ -1,0 +1,49 @@
+/*
+ * `doc-collapse`.
+ *
+ * The content is hidden by `hidden="until-found"` on the author's own children
+ * rather than by a `display: none` on a generated wrapper — see
+ * `core/disclosure.ts` for why, and note that this keeps Ctrl+F working into
+ * collapsed content (acceptance 4).
+ */
+
+@layer doc.theme {
+  doc-collapse {
+    margin-block: var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+  }
+
+  doc-collapse > [data-part="summary"] {
+    gap: var(--doc-space-3);
+    width: 100%;
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border: 0;
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 600;
+    text-align: start;
+  }
+
+  doc-collapse > [data-part="summary"]:hover {
+    background: var(--doc-surface-3);
+  }
+
+  doc-collapse [data-part="chevron"] {
+    color: var(--doc-text-3);
+  }
+
+  doc-collapse > [data-part="body"] {
+    padding-inline: var(--doc-space-4);
+  }
+
+  doc-collapse > [data-part="body"]:first-of-type {
+    padding-block-start: var(--doc-space-4);
+  }
+
+  doc-collapse > [data-part="body"]:last-child {
+    padding-block-end: var(--doc-space-4);
+  }
+}

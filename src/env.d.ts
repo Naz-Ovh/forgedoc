@@ -27,6 +27,11 @@ declare module '*.css' {
   export default url;
 }
 
+declare module '*.scss' {
+  const url: string;
+  export default url;
+}
+
 /**
  * Prism ships as UMD scripts with no per-file types.
  *

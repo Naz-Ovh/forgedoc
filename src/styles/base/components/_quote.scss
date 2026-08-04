@@ -1,0 +1,22 @@
+/*
+ * `doc-quote`, `doc-term` and `doc-ref` — the inline and quotation roles.
+ *
+ * MUST NOT (§6.5): no serif face here, or anywhere. A pull quote gets its
+ * distinct typographic role from weight, measure and a rule, not from a
+ * different family.
+ */
+
+@layer doc.components {
+  doc-quote [data-part="cite"]::before {
+    content: "— ";
+  }
+
+  doc-term {
+    cursor: pointer;
+  }
+
+  doc-ref {
+    white-space: nowrap;
+    cursor: pointer;
+  }
+}

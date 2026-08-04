@@ -13,12 +13,35 @@
  * emitted by the model.
  */
 
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const CSS_PLACEHOLDER = '/*@DOC_CSS@*/';
 export const JS_PLACEHOLDER = '//@DOC_JS@';
+
+/**
+ * The theme compiled in when the document does not name one.
+ *
+ * Themes are chosen at *build* time, never at runtime: a document ships exactly
+ * one stylesheet, so shipping five and switching between them would mean
+ * sending four the reader never sees. `dist/themes/<name>.css` is the unit.
+ */
+export const DEFAULT_THEME = 'forgedoc';
+
+/** `/*@DOC_CSS:geist@*\/` — the placeholder, naming the theme it wants. */
+const CSS_PLACEHOLDER_THEMED = /\/\*@DOC_CSS(?::([a-z0-9-]+))?@\*\//;
+
+/**
+ * Which theme this document asks for, or `null` for the default.
+ *
+ * The name is carried by the placeholder the authoring agent writes, so the
+ * choice lives in the document rather than in whatever command someone happened
+ * to run — a rebuild months later produces the same document.
+ */
+export function themeFromPlaceholder(html: string): string | null {
+  return CSS_PLACEHOLDER_THEMED.exec(html)?.[1] ?? null;
+}
 
 /**
  * The whole placeholder tags, for the `link` mode that replaces them outright.
@@ -31,7 +54,7 @@ export const JS_PLACEHOLDER = '//@DOC_JS@';
 // Takes the line's newline with it: the tag is lifted out of wherever it was
 // written and re-emitted in <head>, and leaving the blank line behind would show
 // up in the built file as a gap the author never typed.
-const CSS_TAG = /<style\b[^>]*>\s*\/\*@DOC_CSS@\*\/\s*<\/style>\n?/;
+const CSS_TAG = /<style\b[^>]*>\s*\/\*@DOC_CSS(?::[a-z0-9-]+)?@\*\/\s*<\/style>\n?/;
 const JS_TAG = /<script\b[^>]*>\s*\/\/@DOC_JS@\s*<\/script>/;
 
 /**
@@ -107,8 +130,13 @@ export class InjectionError extends Error {
  * corrupt the output.
  */
 export function injectAssets(html: string, assets: InjectionAssets): string {
-  requirePlaceholder(html, CSS_PLACEHOLDER, '<style>/*@DOC_CSS@*/</style>');
-  requirePlaceholder(html, JS_PLACEHOLDER, '<script>//@DOC_JS@</script>');
+  requirePlaceholder(
+    html,
+    CSS_PLACEHOLDER_THEMED,
+    CSS_PLACEHOLDER,
+    '<style>/*@DOC_CSS@*/</style>',
+  );
+  requirePlaceholder(html, JS_PLACEHOLDER, JS_PLACEHOLDER, '<script>//@DOC_JS@</script>');
 
   // The script stays where the placeholder was: end of body for the embedded
   // bundle, `defer` for the linked one. Either way elements upgrade once, after
@@ -148,11 +176,23 @@ function hoistToHead(html: string, tag: string): string {
   return `${tag}\n${html}`;
 }
 
-function requirePlaceholder(html: string, placeholder: string, expectedTag: string): void {
-  if (html.includes(placeholder)) return;
+/**
+ * `placeholder` may be a regular expression, because the CSS one carries an
+ * optional theme name. `label` is what the author actually has to type, which
+ * is never the regular expression's source.
+ */
+function requirePlaceholder(
+  html: string,
+  placeholder: string | RegExp,
+  label: string,
+  expectedTag: string,
+): void {
+  const present =
+    typeof placeholder === 'string' ? html.includes(placeholder) : placeholder.test(html);
+  if (present) return;
 
   throw new InjectionError(
-    `The file has no \`${placeholder}\` placeholder, so there is nothing to inject.`,
+    `The file has no \`${label}\` placeholder, so there is nothing to inject.`,
     `End the document body with exactly:\n      ${expectedTag}`,
   );
 }
@@ -174,21 +214,51 @@ function distDirectory(): string {
 export async function resolveAssets(
   flavour: BundleFlavour = 'cdn',
   from: string = distDirectory(),
+  theme: string = DEFAULT_THEME,
 ): Promise<InjectionAssets> {
   if (flavour === 'cdn') {
+    // The CDN path reads no files, so nothing else would notice a theme that
+    // does not exist — the document would build clean and 404 its stylesheet in
+    // the reader's browser, which is the worst place to find out. The names on
+    // disk are the same ones published to the CDN.
+    await requireTheme(theme, from);
+
     return {
       mode: 'link',
-      cssHref: `${CDN_BASE}/forgedoc.css`,
+      cssHref: `${CDN_BASE}/themes/${theme}.css`,
       jsSrc: `${CDN_BASE}/forgedoc.iife.js`,
     };
   }
 
   const [css, js] = await Promise.all([
-    readBundle(resolve(from, 'forgedoc.css')),
+    readBundle(resolve(from, 'themes', `${theme}.css`)),
     readBundle(resolve(from, 'forgedoc.standalone.iife.js')),
   ]);
 
   return { mode: 'embed', css, js };
+}
+
+/** Fail with the list of themes that do exist, rather than a bare "not found". */
+async function requireTheme(theme: string, from: string): Promise<void> {
+  let available: string[];
+  try {
+    available = (await readdir(resolve(from, 'themes')))
+      .filter((entry) => entry.endsWith('.css'))
+      .map((entry) => entry.replace(/\.css$/, ''))
+      .sort();
+  } catch {
+    // No dist/themes at all: `readBundle`'s "run the build first" message is
+    // the more useful one, and the offline path will produce it.
+    return;
+  }
+
+  if (available.includes(theme)) return;
+
+  throw new InjectionError(
+    `There is no theme called "${theme}".`,
+    `Available themes: ${available.join(', ')}. Name one with \`--theme <name>\`, or in the ` +
+      `document itself as \`<style>/*@DOC_CSS:<name>@*/</style>\`.`,
+  );
 }
 
 async function readBundle(path: string): Promise<string> {

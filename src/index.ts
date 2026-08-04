@@ -10,7 +10,17 @@
  * library needs a `MutationObserver` or a `setTimeout(0)`.
  */
 
-import './styles/index.css';
+/*
+ * The reference theme, so `npm run dev` and the test suite have one compiled in
+ * without a build step. It is also what tsdown emits as `dist/forgedoc.css`,
+ * which keeps that filename meaning what it always meant.
+ *
+ * Every *other* theme is compiled by `npm run build:styles` into
+ * `dist/themes/<name>.css` and selected at build time with
+ * `forgedoc build --theme <name>` — themes are not swapped at runtime, so
+ * nothing else is imported here.
+ */
+import './styles/themes/forgedoc/index.scss';
 
 import { DocAction } from './components/doc-action.js';
 import { DocBlocker } from './components/doc-blocker.js';

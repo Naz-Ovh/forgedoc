@@ -1,0 +1,64 @@
+/*
+ * `doc-section` — hierarchical numbering.
+ *
+ * MUST (§8.1): the number is at least as large as its heading text and shrinks
+ * with depth. It is never small chrome beside a big heading.
+ *
+ * The digits come from CSS counters by default (§16.1). One counter per depth
+ * rather than `counters()`: a single counter cannot be both reset and
+ * incremented on the same element, and nested sections *are* descendants of
+ * their parent, so the depth attribute the runtime already sets is the cleanest
+ * way to keep the three levels independent.
+ */
+
+@layer doc.components {
+  doc-page {
+    counter-reset: doc-sec-1 doc-sec-2 doc-sec-3;
+  }
+
+  doc-section[data-depth="1"] {
+    counter-increment: doc-sec-1;
+    counter-reset: doc-sec-2 doc-sec-3;
+  }
+
+  doc-section[data-depth="2"] {
+    counter-increment: doc-sec-2;
+    counter-reset: doc-sec-3;
+  }
+
+  doc-section[data-depth="3"] {
+    counter-increment: doc-sec-3;
+  }
+
+  doc-section {
+    scroll-margin-block-start: var(--doc-space-6);
+  }
+
+  doc-section > [data-part="heading"] {
+    display: flex;
+    align-items: baseline;
+  }
+
+  doc-section > [data-part="heading"] [data-part="number"] {
+    flex: none;
+  }
+
+  /* Counter mode: the digits are rendered by CSS, one selector per depth. */
+  doc-section[data-depth="1"]
+    > [data-part="heading"]
+    [data-part="number"]:not([data-numbering-mode])::before {
+    content: counter(doc-sec-1);
+  }
+
+  doc-section[data-depth="2"]
+    > [data-part="heading"]
+    [data-part="number"]:not([data-numbering-mode])::before {
+    content: counter(doc-sec-1) "." counter(doc-sec-2);
+  }
+
+  doc-section[data-depth="3"]
+    > [data-part="heading"]
+    [data-part="number"]:not([data-numbering-mode])::before {
+    content: counter(doc-sec-1) "." counter(doc-sec-2) "." counter(doc-sec-3);
+  }
+}

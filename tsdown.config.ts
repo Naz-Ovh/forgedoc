@@ -17,7 +17,7 @@ import { mermaidSource, productionEnv } from './tools/build-plugins.ts';
 
 /**
  * The .svelte sources deliberately carry no <style> block (§10.1) — panel styles
- * live in styles/components/bucket.css so the `--doc-*` tokens reach them.
+ * live in the stylesheet graph so the `--doc-*` tokens reach them.
  * `emitCss: false` therefore drops nothing; it just keeps Svelte out of the CSS
  * graph entirely.
  *
@@ -97,7 +97,7 @@ const runtimeBuild = (variant: Variant): UserConfig => ({
   css: {
     // MUST (§4.3): one CSS file, always. Per-component files that shipped
     // separately would break the @layer ordering guarantee. All three variants
-    // emit an identical forgedoc.css from the same styles/index.css graph, so the
+    // emit an identical forgedoc.css from the reference theme's graph, so the
     // concurrent overwrites are byte-identical and harmless.
     splitting: false,
     fileName: 'forgedoc.css',

@@ -44,7 +44,7 @@ export class DocHeader extends DocElement {
    * why conditional (§2.2): in the recommended form the title is a bare text
    * node beside the lede. There is no element to name, and creating one would
    * mean moving author content. `doc-header` carries the title typography
-   * itself in that case; see `styles/components/header.css`.
+   * itself in that case; see `styles/themes/forgedoc/components/_header.scss`.
    */
   #markTitleElement(): void {
     for (const child of Array.from(this.children)) {

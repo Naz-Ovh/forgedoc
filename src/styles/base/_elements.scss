@@ -1,0 +1,102 @@
+/*
+ * Element resets, prose and typography.
+ *
+ * §8.7: there are deliberately no custom tags for `<code>`, `<a>`, `<strong>`,
+ * `<em>`, `<ul>`, `<ol>`, `<li>`, `<p>`, `<h*>` or `<table>`. The reference
+ * document uses all of them heavily and none needs a custom element — they are
+ * styled here instead. Every unnecessary tag is a line on a cheatsheet that has
+ * to fit on one page.
+ *
+ * Everything is scoped under `doc-page` so the CDN build can sit inside a host
+ * page without redecorating it.
+ */
+
+@layer doc.reset {
+  doc-page,
+  doc-page *,
+  doc-page *::before,
+  doc-page *::after {
+    box-sizing: border-box;
+  }
+
+  doc-page :where(img, svg, video, canvas, iframe) {
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    doc-page *,
+    doc-page *::before,
+    doc-page *::after {
+      transition-duration: 1ms !important;
+      animation-duration: 1ms !important;
+    }
+  }
+}
+
+@layer doc.base {
+  /*
+  * MUST (§7.5): the very first rule in this layer gives every doc-* tag a
+  * display value.
+  *
+  * why: an unknown or not-yet-upgraded custom element defaults to
+  * `display: inline`. Without this the reader sees a broken flash of inline
+  * layout for as long as it takes the deferred script to run — and in the
+  * offline build that flash is the whole document.
+  */
+  doc-page,
+  doc-header,
+  doc-section,
+  doc-toc,
+  doc-chips,
+  doc-chip,
+  doc-note,
+  doc-blocker,
+  doc-blocks,
+  doc-why,
+  doc-action,
+  doc-list,
+  doc-quote,
+  doc-table,
+  doc-choice,
+  doc-option,
+  doc-collapse,
+  doc-tabs,
+  doc-tab,
+  doc-checklist,
+  doc-flow,
+  doc-flow-node,
+  doc-roadmap,
+  doc-stage,
+  doc-code,
+  doc-diff,
+  doc-figure,
+  doc-caption,
+  doc-tree,
+  doc-compare {
+    display: block;
+  }
+
+  /* The two inline members of the vocabulary. */
+  doc-term,
+  doc-ref {
+    display: inline;
+  }
+
+  doc-page :where(a) {
+    transition: text-decoration-color var(--doc-transition);
+  }
+
+  /* Inline code only — `doc-code` and `doc-diff` restyle their own `<code>`. */
+  doc-page :where(:not(pre) > code) {
+    white-space: nowrap;
+  }
+}
+
+@layer doc.utilities {
+  /* Visually hidden but reachable by assistive tech and by find-in-page. */
+  doc-page [data-doc-visually-hidden] {
+    position: absolute;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}

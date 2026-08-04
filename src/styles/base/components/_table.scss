@@ -1,0 +1,54 @@
+/*
+ * `doc-table`.
+ *
+ * MUST (§8.3): below 1050px, `stack="auto"` turns rows into label/value cards.
+ * The label comes from `data-label`, which the runtime copies off the `<th>` at
+ * mount — CSS cannot read text from another element.
+ */
+
+@layer doc.components {
+  doc-table {
+    overflow-x: auto;
+  }
+
+  doc-table table {
+    border-collapse: collapse;
+  }
+
+  doc-table :where(th, td) {
+    vertical-align: top;
+  }
+
+  doc-table thead th {
+    position: sticky;
+    inset-block-start: 0;
+    white-space: nowrap;
+  }
+
+  doc-table [data-part="scroll-hint"] {
+    display: none;
+  }
+
+  @media (max-width: 1049px) {
+    doc-table:not([stack="never"]) thead {
+      display: none;
+    }
+
+    doc-table:not([stack="never"]) :where(table, tbody, tr, td, th) {
+      display: block;
+    }
+
+    doc-table:not([stack="never"]) tbody :where(td, th) {
+      display: grid;
+      grid-template-columns: 8rem 1fr;
+    }
+
+    doc-table:not([stack="never"]) tbody :where(td, th)[data-label]::before {
+      content: attr(data-label);
+    }
+
+    doc-table[stack="never"] [data-part="scroll-hint"] {
+      display: block;
+    }
+  }
+}
