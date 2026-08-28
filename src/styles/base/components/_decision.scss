@@ -1,0 +1,35 @@
+/* `doc-decision` — Architecture Decision Record / decision card. */
+
+@layer doc.components {
+  doc-decision {
+    display: block;
+  }
+
+  doc-decision [data-part="header"] {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  doc-decision [data-part="badge-id"] {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-decision [data-part="status"] {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-decision [data-part="title"] {
+    display: inline-block;
+  }
+
+  doc-decision [data-part="date"] {
+    display: inline-block;
+  }
+
+  doc-decision [data-part="body"] {
+    display: block;
+  }
+}

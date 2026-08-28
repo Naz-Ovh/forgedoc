@@ -34,14 +34,14 @@
      Everything a preset or an author may want to move. No var() references. */
   :root,
   doc-page {
-    /* Spacing: one unit. */
-    --doc-space-unit: 4px;
+    /* Spacing: a denser default rhythm keeps controls and prose efficient. */
+    --doc-space-unit: 3.5px;
 
     /* Type: one base, one ratio. */
     --doc-text-base: 16px;
     --doc-text-ratio: 1.2;
 
-    --doc-leading: 1.7;
+    --doc-leading: 1.6;
     --doc-leading-tight: 1.25;
     --doc-leading-heading: 1.15;
     --doc-tracking-tight: -0.011em;

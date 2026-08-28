@@ -1,576 +1,690 @@
 /**
- * The markup contract validator.
+ * Validates a ForgeDoc document against the markup contract (§13.1).
  *
- * Built before any component, because it *is* the contract: a `forgedoc build`
- * that fails loudly gives the authoring agent a feedback loop it can close on
- * its own — write, build, read errors, fix, rebuild (§11.1).
+ * Designed to be fast enough to run in a pre-commit hook and predictable
+ * enough to run in an agent harness:
  *
- * MUST (§11.2): this file runs in Node against raw HTML and MUST NOT import the
- * browser runtime. It imports only `src/core/contract.ts` and `src/core/slug.ts`,
- * both of which are pure data and pure string functions.
+ * 1. Errors carry the exact line number, a fix suggestion, and an explanation.
+ * 2. Every rule maps 1:1 to a subsection of the contract.
+ * 3. An exit code of 0 means the document can be safely built.
  */
 
-import { type DefaultTreeAdapterTypes, parse } from 'parse5';
-
 import {
-  type AttributeSpec,
-  attributeSpec,
+  CODE_LANGUAGES,
   GLOBAL_ATTRIBUTES,
   isKnownTag,
+  PRESET_AXES,
+  TAG_NAMES,
   TAGS,
   type TagName,
   type TagSpec,
 } from '../src/core/contract.js';
-import {
-  collapseId,
-  type IdCandidate,
-  questionId,
-  resolveIds,
-  sectionId,
-  slugify,
-  stageId,
-} from '../src/core/slug.js';
+import { type IdCandidate, resolveIds, slugify } from '../src/core/slug.js';
 
-type Element = DefaultTreeAdapterTypes.Element;
-type Node = DefaultTreeAdapterTypes.Node;
-type ParentNode = DefaultTreeAdapterTypes.ParentNode;
-
-export type Severity = 'error' | 'warning';
-
-/** One machine-parseable finding. Shape is stable and covered by semver. */
 export interface Diagnostic {
-  readonly severity: Severity;
-  /** Stable identifier, e.g. `choice/too-few-options`. */
-  readonly ruleId: string;
-  readonly message: string;
-  /** A concrete edit that resolves the finding. */
-  readonly fix: string;
   readonly file: string;
   readonly line: number;
   readonly column: number;
+  readonly ruleId: string;
+  readonly severity: 'error' | 'warning';
+  readonly message: string;
+  readonly fix: string;
 }
 
 export interface ValidationResult {
   readonly file: string;
-  readonly diagnostics: readonly Diagnostic[];
+  readonly ok: boolean;
   readonly errorCount: number;
   readonly warningCount: number;
-  readonly ok: boolean;
+  readonly diagnostics: readonly Diagnostic[];
 }
 
 export interface ValidateOptions {
-  /** Path reported in diagnostics. */
   readonly file?: string;
-  /**
-   * True when the file is supposed to have been through `forgedoc build`, which
-   * turns a surviving `@DOC_CSS@` / `@DOC_JS@` placeholder into an error.
-   */
   readonly expectBuilt?: boolean;
 }
 
-/** Matches both the bare placeholder and the themed `/*@DOC_CSS:geist@*\/`. */
-const CSS_PLACEHOLDER = /\/\*@DOC_CSS(?::[a-z0-9-]+)?@\*\//;
-const JS_PLACEHOLDER = '//@DOC_JS@';
-
-/** `doc-id`, section ids and `doc-ref to` targets must all look like this. */
-const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
-
-/** Maximum `doc-section` nesting depth before the validator warns (§8.1). */
-const MAX_SECTION_DEPTH = 3;
-
-/** Validate a plan document. Never throws — malformed HTML still yields findings. */
-export function validateHtml(html: string, options: ValidateOptions = {}): ValidationResult {
-  const file = options.file ?? '<input>';
-  const document = parse(html, { sourceCodeLocationInfo: true });
-  const collector = new DiagnosticCollector(file, html);
-
-  const walker = new DocumentWalker(collector);
-  walker.walk(document);
-  walker.finish();
-
-  checkPlaceholders(html, collector, options.expectBuilt === true);
-
-  return collector.result();
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Diagnostics
+// HTML Parser & AST
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Position {
-  readonly line: number;
-  readonly column: number;
+  line: number;
+  column: number;
 }
 
-const START_OF_FILE: Position = { line: 1, column: 1 };
-
-class DiagnosticCollector {
-  readonly #diagnostics: Diagnostic[] = [];
-
-  constructor(
-    private readonly file: string,
-    private readonly source: string,
-  ) {}
-
-  error(ruleId: string, message: string, fix: string, at: Position): void {
-    this.#diagnostics.push({ severity: 'error', ruleId, message, fix, file: this.file, ...at });
-  }
-
-  warn(ruleId: string, message: string, fix: string, at: Position): void {
-    this.#diagnostics.push({ severity: 'warning', ruleId, message, fix, file: this.file, ...at });
-  }
-
-  /** Locate a literal substring in the raw source, for findings with no element. */
-  positionOf(needle: string): Position {
-    const offset = this.source.indexOf(needle);
-    if (offset < 0) return START_OF_FILE;
-
-    const before = this.source.slice(0, offset);
-    const line = before.split('\n').length;
-    const lastNewline = before.lastIndexOf('\n');
-    return { line, column: offset - lastNewline };
-  }
-
-  result(): ValidationResult {
-    const sorted = [...this.#diagnostics].sort(
-      (a, b) => a.line - b.line || a.column - b.column || a.ruleId.localeCompare(b.ruleId),
-    );
-    const errorCount = sorted.filter((d) => d.severity === 'error').length;
-    return {
-      file: this.file,
-      diagnostics: sorted,
-      errorCount,
-      warningCount: sorted.length - errorCount,
-      ok: errorCount === 0,
-    };
-  }
+interface Attribute {
+  name: string;
+  value: string;
+  position: Position;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tree walking
-// ─────────────────────────────────────────────────────────────────────────────
+interface Element {
+  tagName: string;
+  attributes: Attribute[];
+  children: (Element | TextNode)[];
+  parent: Element | null;
+  position: Position;
+  isSelfClosing: boolean;
+}
 
-const isElement = (node: Node): node is Element => 'tagName' in node;
+interface TextNode {
+  type: 'text';
+  text: string;
+  position: Position;
+}
 
-const hasChildren = (node: Node): node is ParentNode => 'childNodes' in node;
+function parseHtml(html: string): Element[] {
+  const roots: Element[] = [];
+  const stack: Element[] = [];
+  let index = 0;
+  let line = 1;
+  let lineStart = 0;
 
-const attributeOf = (element: Element, name: string): string | null =>
-  element.attrs.find((attr) => attr.name === name)?.value ?? null;
+  function getPosition(): Position {
+    return { line, column: index - lineStart + 1 };
+  }
 
-const hasAttribute = (element: Element, name: string): boolean =>
-  element.attrs.some((attr) => attr.name === name);
-
-/** Position of an element's start tag, or of one of its attributes. */
-function positionOf(element: Element, attribute?: string): Position {
-  const location = element.sourceCodeLocation;
-  if (!location) return START_OF_FILE;
-
-  if (attribute) {
-    const attributeLocation = location.attrs?.[attribute];
-    if (attributeLocation) {
-      return { line: attributeLocation.startLine, column: attributeLocation.startCol };
+  function advance(count: number = 1): void {
+    for (let i = 0; i < count; i++) {
+      if (html[index] === '\n') {
+        line++;
+        lineStart = index + 1;
+      }
+      index++;
     }
   }
-  return { line: location.startLine, column: location.startCol };
-}
 
-const childElements = (node: ParentNode): Element[] => node.childNodes.filter(isElement);
+  while (index < html.length) {
+    if (html.startsWith('<!--', index)) {
+      const end = html.indexOf('-->', index + 4);
+      if (end === -1) break;
+      advance(end + 3 - index);
+      continue;
+    }
 
-/** All descendant elements with the given tag name, at any depth. */
-function descendantsNamed(node: ParentNode, tagName: string): Element[] {
-  const found: Element[] = [];
-  for (const child of childElements(node)) {
-    if (child.tagName === tagName) found.push(child);
-    found.push(...descendantsNamed(child, tagName));
+    if (html.startsWith('<!doctype', index) || html.startsWith('<!DOCTYPE', index)) {
+      const end = html.indexOf('>', index);
+      if (end === -1) break;
+      advance(end + 1 - index);
+      continue;
+    }
+
+    if (html.startsWith('</', index)) {
+      const end = html.indexOf('>', index + 2);
+      if (end === -1) break;
+      const tag = html
+        .slice(index + 2, end)
+        .trim()
+        .toLowerCase();
+      advance(end + 1 - index);
+
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i]?.tagName === tag) {
+          stack.length = i;
+          break;
+        }
+      }
+      continue;
+    }
+
+    if (html.startsWith('<', index)) {
+      const pos = getPosition();
+      const end = html.indexOf('>', index + 1);
+      if (end === -1) break;
+
+      const tagContent = html.slice(index + 1, end).trim();
+      const isSelfClosing = tagContent.endsWith('/');
+      const cleanContent = isSelfClosing ? tagContent.slice(0, -1).trim() : tagContent;
+
+      const tagMatch = cleanContent.match(/^[a-zA-Z0-9_-]+/);
+      if (!tagMatch) {
+        advance(1);
+        continue;
+      }
+
+      const tagName = tagMatch[0].toLowerCase();
+      const attrStr = cleanContent.slice(tagName.length);
+      const attributes: Attribute[] = [];
+
+      const attrRegex = /([a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+      let match = attrRegex.exec(attrStr);
+      while (match !== null) {
+        attributes.push({
+          name: match[1]?.toLowerCase() ?? '',
+          value: match[2] ?? match[3] ?? match[4] ?? '',
+          position: pos,
+        });
+        match = attrRegex.exec(attrStr);
+      }
+
+      const elem: Element = {
+        tagName,
+        attributes,
+        children: [],
+        parent: stack[stack.length - 1] ?? null,
+        position: pos,
+        isSelfClosing,
+      };
+
+      if (stack.length > 0) {
+        stack[stack.length - 1]?.children.push(elem);
+      } else {
+        roots.push(elem);
+      }
+
+      advance(end + 1 - index);
+
+      const VOID_ELEMENTS = new Set([
+        'area',
+        'base',
+        'br',
+        'col',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+      ]);
+
+      if (!isSelfClosing && !VOID_ELEMENTS.has(tagName)) {
+        if (tagName === 'script' || tagName === 'style') {
+          const closeTag = `</${tagName}>`;
+          const closeIndex = html.toLowerCase().indexOf(closeTag, index);
+          if (closeIndex !== -1) {
+            const rawText = html.slice(index, closeIndex);
+            elem.children.push({ type: 'text', text: rawText, position: getPosition() });
+            advance(closeIndex + closeTag.length - index);
+          }
+        } else {
+          stack.push(elem);
+        }
+      }
+      continue;
+    }
+
+    const nextTag = html.indexOf('<', index);
+    const textEnd = nextTag === -1 ? html.length : nextTag;
+    const text = html.slice(index, textEnd);
+    if (text.trim().length > 0 && stack.length > 0) {
+      stack[stack.length - 1]?.children.push({
+        type: 'text',
+        text,
+        position: getPosition(),
+      });
+    }
+    advance(textEnd - index);
   }
-  return found;
+
+  return roots;
 }
 
-/** Nearest ancestor that is a `doc-*` element, using an explicit ancestor stack. */
-function nearestPlanAncestor(ancestors: readonly Element[]): Element | null {
-  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
-    const candidate = ancestors[index];
-    if (candidate?.tagName.startsWith('doc-')) return candidate;
+// ─────────────────────────────────────────────────────────────────────────────
+// Levenshtein & Nearest Tag
+// ─────────────────────────────────────────────────────────────────────────────
+
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[] = Array.from({ length: (m + 1) * (n + 1) }, () => 0);
+  const get = (i: number, j: number) => dp[i * (n + 1) + j] ?? 0;
+  const set = (i: number, j: number, v: number) => {
+    dp[i * (n + 1) + j] = v;
+  };
+
+  for (let i = 0; i <= m; i++) set(i, 0, i);
+  for (let j = 0; j <= n; j++) set(0, j, j);
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        set(i, j, get(i - 1, j - 1));
+      } else {
+        set(i, j, 1 + Math.min(get(i - 1, j), get(i, j - 1), get(i - 1, j - 1)));
+      }
+    }
   }
-  return null;
+
+  return get(m, n);
 }
 
-/**
- * Single pass over the document, gathering everything the cross-element rules
- * need (ids, refs, section depths) while emitting the per-element findings.
- */
-class DocumentWalker {
-  readonly #planDocs: Element[] = [];
+function nearestTag(unknown: string): string | null {
+  let closest: string | null = null;
+  let minDistance = Number.POSITIVE_INFINITY;
+
+  for (const tag of TAG_NAMES) {
+    const dist = levenshtein(unknown, tag);
+    if (dist < minDistance) {
+      minDistance = dist;
+      closest = tag;
+    }
+  }
+
+  return closest;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Validator Engine
+// ─────────────────────────────────────────────────────────────────────────────
+
+class Validator {
+  readonly #diagnostics: Diagnostic[] = [];
   readonly #idCandidates: IdCandidate[] = [];
   readonly #idOwners: Element[] = [];
-  readonly #references: { element: Element; target: string }[] = [];
-  readonly #sectionSlugs = new Map<string, Element[]>();
-  #choiceCount = 0;
-  /** Populated by `#checkIds`, read by `#checkReferences`. */
-  #resolvedIds = new Set<string>();
+  readonly #refs: { element: Element; target: string; position: Position }[] = [];
+  readonly #expectBuilt: boolean;
+  readonly #file: string;
+  #hasDocChoice = false;
 
-  constructor(private readonly collector: DiagnosticCollector) {}
+  constructor(options: ValidateOptions = {}) {
+    this.#expectBuilt = options.expectBuilt ?? false;
+    this.#file = options.file ?? 'inline';
+  }
 
-  walk(node: Node, ancestors: Element[] = []): void {
-    if (isElement(node)) {
-      this.#visitElement(node, ancestors);
+  error(ruleId: string, message: string, fix: string, pos: Position): void {
+    this.#diagnostics.push({
+      file: this.#file,
+      line: pos.line,
+      column: pos.column,
+      ruleId,
+      severity: 'error',
+      message,
+      fix,
+    });
+  }
+
+  warning(ruleId: string, message: string, fix: string, pos: Position): void {
+    this.#diagnostics.push({
+      file: this.#file,
+      line: pos.line,
+      column: pos.column,
+      ruleId,
+      severity: 'warning',
+      message,
+      fix,
+    });
+  }
+
+  validate(source: string): ValidationResult {
+    if (this.#expectBuilt) {
+      this.#checkPlaceholders(source);
     }
-    if (!hasChildren(node)) return;
 
-    const nextAncestors = isElement(node) ? [...ancestors, node] : ancestors;
-    for (const child of node.childNodes) {
-      this.walk(child, nextAncestors);
+    const roots = parseHtml(source);
+    const docPages: Element[] = [];
+
+    function findDocPages(elements: Element[]): void {
+      for (const el of elements) {
+        if (el.tagName === 'doc-page') {
+          docPages.push(el);
+        }
+        findDocPages(el.children.filter((c): c is Element => 'tagName' in c));
+      }
+    }
+    findDocPages(roots);
+
+    if (docPages.length === 0) {
+      this.error(
+        'doc/missing',
+        'No <doc-page> element found in the document.',
+        'Wrap your content in a <doc-page doc-id="..."> element to create a valid plan document.',
+        { line: 1, column: 1 },
+      );
+      return this.#result();
+    }
+
+    if (docPages.length > 1) {
+      const second = docPages[1];
+      if (second) {
+        this.error(
+          'doc/duplicate',
+          'Found multiple <doc-page> root elements. A document must have exactly one.',
+          'Remove the extra <doc-page> elements and keep only one root.',
+          positionOf(second),
+        );
+      }
+    }
+
+    const docPage = docPages[0];
+    if (docPage) {
+      this.#validateDocPage(docPage);
+      this.#walk(docPage, []);
+    }
+
+    this.#validateCrossElementReferences();
+
+    if (!this.#hasDocChoice) {
+      this.warning(
+        'doc/no-choice',
+        'The document contains no <doc-choice>.',
+        'A plan with no questions collects no feedback. Add at least one <doc-choice> for the decisions you are unsure about.',
+        { line: docPage?.position.line ?? 1, column: docPage?.position.column ?? 1 },
+      );
+    }
+
+    return this.#result();
+  }
+
+  #checkPlaceholders(source: string): void {
+    const lines = source.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i] ?? '';
+      if (line.includes('/*@DOC_CSS') || line.includes('//@DOC_JS@')) {
+        this.error(
+          'build/unreplaced-placeholder',
+          'Document contains unreplaced build placeholders.',
+          'Run `forgedoc build <file>` to inject stylesheets and runtime assets.',
+          { line: i + 1, column: 1 },
+        );
+      }
     }
   }
 
-  /** Rules that need the whole document: ids, refs, and "exactly one doc-page". */
-  finish(): void {
-    this.#checkDocumentRoot();
-    this.#checkIds();
-    this.#checkReferences();
-    this.#checkDuplicateSectionSlugs();
-    this.#checkDocumentHasQuestions();
+  #validateDocPage(docPage: Element): void {
+    const docId = attributeOf(docPage, 'doc-id');
+    if (!docId) {
+      this.error(
+        'doc/missing-doc-id',
+        '<doc-page> must have a doc-id attribute.',
+        'Add a doc-id attribute: <doc-page doc-id="my-plan">',
+        positionOf(docPage),
+      );
+    } else if (!/^[a-z0-9-]+$/.test(docId)) {
+      this.error(
+        'attr/invalid-value',
+        `Invalid doc-id "${docId}". Must be lowercase alphanumeric with hyphens.`,
+        `Change doc-id to "${slugify(docId)}"`,
+        positionOf(docPage),
+      );
+    }
+
+    for (const [axisName, allowedValues] of Object.entries(PRESET_AXES)) {
+      const val = attributeOf(docPage, axisName);
+      if (val !== null && !(allowedValues as readonly string[]).includes(val)) {
+        this.error(
+          'attr/invalid-value',
+          `Invalid value "${val}" for preset axis "${axisName}".`,
+          `Allowed values: ${(allowedValues as readonly string[]).join(' | ')}`,
+          positionOf(docPage),
+        );
+      }
+    }
   }
 
-  #visitElement(element: Element, ancestors: Element[]): void {
+  #walk(element: Element, ancestors: Element[]): void {
     const tagName = element.tagName;
-    if (!tagName.startsWith('doc-')) return;
 
-    if (!isKnownTag(tagName)) {
-      this.collector.error(
-        'tag/unknown',
-        `Unknown tag <${tagName}>.`,
-        `Check the spelling against skills/better-plan/CHEATSHEET.md. ${nearestTagSuggestion(tagName)}`,
+    if (isKnownTag(tagName)) {
+      this.#validateDocElement(element, tagName, ancestors);
+    } else if (tagName.startsWith('doc-')) {
+      const suggestion = nearestTag(tagName);
+      const fix = suggestion
+        ? `Did you mean <${suggestion}>? Check skills/better-plan/CHEATSHEET.md for supported tags.`
+        : 'Check skills/better-plan/CHEATSHEET.md for the list of supported tags.';
+      this.error('tag/unknown', `Unknown tag <${tagName}>.`, fix, positionOf(element));
+    }
+
+    const currentAncestors = [...ancestors, element];
+    for (const child of element.children) {
+      if ('tagName' in child) {
+        this.#walk(child, currentAncestors);
+      }
+    }
+  }
+
+  #validateDocElement(element: Element, tagName: TagName, ancestors: Element[]): void {
+    const spec = TAGS[tagName] as TagSpec;
+
+    if (spec.generated && !this.#expectBuilt) {
+      this.error(
+        'toc/authored',
+        `<${tagName}> is generated by the runtime. Do not author it directly.`,
+        `Remove the <${tagName}> element and let the runtime build the table of contents automatically.`,
         positionOf(element),
       );
-      return;
     }
 
-    const spec = TAGS[tagName] as TagSpec;
-    this.#checkGenerated(element, tagName, spec);
-    this.#checkAttributes(element, tagName, spec);
-    this.#checkPlacement(element, tagName, spec, ancestors);
-    this.#checkRequiredChildren(element, tagName, spec);
+    this.#validatePlacement(element, tagName, spec, ancestors);
+    this.#validateAttributes(element, tagName, spec);
+    this.#validateChildren(element, tagName, spec);
     this.#collectIdentity(element, tagName, ancestors);
-    this.#checkTagSpecificRules(element, tagName, ancestors);
   }
 
-  #checkGenerated(element: Element, tagName: TagName, spec: TagSpec): void {
-    if (!spec.generated) return;
-    this.collector.error(
-      'toc/authored',
-      `<${tagName}> is generated by the runtime and must not be written by hand.`,
-      `Delete the <${tagName}> block. The runtime builds it from the doc-section tree at mount.`,
-      positionOf(element),
-    );
+  #validatePlacement(
+    element: Element,
+    tagName: TagName,
+    spec: TagSpec,
+    ancestors: Element[],
+  ): void {
+    if (spec.onlyInside) {
+      const parent = ancestors[ancestors.length - 1];
+      const valid = parent && spec.onlyInside.includes(parent.tagName as TagName);
+      if (!valid) {
+        const allowed = spec.onlyInside.map((t) => `<${t}>`).join(' or ');
+        this.error(
+          'child/misplaced',
+          `<${tagName}> is only valid inside ${allowed}.`,
+          `Move <${tagName}> inside ${allowed}.`,
+          positionOf(element),
+        );
+      }
+    }
+
+    if (tagName === 'doc-section') {
+      const sectionDepth = ancestors.filter((a) => a.tagName === 'doc-section').length + 1;
+      if (sectionDepth > 3) {
+        this.warning(
+          'section/too-deep',
+          'Section nesting exceeds the recommended maximum depth of 3.',
+          'Flatten the document structure so readers do not have to navigate deeply nested sections.',
+          positionOf(element),
+        );
+      }
+    }
   }
 
-  #checkAttributes(element: Element, tagName: TagName, spec: TagSpec): void {
-    for (const attribute of element.attrs) {
-      if (attribute.name.startsWith('data-')) continue;
+  #validateAttributes(element: Element, tagName: TagName, spec: TagSpec): void {
+    for (const attr of element.attributes) {
+      const attrName = attr.name;
 
-      const attributeName = attribute.name;
-      const attributeDefinition = attributeSpec(tagName, attributeName);
-      if (!attributeDefinition) {
-        this.collector.error(
-          'attr/unknown',
-          `<${tagName}> does not accept the attribute \`${attributeName}\`.`,
-          `Remove it, or use one of: ${Object.keys({ ...spec.attributes, ...GLOBAL_ATTRIBUTES }).join(', ')}.`,
-          positionOf(element, attributeName),
+      if (attrName === 'style') {
+        this.warning(
+          'attr/inline-style',
+          'Inline styles are forbidden on ForgeDoc semantic elements.',
+          'Remove style attribute and use token classes or semantic attributes.',
+          attr.position,
         );
         continue;
       }
 
-      if (attributeName === 'style') {
-        this.collector.warn(
-          'attr/inline-style',
-          `Inline \`style\` on <${tagName}>.`,
-          'This works, but a preset attribute or a `--doc-*` token override is usually what you want (§6.6).',
-          positionOf(element, attributeName),
+      if (Object.hasOwn(GLOBAL_ATTRIBUTES, attrName)) continue;
+
+      const attrDef = spec.attributes[attrName];
+      if (!attrDef) {
+        this.error(
+          'attr/unknown',
+          `Unknown attribute "${attrName}" on <${tagName}>.`,
+          `Check REFERENCE.md for valid attributes on <${tagName}>.`,
+          attr.position,
         );
+        continue;
       }
 
-      this.#checkAttributeValue(
-        element,
-        tagName,
-        attributeName,
-        attribute.value,
-        attributeDefinition,
-      );
+      const val = attr.value;
+      if (attrDef.kind.type === 'enum' && !attrDef.kind.values.includes(val)) {
+        this.error(
+          'attr/invalid-value',
+          `Invalid attribute value ${attrName}="${val}" on <${tagName}>.`,
+          `Valid values are: ${attrDef.kind.values.join(' | ')}`,
+          attr.position,
+        );
+      } else if (attrDef.kind.type === 'integer' && !/^-?\d+$/.test(val)) {
+        this.error(
+          'attr/invalid-value',
+          `Attribute "${attrName}" on <${tagName}> must be an integer.`,
+          'Provide an integer value.',
+          attr.position,
+        );
+      }
     }
 
-    for (const [name, definition] of Object.entries(spec.attributes)) {
-      if (!definition.required) continue;
-      if (hasAttribute(element, name)) continue;
-      // `doc/missing-doc-id` reports this one with a far better fix message.
-      if (tagName === 'doc-page' && name === 'doc-id') continue;
-
-      this.collector.error(
-        'attr/missing-required',
-        `<${tagName}> requires the attribute \`${name}\`.`,
-        `Add ${name}="…" — ${definition.doc}`,
-        positionOf(element),
-      );
-    }
-  }
-
-  #checkAttributeValue(
-    element: Element,
-    tagName: TagName,
-    name: string,
-    value: string,
-    definition: AttributeSpec,
-  ): void {
-    const at = positionOf(element, name);
-    const kind = definition.kind;
-
-    if (kind.type === 'enum' && !kind.values.includes(value)) {
-      const ruleId = name === 'lang' ? 'code/unknown-lang' : 'attr/invalid-value';
-      this.collector.error(
-        ruleId,
-        `\`${name}="${value}"\` is not valid on <${tagName}>.`,
-        `Use one of: ${kind.values.join(' | ')}.`,
-        at,
-      );
-      return;
+    for (const [attrName, def] of Object.entries(spec.attributes)) {
+      if (def.required && attributeOf(element, attrName) === null) {
+        this.error(
+          'attr/missing-required',
+          `<${tagName}> is missing required attribute "${attrName}".`,
+          `Add "${attrName}" attribute to <${tagName}>.`,
+          positionOf(element),
+        );
+      }
     }
 
-    if (kind.type === 'slug' && value !== '' && !SLUG_PATTERN.test(value)) {
-      this.collector.error(
-        'attr/invalid-value',
-        `\`${name}="${value}"\` is not a slug.`,
-        `Use lowercase letters, digits and hyphens, e.g. ${name}="${slugify(value)}".`,
-        at,
-      );
-      return;
-    }
-
-    if (kind.type === 'integer' && !/^-?\d+$/.test(value)) {
-      this.collector.error(
-        'attr/invalid-value',
-        `\`${name}="${value}"\` is not a whole number.`,
-        `Use a whole number, e.g. ${name}="0".`,
-        at,
-      );
-      return;
-    }
-
-    const requiresText = kind.type === 'string' || kind.type === 'url' || kind.type === 'token';
-    if (requiresText && definition.required && value.trim() === '') {
-      this.collector.error(
-        'attr/invalid-value',
-        `\`${name}\` on <${tagName}> is empty.`,
-        `Give it a value — ${definition.doc}`,
-        at,
-      );
+    if (tagName === 'doc-code') {
+      const lang = attributeOf(element, 'lang');
+      if (lang && !(CODE_LANGUAGES as readonly string[]).includes(lang)) {
+        this.error(
+          'code/unknown-lang',
+          `Unknown code language "${lang}".`,
+          `Supported languages: ${CODE_LANGUAGES.join(', ')}`,
+          positionOf(element),
+        );
+      }
     }
   }
 
-  #checkPlacement(element: Element, tagName: TagName, spec: TagSpec, ancestors: Element[]): void {
-    if (!spec.onlyInside) return;
+  #validateChildren(element: Element, tagName: TagName, spec: TagSpec): void {
+    if (spec.requiresChild) {
+      for (const req of spec.requiresChild) {
+        const hasChild = element.children.some((c) => 'tagName' in c && c.tagName === req);
+        if (!hasChild) {
+          this.error(
+            'child/missing-required',
+            `<${tagName}> requires at least one <${req}> child.`,
+            `Add a <${req}> child inside <${tagName}>.`,
+            positionOf(element),
+          );
+        }
+      }
+    }
 
-    const parent = nearestPlanAncestor(ancestors);
-    if (parent && spec.onlyInside.includes(parent.tagName)) return;
-
-    const allowed = spec.onlyInside.map((name) => `<${name}>`).join(' or ');
-    this.collector.error(
-      'child/misplaced',
-      `<${tagName}> is only valid inside ${allowed}${parent ? `, but its nearest plan ancestor is <${parent.tagName}>` : ''}.`,
-      `Move the <${tagName}> block inside a ${allowed}.`,
-      positionOf(element),
-    );
-  }
-
-  #checkRequiredChildren(element: Element, tagName: TagName, spec: TagSpec): void {
-    if (!spec.requiresChild) return;
-
-    for (const requiredChild of spec.requiresChild) {
-      if (descendantsNamed(element, requiredChild).length > 0) continue;
-
-      this.collector.error(
-        'child/missing-required',
-        `<${tagName}> requires a <${requiredChild}> child.`,
-        requiredChildFix(tagName, requiredChild),
-        positionOf(element),
+    if (tagName === 'doc-choice') {
+      this.#hasDocChoice = true;
+      const options = element.children.filter(
+        (c): c is Element => 'tagName' in c && c.tagName === 'doc-option',
       );
+      if (options.length < 2) {
+        this.error(
+          'choice/too-few-options',
+          '<doc-choice> must contain at least two <doc-option> elements.',
+          'Add at least two <doc-option> children so the reader has real choices.',
+          positionOf(element),
+        );
+      }
+    }
+
+    if (tagName === 'doc-figure') {
+      const hasCaptionAttr = attributeOf(element, 'caption') !== null;
+      const hasCaptionChild = element.children.some(
+        (c) => 'tagName' in c && (c.tagName === 'figcaption' || c.tagName === 'doc-caption'),
+      );
+      if (!hasCaptionAttr && !hasCaptionChild) {
+        this.warning(
+          'figure/missing-caption',
+          '<doc-figure> is missing a caption.',
+          'Add a `caption="..."` attribute or a `<figcaption>` / `<doc-caption>` child inside <doc-figure>.',
+          positionOf(element),
+        );
+      }
     }
   }
 
   /** Record this element's id — explicit or derived — for the duplicate and ref checks. */
-  #collectIdentity(element: Element, tagName: TagName, ancestors: Element[]): void {
+  #collectIdentity(element: Element, tagName: TagName, _ancestors: Element[]): void {
     const derivedId = derivedIdFor(element, tagName);
-    if (!derivedId) return;
+    const explicitId = attributeOf(element, 'id');
 
-    this.#idCandidates.push({ explicitId: attributeOf(element, 'id'), derivedId });
-    this.#idOwners.push(element);
+    if (derivedId || explicitId) {
+      this.#idCandidates.push({
+        explicitId,
+        derivedId: derivedId ?? explicitId ?? '',
+      });
+      this.#idOwners.push(element);
+    }
 
     if (tagName === 'doc-section') {
-      const existing = this.#sectionSlugs.get(derivedId) ?? [];
-      existing.push(element);
-      this.#sectionSlugs.set(derivedId, existing);
-      this.#checkSectionDepth(element, ancestors);
-    }
-  }
-
-  #checkSectionDepth(element: Element, ancestors: Element[]): void {
-    const depth = ancestors.filter((a) => a.tagName === 'doc-section').length + 1;
-    if (depth <= MAX_SECTION_DEPTH) return;
-
-    this.collector.warn(
-      'section/too-deep',
-      `<doc-section> is nested ${depth} levels deep; the vocabulary supports ${MAX_SECTION_DEPTH}.`,
-      'Flatten the outline, or promote this content into its own top-level section.',
-      positionOf(element),
-    );
-  }
-
-  #checkTagSpecificRules(element: Element, tagName: TagName, ancestors: Element[]): void {
-    if (tagName === 'doc-page') {
-      this.#planDocs.push(element);
-      if (ancestors.some((a) => a.tagName === 'doc-page')) {
-        this.collector.error(
-          'doc/duplicate',
-          '<doc-page> is nested inside another <doc-page>.',
-          'Exactly one <doc-page> per document. Remove the inner one.',
-          positionOf(element),
+      const title = attributeOf(element, 'title');
+      if (title) {
+        const slug = slugify(title);
+        const duplicate = this.#idCandidates.filter(
+          (c, idx) =>
+            this.#idOwners[idx]?.tagName === 'doc-section' && c.derivedId === `sec-${slug}`,
         );
+        if (duplicate.length > 1) {
+          this.warning(
+            'section/duplicate-slug',
+            `Section title "${title}" produces duplicate slug "sec-${slug}".`,
+            'Provide unique section titles or explicit id attributes to avoid anchor collision.',
+            positionOf(element),
+          );
+        }
       }
-      return;
-    }
-
-    if (tagName === 'doc-choice') {
-      this.#choiceCount += 1;
-      const options = descendantsNamed(element, 'doc-option');
-      if (options.length > 0 && options.length < 2) {
-        this.collector.error(
-          'choice/too-few-options',
-          `<doc-choice> has ${options.length} <doc-option> child; it needs at least 2.`,
-          'Add a second <doc-option>. The runtime appends "Other" on top of yours — it does not count.',
-          positionOf(element),
-        );
-      }
-      return;
     }
 
     if (tagName === 'doc-ref') {
       const target = attributeOf(element, 'to');
-      if (target) this.#references.push({ element, target });
-      return;
+      if (target) {
+        this.#refs.push({ element, target, position: positionOf(element) });
+      }
+    }
+  }
+
+  #validateCrossElementReferences(): void {
+    const resolvedIds = resolveIds(this.#idCandidates);
+    const seen = new Set<string>();
+
+    for (let i = 0; i < resolvedIds.length; i++) {
+      const id = resolvedIds[i];
+      const owner = this.#idOwners[i];
+      if (!id || !owner) continue;
+
+      if (seen.has(id)) {
+        this.error(
+          'id/duplicate',
+          `Duplicate id "${id}" on <${owner.tagName}>.`,
+          'Ensure all element IDs are unique.',
+          positionOf(owner),
+        );
+      }
+      seen.add(id);
     }
 
-    if (tagName === 'doc-figure') {
-      const hasCaptionAttribute = (attributeOf(element, 'caption') ?? '').trim() !== '';
-      const hasCaptionChild = descendantsNamed(element, 'doc-caption').length > 0;
-      if (!hasCaptionAttribute && !hasCaptionChild) {
-        this.collector.warn(
-          'figure/missing-caption',
-          '<doc-figure> has no caption.',
-          'Add caption="…", or a <doc-caption> child for a rich caption.',
-          positionOf(element),
+    for (const ref of this.#refs) {
+      if (!seen.has(ref.target)) {
+        this.error(
+          'ref/unresolvable',
+          `Referenced id "${ref.target}" does not exist in the document.`,
+          'Check that the target element has a matching id or slug.',
+          ref.position,
         );
       }
     }
   }
 
-  #checkDocumentRoot(): void {
-    if (this.#planDocs.length === 0) {
-      this.collector.error(
-        'doc/missing',
-        'No <doc-page> found.',
-        'Wrap the document in <doc-page doc-id="your-doc-slug">…</doc-page>.',
-        START_OF_FILE,
-      );
-      return;
-    }
-
-    for (const duplicate of this.#planDocs.slice(1)) {
-      this.collector.error(
-        'doc/duplicate',
-        'More than one <doc-page> in the file.',
-        'Exactly one <doc-page> per document — it owns the store, the layout and the bucket.',
-        positionOf(duplicate),
-      );
-    }
-
-    for (const docPage of this.#planDocs) {
-      const docId = attributeOf(docPage, 'doc-id');
-      if (docId !== null && docId.trim() !== '') continue;
-
-      this.collector.error(
-        'doc/missing-doc-id',
-        '<doc-page> has no `doc-id`.',
-        // why (§9.3): Chrome has historically shared one localStorage bucket
-        // across all file:// documents, so two plans would see each other.
-        'Add doc-id="a-unique-slug". Every storage key is namespaced with it, which is what stops two plans opened from file:// colliding.',
-        positionOf(docPage),
-      );
-    }
-  }
-
-  #checkIds(): void {
-    const resolved = resolveIds(this.#idCandidates);
-    const seen = new Map<string, number>();
-
-    resolved.forEach((id, index) => {
-      const firstIndex = seen.get(id);
-      if (firstIndex === undefined) {
-        seen.set(id, index);
-        return;
-      }
-
-      const owner = this.#idOwners[index];
-      if (!owner) return;
-      this.collector.error(
-        'id/duplicate',
-        `Duplicate id \`${id}\`.`,
-        'Ids are derived from titles and questions. Change the title, or set an explicit id="…" on one of them.',
-        positionOf(owner, hasAttribute(owner, 'id') ? 'id' : undefined),
-      );
-    });
-
-    this.#resolvedIds = new Set(resolved);
-  }
-
-  #checkReferences(): void {
-    for (const { element, target } of this.#references) {
-      if (this.#resolvedIds.has(target)) continue;
-
-      this.collector.error(
-        'ref/unresolvable',
-        `<doc-ref to="${target}"> points at an id that does not exist.`,
-        `Ids are derived: a section titled "X" becomes ${sectionId('X')}, a question becomes ${questionId('X')}, a stage becomes ${stageId('X')}. Known ids: ${[...this.#resolvedIds].slice(0, 8).join(', ') || '(none)'}.`,
-        positionOf(element, 'to'),
-      );
-    }
-  }
-
-  #checkDuplicateSectionSlugs(): void {
-    for (const [slug, elements] of this.#sectionSlugs) {
-      if (elements.length < 2) continue;
-
-      for (const duplicate of elements.slice(1)) {
-        this.collector.warn(
-          'section/duplicate-slug',
-          `Two sections slugify to \`${slug}\`; this one gets a numeric suffix.`,
-          'Two sections with the same title is a content smell. Give them distinct titles so their anchors stay meaningful.',
-          positionOf(duplicate, 'title'),
-        );
-      }
-    }
-  }
-
-  #checkDocumentHasQuestions(): void {
-    if (this.#choiceCount > 0) return;
-    if (this.#planDocs.length === 0) return;
-
-    const docPage = this.#planDocs[0];
-    if (!docPage) return;
-    this.collector.warn(
-      'doc/no-choice',
-      'The document contains no <doc-choice>.',
-      'A plan with no questions collects no feedback. Add at least one <doc-choice> for the decisions you are unsure about.',
-      positionOf(docPage),
-    );
+  #result(): ValidationResult {
+    const errorCount = this.#diagnostics.filter((d) => d.severity === 'error').length;
+    const warningCount = this.#diagnostics.filter((d) => d.severity === 'warning').length;
+    return {
+      file: this.#file,
+      ok: errorCount === 0,
+      errorCount,
+      warningCount,
+      diagnostics: this.#diagnostics,
+    };
   }
 }
 
@@ -578,115 +692,53 @@ class DocumentWalker {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * The id the runtime would derive for this element, or null if it needs none.
- *
- * Elements outside the switch only enter the id namespace when the author gave
- * them one explicitly — they still have to be checked for duplicates.
- */
+function positionOf(element: Element): Position {
+  return element.position;
+}
+
+function attributeOf(element: Element, name: string): string | null {
+  const match = element.attributes.find((a) => a.name === name);
+  return match ? match.value : null;
+}
+
 function derivedIdFor(element: Element, tagName: TagName): string | null {
-  switch (tagName) {
-    case 'doc-section':
-      return sectionId(attributeOf(element, 'title') ?? '');
-    case 'doc-choice':
-      return questionId(attributeOf(element, 'question') ?? '');
-    case 'doc-stage':
-      return stageId(attributeOf(element, 'title') ?? '');
-    case 'doc-collapse':
-      return collapseId(attributeOf(element, 'title') ?? '');
-    default:
-      return attributeOf(element, 'id');
+  if (tagName === 'doc-section') {
+    const title = attributeOf(element, 'title');
+    return title ? `sec-${slugify(title)}` : null;
   }
+  if (tagName === 'doc-stage') {
+    const title = attributeOf(element, 'title');
+    return title ? `stage-${slugify(title)}` : null;
+  }
+  if (tagName === 'doc-choice' || tagName === 'doc-rating') {
+    const question = attributeOf(element, 'question');
+    return question ? slugify(question) : null;
+  }
+  return null;
 }
 
-function requiredChildFix(tagName: TagName, requiredChild: string): string {
-  if (tagName === 'doc-blocker' && requiredChild === 'doc-action') {
-    // why (§8.3): this is the single rule the component exists to enforce.
-    return 'Add <doc-action>…</doc-action> stating what resolves the roadblock. A roadblock with no resolution is exactly the failure this library exists to prevent.';
-  }
-  if (tagName === 'doc-table' && requiredChild === 'table') {
-    return 'Put a plain <table> inside <doc-table>. The component styles it; it does not generate it.';
-  }
-  return `Add at least one <${requiredChild}> inside the <${tagName}>.`;
+export function validateHtml(source: string, options: ValidateOptions = {}): ValidationResult {
+  const validator = new Validator(options);
+  return validator.validate(source);
 }
 
-/** Cheap "did you mean" for a misspelled tag, by shared-prefix length. */
-function nearestTagSuggestion(tagName: string): string {
-  let best = '';
-  let bestScore = 0;
-
-  for (const candidate of Object.keys(TAGS)) {
-    let score = 0;
-    while (
-      score < candidate.length &&
-      score < tagName.length &&
-      candidate[score] === tagName[score]
-    ) {
-      score += 1;
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      best = candidate;
-    }
-  }
-
-  // 'doc-' alone is 5 characters and tells the reader nothing.
-  if (bestScore <= 5) return '';
-  return `Did you mean <${best}>?`;
-}
-
-function checkPlaceholders(
-  html: string,
-  collector: DiagnosticCollector,
-  expectBuilt: boolean,
-): void {
-  if (!expectBuilt) return;
-
-  // The CSS placeholder may name a theme — `/*@DOC_CSS:geist@*\/` — so this
-  // matches the shape rather than the one default spelling. A themed
-  // placeholder surviving injection is the same failure and has to report as
-  // one; matching only the bare form would let exactly the documents that ask
-  // for a non-default theme ship unstyled.
-  const survivors = [
-    CSS_PLACEHOLDER.exec(html)?.[0],
-    html.includes(JS_PLACEHOLDER) ? JS_PLACEHOLDER : undefined,
-  ];
-
-  for (const placeholder of survivors) {
-    if (!placeholder) continue;
-
-    collector.error(
-      'build/unreplaced-placeholder',
-      `The built file still contains \`${placeholder}\`.`,
-      'Injection did not run, or ran against the wrong file. Re-run `forgedoc build <file.html>`.',
-      collector.positionOf(placeholder),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Reporting
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Human-readable report: one line per finding, plus an indented fix. */
 export function formatText(result: ValidationResult): string {
-  if (result.diagnostics.length === 0) {
+  if (result.ok && result.warningCount === 0) {
     return `${result.file}: ok`;
   }
 
-  const lines = result.diagnostics.map((diagnostic) => {
-    const location = `${diagnostic.file}:${diagnostic.line}:${diagnostic.column}`;
-    return `${location}  ${diagnostic.severity}  ${diagnostic.ruleId}\n    ${diagnostic.message}\n    fix: ${diagnostic.fix}`;
-  });
+  const lines: string[] = [];
+  for (const diag of result.diagnostics) {
+    lines.push(`${result.file}:${diag.line}:${diag.column}  ${diag.severity}  ${diag.ruleId}`);
+    lines.push(`    ${diag.message}`);
+    lines.push(`    fix: ${diag.fix}`);
+  }
 
-  lines.push(
-    `\n${result.errorCount} error${result.errorCount === 1 ? '' : 's'}, ` +
-      `${result.warningCount} warning${result.warningCount === 1 ? '' : 's'}`,
-  );
+  const summary = `${result.errorCount} error${result.errorCount === 1 ? '' : 's'}, ${result.warningCount} warning${result.warningCount === 1 ? '' : 's'}`;
+  lines.push('', summary);
   return lines.join('\n');
 }
 
-/** Machine-readable report for an agent harness (`--format=json`). */
 export function formatJson(result: ValidationResult): string {
   return JSON.stringify(result, null, 2);
 }

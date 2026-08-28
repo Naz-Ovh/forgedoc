@@ -7,6 +7,7 @@
 
 import { type BucketHandle, mountBucket } from '../bucket/mount.js';
 import { DocElement } from '../core/base.js';
+import { type EndpointDrawerHandle, mountEndpointDrawer } from './doc-endpoint.js';
 import { reportDevViolations } from '../core/dev-report.js';
 import { indexFor } from '../core/numbering.js';
 import { createPart } from '../core/parts.js';
@@ -18,6 +19,7 @@ const TOC_DOCK_BREAKPOINT_PX = 1280;
 
 export class DocPage extends DocElement {
   #bucket: BucketHandle | null = null;
+  #endpointDrawer: EndpointDrawerHandle | null = null;
 
   protected enhance(): void {
     // MUST (§5.4): stamp the version. When a reader pastes a bucket back into a
@@ -28,12 +30,15 @@ export class DocPage extends DocElement {
     this.#describeDocument();
     this.#warnWhenStorageUnavailable();
     this.#appendTableOfContents();
+    this.#appendEndpointDrawer();
     this.#appendBucket();
 
     if (__FORGEDOC_DEV__) reportDevViolations(this);
   }
 
   protected override teardown(): void {
+    this.#endpointDrawer?.destroy();
+    this.#endpointDrawer = null;
     this.#bucket?.destroy();
     this.#bucket = null;
   }
@@ -188,6 +193,11 @@ export class DocPage extends DocElement {
   /** Pin the contents panel beside the content, or let it float. Docking opens it. */
   toggleTocDock(force?: boolean): void {
     this.#setToc(true, force ?? !this.tocDocked, true);
+  }
+
+  /** Append the single reusable API drawer as document chrome. */
+  #appendEndpointDrawer(): void {
+    this.#endpointDrawer = mountEndpointDrawer(this);
   }
 
   /**

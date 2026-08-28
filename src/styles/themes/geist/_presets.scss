@@ -1,0 +1,133 @@
+/*
+ * Presets.
+ *
+ * Four orthogonal axes as attribute selectors on `doc-page` (§6.3). State lives
+ * in the DOM: one source of truth, validatable against an enum, switchable at
+ * runtime with a single `setAttribute`, and reachable from the print stylesheet.
+ *
+ * why so few declarations per preset (§6.2): each axis moves the *unit* the rest
+ * of the system derives from. `density="compact"` sets one spacing unit and one
+ * line-height; every padding in every component follows. A preset that restated
+ * forty values would drift apart from its siblings within a month, and every new
+ * component would mean editing every preset.
+ *
+ * Named bundles ("presentation" = spacious + lg + narrow) are documented
+ * combinations, not a fifth attribute.
+ */
+
+@layer doc.preset {
+  /* ── density ─────────────────────────────────────────────────────────────── */
+  /* One unit and one line-height each — the rest of the system follows. */
+  doc-page[density="compact"] {
+    --doc-space-unit: 3px;
+    --doc-leading: 1.55;
+  }
+
+  doc-page[density="spacious"] {
+    --doc-space-unit: 5px;
+    --doc-leading: 1.85;
+  }
+
+  /* ── scale ───────────────────────────────────────────────────────────────── */
+  doc-page[scale="sm"] {
+    --doc-text-base: 15px;
+    --doc-text-ratio: 1.18;
+  }
+
+  doc-page[scale="lg"] {
+    --doc-text-base: 18px;
+    --doc-text-ratio: 1.22;
+  }
+
+  /* ── measure ─────────────────────────────────────────────────────────────── */
+  doc-page[measure="narrow"] {
+    --doc-measure: 720px;
+  }
+
+  doc-page[measure="wide"] {
+    --doc-measure: 1600px;
+  }
+
+  /* ── accent ──────────────────────────────────────────────────────────────── */
+  /* One ramp per accent. The semantic accent tokens in tokens.css derive light
+     and dark treatments from it, so an accent never needs a dark-mode variant. */
+  /* The accent axis keeps its five names across every theme — it is contract,
+     not decoration — but each theme answers them in its own palette. Here that
+     means Geist's own hues: the gradient purple, pink and teal, plus a true
+     neutral. Blue is the default and lives in `_tokens.scss`. */
+  doc-page[accent="indigo"] {
+    --doc-accent-50: #f4eefc;
+    --doc-accent-100: #e8dcf9;
+    --doc-accent-200: #d0b8f2;
+    --doc-accent-400: #a06ce0;
+    --doc-accent-600: #7928ca;
+    --doc-accent-800: #4c1780;
+    --doc-accent-900: #330f57;
+  }
+
+  /* A true neutral, not a blue-grey: Geist's own gray scale. The most Geist of
+     the five — an accent that adds emphasis without adding colour. */
+  doc-page[accent="slate"] {
+    --doc-accent-50: #f2f2f2;
+    --doc-accent-100: #ebebeb;
+    --doc-accent-200: #d4d4d4;
+    --doc-accent-400: #8f8f8f;
+    --doc-accent-600: #666666;
+    --doc-accent-800: #333333;
+    --doc-accent-900: #1f1f1f;
+  }
+
+  doc-page[accent="plum"] {
+    --doc-accent-50: #ffeef6;
+    --doc-accent-100: #ffdcec;
+    --doc-accent-200: #ffb3d5;
+    --doc-accent-400: #ff4da6;
+    --doc-accent-600: #ff0080;
+    --doc-accent-800: #99004d;
+    --doc-accent-900: #660033;
+  }
+
+  doc-page[accent="amber"] {
+    --doc-accent-50: #fff8eb;
+    --doc-accent-100: #fdeccb;
+    --doc-accent-200: #fbdfae;
+    --doc-accent-400: #f7bb5c;
+    --doc-accent-600: #d18604;
+    --doc-accent-800: #7d4f02;
+    --doc-accent-900: #5c3d05;
+  }
+
+  /* ── code theme ──────────────────────────────────────────────────────────── */
+  /* `auto` is the default and needs no rules — the tokens already use
+     light-dark(). These two force one scheme for code blocks only. */
+  /* Syntax colour is restrained on purpose. Geist's own code blocks are close
+     to monochrome with a few hues carrying meaning, which is the same argument
+     the rest of this theme makes: contrast for hierarchy, colour for meaning. */
+  doc-page[code="light"] {
+    --doc-code-surface: #fafafa;
+    --doc-code-text: #171717;
+    --doc-code-border: #eaeaea;
+    --doc-code-gutter: #a3a3a3;
+    --doc-code-comment: #8f8f8f;
+    --doc-code-keyword: #7928ca;
+    --doc-code-string: #17a398;
+    --doc-code-number: #d18604;
+    --doc-code-function: #0070f3;
+    --doc-code-punctuation: #666666;
+    --doc-code-highlight-row: #fff8eb;
+  }
+
+  doc-page[code="dark"] {
+    --doc-code-surface: #0a0a0a;
+    --doc-code-text: #ededed;
+    --doc-code-border: #2e2e2e;
+    --doc-code-gutter: #5c5c5c;
+    --doc-code-comment: #7d7d7d;
+    --doc-code-keyword: #b98cf0;
+    --doc-code-string: #50e3c2;
+    --doc-code-number: #f7bb5c;
+    --doc-code-function: #52a8ff;
+    --doc-code-punctuation: #a1a1a1;
+    --doc-code-highlight-row: #211a06;
+  }
+}

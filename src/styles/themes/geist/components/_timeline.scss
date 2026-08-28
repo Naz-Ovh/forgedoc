@@ -1,0 +1,76 @@
+/* `doc-timeline` / `doc-milestone` — timeline delivery milestones. */
+
+@layer doc.theme {
+  doc-timeline {
+    margin-block: var(--doc-space-5);
+    gap: var(--doc-space-4);
+    padding-inline-start: var(--doc-space-4);
+    border-inline-start: 2px solid var(--doc-border-2);
+  }
+
+  doc-milestone {
+    padding-inline-start: var(--doc-space-4);
+  }
+
+  doc-milestone [data-part="header"] {
+    gap: var(--doc-space-3);
+    margin-bottom: var(--doc-space-1);
+  }
+
+  doc-milestone [data-part="marker"] {
+    position: absolute;
+    left: calc(-1 * var(--doc-space-4) - 9px);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--doc-surface-base);
+    border: 2px solid var(--doc-border-3);
+  }
+
+  doc-milestone [data-part="marker"][data-status="completed"] {
+    border-color: var(--doc-success-600);
+    background: var(--doc-success-600);
+  }
+
+  doc-milestone [data-part="marker"][data-status="in-progress"] {
+    border-color: var(--doc-accent-solid);
+    background: var(--doc-accent-solid);
+  }
+
+  doc-milestone [data-part="marker"][data-status="delayed"] {
+    border-color: var(--doc-danger-600);
+    background: var(--doc-danger-600);
+  }
+
+  doc-milestone [data-part="date"] {
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 700;
+    color: var(--doc-text-3);
+  }
+
+  doc-milestone [data-part="title"] {
+    font-weight: 600;
+    font-size: var(--doc-text-base);
+    color: var(--doc-text-1);
+  }
+
+  doc-milestone [data-part="owner"] {
+    font-size: var(--doc-text-xs);
+    color: var(--doc-text-3);
+  }
+
+  doc-milestone [data-part="status"] {
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    padding: 0 var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-2);
+  }
+
+  doc-milestone [data-part="body"] {
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-2);
+  }
+}

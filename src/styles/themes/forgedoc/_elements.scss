@@ -12,6 +12,25 @@
  */
 
 @layer doc.reset {
+  /*
+   * Claim the colour scheme on the frame too, not only on `doc-page`.
+   *
+   * why this rule exists: `light-dark()` resolves against the *used* colour
+   * scheme of the element it is written on, and `color-scheme` was declared on
+   * `doc-page` alone. The two rules below paint `html` and `body`, which sit
+   * outside it — so in dark mode they were resolving every token to its light
+   * value and painting the page frame near-white behind a dark document. It
+   * showed up in the overscroll area, behind the scrollbar, and on any UA
+   * widget that reads the scheme.
+   *
+   * Scoped with `:has(doc-page)` for the same reason the backgrounds are: the
+   * CDN build may sit inside someone else's page, and claiming the scheme on a
+   * bare `:root` would restyle their scrollbars and form controls.
+   */
+  html:has(doc-page) {
+    color-scheme: light dark;
+  }
+
   /* Only claim the page when the document *is* a plan. */
   html:has(doc-page) {
     background: var(--doc-surface-0);

@@ -1,0 +1,42 @@
+/* `doc-steps` / `doc-step` — step-by-step walkthrough guides. */
+
+@layer doc.components {
+  doc-steps {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    counter-reset: doc-step;
+  }
+
+  doc-step {
+    display: grid;
+    position: relative;
+    counter-increment: doc-step;
+  }
+
+  doc-step [data-part="marker"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  doc-step [data-part="card"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  doc-step [data-part="header"] {
+    display: flex;
+    align-items: center;
+  }
+
+  doc-step [data-part="title"] {
+    display: inline-block;
+  }
+
+  doc-step [data-part="body"] {
+    display: block;
+  }
+}

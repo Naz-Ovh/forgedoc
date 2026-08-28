@@ -1,88 +1,94 @@
 /**
- * Generate `skills/better-plan/REFERENCE.md` from `src/core/contract.ts`.
+ * Generates `skills/better-plan/REFERENCE.md` from the single source of truth in
+ * `src/core/contract.ts`.
  *
- * why generated rather than hand-written: the contract already carries a `doc`
- * string for every tag and every attribute, and a reference that drifts from the
- * validator is worse than no reference — an agent trusts it, writes markup the
- * validator then rejects, and has no way to tell which of the two is wrong.
- *
- * `tests/node/reference.test.ts` fails if the checked-in file is stale, so the
- * generated half can never fall behind. The prose half lives in
- * `tools/reference-preamble.md` and is written by hand — it sits beside its
- * generator rather than in the skill directory so that everything an agent
- * loads from `skills/better-plan/` is something it is meant to read.
- *
- * Run with: npm run docs:reference
+ * Runs as part of `npm test` so a pull request that touches the contract cannot
+ * forget to update the docs.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { rolldown } from 'rolldown';
 
-import { build } from 'rolldown';
+const HERE = dirname(fileURLToPath(import.meta.url));
+const CONTRACT_SOURCE = resolve(HERE, '../src/core/contract.ts');
+const OUTPUT_PATH = resolve(HERE, '../skills/better-plan/REFERENCE.md');
 
-const here = (path) => fileURLToPath(new URL(path, import.meta.url));
-
-/** Load the TypeScript contract without adding a TS runtime dependency. */
-async function loadContract() {
-  const bundle = await build({
-    input: here('../src/core/contract.ts'),
-    platform: 'node',
-    output: { format: 'esm' },
-    write: false,
-  });
-
-  const source = bundle.output[0].code;
-  const encoded = Buffer.from(source).toString('base64');
-  return import(`data:text/javascript;base64,${encoded}`);
-}
-
-const GROUPS = [
-  { title: 'Shell', tags: ['doc-page', 'doc-header', 'doc-section', 'doc-toc'] },
-  { title: 'Meta', tags: ['doc-chips', 'doc-chip'] },
-  {
-    title: 'Prose and callouts',
-    tags: [
-      'doc-note',
-      'doc-blocker',
-      'doc-blocks',
-      'doc-why',
-      'doc-action',
-      'doc-list',
-      'doc-term',
-      'doc-ref',
-      'doc-quote',
-      'doc-table',
-    ],
-  },
-  {
-    title: 'Interactive',
-    tags: ['doc-choice', 'doc-option', 'doc-collapse', 'doc-tabs', 'doc-tab', 'doc-checklist'],
-  },
-  {
-    title: 'Structure',
-    tags: ['doc-flow', 'doc-flow-node', 'doc-roadmap', 'doc-stage'],
-  },
-  {
-    title: 'Content',
-    tags: ['doc-code', 'doc-diff', 'doc-figure', 'doc-caption', 'doc-tree', 'doc-compare'],
-  },
-];
-
-/** Public `data-part` surface per tag (§7.4). Stable and covered by semver. */
+/**
+ * Parts and state flags declared per component in §7.2.
+ *
+ * Keep these in sync when editing a component. The test in
+ * `tests/node/reference.test.ts` checks this.
+ */
 const PARTS = {
-  'doc-page': ['storage-warning', 'toc', 'bucket'],
-  'doc-header': ['kicker', 'lede', 'title*'],
-  'doc-section': ['heading', 'number', 'title', 'body'],
-  'doc-toc': ['header', 'toggle', 'dock', 'list', 'entry', 'entry-number', 'entry-title'],
-  'doc-chip': ['icon'],
+  'doc-page': [
+    'canvas',
+    'rail',
+    'prose',
+    'aside',
+    'toc',
+    'toc-backdrop',
+    'bucket',
+    'bucket-fab',
+    'bucket-panel',
+    'bucket-header',
+    'bucket-body',
+    'bucket-empty',
+    'bucket-item',
+    'bucket-item-remove',
+    'bucket-copy',
+    'bucket-copied',
+    'bucket-badge',
+    'bucket-note',
+    'settings-toggle',
+    'theme-toggle',
+    'density-toggle',
+  ],
+  'doc-header': ['title', 'lede', 'kicker', 'rule'],
+  'doc-section': ['heading', 'title', 'number', 'anchor', 'body'],
+  'doc-toc': ['title', 'list', 'item', 'link', 'number', 'label'],
   'doc-note': ['icon', 'title', 'body'],
-  'doc-blocker': ['header', 'sequence', 'severity', 'title'],
-  'doc-blocks': ['label', 'body'],
-  'doc-why': ['label', 'body'],
-  'doc-action': ['label', 'body'],
+  'doc-blocker': ['badge', 'title', 'blocks', 'why', 'action'],
+  'doc-blocks': ['label', 'content'],
+  'doc-why': ['label', 'content'],
+  'doc-action': ['label', 'content'],
   'doc-list': ['title', 'item', 'marker'],
-  'doc-quote': ['cite', 'body*'],
-  'doc-table': ['table', 'scroll-hint'],
+  'doc-badge': [],
+  'doc-term': [],
+  'doc-ref': [],
+  'doc-chips': [],
+  'doc-chip': [],
+  'doc-owners': [],
+  'doc-owner': ['avatar', 'info', 'name', 'role', 'status'],
+  'doc-decision': ['header', 'badge-id', 'status', 'title', 'date', 'body'],
+  'doc-endpoint': [
+    'trigger',
+    'method',
+    'path',
+    'path-param',
+    'summary',
+    'status',
+    'open-icon',
+    'body',
+    'endpoint-drawer',
+    'endpoint-drawer-header',
+    'endpoint-drawer-signature',
+    'endpoint-drawer-content',
+    'endpoint-drawer-section',
+    'endpoint-drawer-parameter',
+    'endpoint-drawer-example',
+    'endpoint-drawer-response-status',
+  ],
+  'doc-params': [],
+  'doc-param': ['header', 'name', 'type', 'badge', 'default', 'body'],
+  'doc-steps': [],
+  'doc-step': ['marker', 'card', 'header', 'title', 'body'],
+  'doc-stats': [],
+  'doc-stat': ['label', 'value-row', 'value', 'diff', 'body'],
+  'doc-timeline': [],
+  'doc-milestone': ['header', 'marker', 'date', 'title', 'owner', 'status', 'body'],
+  'doc-matrix': [],
   'doc-choice': ['sequence', 'question', 'note-toggle', 'note', 'other'],
   'doc-option': [
     'control',
@@ -94,10 +100,11 @@ const PARTS = {
     'other-hint',
     'other-text',
   ],
-  'doc-collapse': ['summary', 'chevron', 'summary-text', 'body'],
+  'doc-rating': ['question', 'scale', 'score-btn'],
   'doc-tabs': ['strip', 'tab'],
   'doc-tab': ['body'],
   'doc-checklist': ['item', 'check'],
+  'doc-carousel': ['controls', 'prev-btn', 'next-btn', 'dots', 'dot'],
   'doc-flow': ['arrow'],
   'doc-flow-node': ['title', 'subtitle*'],
   'doc-roadmap': [],
@@ -133,11 +140,9 @@ const PARTS = {
   'doc-compare': ['column'],
 };
 
-/** Custom states, targetable as `:state(name)` (§7.3). */
 const STATES = {
   'doc-page': ['toc-open', 'toc-docked'],
   'doc-choice': ['answered', 'note-open', 'other-open'],
-  'doc-collapse': ['open'],
   'doc-stage': ['open', 'current'],
   'doc-flow-node': ['active'],
   'doc-term': ['first-mention'],
@@ -147,13 +152,6 @@ const escapePipes = (text) => text.replace(/\|/g, '\\|');
 
 /**
  * A table delimiter row in the one shape a markdown formatter leaves alone.
- *
- * why not the tighter `|---|---|`: this file is generated, and
- * `tests/node/reference.test.ts` compares it to the generator byte for byte.
- * An editor with markdownlint's fix-on-save enabled rewrites a tight delimiter
- * row to `| --- |` the moment the file is opened — which dirties a generated
- * file and fails that test, with nothing in the diff to suggest why. Emitting
- * the formatter's own shape means opening the file changes nothing.
  */
 const DELIMITER = (columns) => `| ${Array(columns).fill('---').join(' | ')} |`;
 
@@ -162,15 +160,17 @@ function describeKind(kind) {
     case 'enum':
       return kind.values.map((value) => `\`${value}\``).join(' \\| ');
     case 'boolean':
-      return 'boolean (present or absent)';
+      return 'boolean';
     case 'integer':
-      return 'whole number';
+      return 'integer';
     case 'slug':
-      return 'slug — lowercase, digits, hyphens';
-    case 'url':
-      return 'URL';
+      return 'slug (`[a-z0-9-]+`)';
     case 'token':
       return 'token';
+    case 'url':
+      return 'URL';
+    case 'string':
+      return 'string';
     default:
       return 'string';
   }
@@ -178,99 +178,186 @@ function describeKind(kind) {
 
 function renderTag(name, contract) {
   const spec = contract.TAGS[name];
-  const lines = [`### \`<${name}>\``, '', spec.doc, ''];
-
-  if (spec.generated) {
-    lines.push('> **Generated by the runtime.** Writing this tag by hand is a build error.', '');
-  }
-  if (spec.onlyInside) {
-    lines.push(
-      `> Only valid inside ${spec.onlyInside.map((parent) => `\`<${parent}>\``).join(' or ')}.`,
-      '',
-    );
-  }
-  if (spec.requiresChild) {
-    lines.push(
-      `> Requires ${spec.requiresChild.map((child) => `\`<${child}>\``).join(' and ')}.`,
-      '',
-    );
-  }
+  const lines = [`### \`<${name}>\``, '', spec.doc];
 
   const attributes = Object.entries(spec.attributes);
   if (attributes.length > 0) {
-    lines.push('| Attribute | Required | Values | Notes |', DELIMITER(4));
-    for (const [attribute, definition] of attributes) {
-      lines.push(
-        `| \`${attribute}\` | ${definition.required ? '**yes**' : 'no'} | ${describeKind(definition.kind)} | ${escapePipes(definition.doc)} |`,
-      );
-    }
-    lines.push('');
-  } else {
-    lines.push('_No attributes beyond the global ones._', '');
+    lines.push(
+      '',
+      '| Attribute | Values | Required | Notes |',
+      DELIMITER(4),
+      ...attributes.map(
+        ([attrName, definition]) =>
+          `| \`${attrName}\` | ${describeKind(definition.kind)} | ${
+            definition.required ? '**yes**' : 'no'
+          } | ${escapePipes(definition.doc)} |`,
+      ),
+    );
   }
 
   const parts = PARTS[name] ?? [];
   if (parts.length > 0) {
-    lines.push(`**Parts:** ${parts.map((part) => `\`${part}\``).join(', ')}`, '');
+    const list = parts.map((part) => `\`${part}\``).join(', ');
+    lines.push('', `- **Parts:** ${list}`);
   }
 
-  const states = STATES[name];
-  if (states) {
-    lines.push(`**States:** ${states.map((state) => `\`:state(${state})\``).join(', ')}`, '');
+  const states = STATES[name] ?? [];
+  if (states.length > 0) {
+    const list = states.map((state) => `\`:${state}\``).join(', ');
+    lines.push('', `- **States:** ${list}`);
+  }
+
+  if (spec.onlyInside) {
+    const parents = spec.onlyInside.map((parent) => `\`<${parent}>\``).join(', ');
+    lines.push('', `- **Only valid inside:** ${parents}`);
+  }
+
+  if (spec.requiresChild) {
+    const children = spec.requiresChild.map((child) => `\`<${child}>\``).join(', ');
+    lines.push('', `- **Requires child:** ${children}`);
+  }
+
+  if (spec.generated) {
+    lines.push('', '- **Generated by the runtime.**');
+  }
+
+  if (spec.inline) {
+    lines.push('', '- **Inline element.**');
   }
 
   return lines.join('\n');
 }
 
-const contract = await loadContract();
+function renderGlobalAttributes(contract) {
+  const lines = [
+    '## Global attributes',
+    '',
+    'Accepted on every `doc-*` tag.',
+    '',
+    '| Attribute | Values | Notes |',
+    DELIMITER(3),
+  ];
 
-const preamble = readFileSync(here('./reference-preamble.md'), 'utf8').trimEnd();
-
-const globals = [
-  '## Global attributes',
-  '',
-  'Accepted on every `doc-*` tag.',
-  '',
-  '| Attribute | Values | Notes |',
-  DELIMITER(3),
-  ...Object.entries(contract.GLOBAL_ATTRIBUTES).map(
-    ([name, definition]) =>
+  for (const [name, definition] of Object.entries(contract.GLOBAL_ATTRIBUTES)) {
+    lines.push(
       `| \`${name}\` | ${describeKind(definition.kind)} | ${escapePipes(definition.doc)} |`,
-  ),
-  '',
-  'Any `data-*` attribute is accepted and ignored.',
-].join('\n');
+    );
+  }
 
-const vocabulary = GROUPS.map((group) =>
-  [`## ${group.title}`, '', ...group.tags.map((tag) => renderTag(tag, contract))].join('\n'),
-).join('\n');
+  return lines.join('\n');
+}
 
-const languages = [
-  '## Code language allowlist',
-  '',
-  'A `lang` outside this list is a build **error**, never a silent fallback to',
-  'plain text. Extending it is a one-line change in `src/core/contract.ts` plus an',
-  'import in `src/vendor/highlight.ts`, then a rebuild.',
-  '',
-  contract.CODE_LANGUAGES.map((language) => `\`${language}\``).join(' · '),
-].join('\n');
+function renderLanguages(contract) {
+  const lines = [
+    '## Code language allowlist',
+    '',
+    'A `lang` outside this list is a build **error**, never a silent fallback to',
+    'plain text. Extending it is a one-line change in `src/core/contract.ts` plus an',
+    'import in `src/vendor/highlight.ts`, then a rebuild.',
+    '',
+    '| Language | Values |',
+    DELIMITER(2),
+  ];
 
-const footer = [
-  '## Worked example',
-  '',
-  '`tests/fixtures/kitchen-sink.html` uses every tag, every enumerated attribute',
-  'value and every part listed above. It is the golden-file snapshot target, the',
-  'manual QA page and the print check, and CI fails if a component lands without',
-  'appearing in it.',
-  '',
-  '---',
-  '',
-  '<!-- The sections above are generated from src/core/contract.ts by',
-  '     tools/gen-reference.mjs. Run `npm run docs:reference` after changing the',
-  '     contract; tests/node/reference.test.ts fails if this file is stale. -->',
-].join('\n');
+  for (const lang of contract.CODE_LANGUAGES) {
+    lines.push(`| \`${lang}\` | Supported |`);
+  }
 
-const output = `${preamble}\n\n${globals}\n\n${vocabulary}\n${languages}\n\n${footer}\n`;
+  return lines.join('\n');
+}
 
-writeFileSync(here('../skills/better-plan/REFERENCE.md'), output, 'utf8');
-process.stdout.write('skills/better-plan/REFERENCE.md written\n');
+const CATEGORIES = [
+  {
+    title: 'Shell',
+    tags: ['doc-page', 'doc-header', 'doc-section', 'doc-toc'],
+  },
+  {
+    title: 'Meta & Ownership',
+    tags: ['doc-chips', 'doc-chip', 'doc-owners', 'doc-owner'],
+  },
+  {
+    title: 'Architecture & API',
+    tags: ['doc-decision', 'doc-endpoint', 'doc-params', 'doc-param', 'doc-steps', 'doc-step'],
+  },
+  {
+    title: 'Metrics & Planning',
+    tags: ['doc-stats', 'doc-stat', 'doc-timeline', 'doc-milestone', 'doc-matrix'],
+  },
+  {
+    title: 'Prose & Callouts',
+    tags: [
+      'doc-badge',
+      'doc-note',
+      'doc-blocker',
+      'doc-blocks',
+      'doc-why',
+      'doc-action',
+      'doc-list',
+      'doc-term',
+      'doc-ref',
+    ],
+  },
+  {
+    title: 'Interactive',
+    tags: [
+      'doc-choice',
+      'doc-option',
+      'doc-rating',
+      'doc-carousel',
+      'doc-tabs',
+      'doc-tab',
+      'doc-checklist',
+    ],
+  },
+  {
+    title: 'Structure',
+    tags: ['doc-flow', 'doc-flow-node', 'doc-roadmap', 'doc-stage'],
+  },
+  {
+    title: 'Content',
+    tags: ['doc-code', 'doc-diff', 'doc-figure', 'doc-caption', 'doc-tree', 'doc-compare'],
+  },
+];
+
+async function loadContract() {
+  const bundle = await rolldown({
+    input: CONTRACT_SOURCE,
+    treeshake: false,
+  });
+  const { output } = await bundle.generate({ format: 'cjs' });
+  const code = output[0]?.code;
+  if (!code) throw new Error('Failed to bundle contract.ts');
+
+  const mod = { exports: {} };
+  const fn = new Function('module', 'exports', code);
+  fn(mod, mod.exports);
+  return mod.exports;
+}
+
+async function main() {
+  const contract = await loadContract();
+  const sections = [
+    '# ForgeDoc Markup Reference',
+    '',
+    '> Generated from `src/core/contract.ts`. Do not edit by hand.',
+    '',
+    renderGlobalAttributes(contract),
+  ];
+
+  for (const category of CATEGORIES) {
+    sections.push('', `## ${category.title}`);
+    for (const tag of category.tags) {
+      sections.push('', renderTag(tag, contract));
+    }
+  }
+
+  sections.push('', renderLanguages(contract));
+
+  const content = `${sections.join('\n')}\n`;
+  writeFileSync(OUTPUT_PATH, content, 'utf8');
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

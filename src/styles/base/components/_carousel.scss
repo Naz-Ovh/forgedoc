@@ -1,0 +1,30 @@
+/* `doc-carousel` — visual slide/mockup carousel. */
+
+@layer doc.components {
+  doc-carousel {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  doc-carousel [data-part="controls"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  doc-carousel [data-part="dots"] {
+    display: flex;
+    align-items: center;
+  }
+
+  doc-carousel [data-part="prev-btn"],
+  doc-carousel [data-part="next-btn"],
+  doc-carousel [data-part="dot"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+}

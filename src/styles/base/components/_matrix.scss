@@ -1,0 +1,8 @@
+/* `doc-matrix` — matrix tables (RACI, risk, comparison). */
+
+@layer doc.components {
+  doc-matrix {
+    display: block;
+    overflow-x: auto;
+  }
+}

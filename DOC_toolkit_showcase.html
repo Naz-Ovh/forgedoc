@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ForgeDoc Toolkit Showcase</title>
+<style>/*@DOC_CSS@*/</style>
+</head>
+<body>
+
+<doc-page doc-id="toolkit-showcase" density="comfortable" scale="md" accent="indigo" toc="docked" numbering="counter">
+
+  <doc-header kicker="System Specification · ForgeDoc v2.0">
+    Interactive Documentation & Planning Toolkit
+    <p slot="lede">A complete showcase demonstrating all newly authored architectural, API, metric, milestone, and interactive scorecard components across multiple themes.</p>
+  </doc-header>
+
+  <doc-chips>
+    <doc-chip kind="confirmed">Multi-Theme Engine (ForgeDoc & Geist)</doc-chip>
+    <doc-chip kind="info">Light DOM & Zero Shadow DOM Encapsulation</doc-chip>
+    <doc-chip kind="action">Rate the components and submit feedback in the bottom-right bucket</doc-chip>
+  </doc-chips>
+
+  <doc-owners>
+    <doc-owner name="Alex Rivera" role="Lead Architect" status="approved"></doc-owner>
+    <doc-owner name="Sarah Chen" role="Core Systems DRI" status="approved"></doc-owner>
+    <doc-owner name="Elena Rostova" role="Design Systems" status="reviewing"></doc-owner>
+    <doc-owner name="Marcus Brody" role="Security & Compliance" status="pending"></doc-owner>
+  </doc-owners>
+
+  <doc-section title="Executive Overview & Architecture Decisions">
+    <p>This document specifies the expanded component library for technical documentation, RFCs, API designs, and execution planning. Status indicators: <doc-badge variant="success">Production Ready</doc-badge> <doc-badge variant="accent">New Feature</doc-badge> <doc-badge variant="info">Preview</doc-badge> <doc-badge variant="warn">Pending Audit</doc-badge>.</p>
+
+    <doc-decision id="ADR-101" title="Adoption of CSS Cascade Layers for Theming" status="accepted" date="2026-08-28">
+      <p>All component styling is strictly decoupled into headless structural base rules (<code>src/styles/base/</code>) and tokenized themes (<code>src/styles/themes/forgedoc/</code> and <code>src/styles/themes/geist/</code>). No theme-specific visual rules may exist in the base layer.</p>
+    </doc-decision>
+
+    <doc-decision id="ADR-102" title="Unified Light-DOM Storage Contract" status="accepted" date="2026-08-28">
+      <p>Interactive scorecards and question choices write atomically to a single local state bucket keyed by document identifier, preserving full zero-setup offline portability.</p>
+    </doc-decision>
+  </doc-section>
+
+  <doc-section title="API & Endpoint Specifications">
+    <p>Document backend endpoints with clear HTTP method badges, authenticated authorization badges, and structured parameter trees.</p>
+
+    <doc-endpoint method="post" path="/v2/documents/compile" auth="bearer">
+      <p>Compiles author-written semantic markup into a self-contained, standalone single-file distribution containing offline stylesheets and the interactive runtime.</p>
+    </doc-endpoint>
+
+    <doc-params>
+      <doc-param name="source" type="string" required>
+        <p>The raw semantic HTML source containing <code>&lt;doc-page&gt;</code> and nested tags.</p>
+      </doc-param>
+      <doc-param name="theme" type="enum" default="forgedoc">
+        <p>Visual theme preset to bundle into the artifact (e.g., <code>forgedoc</code> or <code>geist</code>).</p>
+      </doc-param>
+      <doc-param name="offline" type="boolean" default="true">
+        <p>When true, inlines the entire offline JavaScript engine and Prism/Mermaid bundles.</p>
+      </doc-param>
+    </doc-params>
+
+    <doc-endpoint method="get" path="/v2/documents/{docId}/status" auth="api-key">
+      <p>Fetches the validation diagnostics, hash signature, and status of a remote document.</p>
+    </doc-endpoint>
+
+    <doc-steps>
+      <doc-step title="Initialize Document with CLI" status="completed">
+        <p>Execute <code>forgedoc new system-arch</code> to scaffold a compliant semantic template.</p>
+      </doc-step>
+      <doc-step title="Author Semantic Components" status="active">
+        <p>Write clean markup using ADR decisions, endpoints, stats, and interactive choices without touching CSS classes.</p>
+      </doc-step>
+      <doc-step title="Build and Validate" status="pending">
+        <p>Run <code>forgedoc build DOC_system-arch.html --offline</code> for local distribution.</p>
+      </doc-step>
+    </doc-steps>
+  </doc-section>
+
+  <doc-section title="Performance Targets & Key Metrics">
+    <doc-stats>
+      <doc-stat label="P99 First Contentful Paint" value="12ms" trend="down" good diff="-18ms">
+        <p>Zero layout shift with ahead-of-time embedded layer CSS.</p>
+      </doc-stat>
+      <doc-stat label="Lighthouse Score" value="100/100" trend="up" good diff="+5">
+        <p>Full accessibility, contrast, and semantic tree compliance.</p>
+      </doc-stat>
+      <doc-stat label="Bundle Size (Offline Engine)" value="48 kB" trend="down" good diff="-14 kB">
+        <p>Compressed lightweight IIFE runtime footprint.</p>
+      </doc-stat>
+    </doc-stats>
+
+    <doc-timeline>
+      <doc-milestone date="2026-Q1" title="Base Foundation & CLI" status="completed" owner="Core Engine">
+        <p>Parser, CLI scaffolding, schema validator, and core container layout.</p>
+      </doc-milestone>
+      <doc-milestone date="2026-Q2" title="Extended Components & Multi-Theme" status="in-progress" owner="Design Systems">
+        <p>ADR decisions, API endpoints, ratings, steps, KPI metrics, and Geist theme.</p>
+      </doc-milestone>
+      <doc-milestone date="2026-Q3" title="Plugin Ecosystem & IDE Tooling" status="planned" owner="Developer Experience">
+        <p>Language server diagnostics, live preview extension, and CI actions.</p>
+      </doc-milestone>
+    </doc-timeline>
+
+    <doc-matrix type="raci">
+      <table>
+        <thead>
+          <tr><th>Component Area</th><th>Engineering</th><th>Architecture</th><th>Design</th><th>Product</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Schema & Contract</td><td>Responsible</td><td>Accountable</td><td>Consulted</td><td>Informed</td></tr>
+          <tr><td>Component Styles</td><td>Consulted</td><td>Informed</td><td>Responsible</td><td>Informed</td></tr>
+          <tr><td>CLI & Bundler</td><td>Responsible</td><td>Accountable</td><td>Informed</td><td>Consulted</td></tr>
+        </tbody>
+      </table>
+    </doc-matrix>
+  </doc-section>
+
+  <doc-section title="Visual Media & Diagram Carousels">
+    <p>Present multi-slide wireframes, responsive mockups, and architectural diagrams seamlessly:</p>
+
+    <doc-carousel title="Architecture & Flow Slides">
+      <doc-figure type="mermaid" caption="System Architecture Workflow">
+        flowchart LR
+          A[Author Agent] -->|Semantic Markup| B[ForgeDoc Compiler]
+          B -->|Offline Artifact| C[Browser Client]
+          C -->|Live Choices & Ratings| D[DocStore State]
+          D -->|Feedback Bucket| A
+      </doc-figure>
+      <doc-figure type="svg">
+        <svg viewBox="0 0 320 80" role="img" aria-label="Component layers">
+          <rect x="10" y="20" width="90" height="40" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="55" y="45" text-anchor="middle" fill="currentColor" font-size="12">Base Layer</text>
+          <path d="M100 40h20" stroke="currentColor"></path>
+          <rect x="120" y="20" width="90" height="40" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="165" y="45" text-anchor="middle" fill="currentColor" font-size="12">Theme Tokens</text>
+          <path d="M210 40h20" stroke="currentColor"></path>
+          <rect x="230" y="20" width="80" height="40" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="270" y="45" text-anchor="middle" fill="currentColor" font-size="12">Document</text>
+        </svg>
+        <doc-caption>Layered CSS Architecture: Zero style bleed across themes.</doc-caption>
+      </doc-figure>
+    </doc-carousel>
+  </doc-section>
+
+  <doc-section title="Interactive Evaluation & Scorecard">
+    <p>Provide direct rating scores and structured decisions directly inside the document. Every choice is automatically saved and exported in the reader's feedback bucket.</p>
+
+    <doc-rating question="How satisfied are you with the completeness of the documentation toolkit?" scale="5" mode="stars"></doc-rating>
+
+    <doc-rating question="Readiness to deploy into production workflows:" scale="5" mode="numeric"></doc-rating>
+
+    <doc-choice mode="single" question="Which default theme do you prefer for technical documentation?">
+      <doc-option recommended>
+        ForgeDoc Classic
+        <p slot="desc">Clean warm typography with balanced contrast and distinct accent tones.</p>
+      </doc-option>
+      <doc-option>
+        Geist Minimal
+        <p slot="desc">Modern high-contrast monochrome design with crisp micro-borders and sans-serif headers.</p>
+      </doc-option>
+    </doc-choice>
+  </doc-section>
+
+</doc-page>
+
+<script>//@DOC_JS@</script>
+</body>
+</html>

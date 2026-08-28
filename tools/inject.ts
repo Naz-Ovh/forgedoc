@@ -130,12 +130,7 @@ export class InjectionError extends Error {
  * corrupt the output.
  */
 export function injectAssets(html: string, assets: InjectionAssets): string {
-  requirePlaceholder(
-    html,
-    CSS_PLACEHOLDER_THEMED,
-    CSS_PLACEHOLDER,
-    '<style>/*@DOC_CSS@*/</style>',
-  );
+  requirePlaceholder(html, CSS_PLACEHOLDER_THEMED, CSS_PLACEHOLDER, '<style>/*@DOC_CSS@*/</style>');
   requirePlaceholder(html, JS_PLACEHOLDER, JS_PLACEHOLDER, '<script>//@DOC_JS@</script>');
 
   // The script stays where the placeholder was: end of body for the embedded
@@ -163,24 +158,21 @@ export function injectAssets(html: string, assets: InjectionAssets): string {
  * Put the stylesheet in `<head>`, falling back to the end of the document.
  *
  * `<link rel="stylesheet">` in `<body>` is honoured by every browser but is not
- * conforming HTML, and this library is held to its own validator. An inline
- * `<style>` *is* conforming there, just late enough to flash — so both go up.
- *
- * MUST (§5.3): `tag` is spliced in from inside a replacement function. For the
- * embedded flavour it carries the minified CSS bundle, `$&` sequences and all.
+ * compliant HTML5. More importantly, the reader's browser starts rendering the
+ * unstyled body while the stylesheet request is still in flight, which produces
+ * the exact flash the compiler exists to prevent.
  */
 function hoistToHead(html: string, tag: string): string {
-  if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, () => `${tag}\n</head>`);
-  if (/<body\b[^>]*>/i.test(html))
-    return html.replace(/<body\b[^>]*>/i, (open) => `${open}\n${tag}`);
+  const head = html.indexOf('</head>');
+  if (head !== -1) {
+    return `${html.slice(0, head)}${tag}\n${html.slice(head)}`;
+  }
+
+  // Author gave us a fragment rather than a full document (valid in tests, and
+  // tolerable in an agent-authored draft before build): put it first.
   return `${tag}\n${html}`;
 }
 
-/**
- * `placeholder` may be a regular expression, because the CSS one carries an
- * optional theme name. `label` is what the author actually has to type, which
- * is never the regular expression's source.
- */
 function requirePlaceholder(
   html: string,
   placeholder: string | RegExp,
@@ -264,7 +256,7 @@ async function requireTheme(theme: string, from: string): Promise<void> {
 async function readBundle(path: string): Promise<string> {
   try {
     const contents = await readFile(path, 'utf8');
-    return stripSourcemapComment(contents);
+    return stripSourcemapComment(contents.replace(/^\uFEFF/, ''));
   } catch {
     throw new InjectionError(
       `Cannot read the built bundle at ${path}.`,

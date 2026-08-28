@@ -1,0 +1,60 @@
+/* `doc-chips` / `doc-chip` — the pill row under the lede. */
+
+@layer doc.theme {
+  doc-chips {
+    gap: var(--doc-space-2);
+    margin-block: var(--doc-space-5);
+  }
+
+  doc-chip {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-sm);
+    font-weight: 520;
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-chip [data-part="icon"] {
+    width: 1.15em;
+    height: 1.15em;
+    border-radius: 50%;
+    background: var(--doc-surface-3);
+    color: var(--doc-text-2);
+    font-size: 0.8em;
+    font-weight: 700;
+  }
+
+  doc-chip[kind="confirmed"] {
+    border-color: color-mix(in oklab, var(--doc-success-400) 55%, transparent);
+    background: light-dark(
+    var(--doc-success-50),
+    color-mix(in oklab, var(--doc-success-900) 45%, var(--doc-shade-base))
+    );
+    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+  }
+
+  doc-chip[kind="confirmed"] [data-part="icon"] {
+    background: var(--doc-success-600);
+    color: var(--doc-ink-on-solid);
+  }
+
+  doc-chip[kind="action"] {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+  }
+
+  doc-chip[kind="action"] [data-part="icon"] {
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+  }
+
+  doc-chip[kind="pending"] {
+    border-style: dashed;
+    color: var(--doc-text-3);
+  }
+}

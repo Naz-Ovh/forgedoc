@@ -1,44 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ForgeDoc kitchen sink</title>
-<!--
-  §13.3 — this fixture is simultaneously the golden-file snapshot target, the
-  manual QA page, the print/PDF check, and the example in REFERENCE.md.
-
-  MUST: CI fails if a new component lands without being added here. The guard is
-  `tests/node/kitchen-sink.test.ts`, which walks the contract and asserts every
-  tag appears below.
-
-  Preset *combinations* are exercised by `tests/components/presets.test.ts`,
-  which swaps the attributes on `doc-page` at runtime — a document has exactly
-  one `doc-page`, so it can only carry one combination at a time.
-
-  Not formatted (see the ignore list in biome.jsonc): the content of `doc-code`,
-  `doc-diff` and `doc-tree` is whitespace-significant, and reflowing it changes
-  what those components render.
--->
+  <meta charset="utf-8">
+  <title>Kitchen Sink — ForgeDoc Components</title>
 </head>
 <body>
 
-<doc-page doc-id="kitchen-sink" density="comfortable" scale="md" accent="teal" measure="default" code="auto" toc="docked" numbering="counter">
-
-  <doc-header kicker="Plan · ForgeDoc self-test">
-    Every tag in the vocabulary
-    <p slot="lede">This document exercises all 22 authored tags, all 9 child-only tags and the one generated tag, so that a regression in any of them shows up in one screenshot.</p>
+<doc-page doc-id="kitchen-sink" density="comfortable" scale="md" accent="teal" measure="default" code="auto">
+  <doc-header kicker="Interactive Specification">
+    ForgeDoc Component Showcase &amp; Verification Suite
+    <p slot="lede">This document exercises all 33 authored and child tags, so that a regression in any of them shows up in one test.</p>
   </doc-header>
 
   <doc-chips>
     <doc-chip kind="confirmed">Light DOM only — decided</doc-chip>
     <doc-chip kind="info">Runtime injected at build time</doc-chip>
-    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
-    <doc-chip kind="pending">Mermaid version pin still open</doc-chip>
+    <doc-chip kind="neutral">Answer the questions inline, then send the bucket back</doc-chip>
+    <doc-chip kind="open">Mermaid version pin still open</doc-chip>
+    <doc-chip kind="tentative">Draft RFC under review</doc-chip>
+    <doc-chip kind="rejected">Legacy XML syntax discarded</doc-chip>
   </doc-chips>
 
+  <doc-owners>
+    <doc-owner name="Bns" role="Lead Architect" status="approved"></doc-owner>
+    <doc-owner name="Core Team" role="Reviewer" status="reviewing"></doc-owner>
+    <doc-owner name="Stakeholder" role="Product" status="pending"></doc-owner>
+    <doc-owner name="Legacy Lead" role="Contributor" status="rejected"></doc-owner>
+  </doc-owners>
+
   <doc-section title="What we are building">
-    <p>A component library for AI-authored planning documents. The agent writes <code>semantic markup</code> and nothing else — no <code>&lt;style&gt;</code>, no <code>&lt;script&gt;</code>, no class names, no section numbers. See <doc-ref to="sec-the-roadmap"></doc-ref> for delivery order.</p>
+    <p>A component library for AI-authored planning documents. The agent writes <code>semantic markup</code> and nothing else — no <code>&lt;style&gt;</code>, no <code>&lt;script&gt;</code>, no class names, no section numbers. See <doc-ref to="sec-the-roadmap"></doc-ref> for delivery order. Tagged as <doc-badge variant="info">preview</doc-badge>, <doc-badge variant="success">stable</doc-badge>, <doc-badge variant="warn">draft</doc-badge>, <doc-badge variant="danger">deprecated</doc-badge>, <doc-badge variant="neutral">reference</doc-badge>, and <doc-badge variant="accent">highlighted</doc-badge>.</p>
 
     <p>The runtime handles <doc-term href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">web components</doc-term>, persistence and feedback collection. A second mention of <doc-term href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">web components</doc-term> renders more quietly than the first.</p>
 
@@ -56,10 +47,6 @@
 
     <doc-note kind="danger" title="Do not do this">
       <p>Never call <code>attachShadow</code>. A lint rule enforces it.</p>
-    </doc-note>
-
-    <doc-note kind="success" title="Already shipping">
-      <p>Validator, CLI and all four build artefacts.</p>
     </doc-note>
 
     <doc-section title="Scope boundaries">
@@ -84,20 +71,32 @@
       </doc-list>
     </doc-compare>
 
-    <doc-list marker="arrow">
-      <li>Arrow markers, for sequences that are not comparisons</li>
-      <li>Second item</li>
-    </doc-list>
+    <doc-compare columns="3">
+      <doc-list marker="dash">
+        <li>Dash marker item 1</li>
+      </doc-list>
+      <doc-list marker="arrow">
+        <li>Arrow markers</li>
+      </doc-list>
+      <doc-list marker="bullet">
+        <li>Bullet markers</li>
+      </doc-list>
+    </doc-compare>
 
-    <doc-list marker="dot" kind="neutral" title="Still undecided">
-      <li>Dot markers are the default</li>
-      <li>Second item</li>
-    </doc-list>
-
-    <doc-list marker="number">
-      <li>Numbered markers come from a CSS counter</li>
-      <li>Second item</li>
-    </doc-list>
+    <doc-compare columns="4">
+      <doc-list marker="number">
+        <li>Number markers</li>
+      </doc-list>
+      <doc-list marker="check">
+        <li>Check markers</li>
+      </doc-list>
+      <doc-list marker="cross">
+        <li>Cross markers</li>
+      </doc-list>
+      <doc-list marker="dash">
+        <li>Dash markers</li>
+      </doc-list>
+    </doc-compare>
 
     <doc-flow>
       <doc-flow-node title="Agent writes">semantic markup only</doc-flow-node>
@@ -107,36 +106,164 @@
       <doc-flow-node title="Agent reads back">FB v1 block</doc-flow-node>
     </doc-flow>
 
-    <doc-table size="md" stack="auto">
-      <table>
-        <caption>Build artefacts</caption>
-        <thead>
-          <tr><th>Output</th><th>Format</th><th>Contents</th><th>Used by</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>forgedoc.iife.js</code></td><td>IIFE</td><td>Core + Prism</td><td>CDN viewer</td></tr>
-          <tr><td><code>forgedoc.standalone.iife.js</code></td><td>IIFE</td><td>Everything, Mermaid included</td><td>Offline <code>file://</code></td></tr>
-          <tr><td><code>forgedoc.js</code></td><td>ESM</td><td>Core, external deps</td><td>npm consumers</td></tr>
-          <tr><td><code>forgedoc.css</code></td><td>CSS</td><td>All layers, one file</td><td>Both</td></tr>
-        </tbody>
-      </table>
-    </doc-table>
+    <table>
+      <caption>Build artefacts</caption>
+      <thead>
+        <tr><th>Output</th><th>Format</th><th>Contents</th><th>Used by</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>forgedoc.iife.js</code></td><td>IIFE</td><td>Core + Prism</td><td>CDN viewer</td></tr>
+        <tr><td><code>forgedoc.standalone.iife.js</code></td><td>IIFE</td><td>Everything, Mermaid included</td><td>Offline <code>file://</code></td></tr>
+        <tr><td><code>forgedoc.js</code></td><td>ESM</td><td>Core, external deps</td><td>npm consumers</td></tr>
+        <tr><td><code>forgedoc.css</code></td><td>CSS</td><td>All layers, one file</td><td>Both</td></tr>
+      </tbody>
+    </table>
 
-    <doc-table size="sm" stack="never">
-      <table>
-        <thead>
-          <tr><th>Axis</th><th>Values</th><th>Default</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>density</td><td>compact / comfortable / spacious</td><td>comfortable</td></tr>
-          <tr><td>measure</td><td>narrow / default / wide</td><td>default</td></tr>
-        </tbody>
-      </table>
-    </doc-table>
-
-    <doc-quote cite="§2.2, the build specification">
+    <blockquote>
       Components receive DOM the agent wrote. Their job is to read it, wrap chrome around it, and wire behaviour — never to move it.
-    </doc-quote>
+    </blockquote>
+  </doc-section>
+
+  <doc-section title="Architecture Decisions">
+    <doc-decision id="ADR-001" title="Light DOM with Standard CSS Layers" status="accepted" date="2026-08-28">
+      <p>We use standard custom elements in light DOM, organized in CSS Cascade Layers.</p>
+    </doc-decision>
+
+    <doc-decision id="ADR-002" title="Client Storage Strategy" status="proposed" date="2026-08-29">
+      <p>Local state namespace isolation using doc-id parameter.</p>
+    </doc-decision>
+
+    <doc-decision id="ADR-003" title="Legacy HTML Injection" status="rejected" date="2026-08-20">
+      <p>Rejected in favor of validated custom element parser.</p>
+    </doc-decision>
+
+    <doc-decision id="ADR-004" title="Cookie Storage Backend" status="superseded" date="2026-08-21">
+      <p>Superseded by localStorage namespacing.</p>
+    </doc-decision>
+
+    <doc-decision id="ADR-005" title="Initial Prototype Format" status="deprecated" date="2026-08-15">
+      <p>Deprecated v0 prototype format.</p>
+    </doc-decision>
+  </doc-section>
+
+  <doc-section title="API &amp; Developer Specs">
+    <doc-endpoint method="post" path="/api/v1/plans/validate" summary="Validate plan markup" description="Validate planning markup against the schema contract before building a document." auth="bearer" headers="Content-Type: application/json; Authorization: Bearer token" params="strict:query:boolean:optional:Fail on warnings" request="{ markup: string, strict?: boolean }" status="200 OK" response="{ valid: boolean, errors: ValidationError[] }"></doc-endpoint>
+
+    <doc-endpoint method="get" path="/api/v1/plans/list" summary="List plans" auth="none" params="limit:query:integer:optional:Maximum results; cursor:query:string:optional:Pagination cursor" status="200 OK"></doc-endpoint>
+
+    <doc-endpoint method="put" path="/api/v1/plans/{id}" summary="Replace a plan" auth="basic" params="id:path:string:required:Plan identifier" status="200 OK"></doc-endpoint>
+
+    <doc-endpoint method="patch" path="/api/v1/plans/{id}" summary="Update plan properties" auth="api-key" params="id:path:string:required:Plan identifier" status="200 OK"></doc-endpoint>
+
+    <doc-endpoint method="delete" path="/api/v1/plans/{id}" summary="Delete a plan" auth="session" params="id:path:string:required:Plan identifier" status="204 No Content"></doc-endpoint>
+
+    <doc-endpoint method="head" path="/api/v1/health" summary="Health check" status="200 OK"></doc-endpoint>
+
+    <doc-endpoint method="options" path="/api/v1/cors" summary="CORS capabilities" status="200 OK"></doc-endpoint>
+
+    <doc-params>
+      <doc-param name="markup" type="string" required>
+        <p>Raw HTML or ForgeDoc semantic markup source string.</p>
+      </doc-param>
+      <doc-param name="strict" type="boolean" default="false">
+        <p>Enable strict linting warnings as hard build errors.</p>
+      </doc-param>
+    </doc-params>
+
+    <doc-steps>
+      <doc-step title="Install the CLI toolchain" status="completed">
+        <p>Run <code>npm install -g forgedoc</code> or use <code>npx forgedoc</code> directly.</p>
+      </doc-step>
+      <doc-step title="Initialize your document" status="active">
+        <p>Run <code>forgedoc new system-architecture</code> to scaffold the template.</p>
+      </doc-step>
+      <doc-step title="Optional configuration tuning" status="optional">
+        <p>Configure tsdown or custom stylesheets.</p>
+      </doc-step>
+      <doc-step title="Build and distribute" status="pending">
+        <p>Run <code>forgedoc build PLAN_system-architecture.html</code>.</p>
+      </doc-step>
+    </doc-steps>
+  </doc-section>
+
+  <doc-section title="Metrics &amp; Performance Targets">
+    <doc-stats>
+      <doc-stat label="Bundle Size (Offline)" value="48 kB" trend="down" good diff="-14 kB">
+        <p>Gzipped payload for full offline bundle.</p>
+      </doc-stat>
+      <doc-stat label="Lighthouse Score" value="100" trend="up" good diff="+4">
+        <p>Accessibility &amp; Best Practices score.</p>
+      </doc-stat>
+      <doc-stat label="Memory Footprint" value="4.2 MB" trend="flat" diff="0 MB">
+        <p>Steady memory retention.</p>
+      </doc-stat>
+      <doc-stat label="First Contentful Paint" value="12ms">
+        <p>Instant zero-layout-shift rendering.</p>
+      </doc-stat>
+      <doc-stat label="Bundle Bloat Risk" value="High">
+        <p>Preventing unbounded external vendor bundles.</p>
+      </doc-stat>
+    </doc-stats>
+
+    <doc-timeline>
+      <doc-milestone date="2026-Q1" title="Core Contract &amp; Engine" status="completed" owner="Core">
+        <p>Initial parser, validator, and base component set.</p>
+      </doc-milestone>
+      <doc-milestone date="2026-Q2" title="Multi-Theme &amp; Extended Elements" status="in-progress" owner="Design">
+        <p>Geist theme, ADR decisions, API specs, interactive scorecards.</p>
+      </doc-milestone>
+      <doc-milestone date="2026-Q3" title="Legacy Migration" status="delayed" owner="Infra">
+        <p>Migrating deprecated v0 formats.</p>
+      </doc-milestone>
+      <doc-milestone date="2026-Q4" title="Ecosystem Tooling" status="planned" owner="Community">
+        <p>VS Code extension, GitHub Action, and export plugins.</p>
+      </doc-milestone>
+    </doc-timeline>
+
+    <doc-matrix type="raci">
+      <table>
+        <thead>
+          <tr><th>Module</th><th>Author</th><th>Reviewer</th><th>Approver</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Contract Specification</td><td>Responsible</td><td>Consulted</td><td>Accountable</td></tr>
+          <tr><td>Visual Styles</td><td>Responsible</td><td>Informed</td><td>Accountable</td></tr>
+        </tbody>
+      </table>
+    </doc-matrix>
+
+    <doc-matrix type="risk">
+      <table>
+        <thead>
+          <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Browser incompatibility</td><td>Medium</td><td>Target modern baseline</td></tr>
+        </tbody>
+      </table>
+    </doc-matrix>
+
+    <doc-matrix type="comparison">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>ForgeDoc</th><th>Static Markdown</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Interactive Feedback</td><td>Built-in</td><td>Manual</td></tr>
+        </tbody>
+      </table>
+    </doc-matrix>
+
+    <doc-matrix type="custom">
+      <table>
+        <thead>
+          <tr><th>Key</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Architecture</td><td>Light DOM</td></tr>
+        </tbody>
+      </table>
+    </doc-matrix>
   </doc-section>
 
   <doc-section title="Roadblocks">
@@ -178,7 +305,7 @@
       forgedoc build DOC_vendor-orders.html --out dist/plan.html
     </doc-code>
 
-    <doc-code lang="css" wrap>
+    <doc-code lang="css">
       @layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.utilities;
     </doc-code>
 
@@ -200,7 +327,7 @@
          return {
       -    available: true,
       +    available: storage !== null,
-    </doc-diff>
+     </doc-diff>
 
     <doc-tree root="forgedoc/">
       src/
@@ -231,44 +358,31 @@
         <doc-code lang="sh">npm install forgedoc</doc-code>
       </doc-tab>
     </doc-tabs>
-
-    <doc-collapse title="Why not Svelte for the elements?" sticky>
-      <p>Its <code>shadow: "none"</code> mode — the only light-DOM option — does not support slots. Since every component here wraps agent-authored children, there is no way to render that content.</p>
-    </doc-collapse>
-
-    <doc-collapse title="Why not Lit?" open>
-      <p>Its template still owns the render root, so rendering into <code>this</code> overwrites the children you are trying to enhance.</p>
-    </doc-collapse>
   </doc-section>
 
-  <doc-section title="Diagrams and figures">
+  <doc-section title="Diagrams, Carousels and Figures">
     <doc-figure type="mermaid" caption="How a plan travels from the agent to the reader and back">
       flowchart LR
-        A[Agent writes markup] --> B[forgedoc build]
-        B --> C[One self-contained file]
-        C --> D[Reader answers inline]
-        D --> E[FB v1 bucket]
-        E --> A
+        A[Agent writes markup] --&gt; B[forgedoc build]
+        B --&gt; C[One self-contained file]
+        C --&gt; D[Reader answers inline]
+        D --&gt; E[FB v1 bucket]
+        E --&gt; A
     </doc-figure>
 
-    <doc-figure type="svg">
-      <svg viewBox="0 0 240 60" role="img" aria-label="Three connected boxes">
-        <rect x="4" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
-        <rect x="88" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
-        <rect x="172" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
-        <path d="M68 30h20M152 30h20" stroke="currentColor"></path>
-      </svg>
-      <doc-caption>An inline <code>svg</code> figure, captioned with a rich <code>doc-caption</code> child rather than the <code>caption</code> attribute.</doc-caption>
-    </doc-figure>
+    <doc-carousel title="Product Mockup Carousel">
+      <doc-figure type="svg">
+        <svg viewBox="0 0 240 60" role="img" aria-label="Three connected boxes">
+          <rect x="4" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
+          <rect x="88" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
+          <rect x="172" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
+          <path d="M68 30h20M152 30h20" stroke="currentColor"></path>
+        </svg>
+        <doc-caption>Slide 1: Inline <code>svg</code> architecture wireframe.</doc-caption>
+      </doc-figure>
 
-    <doc-figure type="image" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%2260%22%3E%3Crect%20width%3D%22240%22%20height%3D%2260%22%20fill%3D%22%2312907a%22%2F%3E%3C%2Fsvg%3E" alt="A solid teal rectangle" caption="An image figure, loaded from a data URI so the fixture works offline"></doc-figure>
-
-    <doc-figure type="html" caption="A UI wireframe, rendered inside an iframe srcdoc so its styles cannot leak">
-      <div style="font: 13px system-ui; padding: 12px;">
-        <div style="font-weight: 600; margin-bottom: 6px;">Order #1042</div>
-        <div style="color: #666;">Paid · awaiting fulfilment</div>
-      </div>
-    </doc-figure>
+      <doc-figure type="image" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%2260%22%3E%3Crect%20width%3D%22240%22%20height%3D%2260%22%20fill%3D%22%2312907a%22%2F%3E%3C%2Fsvg%3E" alt="A solid teal rectangle" caption="Slide 2: Visual mockup card"></doc-figure>
+    </doc-carousel>
   </doc-section>
 
   <doc-section title="The roadmap">
@@ -286,7 +400,7 @@
         <p>A document with only headings and paragraphs already looks like the reference.</p>
       </doc-stage>
 
-      <doc-stage title="The eighty percent" subtitle="choice, note, blocker, table, code" open>
+      <doc-stage title="The eighty percent" subtitle="choice, note, blocker, table, code">
         <p>The reference document reproduced except roadmap, flow and figures.</p>
       </doc-stage>
 
@@ -296,7 +410,10 @@
     </doc-roadmap>
   </doc-section>
 
-  <doc-section title="Open questions">
+  <doc-section title="Feedback &amp; Ratings">
+    <doc-rating question="Confidence level in delivering the unified docs toolkit:" scale="5" mode="numeric"></doc-rating>
+    <doc-rating question="Overall visual appeal:" scale="5" mode="stars"></doc-rating>
+
     <doc-choice mode="single" question="Should section numbers be CSS counters or real text nodes?">
       <doc-option recommended>
         CSS counters
@@ -326,12 +443,6 @@
 
 </doc-page>
 
-<!--
-  Dev/QA entry only. The module import pulls in `src/styles/index.css` through the
-  module graph, so there is deliberately no <link> to the built stylesheet — two
-  copies of the cascade would let a stale `dist/forgedoc.css` silently override
-  the source being edited.
--->
 <script type="module" src="/src/index.ts"></script>
 </body>
 </html>

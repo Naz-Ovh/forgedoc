@@ -1,0 +1,66 @@
+/* `doc-params` / `doc-param` — API parameters list. */
+
+@layer doc.theme {
+  doc-params {
+    margin-block: var(--doc-space-4);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    overflow: hidden;
+  }
+
+  doc-param {
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border-bottom: var(--doc-border-width) solid var(--doc-border-1);
+  }
+
+  doc-param:last-child {
+    border-bottom: none;
+  }
+
+  doc-param [data-part="header"] {
+    gap: var(--doc-space-2);
+    margin-bottom: var(--doc-space-1);
+  }
+
+  doc-param [data-part="name"] {
+    font-family: var(--doc-font-mono);
+    font-weight: 600;
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-1);
+  }
+
+  doc-param [data-part="type"] {
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    color: var(--doc-text-3);
+  }
+
+  doc-param [data-part="badge"] {
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    padding: var(--doc-space-0-5) var(--doc-space-1-5);
+    border-radius: var(--doc-radius-sm);
+  }
+
+  doc-param [data-part="badge"][data-kind="required"] {
+    background: var(--doc-danger-tint);
+    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+  }
+
+  doc-param [data-part="badge"][data-kind="optional"] {
+    color: var(--doc-text-3);
+  }
+
+  doc-param [data-part="default"] {
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    color: var(--doc-text-3);
+    margin-inline-start: auto;
+  }
+
+  doc-param [data-part="body"] {
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-2);
+  }
+}

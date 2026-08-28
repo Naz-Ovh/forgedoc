@@ -1,0 +1,48 @@
+/* `doc-carousel` — visual slide/mockup carousel. */
+
+@layer doc.theme {
+  doc-carousel {
+    margin-block: var(--doc-space-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+  }
+
+  doc-carousel [data-part="controls"] {
+    padding: var(--doc-space-2) var(--doc-space-4);
+    background: var(--doc-surface-2);
+    border-top: var(--doc-border-width) solid var(--doc-border-1);
+  }
+
+  doc-carousel [data-part="prev-btn"],
+  doc-carousel [data-part="next-btn"] {
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border-radius: var(--doc-radius-sm);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    background: var(--doc-surface-base);
+    color: var(--doc-text-1);
+    font-weight: 600;
+  }
+
+  doc-carousel [data-part="prev-btn"]:hover,
+  doc-carousel [data-part="next-btn"]:hover {
+    border-color: var(--doc-accent-edge);
+  }
+
+  doc-carousel [data-part="dots"] {
+    gap: var(--doc-space-2);
+  }
+
+  doc-carousel [data-part="dot"] {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--doc-border-3);
+    border: none;
+    padding: 0;
+  }
+
+  doc-carousel [data-part="dot"][data-active="true"] {
+    background: var(--doc-accent-solid);
+  }
+}

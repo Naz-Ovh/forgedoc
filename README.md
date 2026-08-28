@@ -193,6 +193,31 @@ npm run test:visual:update    # records
 npm run test:visual           # compares from here on
 ```
 
+### Previewing a theme
+
+```sh
+npm run build      # dist/themes/<name>.css
+npm run preview    # .temp/preview-<name>.html, one per theme
+```
+
+Each preview is the kitchen sink built as a reader receives it — one file, no
+server, and the feedback bucket persists to localStorage so you can leave
+comments in it. Open two side by side to compare themes.
+
+The dev server (`npm run dev`) can only ever show the reference theme, because
+`src/index.ts` imports exactly one.
+
+### Adding a theme
+
+1. `cp -r src/styles/themes/forgedoc src/styles/themes/<name>` — the copy is the
+   visual layer; `src/styles/base/` is shared and must not be touched.
+2. Retune `_tokens.scss` and `_presets.scss`. Most of a theme is these two.
+3. Adjust only the `components/*.scss` that genuinely differ in shape rather
+   than in colour. They land in `@layer doc.theme`, after `doc.components`, so
+   an override needs no `!important` and no selector matching.
+4. `npm run lint` — fails if the theme is missing a token the reference declares.
+5. `npm run preview` and look at it in both colour schemes.
+
 ### Adding a component
 
 1. `src/core/contract.ts` — the tag, its attributes, its doc strings.

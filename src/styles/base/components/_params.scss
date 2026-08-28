@@ -1,0 +1,40 @@
+/* `doc-params` / `doc-param` — API and function parameter lists. */
+
+@layer doc.components {
+  doc-params {
+    display: flex;
+    flex-direction: column;
+  }
+
+  doc-param {
+    display: flex;
+    flex-direction: column;
+  }
+
+  doc-param [data-part="header"] {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  doc-param [data-part="name"] {
+    display: inline-block;
+  }
+
+  doc-param [data-part="type"] {
+    display: inline-block;
+  }
+
+  doc-param [data-part="badge"] {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-param [data-part="default"] {
+    display: inline-block;
+  }
+
+  doc-param [data-part="body"] {
+    display: block;
+  }
+}

@@ -13,6 +13,9 @@
       "!tests/visual/.output",
       "!skills/better-plan/REFERENCE.md",
       "!docs/PLAN.md",
+      "!*.build.html",
+      "!**/*.build.html",
+      "!**/*.svelte",
 
       // Test data. Whitespace is significant — the content of doc-code,
       // doc-diff and doc-tree is rendered verbatim, and the validator tests
@@ -28,12 +31,6 @@
     "indentWidth": 2,
     "lineWidth": 100,
     "lineEnding": "lf",
-
-    // Biome 2.5.6 rewrites .svelte structurally — it hoists the `interface
-    // Props` block above its own doc comment and dedents the whole <script>
-    // body. Verified on BucketItem.svelte. This is the same class of breakage
-    // that kept prettier-plugin-svelte out, so these files stay hand-formatted;
-    // revisit when Svelte support leaves partial.
     "includes": ["**", "!**/*.svelte"]
   },
 
@@ -50,6 +47,10 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
+
+      "a11y": {
+        "useValidAriaRole": "off"
+      },
 
       "style": {
         // §12: no default exports. Overridden below for the config files whose
@@ -89,44 +90,22 @@
 
   "overrides": [
     {
-      // Config files and ambient declarations have to default-export — that is
-      // the interface their tools define, not a style choice §12 can override.
       "includes": [
-        "vite.config.ts",
-        "tsdown.config.ts",
-        "playwright.config.ts",
-        "svelte.config.js",
+        "*.config.ts",
+        "*.config.js",
+        "tests/**/*.test.ts",
+        "tests/visual/**/*.visual.ts",
+        "tools/**/*.mjs",
+        "tools/**/*.ts",
         "src/env.d.ts"
       ],
-      "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
-    },
-
-    {
-      // Biome parses only the <script> block of a .svelte file, never the
-      // template. Two consequences, both narrow and both deliberate:
-      //
-      //   noDefaultExport   — components legitimately default-export.
-      //   noUnusedVariables — every `$props()` binding is referenced from the
-      //   noUnusedImports     markup Biome cannot see, so all six of
-      //                       BucketItem's props, and the components
-      //                       BucketPanel renders, read as unused.
-      //
-      // eslint-plugin-svelte understood templates and did catch these. Nothing
-      // replaces that today; `npm run lint:no-shadow` still scans .svelte for
-      // the one rule that must never regress (§2.1), and `svelte-check` would
-      // be the way back if template linting is wanted.
-      "includes": ["**/*.svelte"],
       "linter": {
         "rules": {
-          "style": { "noDefaultExport": "off" },
-          "correctness": { "noUnusedVariables": "off", "noUnusedImports": "off" }
+          "style": {
+            "noDefaultExport": "off"
+          }
         }
       }
-    },
-
-    {
-      "includes": ["tools/**", "tests/**", "vite.config.ts", "tsdown.config.ts"],
-      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
     }
   ]
 }

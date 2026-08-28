@@ -227,7 +227,11 @@ export function themeVariables(): Record<string, string> {
       // palette the rest of the document uses. `hsl(from …)` does the
       // compensation in the engine — see `TokenProbe.lightened`.
       ...indexed('cScale', 0, seriesPalette(probe, INK, 25)),
-      ...indexed('cScaleLabel', 0, series.map(() => onAccent)),
+      ...indexed(
+        'cScaleLabel',
+        0,
+        series.map(() => onAccent),
+      ),
       scaleLabelColor: onAccent,
 
       fontSize: probe.length('--doc-text-sm', '14px'),

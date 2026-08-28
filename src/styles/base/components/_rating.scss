@@ -1,0 +1,25 @@
+/* `doc-rating` — interactive rating scale component. */
+
+@layer doc.components {
+  doc-rating {
+    display: flex;
+    flex-direction: column;
+  }
+
+  doc-rating [data-part="question"] {
+    display: block;
+  }
+
+  doc-rating [data-part="scale"] {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  doc-rating [data-part="score-btn"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+}

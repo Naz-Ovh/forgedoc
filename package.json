@@ -55,6 +55,7 @@
     "test:visual": "playwright test",
     "test:visual:ci": "playwright test --grep-invert @pixel",
     "test:visual:update": "playwright test --update-snapshots",
+    "preview": "node tools/make-preview.mjs",
     "docs:reference": "node tools/gen-reference.mjs",
     "lint": "biome lint . && npm run lint:no-shadow && npm run lint:styles && npm run lint:md",
     "lint:no-shadow": "node tools/check-no-shadow-dom.mjs",

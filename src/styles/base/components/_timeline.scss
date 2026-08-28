@@ -1,0 +1,47 @@
+/* `doc-timeline` / `doc-milestone` — delivery timeline and milestones. */
+
+@layer doc.components {
+  doc-timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  doc-milestone {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  doc-milestone [data-part="header"] {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  doc-milestone [data-part="marker"] {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  doc-milestone [data-part="date"] {
+    display: inline-block;
+  }
+
+  doc-milestone [data-part="title"] {
+    display: inline-block;
+  }
+
+  doc-milestone [data-part="owner"] {
+    display: inline-block;
+  }
+
+  doc-milestone [data-part="status"] {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-milestone [data-part="body"] {
+    display: block;
+  }
+}

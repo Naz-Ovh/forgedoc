@@ -1,0 +1,35 @@
+/* `doc-stats` / `doc-stat` — KPI and key metric cards. */
+
+@layer doc.components {
+  doc-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  doc-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  doc-stat [data-part="label"] {
+    display: block;
+  }
+
+  doc-stat [data-part="value-row"] {
+    display: flex;
+    align-items: baseline;
+  }
+
+  doc-stat [data-part="value"] {
+    display: inline-block;
+  }
+
+  doc-stat [data-part="diff"] {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-stat [data-part="body"] {
+    display: block;
+  }
+}

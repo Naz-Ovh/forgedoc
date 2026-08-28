@@ -398,6 +398,63 @@ commit — and diffing every computed property of all 840 elements, in both colo
 schemes. It found one real regression (a token rewritten into a self-reference)
 and, once fixed, reported the two renders identical.
 
+### F6. The `geist` theme, and the two rules it bends
+
+`themes/geist/` is the first theme that is not the reference, and building it
+was the real test of whether the split works. It does: the theme is a token
+file, a preset file, and the visual layer — `base/` was not touched once.
+
+Two departures worth recording.
+
+**§6.5, "no web fonts ship in either build."** Geist rendered in a system
+grotesque is a different design, so this theme loads its own typefaces:
+Google Fonts first, a version-pinned jsDelivr copy second. The fallback is the
+_font stack_ rather than a multi-`url()` `src`, because Google's gstatic URLs
+carry a content hash that changes when they re-cut the font — asking for their
+stylesheet keeps that indirection on their side, and giving the jsDelivr copy a
+different family name stops the two `@font-face` rules from shadowing each
+other. Consequence: an `--offline` document in this theme renders in the system
+stack. Inlining the woff2 as base64 was built and then removed; it worked and
+kept the offline promise, but cost ~190 kB on a 68 kB stylesheet.
+
+**Vercel's published brand colours, at the 600 step.** White on `#f5a623` is
+2.0:1 and on `#e5484d` is 3.9:1. That is not a mistake in Geist — those are its
+700 "high contrast background" step and the ink on them is dark, not white. Our
+contract has one 600 step doing both jobs, so the ramps here deepen it until it
+carries white, and the brand hex keeps its place at 400 where it is used for
+borders and dark-mode lines. Changing the contract instead would have meant
+changing it for every theme.
+
+### F7. Two bugs the second theme exposed
+
+Neither was introduced by the split; both had been there and were invisible
+while only one palette existed.
+
+**The page frame resolved `light-dark()` in the wrong scheme.** `color-scheme`
+was declared on `doc-page`, but the `html:has(doc-page)` and `body:has(doc-page)`
+background rules sit outside it, so `<html>` computed `color-scheme: normal` and
+took the _light_ value of every token — in dark mode it painted the frame
+near-white behind a dark document, visible in the overscroll area and behind the
+scrollbar. `forgedoc` hid it because its light and dark surfaces are both muted;
+`geist` made it obvious the moment the page went pure black. Fixed in both
+themes by claiming the scheme on `html:has(doc-page)`, kept behind `:has()` so
+the CDN build still cannot restyle a host page's scrollbars.
+
+**Contrast that was never measured.** Sweeping every text run against its real
+backdrop found 60 sub-AA pairs in `forgedoc` light and 25 in dark — line
+numbers at 2.6:1, flow-node subtitles at 4.3:1, white glyphs on the amber and
+green solids. `geist` was brought to 0 as it was built. The `forgedoc` numbers
+are recorded here rather than fixed, because changing them changes the
+reference theme's appearance and that is a separate decision.
+
+### F8. The collapsed disclosure is a row, not a card
+
+`geist` gives `doc-collapse` 8px of vertical padding, small text and no fill
+until hover: 33px closed against `forgedoc`'s 51px. A closed disclosure is a
+line in a list — the reader is scanning titles — and five of them at card
+height cost most of a screen. The open state keeps its full padding; nothing is
+gained by cramping prose once the reader has committed to it.
+
 ---
 
 ## E. Dependencies

@@ -1,0 +1,55 @@
+/*
+ * `doc-header` — the document title block.
+ *
+ * why the title typography sits on `doc-header` itself rather than on a
+ * `[data-part="title"]` element (§2.2): in the recommended authoring form the
+ * title is a bare text node beside the lede, and wrapping it would mean moving
+ * author content. The lede and kicker are real elements and override the
+ * inherited size, so the only text left rendering at title size is the title.
+ */
+
+@layer doc.theme {
+  doc-header {
+    margin-block-end: var(--doc-space-8);
+    padding-block-end: var(--doc-space-6);
+    border-block-end: var(--doc-rule);
+    font-family: var(--doc-font-display);
+    font-size: var(--doc-text-4xl);
+    font-weight: 680;
+    line-height: var(--doc-leading-heading);
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  doc-header [data-part="kicker"] {
+    margin-block-end: var(--doc-space-3);
+    color: var(--doc-accent-text);
+    font-size: var(--doc-text-xs);
+    font-weight: 640;
+    letter-spacing: var(--doc-tracking-wide);
+    line-height: var(--doc-leading-tight);
+    text-transform: uppercase;
+  }
+
+  doc-header [data-part="title"] {
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  doc-header [data-part="lede"] {
+    max-width: var(--doc-measure-prose);
+    margin-block-start: var(--doc-space-4);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-lg);
+    font-weight: 400;
+    line-height: var(--doc-leading);
+    letter-spacing: normal;
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 720px) {
+    doc-header {
+      font-size: var(--doc-text-3xl);
+    }
+  }
+}

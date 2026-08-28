@@ -1,56 +1,6 @@
-# ForgeDoc reference
+# ForgeDoc Markup Reference
 
-The complete per-component API. For the one-page version an authoring agent
-should keep open, see [CHEATSHEET.md](./CHEATSHEET.md).
-
-**Attributes** are what the agent writes. **Parts** are the public `data-part`
-surface. **States** are custom states, targetable as `:state(name)`. Everything
-else — class names, element structure, the shape of generated chrome — is
-internal and will change.
-
-## How to read this
-
-- A tag marked **generated** is created by the runtime. Writing it by hand is a
-  build error.
-- A tag marked **only valid inside** is a child-only tag; the validator rejects it
-  elsewhere.
-- A part marked with `*` exists only when the author wrapped that content in an
-  element of their own. In the recommended authoring form that content arrives as
-  a bare text node, and wrapping it would mean moving author content, which the
-  runtime never does. Those components carry the typography on the host element
-  instead — style `doc-quote` itself, not `doc-quote [data-part="body"]`.
-
-## The three override tiers
-
-In order of preference (§6.6):
-
-1. **Preset attributes** — `<doc-page density="compact">`. Validated against an
-   enum, switchable at runtime with one `setAttribute`, and reachable from the
-   print stylesheet.
-2. **Token override** — `doc-note { --doc-accent-600: #8b5cf6 }`. Semantic, and
-   survives a library upgrade. Custom properties inherit, so this works on any
-   subtree: `<doc-table style="--doc-space-unit: 3px">`.
-3. **Raw CSS** — `doc-note [data-part="title"] { letter-spacing: .02em }`.
-
-Tier 3 needs no `!important` and no specificity arithmetic. Every rule the
-library ships lives inside `@layer doc.*`, and unlayered author CSS beats layered
-CSS outright:
-
-```css
-/* wins against every shipped rule */
-doc-note {
-  border-radius: 0;
-}
-```
-
-Only `data-part` selectors are public API. Internal class names are not, and will
-change without a major version.
-
-## ARIA
-
-The agent never writes `role=` or `aria-*`. Components set them through
-`ElementInternals` at upgrade, which keeps accessibility semantics out of the
-markup the agent has to remember and out of the DOM an author might edit.
+> Generated from `src/core/contract.ts`. Do not edit by hand.
 
 ## Global attributes
 
@@ -58,14 +8,12 @@ Accepted on every `doc-*` tag.
 
 | Attribute | Values | Notes |
 | --- | --- | --- |
-| `id` | slug — lowercase, digits, hyphens | Override the derived id. Prefer letting the runtime derive it. |
+| `id` | slug (`[a-z0-9-]+`) | Override the derived id. Prefer letting the runtime derive it. |
 | `class` | string | Author styling hook. Not used by the library. |
 | `style` | string | Inline token override, e.g. `--doc-space-unit: 3px`. |
-| `hidden` | boolean (present or absent) | Standard HTML `hidden`. |
+| `hidden` | boolean | Standard HTML `hidden`. |
 | `lang` | string | Standard HTML `lang`. |
 | `dir` | `ltr` \| `rtl` \| `auto` | Standard HTML `dir`. |
-
-Any `data-*` attribute is accepted and ignored.
 
 ## Shell
 
@@ -73,377 +21,495 @@ Any `data-*` attribute is accepted and ignored.
 
 The root, and the only authored root. Owns the store, the layout column, the TOC and the bucket.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `doc-id` | **yes** | slug — lowercase, digits, hyphens | Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket. |
-| `density` | no | `compact` \| `comfortable` \| `spacious` | Spacing unit, line-height and component padding. |
-| `scale` | no | `sm` \| `md` \| `lg` | Type scale base size and ratio. |
-| `accent` | no | `teal` \| `indigo` \| `slate` \| `plum` \| `amber` | Accent ramp and derived tints. |
-| `measure` | no | `narrow` \| `default` \| `wide` | Reading column width: 720 / 1200 / 1600px. |
-| `code` | no | `auto` \| `light` \| `dark` | Prism theme: follow the document, or force light/dark. |
-| `toc` | no | `open` \| `closed` \| `docked` \| `off` | Contents panel: floating open, collapsed, docked beside the content, or absent. Defaults to floating and collapsed; the reader can change it and the choice is remembered. |
-| `numbering` | no | `counter` \| `text` | Section numbers as CSS counters (default, cheap) or real selectable text nodes. |
+| `doc-id` | slug (`[a-z0-9-]+`) | **yes** | Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket. |
+| `density` | `compact` \| `comfortable` \| `spacious` | no | Spacing unit, line-height and component padding. Defaults to `comfortable`. |
+| `scale` | `sm` \| `md` \| `lg` | no | Type scale base size and ratio. Defaults to `md`. |
+| `accent` | `teal` \| `indigo` \| `slate` \| `plum` \| `amber` | no | Accent ramp and derived tints. Defaults to `teal`. |
+| `measure` | `narrow` \| `default` \| `wide` | no | Reading column width: 720 / 1200 / 1600px. Defaults to `default`. |
+| `code` | `auto` \| `light` \| `dark` | no | Prism theme: follow the document, or force light/dark. Defaults to `auto`. |
+| `toc` | `open` \| `closed` \| `docked` \| `off` | no | Contents panel: floating open, collapsed, docked beside the content, or absent. Defaults to floating and collapsed; the reader can change it and the choice is remembered. |
+| `numbering` | `counter` \| `text` | no | Section numbers as CSS counters (default, cheap) or real selectable text nodes. |
 
-**Parts:** `storage-warning`, `toc`, `bucket`
+- **Parts:** `canvas`, `rail`, `prose`, `aside`, `toc`, `toc-backdrop`, `bucket`, `bucket-fab`, `bucket-panel`, `bucket-header`, `bucket-body`, `bucket-empty`, `bucket-item`, `bucket-item-remove`, `bucket-copy`, `bucket-copied`, `bucket-badge`, `bucket-note`, `settings-toggle`, `theme-toggle`, `density-toggle`
 
-**States:** `:state(toc-open)`, `:state(toc-docked)`
+- **States:** `:toc-open`, `:toc-docked`
 
 ### `<doc-header>`
 
 Document title block. Heading text is the default content; an optional `<p slot="lede">` follows.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `kicker` | no | string | Small-caps eyebrow line above the title. |
+| `kicker` | string | no | Small-caps eyebrow line above the title. |
 
-**Parts:** `kicker`, `lede`, `title*`
+- **Parts:** `title`, `lede`, `kicker`, `rule`
 
 ### `<doc-section>`
 
-A numbered section. Nests to depth 3. Number, id and TOC entry are all derived.
+Structural section. Derives its anchor id and heading from `title`. Nestable up to 3 deep.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `title` | **yes** | string | Heading text. Also the source of the derived id. |
+| `title` | string | **yes** | Section heading text. Derives the section id for TOC and deep-linking. |
 
-**Parts:** `heading`, `number`, `title`, `body`
+- **Parts:** `heading`, `title`, `number`, `anchor`, `body`
 
 ### `<doc-toc>`
 
-Generated table of contents. Never write this tag — the runtime creates it.
+Table of contents navigation panel.
 
-> **Generated by the runtime.** Writing this tag by hand is a build error.
+- **Parts:** `title`, `list`, `item`, `link`, `number`, `label`
 
-_No attributes beyond the global ones._
+- **Generated by the runtime.**
 
-**Parts:** `header`, `toggle`, `dock`, `list`, `entry`, `entry-number`, `entry-title`
-
-## Meta
+## Meta & Ownership
 
 ### `<doc-chips>`
 
-The pill row under the lede: locked decisions and reader instructions.
-
-_No attributes beyond the global ones._
+A flex row of meta pills (tags, versions, reviewers).
 
 ### `<doc-chip>`
 
-One pill. Carries real meaning, not decoration.
+A single status / metadata pill.
 
-> Only valid inside `<doc-chips>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `kind` | no | `confirmed` \| `info` \| `action` \| `pending` | Colour and icon. Defaults to `info`. |
+| `kind` | `confirmed` \| `open` \| `tentative` \| `rejected` \| `info` \| `neutral` | no | Semantic tone of the chip. Defaults to `neutral`. |
 
-**Parts:** `icon`
+- **Only valid inside:** `<doc-chips>`
 
-## Prose and callouts
+### `<doc-owners>`
+
+Document authors, owners, and DRI sign-off status block.
+
+### `<doc-owner>`
+
+Single owner or reviewer entry with avatar, name, role, and approval status.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `name` | string | **yes** | Name of the person or team. |
+| `role` | string | no | DRI, Reviewer, Lead, etc. |
+| `status` | `approved` \| `pending` \| `reviewing` \| `rejected` | no | Sign-off status. Defaults to `pending`. |
+
+- **Parts:** `avatar`, `info`, `name`, `role`, `status`
+
+- **Only valid inside:** `<doc-owners>`
+
+## Architecture & API
+
+### `<doc-decision>`
+
+Architecture Decision Record (ADR) / RFC card with structured header and rationale body.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `id` | string | no | ADR identifier (e.g. ADR-001). |
+| `title` | string | **yes** | Decision title / summary. |
+| `status` | `accepted` \| `proposed` \| `rejected` \| `deprecated` \| `superseded` | no | Status of the architectural decision. |
+| `date` | string | no | ISO date string or human date. |
+
+- **Parts:** `header`, `badge-id`, `status`, `title`, `date`, `body`
+
+### `<doc-endpoint>`
+
+Compact HTTP API operation button that opens a generated OpenAPI-style detail drawer.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `method` | `get` \| `post` \| `put` \| `patch` \| `delete` \| `options` \| `head` | **yes** | HTTP method. |
+| `path` | string | **yes** | API route URL path (e.g. `/api/v1/users/{id}`). |
+| `summary` | string | no | Short operation label shown in the endpoint row and drawer heading. |
+| `description` | string | no | Longer operation explanation shown only in the generated drawer. |
+| `auth` | `bearer` \| `basic` \| `api-key` \| `session` \| `none` | no | Authentication requirement. |
+| `headers` | string | no | Semicolon or comma-separated list of request headers (e.g. `Content-Type: application/json; Authorization: Bearer ...`). |
+| `params` | string | no | Compact semicolon-separated parameters: `name:in:type:required\|optional:description`. |
+| `request` | string | no | Optional request example rendered as code in the drawer. |
+| `status` | string | no | Expected HTTP response status code and description (e.g. `200 OK`, `201 Created`). |
+| `response` | string | no | Optional response example rendered as code in the drawer. |
+
+- **Parts:** `trigger`, `method`, `path`, `path-param`, `summary`, `status`, `open-icon`, `body`, `endpoint-drawer`, `endpoint-drawer-header`, `endpoint-drawer-signature`, `endpoint-drawer-content`, `endpoint-drawer-section`, `endpoint-drawer-parameter`, `endpoint-drawer-example`, `endpoint-drawer-response-status`
+
+### `<doc-params>`
+
+Parameter / argument specification table for APIs, CLI options, and function signatures.
+
+### `<doc-param>`
+
+Single parameter item with name, type, requirement badge, default value, and description.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `name` | string | **yes** | Parameter name. |
+| `type` | string | no | Type signature (e.g. `string`, `number`, `boolean`). |
+| `in` | `path` \| `query` \| `header` \| `body` | no | Where the API parameter is sent. Defaults to `query`. |
+| `required` | boolean | no | Whether the parameter is mandatory. |
+| `default` | string | no | Default value if omitted. |
+
+- **Parts:** `header`, `name`, `type`, `badge`, `default`, `body`
+
+- **Only valid inside:** `<doc-params>`, `<doc-endpoint>`
+
+### `<doc-steps>`
+
+Sequential step-by-step procedure or setup walkthrough list.
+
+### `<doc-step>`
+
+A single step in a step-by-step sequence with title, status, and description.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | **yes** | Step title. |
+| `status` | `completed` \| `active` \| `pending` \| `optional` | no | Progress status of the step. |
+
+- **Parts:** `marker`, `card`, `header`, `title`, `body`
+
+- **Only valid inside:** `<doc-steps>`
+
+## Metrics & Planning
+
+### `<doc-stats>`
+
+A metric / KPI card grid layout.
+
+### `<doc-stat>`
+
+Single metric / KPI card displaying value, label, trend arrow, and delta difference.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `label` | string | **yes** | Metric label. |
+| `value` | string | **yes** | Value text or number. |
+| `trend` | `up` \| `down` \| `flat` | no | Directional indicator arrow. |
+| `good` | boolean | no | Whether the trend direction is positive. |
+| `diff` | string | no | Delta text (e.g. +15%, -2ms). |
+
+- **Parts:** `label`, `value-row`, `value`, `diff`, `body`
+
+- **Only valid inside:** `<doc-stats>`
+
+### `<doc-timeline>`
+
+Delivery milestone timeline container.
+
+### `<doc-milestone>`
+
+A milestone event in a delivery timeline with date, title, owner, and status.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `date` | string | **yes** | Target date or release milestone. |
+| `title` | string | **yes** | Milestone title. |
+| `status` | `completed` \| `in-progress` \| `planned` \| `delayed` | no | Status of the milestone. |
+| `owner` | string | no | Owner or squad responsible. |
+
+- **Parts:** `header`, `marker`, `date`, `title`, `owner`, `status`, `body`
+
+- **Only valid inside:** `<doc-timeline>`
+
+### `<doc-matrix>`
+
+Structured decision or RACI matrix wrapper.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `type` | `raci` \| `risk` \| `comparison` \| `custom` | no | Type of matrix table. Defaults to custom. |
+
+## Prose & Callouts
+
+### `<doc-badge>`
+
+Compact status tag / label pill.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `variant` | `info` \| `success` \| `warn` \| `danger` \| `neutral` \| `accent` | no | Visual variant of the badge. |
+
+- **Inline element.**
 
 ### `<doc-note>`
 
-Coloured callout.
+Callout block with icon and tone ramp.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `kind` | no | `info` \| `tip` \| `warn` \| `danger` \| `success` | Colour ramp and icon. Defaults to `info`. |
-| `title` | no | string | Optional bold lead line. |
+| `kind` | `info` \| `tip` \| `warn` \| `danger` | no | Tone: blue info (default), green tip, amber warn, red danger. |
+| `title` | string | no | Optional bold heading on the callout. |
 
-**Parts:** `icon`, `title`, `body`
+- **Parts:** `icon`, `title`, `body`
 
 ### `<doc-blocker>`
 
-A roadblock with an enforced shape: what it blocks, why, and the action that resolves it.
+Roadblock banner requiring resolution. Contains `<doc-blocks>`, `<doc-why>` and `<doc-action>`.
 
-> Requires `<doc-blocks>` and `<doc-action>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `severity` | no | `low` \| `medium` \| `high` | Drives colour. Defaults to `medium`. |
-| `title` | **yes** | string | One-line statement of the roadblock. |
+| `severity` | `high` \| `medium` \| `low` | no | Severity: high red (default), medium amber, low gray. |
+| `title` | string | **yes** | Short headline of the blocker. |
 
-**Parts:** `header`, `sequence`, `severity`, `title`
+- **Parts:** `badge`, `title`, `blocks`, `why`, `action`
+
+- **Requires child:** `<doc-action>`
 
 ### `<doc-blocks>`
 
-What the roadblock breaks. Required inside `doc-blocker`.
+The "What it blocks" line of a `<doc-blocker>`.
 
-> Only valid inside `<doc-blocker>`.
+- **Parts:** `label`, `content`
 
-_No attributes beyond the global ones._
-
-**Parts:** `label`, `body`
+- **Only valid inside:** `<doc-blocker>`
 
 ### `<doc-why>`
 
-Why the roadblock happens. Optional.
+The "Why it happened" line of a `<doc-blocker>`.
 
-> Only valid inside `<doc-blocker>`.
+- **Parts:** `label`, `content`
 
-_No attributes beyond the global ones._
-
-**Parts:** `label`, `body`
+- **Only valid inside:** `<doc-blocker>`
 
 ### `<doc-action>`
 
-The action that resolves the roadblock. Required — a roadblock without a resolution is the failure this library prevents.
+The "What unblocks it" line of a `<doc-blocker>`. Required.
 
-> Only valid inside `<doc-blocker>`.
+- **Parts:** `label`, `content`
 
-_No attributes beyond the global ones._
-
-**Parts:** `label`, `body`
+- **Only valid inside:** `<doc-blocker>`
 
 ### `<doc-list>`
 
-A marked list. Children are plain `<li>`.
+A list with custom markers (check, cross, arrow, dash, bullet, number).
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `marker` | no | `check` \| `cross` \| `arrow` \| `dot` \| `number` | Bullet glyph. Defaults to `dot`. |
-| `title` | no | string | Column heading, used inside `doc-compare`. |
-| `kind` | no | `positive` \| `negative` \| `neutral` | Tone of the column inside `doc-compare`. Defaults to `neutral`. |
+| `marker` | `check` \| `cross` \| `arrow` \| `dash` \| `bullet` \| `number` | no | Glyph or counter for items. Defaults to bullet. |
+| `title` | string | no | Optional heading above the list. |
+| `kind` | `positive` \| `negative` \| `neutral` | no | Tone of the column inside `doc-compare`. Defaults to `neutral`. |
 
-**Parts:** `title`, `item`, `marker`
+- **Parts:** `title`, `item`, `marker`
 
 ### `<doc-term>`
 
 Inline technical term, hyperlinked. First mention is styled differently from repeats.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `href` | **yes** | URL | Where the term is defined. |
+| `href` | URL | **yes** | Where the term is defined. |
 
-**States:** `:state(first-mention)`
+- **States:** `:first-mention`
+
+- **Inline element.**
 
 ### `<doc-ref>`
 
 Inline cross-reference. Resolves to the live number at mount, so nothing goes stale when sections shift.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `to` | **yes** | slug — lowercase, digits, hyphens | Id of a section, stage or question. |
+| `to` | string | **yes** | Target section title or id (e.g. `sec-what-we-are-building` or `sec-roadmap`). |
 
-### `<doc-quote>`
-
-Pull quote with a distinct typographic role.
-
-| Attribute | Required | Values | Notes |
-| --- | --- | --- | --- |
-| `cite` | no | string | Attribution line. |
-
-**Parts:** `cite`, `body*`
-
-### `<doc-table>`
-
-Wraps a plain `<table>`. Header styling, first-column emphasis, tabular numerals.
-
-> Requires `<table>`.
-
-| Attribute | Required | Values | Notes |
-| --- | --- | --- | --- |
-| `size` | no | `sm` \| `md` | Cell padding and type size. Defaults to `md`. |
-| `stack` | no | `auto` \| `never` | Below 1050px, `auto` converts rows into stacked label/value cards. Defaults to `auto`. |
-
-**Parts:** `table`, `scroll-hint`
+- **Inline element.**
 
 ## Interactive
 
 ### `<doc-choice>`
 
-A question with lettered options. Letter keys, the Other option, the note field and ARIA are all derived.
+A decision question with mutually-exclusive or multi-select options.
 
-> Requires `<doc-option>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `mode` | no | `single` \| `multi` | One answer or several. Defaults to `single`. |
-| `question` | **yes** | string | The question text. Also the source of the derived id. |
+| `id` | slug (`[a-z0-9-]+`) | no | Stable key in the feedback bucket. Derived from `question` if omitted. |
+| `question` | string | **yes** | Question text. |
+| `mode` | `single` \| `multi` | no | Selection mode: radio (default) or checkbox. |
 
-**Parts:** `sequence`, `question`, `note-toggle`, `note`, `other`
+- **Parts:** `sequence`, `question`, `note-toggle`, `note`, `other`
 
-**States:** `:state(answered)`, `:state(note-open)`, `:state(other-open)`
+- **States:** `:answered`, `:note-open`, `:other-open`
+
+- **Requires child:** `<doc-option>`
 
 ### `<doc-option>`
 
-One answer. Label text is the default content; an optional `<p slot="desc">` follows.
+One answer in a `doc-choice`. Option letters (A, B, C) are derived.
 
-> Only valid inside `<doc-choice>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `recommended` | no | boolean (present or absent) | Adds a "recommended" badge. Use this instead of `disabled`. |
-| `value` | no | string | Override the stored value. Defaults to the derived letter key. |
+| `label` | string | no | Optional label text. |
+| `value` | string | no | Optional custom value string. |
+| `hint` | string | no | One-line trade-off note beside the label. |
+| `recommended` | boolean | no | Option the agent is recommending. |
+| `other` | boolean | no | Reveals a free-text input when chosen. Only valid on the last option. |
 
-**Parts:** `control`, `input`, `key`, `desc`, `recommended`, `other-label`, `other-hint`, `other-text`
+- **Parts:** `control`, `input`, `key`, `desc`, `recommended`, `other-label`, `other-hint`, `other-text`
 
-### `<doc-collapse>`
+- **Only valid inside:** `<doc-choice>`
 
-Generic disclosure, built on `<details>`/`<summary>`.
+### `<doc-rating>`
 
-| Attribute | Required | Values | Notes |
+Interactive rating / scorecard with score options saved directly to feedback bucket.
+
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `title` | **yes** | string | Summary text. |
-| `open` | no | boolean (present or absent) | Start expanded. |
-| `sticky` | no | boolean (present or absent) | Persist the reader’s open/closed choice. |
+| `id` | slug (`[a-z0-9-]+`) | no | Stable key in the feedback bucket. |
+| `question` | string | **yes** | Evaluation question or title. |
+| `scale` | integer | no | Max rating score (default 5). |
+| `mode` | `stars` \| `numeric` | no | Display mode: stars or numeric badges. Defaults to numeric. |
 
-**Parts:** `summary`, `chevron`, `summary-text`, `body`
+- **Parts:** `question`, `scale`, `score-btn`
 
-**States:** `:state(open)`
+### `<doc-carousel>`
+
+Interactive slide viewer / gallery container with non-destructive slide toggling.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | no | Optional title banner for the gallery. |
+
+- **Parts:** `controls`, `prev-btn`, `next-btn`, `dots`, `dot`
 
 ### `<doc-tabs>`
 
-Tab strip. Arrow-key navigation and roving tabindex are built in; flattens in print.
+Tabbed panel switch. Contains one or more `<doc-tab label="...">`.
 
-> Requires `<doc-tab>`.
+- **Parts:** `strip`, `tab`
 
-_No attributes beyond the global ones._
-
-**Parts:** `strip`, `tab`
+- **Requires child:** `<doc-tab>`
 
 ### `<doc-tab>`
 
-One tab panel.
+A single tab panel.
 
-> Only valid inside `<doc-tabs>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `label` | **yes** | string | Tab strip label. |
-| `active` | no | boolean (present or absent) | Initially selected tab. |
+| `label` | string | **yes** | Tab button text. |
+| `active` | boolean | no | Set to make this tab the initially visible one. |
 
-**Parts:** `body`
+- **Parts:** `body`
+
+- **Only valid inside:** `<doc-tabs>`
 
 ### `<doc-checklist>`
 
-Persistent reader-facing ticks. Children are plain `<li>`.
+Interactive checklist. Items persist check state in the document store.
 
-_No attributes beyond the global ones._
-
-**Parts:** `item`, `check`
+- **Parts:** `item`, `check`
 
 ## Structure
 
 ### `<doc-flow>`
 
-A horizontal chain of steps. Not a Mermaid job — it must sit inline at reading width.
+Horizontal sequence flow. Nodes connect with arrows; wrap automatically.
 
-> Requires `<doc-flow-node>`.
+- **Parts:** `arrow`
 
-_No attributes beyond the global ones._
-
-**Parts:** `arrow`
+- **Requires child:** `<doc-flow-node>`
 
 ### `<doc-flow-node>`
 
-One step in a `doc-flow`. Child text is the subtitle.
+One step in a `<doc-flow>`.
 
-> Only valid inside `<doc-flow>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `title` | **yes** | string | Step name. |
-| `active` | no | boolean (present or absent) | The emphasised dark node. |
+| `title` | string | **yes** | Node label. |
+| `active` | boolean | no | Highlights the current or recommended path. |
 
-**Parts:** `title`, `subtitle*`
+- **Parts:** `title`, `subtitle*`
 
-**States:** `:state(active)`
+- **States:** `:active`
+
+- **Only valid inside:** `<doc-flow>`
 
 ### `<doc-roadmap>`
 
-A numbered sequence of collapsible stages with a current-position marker.
+Delivery phases with numbers, subtitles, and expandable content.
 
-> Requires `<doc-stage>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `start` | no | whole number | First stage number. Defaults to 0. |
+| `start` | integer | no | Number assigned to the first stage (0 or 1). Default 1. |
+
+- **Requires child:** `<doc-stage>`
 
 ### `<doc-stage>`
 
-One stage. Number badge, rail and current-stage treatment are all derived.
+One phase in a roadmap. Derives its anchor id and badge number.
 
-> Only valid inside `<doc-roadmap>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `title` | **yes** | string | Stage name. |
-| `subtitle` | no | string | Secondary line beside the title. |
-| `current` | no | boolean (present or absent) | Marks the stage as the current position. |
-| `open` | no | boolean (present or absent) | Start expanded. `current` implies this. |
+| `title` | string | **yes** | Stage name. |
+| `subtitle` | string | no | One-line status or timing beside the title. |
+| `current` | boolean | no | Highlights the active phase with an accent border. |
 
-**Parts:** `header`, `badge`, `heading`, `title`, `subtitle`, `current-marker`, `body`
+- **Parts:** `header`, `badge`, `heading`, `title`, `subtitle`, `current-marker`, `body`
 
-**States:** `:state(open)`, `:state(current)`
+- **States:** `:open`, `:current`
+
+- **Only valid inside:** `<doc-roadmap>`
 
 ## Content
 
 ### `<doc-code>`
 
-A syntax-highlighted code block.
+Syntax-highlighted code block with line numbers, copy button, and highlight ranges.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `lang` | **yes** | `ts` \| `js` \| `tsx` \| `jsx` \| `html` \| `css` \| `json` \| `bash` \| `sh` \| `sql` \| `rust` \| `python` \| `yaml` \| `toml` \| `diff` \| `http` \| `text` | Language. Outside the allowlist is a build error, never a silent fallback. |
-| `title` | no | string | Filename or caption in the block header. |
-| `wrap` | no | boolean (present or absent) | Soft-wrap long lines instead of scrolling. |
-| `highlight` | no | token | Emphasised line ranges, e.g. `3-5,9`. |
+| `lang` | `ts` \| `js` \| `tsx` \| `jsx` \| `html` \| `css` \| `json` \| `bash` \| `sh` \| `sql` \| `rust` \| `python` \| `yaml` \| `toml` \| `diff` \| `http` \| `text` | **yes** | Language for syntax highlighting. Required. |
+| `title` | string | no | Filename or label in the header bar. |
+| `highlight` | string | no | Line numbers or ranges to highlight (e.g. `3`, `5-8`, `3, 5-8`). |
 
-**Parts:** `header`, `title`, `lang`, `copy`, `code`, `gutter`, `line-number`, `lines`, `line`, `feedback`
+- **Parts:** `header`, `title`, `lang`, `copy`, `code`, `gutter`, `line-number`, `lines`, `line`, `feedback`
 
 ### `<doc-diff>`
 
-A unified diff with +/- gutters and aligned line numbers.
+Unified diff viewer with additions and deletions highlighted.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `lang` | no | `ts` \| `js` \| `tsx` \| `jsx` \| `html` \| `css` \| `json` \| `bash` \| `sh` \| `sql` \| `rust` \| `python` \| `yaml` \| `toml` \| `diff` \| `http` \| `text` | Language of the diffed content. |
-| `filename` | no | string | Path shown in the block header. |
+| `lang` | `ts` \| `js` \| `tsx` \| `jsx` \| `html` \| `css` \| `json` \| `bash` \| `sh` \| `sql` \| `rust` \| `python` \| `yaml` \| `toml` \| `diff` \| `http` \| `text` | no | Syntax highlighting language for diff lines. |
+| `filename` | string | no | File path displayed in the header. |
 
-**Parts:** `header`, `filename`, `stat-add`, `stat-remove`, `code`, `row`, `old-number`, `new-number`, `sign`, `text`, `feedback`
+- **Parts:** `header`, `filename`, `stat-add`, `stat-remove`, `code`, `row`, `old-number`, `new-number`, `sign`, `text`, `feedback`
 
 ### `<doc-figure>`
 
-One framed box for a diagram, image, Mermaid source or isolated HTML mock.
+Diagram or illustration container with Mermaid rendering and caption.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `type` | no | `svg` \| `image` \| `mermaid` \| `html` | What the child content is. Defaults to `svg`. |
-| `src` | no | URL | Image source, for `type="image"`. |
-| `alt` | no | string | Alternative text, for `type="image"`. |
-| `caption` | no | string | Plain caption. Use `<doc-caption>` for a rich one. |
+| `type` | `mermaid` \| `svg` \| `image` | no | Figure type. Defaults to `mermaid`. |
+| `caption` | string | no | Figure caption beneath the illustration. |
+| `src` | URL | no | Image URL for `type="image"`. |
+| `alt` | string | no | Accessible description for screen readers. |
 
-**Parts:** `content`, `caption`, `diagram-error`, `feedback`
+- **Parts:** `content`, `caption`, `diagram-error`, `feedback`
 
 ### `<doc-caption>`
 
-Rich caption for a `doc-figure`, as an alternative to the `caption` attribute.
+Rich figure caption containing formatted prose, links or terms.
 
-> Only valid inside `<doc-figure>`.
-
-_No attributes beyond the global ones._
+- **Only valid inside:** `<doc-figure>`
 
 ### `<doc-tree>`
 
-A directory tree drawn from indented plain text.
+Directory tree viewer with ASCII connector lines and folder icons.
 
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `root` | no | string | Label for the root node. |
+| `root` | string | no | Root folder name displayed at top of tree. |
 
-**Parts:** `list`, `node`, `connector`, `label`, `feedback`
+- **Parts:** `list`, `node`, `connector`, `label`, `feedback`
 
 ### `<doc-compare>`
 
-A two-column comparison panel. Children are `doc-list` blocks with a `title`.
+Side-by-side or column comparison container for options, pros/cons, before/after.
 
-> Requires `<doc-list>`.
-
-| Attribute | Required | Values | Notes |
+| Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `columns` | no | whole number | Column count. Defaults to 2. |
+| `columns` | `2` \| `3` \| `4` | no | Number of comparison columns. Default 2. |
 
-**Parts:** `column`
+- **Parts:** `column`
 
 ## Code language allowlist
 
@@ -451,17 +517,22 @@ A `lang` outside this list is a build **error**, never a silent fallback to
 plain text. Extending it is a one-line change in `src/core/contract.ts` plus an
 import in `src/vendor/highlight.ts`, then a rebuild.
 
-`ts` · `js` · `tsx` · `jsx` · `html` · `css` · `json` · `bash` · `sh` · `sql` · `rust` · `python` · `yaml` · `toml` · `diff` · `http` · `text`
-
-## Worked example
-
-`tests/fixtures/kitchen-sink.html` uses every tag, every enumerated attribute
-value and every part listed above. It is the golden-file snapshot target, the
-manual QA page and the print check, and CI fails if a component lands without
-appearing in it.
-
----
-
-<!-- The sections above are generated from src/core/contract.ts by
-     tools/gen-reference.mjs. Run `npm run docs:reference` after changing the
-     contract; tests/node/reference.test.ts fails if this file is stale. -->
+| Language | Values |
+| --- | --- |
+| `ts` | Supported |
+| `js` | Supported |
+| `tsx` | Supported |
+| `jsx` | Supported |
+| `html` | Supported |
+| `css` | Supported |
+| `json` | Supported |
+| `bash` | Supported |
+| `sh` | Supported |
+| `sql` | Supported |
+| `rust` | Supported |
+| `python` | Supported |
+| `yaml` | Supported |
+| `toml` | Supported |
+| `diff` | Supported |
+| `http` | Supported |
+| `text` | Supported |

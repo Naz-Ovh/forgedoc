@@ -1,0 +1,35 @@
+/* `doc-matrix` — matrix grid. */
+
+@layer doc.theme {
+  doc-matrix {
+    margin-block: var(--doc-space-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+  }
+
+  doc-matrix table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--doc-text-sm);
+  }
+
+  doc-matrix th {
+    background: var(--doc-surface-2);
+    font-weight: 650;
+    text-align: left;
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border-bottom: var(--doc-border-width) solid var(--doc-border-2);
+    color: var(--doc-text-1);
+  }
+
+  doc-matrix td {
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border-bottom: var(--doc-border-width) solid var(--doc-border-1);
+    color: var(--doc-text-2);
+  }
+
+  doc-matrix tr:last-child td {
+    border-bottom: none;
+  }
+}

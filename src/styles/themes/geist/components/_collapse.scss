@@ -1,0 +1,87 @@
+/*
+ * `doc-collapse` — the geist treatment.
+ *
+ * The content is hidden by `hidden="until-found"` on the author's own children
+ * rather than by a `display: none` on a generated wrapper — see
+ * `core/disclosure.ts` for why, and note that this keeps Ctrl+F working into
+ * collapsed content (acceptance 4).
+ *
+ * ── Why this is shorter than the reference theme's ──────────────────────────
+ *
+ * A closed disclosure is a *line in a list*, not a card. The reference theme
+ * gives it a filled header bar at 12px/16px padding and body-size bold text,
+ * which comes out around 48px tall before its 20px margins — so five collapsed
+ * sections in a row cost most of a screen and read as five heavy slabs. The
+ * reader is scanning titles at that point; the titles are all that matter.
+ *
+ * So here the closed state is a row: 8px vertical padding, small text, and no
+ * fill at all until the pointer is over it. That lands near 34px — roughly a
+ * third off — and a stack of them scans like a table of contents, which is what
+ * it actually is.
+ *
+ * The *open* state keeps its full padding. Nothing is gained by cramping prose
+ * once the reader has committed to reading it, and the asymmetry is the point:
+ * cheap to skim, comfortable to read.
+ */
+
+@layer doc.theme {
+  doc-collapse {
+    /* Tighter than the reference theme's `space-5`, so consecutive disclosures
+       group into a list rather than floating as separate cards. */
+    margin-block: var(--doc-space-3);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+  }
+
+  /* Consecutive disclosures collapse their shared margin and lose the doubled
+     hairline, so a run of them reads as one grouped list. */
+  doc-collapse + doc-collapse {
+    margin-block-start: calc(var(--doc-space-3) * -1 + var(--doc-space-2));
+  }
+
+  doc-collapse > [data-part="summary"] {
+    gap: var(--doc-space-2);
+    width: 100%;
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border: 0;
+    /* No fill when closed. The hairline already separates it; a filled bar on
+       top of that is two separators doing one job. */
+    background: transparent;
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-sm);
+    /* 550 rather than 600: Geist Sans at 15px is already dense, and the extra
+       weight was doing the work the tighter tracking now does. */
+    font-weight: 550;
+    letter-spacing: var(--doc-tracking-tight);
+    line-height: var(--doc-leading-tight);
+    text-align: start;
+  }
+
+  doc-collapse > [data-part="summary"]:hover {
+    background: var(--doc-surface-2);
+  }
+
+  /* Open: the header earns its separator, because there is now content under it
+     that it has to be told apart from. */
+  doc-collapse:state(open) > [data-part="summary"] {
+    border-block-end: var(--doc-rule);
+  }
+
+  doc-collapse [data-part="chevron"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+  }
+
+  doc-collapse > [data-part="body"] {
+    padding-inline: var(--doc-space-3);
+  }
+
+  doc-collapse > [data-part="body"]:first-of-type {
+    padding-block-start: var(--doc-space-3);
+  }
+
+  doc-collapse > [data-part="body"]:last-child {
+    padding-block-end: var(--doc-space-3);
+  }
+}

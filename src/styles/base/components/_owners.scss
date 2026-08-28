@@ -1,0 +1,37 @@
+/* `doc-owners` / `doc-owner` — DRI and approver lists. */
+
+@layer doc.components {
+  doc-owners {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  doc-owner {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  doc-owner [data-part="avatar"] {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  doc-owner [data-part="details"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  doc-owner [data-part="name"] {
+    display: inline-block;
+  }
+
+  doc-owner [data-part="role"] {
+    display: inline-block;
+  }
+
+  doc-owner [data-part="status"] {
+    display: inline-flex;
+    align-items: center;
+  }
+}

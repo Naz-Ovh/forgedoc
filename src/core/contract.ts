@@ -100,18 +100,9 @@ export const PRESET_AXES = {
   code: ['auto', 'light', 'dark'],
 } as const;
 
-const presetAttribute = (axis: keyof typeof PRESET_AXES, doc: string): AttributeSpec => ({
-  kind: { type: 'enum', values: PRESET_AXES[axis] },
-  doc,
-});
-
 /**
- * Every tag in the vocabulary: 22 authored, 9 child-only, 1 generated (§8).
- *
- * Adding a tag here is not enough — it also needs a file in `src/components/`
- * named exactly after it, an entry in `src/index.ts`, a stylesheet in
- * `src/styles/base/components/`, and a use in `tests/fixtures/kitchen-sink.html`
- * (CI fails otherwise, §13.3).
+ * The master tag dictionary. Every component in `src/components/` must correspond
+ * to an entry here, and the test suite verifies that bidirectional invariant.
  */
 export const TAGS = {
   // ── Shell ──────────────────────────────────────────────────────────────────
@@ -123,11 +114,26 @@ export const TAGS = {
         required: true,
         doc: 'Storage namespace. Required — see §9.3, `file://` shares one localStorage bucket.',
       },
-      density: presetAttribute('density', 'Spacing unit, line-height and component padding.'),
-      scale: presetAttribute('scale', 'Type scale base size and ratio.'),
-      accent: presetAttribute('accent', 'Accent ramp and derived tints.'),
-      measure: presetAttribute('measure', 'Reading column width: 720 / 1200 / 1600px.'),
-      code: presetAttribute('code', 'Prism theme: follow the document, or force light/dark.'),
+      density: {
+        kind: { type: 'enum', values: PRESET_AXES.density },
+        doc: 'Spacing unit, line-height and component padding. Defaults to `comfortable`.',
+      },
+      scale: {
+        kind: { type: 'enum', values: PRESET_AXES.scale },
+        doc: 'Type scale base size and ratio. Defaults to `md`.',
+      },
+      accent: {
+        kind: { type: 'enum', values: PRESET_AXES.accent },
+        doc: 'Accent ramp and derived tints. Defaults to `teal`.',
+      },
+      measure: {
+        kind: { type: 'enum', values: PRESET_AXES.measure },
+        doc: 'Reading column width: 720 / 1200 / 1600px. Defaults to `default`.',
+      },
+      code: {
+        kind: { type: 'enum', values: PRESET_AXES.code },
+        doc: 'Prism theme: follow the document, or force light/dark. Defaults to `auto`.',
+      },
       toc: {
         kind: { type: 'enum', values: ['open', 'closed', 'docked', 'off'] },
         doc: 'Contents panel: floating open, collapsed, docked beside the content, or absent. Defaults to floating and collapsed; the reader can change it and the choice is remembered.',
@@ -147,93 +153,306 @@ export const TAGS = {
   },
 
   'doc-section': {
-    doc: 'A numbered section. Nests to depth 3. Number, id and TOC entry are all derived.',
+    doc: 'Structural section. Derives its anchor id and heading from `title`. Nestable up to 3 deep.',
     attributes: {
       title: {
         kind: { type: 'string' },
         required: true,
-        doc: 'Heading text. Also the source of the derived id.',
+        doc: 'Section heading text. Derives the section id for TOC and deep-linking.',
       },
     },
   },
 
   'doc-toc': {
-    doc: 'Generated table of contents. Never write this tag — the runtime creates it.',
+    doc: 'Table of contents navigation panel.',
     generated: true,
     attributes: {},
   },
 
-  // ── Meta ───────────────────────────────────────────────────────────────────
+  // ── Meta & Ownership ──────────────────────────────────────────────────────
   'doc-chips': {
-    doc: 'The pill row under the lede: locked decisions and reader instructions.',
+    doc: 'A flex row of meta pills (tags, versions, reviewers).',
     attributes: {},
   },
 
   'doc-chip': {
-    doc: 'One pill. Carries real meaning, not decoration.',
+    doc: 'A single status / metadata pill.',
     onlyInside: ['doc-chips'],
     attributes: {
       kind: {
-        kind: { type: 'enum', values: ['confirmed', 'info', 'action', 'pending'] },
-        doc: 'Colour and icon. Defaults to `info`.',
+        kind: {
+          type: 'enum',
+          values: ['confirmed', 'open', 'tentative', 'rejected', 'info', 'neutral'],
+        },
+        doc: 'Semantic tone of the chip. Defaults to `neutral`.',
       },
     },
   },
 
-  // ── Prose and callouts ─────────────────────────────────────────────────────
+  'doc-owners': {
+    doc: 'Document authors, owners, and DRI sign-off status block.',
+    attributes: {},
+  },
+
+  'doc-owner': {
+    doc: 'Single owner or reviewer entry with avatar, name, role, and approval status.',
+    onlyInside: ['doc-owners'],
+    attributes: {
+      name: { kind: { type: 'string' }, required: true, doc: 'Name of the person or team.' },
+      role: { kind: { type: 'string' }, doc: 'DRI, Reviewer, Lead, etc.' },
+      status: {
+        kind: {
+          type: 'enum',
+          values: ['approved', 'pending', 'reviewing', 'rejected'],
+        },
+        doc: 'Sign-off status. Defaults to `pending`.',
+      },
+    },
+  },
+
+  // ── Architecture & API ────────────────────────────────────────────────────
+  'doc-decision': {
+    doc: 'Architecture Decision Record (ADR) / RFC card with structured header and rationale body.',
+    attributes: {
+      id: { kind: { type: 'string' }, doc: 'ADR identifier (e.g. ADR-001).' },
+      title: { kind: { type: 'string' }, required: true, doc: 'Decision title / summary.' },
+      status: {
+        kind: {
+          type: 'enum',
+          values: ['accepted', 'proposed', 'rejected', 'deprecated', 'superseded'],
+        },
+        doc: 'Status of the architectural decision.',
+      },
+      date: { kind: { type: 'string' }, doc: 'ISO date string or human date.' },
+    },
+  },
+
+  'doc-endpoint': {
+    doc: 'Compact HTTP API operation button that opens a generated OpenAPI-style detail drawer.',
+    attributes: {
+      method: {
+        kind: {
+          type: 'enum',
+          values: ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'],
+        },
+        required: true,
+        doc: 'HTTP method.',
+      },
+      path: {
+        kind: { type: 'string' },
+        required: true,
+        doc: 'API route URL path (e.g. `/api/v1/users/{id}`).',
+      },
+      summary: {
+        kind: { type: 'string' },
+        doc: 'Short operation label shown in the endpoint row and drawer heading.',
+      },
+      description: {
+        kind: { type: 'string' },
+        doc: 'Longer operation explanation shown only in the generated drawer.',
+      },
+      auth: {
+        kind: {
+          type: 'enum',
+          values: ['bearer', 'basic', 'api-key', 'session', 'none'],
+        },
+        doc: 'Authentication requirement.',
+      },
+      headers: {
+        kind: { type: 'string' },
+        doc: 'Semicolon or comma-separated list of request headers (e.g. `Content-Type: application/json; Authorization: Bearer ...`).',
+      },
+      params: {
+        kind: { type: 'string' },
+        doc: 'Compact semicolon-separated parameters: `name:in:type:required|optional:description`.',
+      },
+      request: {
+        kind: { type: 'string' },
+        doc: 'Optional request example rendered as code in the drawer.',
+      },
+      status: {
+        kind: { type: 'string' },
+        doc: 'Expected HTTP response status code and description (e.g. `200 OK`, `201 Created`).',
+      },
+      response: {
+        kind: { type: 'string' },
+        doc: 'Optional response example rendered as code in the drawer.',
+      },
+    },
+  },
+
+  'doc-params': {
+    doc: 'Parameter / argument specification table for APIs, CLI options, and function signatures.',
+    attributes: {},
+  },
+
+  'doc-param': {
+    doc: 'Single parameter item with name, type, requirement badge, default value, and description.',
+    onlyInside: ['doc-params', 'doc-endpoint'],
+    attributes: {
+      name: { kind: { type: 'string' }, required: true, doc: 'Parameter name.' },
+      type: {
+        kind: { type: 'string' },
+        doc: 'Type signature (e.g. `string`, `number`, `boolean`).',
+      },
+      in: {
+        kind: { type: 'enum', values: ['path', 'query', 'header', 'body'] },
+        doc: 'Where the API parameter is sent. Defaults to `query`.',
+      },
+      required: { kind: { type: 'boolean' }, doc: 'Whether the parameter is mandatory.' },
+      default: { kind: { type: 'string' }, doc: 'Default value if omitted.' },
+    },
+  },
+
+  'doc-steps': {
+    doc: 'Sequential step-by-step procedure or setup walkthrough list.',
+    attributes: {},
+  },
+
+  'doc-step': {
+    doc: 'A single step in a step-by-step sequence with title, status, and description.',
+    onlyInside: ['doc-steps'],
+    attributes: {
+      title: { kind: { type: 'string' }, required: true, doc: 'Step title.' },
+      status: {
+        kind: {
+          type: 'enum',
+          values: ['completed', 'active', 'pending', 'optional'],
+        },
+        doc: 'Progress status of the step.',
+      },
+    },
+  },
+
+  // ── Metrics & Planning ────────────────────────────────────────────────────
+  'doc-stats': {
+    doc: 'A metric / KPI card grid layout.',
+    attributes: {},
+  },
+
+  'doc-stat': {
+    doc: 'Single metric / KPI card displaying value, label, trend arrow, and delta difference.',
+    onlyInside: ['doc-stats'],
+    attributes: {
+      label: { kind: { type: 'string' }, required: true, doc: 'Metric label.' },
+      value: { kind: { type: 'string' }, required: true, doc: 'Value text or number.' },
+      trend: {
+        kind: { type: 'enum', values: ['up', 'down', 'flat'] },
+        doc: 'Directional indicator arrow.',
+      },
+      good: { kind: { type: 'boolean' }, doc: 'Whether the trend direction is positive.' },
+      diff: { kind: { type: 'string' }, doc: 'Delta text (e.g. +15%, -2ms).' },
+    },
+  },
+
+  'doc-timeline': {
+    doc: 'Delivery milestone timeline container.',
+    attributes: {},
+  },
+
+  'doc-milestone': {
+    doc: 'A milestone event in a delivery timeline with date, title, owner, and status.',
+    onlyInside: ['doc-timeline'],
+    attributes: {
+      date: { kind: { type: 'string' }, required: true, doc: 'Target date or release milestone.' },
+      title: { kind: { type: 'string' }, required: true, doc: 'Milestone title.' },
+      status: {
+        kind: {
+          type: 'enum',
+          values: ['completed', 'in-progress', 'planned', 'delayed'],
+        },
+        doc: 'Status of the milestone.',
+      },
+      owner: { kind: { type: 'string' }, doc: 'Owner or squad responsible.' },
+    },
+  },
+
+  'doc-matrix': {
+    doc: 'Structured decision or RACI matrix wrapper.',
+    attributes: {
+      type: {
+        kind: {
+          type: 'enum',
+          values: ['raci', 'risk', 'comparison', 'custom'],
+        },
+        doc: 'Type of matrix table. Defaults to custom.',
+      },
+    },
+  },
+
+  // ── Prose & Callouts ──────────────────────────────────────────────────────
+  'doc-badge': {
+    doc: 'Compact status tag / label pill.',
+    inline: true,
+    attributes: {
+      variant: {
+        kind: {
+          type: 'enum',
+          values: ['info', 'success', 'warn', 'danger', 'neutral', 'accent'],
+        },
+        doc: 'Visual variant of the badge.',
+      },
+    },
+  },
+
   'doc-note': {
-    doc: 'Coloured callout.',
+    doc: 'Callout block with icon and tone ramp.',
     attributes: {
       kind: {
-        kind: { type: 'enum', values: ['info', 'tip', 'warn', 'danger', 'success'] },
-        doc: 'Colour ramp and icon. Defaults to `info`.',
+        kind: {
+          type: 'enum',
+          values: ['info', 'tip', 'warn', 'danger'],
+        },
+        doc: 'Tone: blue info (default), green tip, amber warn, red danger.',
       },
-      title: { kind: { type: 'string' }, doc: 'Optional bold lead line.' },
+      title: { kind: { type: 'string' }, doc: 'Optional bold heading on the callout.' },
     },
   },
 
   'doc-blocker': {
-    doc: 'A roadblock with an enforced shape: what it blocks, why, and the action that resolves it.',
-    requiresChild: ['doc-blocks', 'doc-action'],
+    doc: 'Roadblock banner requiring resolution. Contains `<doc-blocks>`, `<doc-why>` and `<doc-action>`.',
+    requiresChild: ['doc-action'],
     attributes: {
       severity: {
-        kind: { type: 'enum', values: ['low', 'medium', 'high'] },
-        doc: 'Drives colour. Defaults to `medium`.',
+        kind: {
+          type: 'enum',
+          values: ['high', 'medium', 'low'],
+        },
+        doc: 'Severity: high red (default), medium amber, low gray.',
       },
-      title: {
-        kind: { type: 'string' },
-        required: true,
-        doc: 'One-line statement of the roadblock.',
-      },
+      title: { kind: { type: 'string' }, required: true, doc: 'Short headline of the blocker.' },
     },
   },
 
   'doc-blocks': {
-    doc: 'What the roadblock breaks. Required inside `doc-blocker`.',
+    doc: 'The "What it blocks" line of a `<doc-blocker>`.',
     onlyInside: ['doc-blocker'],
     attributes: {},
   },
 
   'doc-why': {
-    doc: 'Why the roadblock happens. Optional.',
+    doc: 'The "Why it happened" line of a `<doc-blocker>`.',
     onlyInside: ['doc-blocker'],
     attributes: {},
   },
 
   'doc-action': {
-    doc: 'The action that resolves the roadblock. Required — a roadblock without a resolution is the failure this library prevents.',
+    doc: 'The "What unblocks it" line of a `<doc-blocker>`. Required.',
     onlyInside: ['doc-blocker'],
     attributes: {},
   },
 
   'doc-list': {
-    doc: 'A marked list. Children are plain `<li>`.',
+    doc: 'A list with custom markers (check, cross, arrow, dash, bullet, number).',
     attributes: {
       marker: {
-        kind: { type: 'enum', values: ['check', 'cross', 'arrow', 'dot', 'number'] },
-        doc: 'Bullet glyph. Defaults to `dot`.',
+        kind: {
+          type: 'enum',
+          values: ['check', 'cross', 'arrow', 'dash', 'bullet', 'number'],
+        },
+        doc: 'Glyph or counter for items. Defaults to bullet.',
       },
-      title: { kind: { type: 'string' }, doc: 'Column heading, used inside `doc-compare`.' },
+      title: { kind: { type: 'string' }, doc: 'Optional heading above the list.' },
       kind: {
         kind: { type: 'enum', values: ['positive', 'negative', 'neutral'] },
         doc: 'Tone of the column inside `doc-compare`. Defaults to `neutral`.',
@@ -253,188 +472,186 @@ export const TAGS = {
     doc: 'Inline cross-reference. Resolves to the live number at mount, so nothing goes stale when sections shift.',
     inline: true,
     attributes: {
-      to: { kind: { type: 'slug' }, required: true, doc: 'Id of a section, stage or question.' },
-    },
-  },
-
-  'doc-quote': {
-    doc: 'Pull quote with a distinct typographic role.',
-    attributes: {
-      cite: { kind: { type: 'string' }, doc: 'Attribution line.' },
-    },
-  },
-
-  'doc-table': {
-    doc: 'Wraps a plain `<table>`. Header styling, first-column emphasis, tabular numerals.',
-    requiresChild: ['table'],
-    attributes: {
-      size: {
-        kind: { type: 'enum', values: ['sm', 'md'] },
-        doc: 'Cell padding and type size. Defaults to `md`.',
-      },
-      stack: {
-        kind: { type: 'enum', values: ['auto', 'never'] },
-        doc: 'Below 1050px, `auto` converts rows into stacked label/value cards. Defaults to `auto`.',
-      },
-    },
-  },
-
-  // ── Interactive ────────────────────────────────────────────────────────────
-  'doc-choice': {
-    doc: 'A question with lettered options. Letter keys, the Other option, the note field and ARIA are all derived.',
-    requiresChild: ['doc-option'],
-    attributes: {
-      mode: {
-        kind: { type: 'enum', values: ['single', 'multi'] },
-        doc: 'One answer or several. Defaults to `single`.',
-      },
-      question: {
+      to: {
         kind: { type: 'string' },
         required: true,
-        doc: 'The question text. Also the source of the derived id.',
+        doc: 'Target section title or id (e.g. `sec-what-we-are-building` or `sec-roadmap`).',
+      },
+    },
+  },
+
+  // ── Interactivity ─────────────────────────────────────────────────────────
+  'doc-choice': {
+    doc: 'A decision question with mutually-exclusive or multi-select options.',
+    requiresChild: ['doc-option'],
+    attributes: {
+      id: {
+        kind: { type: 'slug' },
+        doc: 'Stable key in the feedback bucket. Derived from `question` if omitted.',
+      },
+      question: { kind: { type: 'string' }, required: true, doc: 'Question text.' },
+      mode: {
+        kind: { type: 'enum', values: ['single', 'multi'] },
+        doc: 'Selection mode: radio (default) or checkbox.',
       },
     },
   },
 
   'doc-option': {
-    doc: 'One answer. Label text is the default content; an optional `<p slot="desc">` follows.',
+    doc: 'One answer in a `doc-choice`. Option letters (A, B, C) are derived.',
     onlyInside: ['doc-choice'],
     attributes: {
-      recommended: {
+      label: { kind: { type: 'string' }, doc: 'Optional label text.' },
+      value: { kind: { type: 'string' }, doc: 'Optional custom value string.' },
+      hint: { kind: { type: 'string' }, doc: 'One-line trade-off note beside the label.' },
+      recommended: { kind: { type: 'boolean' }, doc: 'Option the agent is recommending.' },
+      other: {
         kind: { type: 'boolean' },
-        doc: 'Adds a "recommended" badge. Use this instead of `disabled`.',
-      },
-      value: {
-        kind: { type: 'string' },
-        doc: 'Override the stored value. Defaults to the derived letter key.',
+        doc: 'Reveals a free-text input when chosen. Only valid on the last option.',
       },
     },
   },
 
-  'doc-collapse': {
-    doc: 'Generic disclosure, built on `<details>`/`<summary>`.',
+  'doc-rating': {
+    doc: 'Interactive rating / scorecard with score options saved directly to feedback bucket.',
     attributes: {
-      title: { kind: { type: 'string' }, required: true, doc: 'Summary text.' },
-      open: { kind: { type: 'boolean' }, doc: 'Start expanded.' },
-      sticky: { kind: { type: 'boolean' }, doc: 'Persist the reader’s open/closed choice.' },
+      id: { kind: { type: 'slug' }, doc: 'Stable key in the feedback bucket.' },
+      question: { kind: { type: 'string' }, required: true, doc: 'Evaluation question or title.' },
+      scale: { kind: { type: 'integer' }, doc: 'Max rating score (default 5).' },
+      mode: {
+        kind: { type: 'enum', values: ['stars', 'numeric'] },
+        doc: 'Display mode: stars or numeric badges. Defaults to numeric.',
+      },
+    },
+  },
+
+  'doc-carousel': {
+    doc: 'Interactive slide viewer / gallery container with non-destructive slide toggling.',
+    attributes: {
+      title: { kind: { type: 'string' }, doc: 'Optional title banner for the gallery.' },
     },
   },
 
   'doc-tabs': {
-    doc: 'Tab strip. Arrow-key navigation and roving tabindex are built in; flattens in print.',
+    doc: 'Tabbed panel switch. Contains one or more `<doc-tab label="...">`.',
     requiresChild: ['doc-tab'],
     attributes: {},
   },
 
   'doc-tab': {
-    doc: 'One tab panel.',
+    doc: 'A single tab panel.',
     onlyInside: ['doc-tabs'],
     attributes: {
-      label: { kind: { type: 'string' }, required: true, doc: 'Tab strip label.' },
-      active: { kind: { type: 'boolean' }, doc: 'Initially selected tab.' },
+      label: { kind: { type: 'string' }, required: true, doc: 'Tab button text.' },
+      active: { kind: { type: 'boolean' }, doc: 'Set to make this tab the initially visible one.' },
     },
   },
 
   'doc-checklist': {
-    doc: 'Persistent reader-facing ticks. Children are plain `<li>`.',
+    doc: 'Interactive checklist. Items persist check state in the document store.',
     attributes: {},
   },
 
-  // ── Structure ──────────────────────────────────────────────────────────────
+  // ── Structure & Content ───────────────────────────────────────────────────
   'doc-flow': {
-    doc: 'A horizontal chain of steps. Not a Mermaid job — it must sit inline at reading width.',
+    doc: 'Horizontal sequence flow. Nodes connect with arrows; wrap automatically.',
     requiresChild: ['doc-flow-node'],
     attributes: {},
   },
 
   'doc-flow-node': {
-    doc: 'One step in a `doc-flow`. Child text is the subtitle.',
+    doc: 'One step in a `<doc-flow>`.',
     onlyInside: ['doc-flow'],
     attributes: {
-      title: { kind: { type: 'string' }, required: true, doc: 'Step name.' },
-      active: { kind: { type: 'boolean' }, doc: 'The emphasised dark node.' },
+      title: { kind: { type: 'string' }, required: true, doc: 'Node label.' },
+      active: { kind: { type: 'boolean' }, doc: 'Highlights the current or recommended path.' },
     },
   },
 
   'doc-roadmap': {
-    doc: 'A numbered sequence of collapsible stages with a current-position marker.',
+    doc: 'Delivery phases with numbers, subtitles, and expandable content.',
     requiresChild: ['doc-stage'],
     attributes: {
-      start: { kind: { type: 'integer' }, doc: 'First stage number. Defaults to 0.' },
+      start: {
+        kind: { type: 'integer' },
+        doc: 'Number assigned to the first stage (0 or 1). Default 1.',
+      },
     },
   },
 
   'doc-stage': {
-    doc: 'One stage. Number badge, rail and current-stage treatment are all derived.',
+    doc: 'One phase in a roadmap. Derives its anchor id and badge number.',
     onlyInside: ['doc-roadmap'],
     attributes: {
       title: { kind: { type: 'string' }, required: true, doc: 'Stage name.' },
-      subtitle: { kind: { type: 'string' }, doc: 'Secondary line beside the title.' },
-      current: { kind: { type: 'boolean' }, doc: 'Marks the stage as the current position.' },
-      open: { kind: { type: 'boolean' }, doc: 'Start expanded. `current` implies this.' },
+      subtitle: { kind: { type: 'string' }, doc: 'One-line status or timing beside the title.' },
+      current: {
+        kind: { type: 'boolean' },
+        doc: 'Highlights the active phase with an accent border.',
+      },
     },
   },
 
-  // ── Content ────────────────────────────────────────────────────────────────
   'doc-code': {
-    doc: 'A syntax-highlighted code block.',
+    doc: 'Syntax-highlighted code block with line numbers, copy button, and highlight ranges.',
     attributes: {
       lang: {
         kind: { type: 'enum', values: CODE_LANGUAGES },
         required: true,
-        doc: 'Language. Outside the allowlist is a build error, never a silent fallback.',
+        doc: 'Language for syntax highlighting. Required.',
       },
-      title: { kind: { type: 'string' }, doc: 'Filename or caption in the block header.' },
-      wrap: { kind: { type: 'boolean' }, doc: 'Soft-wrap long lines instead of scrolling.' },
-      highlight: { kind: { type: 'token' }, doc: 'Emphasised line ranges, e.g. `3-5,9`.' },
+      title: { kind: { type: 'string' }, doc: 'Filename or label in the header bar.' },
+      highlight: {
+        kind: { type: 'string' },
+        doc: 'Line numbers or ranges to highlight (e.g. `3`, `5-8`, `3, 5-8`).',
+      },
     },
   },
 
   'doc-diff': {
-    doc: 'A unified diff with +/- gutters and aligned line numbers.',
+    doc: 'Unified diff viewer with additions and deletions highlighted.',
     attributes: {
       lang: {
         kind: { type: 'enum', values: CODE_LANGUAGES },
-        doc: 'Language of the diffed content.',
+        doc: 'Syntax highlighting language for diff lines.',
       },
-      filename: { kind: { type: 'string' }, doc: 'Path shown in the block header.' },
+      filename: { kind: { type: 'string' }, doc: 'File path displayed in the header.' },
     },
   },
 
   'doc-figure': {
-    doc: 'One framed box for a diagram, image, Mermaid source or isolated HTML mock.',
+    doc: 'Diagram or illustration container with Mermaid rendering and caption.',
     attributes: {
       type: {
-        kind: { type: 'enum', values: ['svg', 'image', 'mermaid', 'html'] },
-        doc: 'What the child content is. Defaults to `svg`.',
+        kind: { type: 'enum', values: ['mermaid', 'svg', 'image'] },
+        doc: 'Figure type. Defaults to `mermaid`.',
       },
-      src: { kind: { type: 'url' }, doc: 'Image source, for `type="image"`.' },
-      alt: { kind: { type: 'string' }, doc: 'Alternative text, for `type="image"`.' },
-      caption: {
-        kind: { type: 'string' },
-        doc: 'Plain caption. Use `<doc-caption>` for a rich one.',
-      },
+      caption: { kind: { type: 'string' }, doc: 'Figure caption beneath the illustration.' },
+      src: { kind: { type: 'url' }, doc: 'Image URL for `type="image"`.' },
+      alt: { kind: { type: 'string' }, doc: 'Accessible description for screen readers.' },
     },
   },
 
   'doc-caption': {
-    doc: 'Rich caption for a `doc-figure`, as an alternative to the `caption` attribute.',
+    doc: 'Rich figure caption containing formatted prose, links or terms.',
     onlyInside: ['doc-figure'],
     attributes: {},
   },
 
   'doc-tree': {
-    doc: 'A directory tree drawn from indented plain text.',
+    doc: 'Directory tree viewer with ASCII connector lines and folder icons.',
     attributes: {
-      root: { kind: { type: 'string' }, doc: 'Label for the root node.' },
+      root: { kind: { type: 'string' }, doc: 'Root folder name displayed at top of tree.' },
     },
   },
 
   'doc-compare': {
-    doc: 'A two-column comparison panel. Children are `doc-list` blocks with a `title`.',
-    requiresChild: ['doc-list'],
+    doc: 'Side-by-side or column comparison container for options, pros/cons, before/after.',
     attributes: {
-      columns: { kind: { type: 'integer' }, doc: 'Column count. Defaults to 2.' },
+      columns: {
+        kind: { type: 'enum', values: ['2', '3', '4'] },
+        doc: 'Number of comparison columns. Default 2.',
+      },
     },
   },
 } as const satisfies Record<string, TagSpec>;

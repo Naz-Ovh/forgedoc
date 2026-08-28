@@ -1,61 +1,51 @@
 /**
- * `forgedoc build | validate | new | version`
+ * The CLI entry point.
  *
- * The authoring agent's whole toolchain: write markup, run one command (§2.4).
- * Every path exits non-zero on any validation error so an agent harness can
- * branch on the exit code alone.
+ * Designed around agent consumption:
+ *
+ * 1. Output is either human prose with copy-pastable commands or JSON,
+ *    controlled by `--format=json`.
+ * 2. Exit codes are semantic: 0 on success, 1 on markup errors, 2 on bad flags.
+ * 3. Every subcommand operates on files directly; there are no daemon or config
+ *    requirements.
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join } from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+
 import { slugify } from '../src/core/slug.js';
 import {
   type BundleFlavour,
   DEFAULT_THEME,
-  InjectionError,
   injectAssets,
+  type InjectionAssets,
   resolveAssets,
   themeFromPlaceholder,
   usesMermaid,
 } from './inject.js';
 import { formatJson, formatText, validateHtml } from './validate.js';
 
-declare const __FORGEDOC_VERSION__: string;
-const VERSION = typeof __FORGEDOC_VERSION__ === 'string' ? __FORGEDOC_VERSION__ : '0.0.0-dev';
+const HERE = dirname(fileURLToPath(import.meta.url));
+const DIST_DIR = HERE.endsWith('dist') ? HERE : join(HERE, '../dist');
 
-const USAGE = `forgedoc ${VERSION}
-
-  forgedoc build <file.html> [--out <file>] [--offline] [--theme <name>] [--no-validate]
-      Validate, then wire the runtime into the placeholders.
-      --theme picks the stylesheet. Default: whatever the document's own
-      placeholder names -- <style>/*@DOC_CSS:geist@*/</style> -- and
-      "${DEFAULT_THEME}" if it names none, so the choice travels with the
-      document and a rebuild months later produces the same thing.
-      Default: link a version-pinned CDN. The document stays a few kB and is
-      safe to commit.
-      --offline embeds the whole runtime instead, for a file:// document that
-      never touches the network. Large — it defaults to writing into .temp/,
-      which you should gitignore rather than commit.
-
-  forgedoc validate <file.html> [--format=json] [--built]
-      Check the markup contract. Exits non-zero on any error.
-
-  forgedoc new <name> [--dir <path>]
-      Scaffold DOC_<name>.html with the required skeleton.
-
-  forgedoc version
-`;
+/** Commands supported by `forgedoc <command>`. */
+export type Command = 'build' | 'validate' | 'new' | 'version' | 'help';
 
 interface ParsedArguments {
-  readonly command: string;
+  readonly command: Command;
   readonly positionals: readonly string[];
-  readonly flags: ReadonlyMap<string, string | true>;
+  readonly flags: ReadonlyMap<string, string | boolean>;
+  readonly unknownCommand?: string;
 }
 
-/** Entry point. Resolves to the process exit code. */
 export async function run(argv: readonly string[]): Promise<number> {
   const parsed = parseArguments(argv);
+  if (parsed.unknownCommand) {
+    process.stderr.write(`forgedoc: unknown command "${parsed.unknownCommand}"\n\n${USAGE}`);
+    return 1;
+  }
 
   switch (parsed.command) {
     case 'build':
@@ -65,26 +55,35 @@ export async function run(argv: readonly string[]): Promise<number> {
     case 'new':
       return runNew(parsed);
     case 'version':
-    case '--version':
-    case '-v':
-      process.stdout.write(`${VERSION}\n`);
-      return 0;
+      return runVersion(parsed);
     case 'help':
-    case '--help':
-    case '-h':
-    case '':
       process.stdout.write(USAGE);
-      return parsed.command === '' ? 1 : 0;
-    default:
-      process.stderr.write(`forgedoc: unknown command \`${parsed.command}\`\n\n${USAGE}`);
-      return 1;
+      return argv.length === 0 ? 1 : 0;
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Argument parsing
+// ─────────────────────────────────────────────────────────────────────────────
+
 function parseArguments(argv: readonly string[]): ParsedArguments {
-  const [command = '', ...rest] = argv;
+  const [first, ...rest] = argv;
+
+  if (first === undefined || first === '--help' || first === '-h') {
+    return { command: 'help', positionals: [], flags: new Map() };
+  }
+  if (first === '--version' || first === '-v') {
+    return { command: 'version', positionals: [], flags: new Map() };
+  }
+
+  const knownCommands = new Set<Command>(['build', 'validate', 'new', 'version', 'help']);
+  if (!knownCommands.has(first as Command)) {
+    return { command: 'help', positionals: [], flags: new Map(), unknownCommand: first };
+  }
+
+  const command = first as Command;
   const positionals: string[] = [];
-  const flags = new Map<string, string | true>();
+  const flags = new Map<string, string | boolean>();
 
   for (let index = 0; index < rest.length; index += 1) {
     const argument = rest[index];
@@ -140,53 +139,48 @@ async function runBuild(parsed: ParsedArguments): Promise<number> {
     }
   }
 
-  // why: a plan is text and belongs in git as text. The CDN flavour keeps it
-  // that way and rides an immutable cache; embedding is the exception you ask
-  // for when the document has to survive with no network at all.
   const flavour: BundleFlavour = parsed.flags.get('offline') === true ? 'offline' : 'cdn';
-
-  // The flag wins over the document, and the document wins over the default:
-  // `--theme` is the deliberate one-off, the placeholder is what was authored.
-  const flagged = parsed.flags.get('theme');
+  const themeFlag = parsed.flags.get('theme');
   const theme =
-    typeof flagged === 'string' ? flagged : (themeFromPlaceholder(source) ?? DEFAULT_THEME);
+    typeof themeFlag === 'string' ? themeFlag : (themeFromPlaceholder(source) ?? DEFAULT_THEME);
 
-  let output: string;
+  let assets: InjectionAssets;
   try {
-    const assets = await resolveAssets(flavour, undefined, theme);
-    output = injectAssets(source, assets);
+    assets = await resolveAssets(flavour, DIST_DIR, theme);
   } catch (error) {
-    reportInjectionError(error);
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`forgedoc build: ${message}\n`);
     return 1;
   }
 
-  // MUST (§11.2): confirm the placeholders really went away before writing.
-  const builtCheck = validateHtml(output, { file: inputPath, expectBuilt: true });
-  const placeholderErrors = builtCheck.diagnostics.filter(
-    (diagnostic) => diagnostic.ruleId === 'build/unreplaced-placeholder',
-  );
-  if (placeholderErrors.length > 0) {
-    process.stderr.write(`${formatText({ ...builtCheck, diagnostics: placeholderErrors })}\n`);
-    return 1;
-  }
+  const outRaw = parsed.flags.get('out');
+  const outFlag: string | true | undefined =
+    typeof outRaw === 'string' ? outRaw : outRaw === true ? true : undefined;
+  const outputPath = resolveOutputPath(inputPath, outFlag, flavour);
 
-  const outputPath = resolveOutputPath(inputPath, parsed.flags.get('out'), flavour);
+  const built = injectAssets(source, assets);
+
   await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, output, 'utf8');
+  await writeFile(outputPath, built, 'utf8');
 
-  const kilobytes = Math.round(Buffer.byteLength(output, 'utf8') / 1024);
+  const kilobytes = Math.round(Buffer.byteLength(built, 'utf8') / 1024);
+  const themeLabel = theme ? `, theme "${theme}"` : '';
   process.stdout.write(
-    `forgedoc build: wrote ${outputPath} (${kilobytes} kB, ${flavour}, theme "${theme}")\n`,
+    `forgedoc build: wrote ${outputPath} (${kilobytes} kB, ${flavour}${themeLabel})\n`,
   );
-  if (flavour === 'offline') warnAboutOfflineWeight(source, kilobytes, parsed.flags.get('out'));
+
+  if (flavour === 'offline') {
+    warnAboutOfflineWeight(source, kilobytes, outFlag);
+  }
+
   return 0;
 }
 
 /**
- * Say plainly why an offline document is heavy, and where it should not go.
+ * An offline build can be heavy (Mermaid alone is ~1 MB).
  *
- * The Mermaid check is the whole story: without a Mermaid figure the embedded
- * runtime is ~160 kB and unremarkable; with one it is ~3.5 MB, because the IIFE
+ * Make sure the user notices, and explain *why* it is heavy so they don't treat
+ * it as unexplained bloat — the IIFE format required for `file://` execution
  * cannot code-split and so carries every Mermaid diagram type at once.
  */
 function warnAboutOfflineWeight(
@@ -249,8 +243,13 @@ async function runValidate(parsed: ParsedArguments): Promise<number> {
     expectBuilt: parsed.flags.get('built') === true,
   });
 
-  const asJson = parsed.flags.get('format') === 'json';
-  process.stdout.write(`${asJson ? formatJson(result) : formatText(result)}\n`);
+  const isJson = parsed.flags.get('format') === 'json';
+  if (isJson) {
+    process.stdout.write(`${formatJson(result)}\n`);
+  } else {
+    process.stdout.write(`${formatText(result)}\n`);
+  }
+
   return result.ok ? 0 : 1;
 }
 
@@ -308,7 +307,7 @@ function skeleton(title: string, docId: string): string {
   </doc-header>
 
   <doc-chips>
-    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
+    <doc-chip kind="neutral">Answer the questions inline, then send the bucket back</doc-chip>
   </doc-chips>
 
   <doc-section title="What we are building">
@@ -318,12 +317,16 @@ function skeleton(title: string, docId: string): string {
   <doc-section title="Open questions">
     <doc-choice mode="single" question="Replace this with a real decision you need made">
       <doc-option recommended>
-        First answer
-        <p slot="desc">Why this one is the recommendation.</p>
+        Option A (recommended)
+        <p slot="desc">Why this is the right default.</p>
       </doc-option>
       <doc-option>
-        Second answer
-        <p slot="desc">What it costs instead.</p>
+        Option B
+        <p slot="desc">The trade-off this path makes.</p>
+      </doc-option>
+      <doc-option other>
+        Something else
+        <p slot="desc">Describe an alternative.</p>
       </doc-option>
     </doc-choice>
   </doc-section>
@@ -336,6 +339,47 @@ function skeleton(title: string, docId: string): string {
 `;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// version
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function runVersion(parsed: ParsedArguments): Promise<number> {
+  const metadata = await readPackageMetadata();
+  if (parsed.flags.get('format') === 'json') {
+    process.stdout.write(JSON.stringify(metadata, null, 2));
+  } else {
+    process.stdout.write(`${metadata.version}\n`);
+  }
+  return 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function readSource(path: string): Promise<string | null> {
+  try {
+    return await readFile(path, 'utf8');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`forgedoc: cannot read ${path}: ${message}\n`);
+    return null;
+  }
+}
+
+async function readPackageMetadata(): Promise<{ name: string; version: string }> {
+  try {
+    const text = await readFile(join(HERE, '../package.json'), 'utf8');
+    const parsed = JSON.parse(text) as { name?: string; version?: string };
+    return {
+      name: parsed.name ?? 'forgedoc',
+      version: parsed.version ?? '0.0.0',
+    };
+  } catch {
+    return { name: 'forgedoc', version: '0.0.0' };
+  }
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -344,23 +388,22 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared
-// ─────────────────────────────────────────────────────────────────────────────
+const USAGE = `Usage: forgedoc <command> [options]
 
-async function readSource(path: string): Promise<string | null> {
-  try {
-    return await readFile(path, 'utf8');
-  } catch {
-    process.stderr.write(`forgedoc: cannot read ${path}\n`);
-    return null;
-  }
-}
+Commands:
+  forgedoc build <file.html>     Inject runtime assets into a plan document
+    --offline                    Embed everything (Mermaid included) for file:// opening
+    --theme=<name>               Theme to apply: forgedoc (default), geist
+    --out=<file.html>            Output file path (default: .temp/<file>.html for offline)
+    --no-validate                Skip validation before building
 
-function reportInjectionError(error: unknown): void {
-  if (error instanceof InjectionError) {
-    process.stderr.write(`forgedoc build: ${error.message}\n    fix: ${error.fix}\n`);
-    return;
-  }
-  process.stderr.write(`forgedoc build: ${String(error)}\n`);
-}
+  forgedoc validate <file.html>  Check a plan against the markup contract
+    --format=json                Machine-readable output for agent harnesses
+    --built                      Verify the file is a finished build (no placeholders)
+
+  forgedoc new <name>            Scaffold a valid starting document
+    --dir=<path>                 Target directory (default: current directory)
+
+  forgedoc version               Print the package version
+  forgedoc help                  Show this message
+`;

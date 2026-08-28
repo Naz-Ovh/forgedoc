@@ -1,6 +1,6 @@
 ---
 name: better-plan
-description: Write interactive planning documents as ForgeDoc markup, build them to a single self-contained HTML file, and read a pasted feedback bucket back. Use whenever you are asked to plan work, write a design doc, propose an approach, or collect decisions from a human reviewer.
+description: Write interactive planning documents or documentation as ForgeDoc markup, build them to a single self-contained HTML file, and read a pasted feedback bucket back. Use whenever you are asked to plan work, write a design doc, propose an approach, write documentation, or collect decisions from a human reviewer.
 ---
 
 # ForgeDoc
@@ -16,9 +16,14 @@ Read `CHEATSHEET.md` for the full tag list. It fits on one page; keep it open.
 `REFERENCE.md`, beside it, is the per-attribute detail — reach for it only when
 the cheatsheet leaves a question open.
 
-## Producing a plan
+## File naming convention
 
-1. `forgedoc new <name>` — or write the skeleton yourself. It must contain these
+- **`PLAN_<name>.html`**: Use for interactive plans, implementation roadmaps, approach proposals, and decision-gathering documents.
+- **`DOC_<name>.html`**: Use for general documentation, technical specifications, guides, and design docs.
+
+## Producing a document
+
+1. `forgedoc new <name>` — or write the skeleton yourself in `PLAN_<name>.html` or `DOC_<name>.html`. It must contain these
    two lines, byte for byte: the first in `<head>`, the second as the last line
    of `<body>`.
 
@@ -39,18 +44,23 @@ the cheatsheet leaves a question open.
    The `doc-id` is mandatory — it namespaces the reader's stored answers, and
    without it two plans opened from disk can overwrite each other.
 
-3. `forgedoc build DOC_<name>.html`
+3. `forgedoc build <file.html> [--out <target.html>]`
 
-   The build validates first and writes nothing if validation fails. Read the
-   errors, fix them, and run it again. Each error carries a file, a line, a
-   column, a rule id and a concrete fix. `--format=json` on `forgedoc validate`
-   gives you the same thing as structured data.
+   The build validates first and writes nothing if validation fails. By default,
+   `forgedoc build PLAN_<name>.html` outputs `PLAN_<name>.built.html` (or `DOC_<name>.built.html`).
+   If you want a specific output filename, pass `--out <target.html>`.
 
    The output links a version-pinned CDN and stays around 15 kB, so it is safe
    to commit. Pass `--offline` only when the reader genuinely has no network —
    it embeds the whole runtime, which is ~3.5 MB once a Mermaid figure is
    present, and writes into `.temp/` because that file should never be
    committed.
+
+## Lifecycle and revisions
+
+- **Default lifecycle (in-place override):** Maintain a single source file (`PLAN_<name>.html` or `DOC_<name>.html`). On every revision, edit the original source file directly in-place and rebuild. If a build creates a new output file or renames output, clean up any stray or obsolete files so you keep only the clean single document. Do not create unnecessary intermediate files (e.g. `PLAN_<name>.something.html` or `PLAN_<name>.v1.html`) by default.
+- **Explicit output naming:** You can explicitly provide the desired output filename using `--out <target.html>`.
+- **Numbered/versioned lifecycle:** Only create versioned files (`PLAN_<name>.v1.html`, `DOC_<name>.v1.html`, etc.) if the user explicitly asks for versioning, a numbered lifecycle, or versioned revisions.
 
 ## What the runtime derives, so you never type it
 
@@ -64,9 +74,8 @@ the cheatsheet leaves a question open.
 
 ## Writing well
 
-- **Ask real questions.** A plan with no `doc-choice` collects no feedback, and
-  the validator warns about it. Put a question wherever you made a judgement call
-  the reader might disagree with, and mark your suggestion `recommended`.
+- **Use elements only when necessary.** Do not use any element just to use it. Only use elements if they are necessary for the document.
+- **Ask real questions when needed.** Put a `doc-choice` wherever you made a judgement call or need a decision from the reader, and mark your suggestion `recommended`.
 - **Every roadblock states its resolution.** `doc-blocker` requires a
   `doc-action`. This is enforced, not advisory — a roadblock with no way out is
   the failure the whole library exists to prevent.
@@ -130,7 +139,7 @@ not by the id.
 
 ### After you have read it
 
-Regenerate the plan with the decisions folded in. Answered questions become
+Update the plan with the decisions folded in. Answered questions become
 `<doc-chip kind="confirmed">` entries rather than open `doc-choice` blocks — a
 question the reader has already settled should not be asked twice. Tooling can do
 this incrementally with `ForgeDoc.chips.add({kind: 'confirmed', text: '…'})`.

@@ -23,9 +23,11 @@
 import './styles/themes/forgedoc/index.scss';
 
 import { DocAction } from './components/doc-action.js';
+import { DocBadge } from './components/doc-badge.js';
 import { DocBlocker } from './components/doc-blocker.js';
 import { DocBlocks } from './components/doc-blocks.js';
 import { DocCaption } from './components/doc-caption.js';
+import { DocCarousel } from './components/doc-carousel.js';
 import { DocChecklist } from './components/doc-checklist.js';
 import { DocChip } from './components/doc-chip.js';
 import { DocChips } from './components/doc-chips.js';
@@ -33,29 +35,43 @@ import { DocChoice } from './components/doc-choice.js';
 import { DocCode } from './components/doc-code.js';
 import { DocCollapse } from './components/doc-collapse.js';
 import { DocCompare } from './components/doc-compare.js';
+import { DocDecision } from './components/doc-decision.js';
 import { DocDiff } from './components/doc-diff.js';
+import { DocEndpoint } from './components/doc-endpoint.js';
 import { DocFigure } from './components/doc-figure.js';
 import { DocFlow } from './components/doc-flow.js';
 import { DocFlowNode } from './components/doc-flow-node.js';
 import { DocHeader } from './components/doc-header.js';
 import { DocList } from './components/doc-list.js';
+import { DocMatrix } from './components/doc-matrix.js';
+import { DocMilestone } from './components/doc-milestone.js';
 import { DocNote } from './components/doc-note.js';
 import { DocOption } from './components/doc-option.js';
+import { DocOwner } from './components/doc-owner.js';
+import { DocOwners } from './components/doc-owners.js';
 import { DocPage } from './components/doc-page.js';
+import { DocParam } from './components/doc-param.js';
+import { DocParams } from './components/doc-params.js';
 import { DocQuote } from './components/doc-quote.js';
+import { DocRating } from './components/doc-rating.js';
 import { DocRef } from './components/doc-ref.js';
 import { DocRoadmap } from './components/doc-roadmap.js';
 import { DocSection } from './components/doc-section.js';
 import { DocStage } from './components/doc-stage.js';
+import { DocStat } from './components/doc-stat.js';
+import { DocStats } from './components/doc-stats.js';
+import { DocStep } from './components/doc-step.js';
+import { DocSteps } from './components/doc-steps.js';
 import { DocTab } from './components/doc-tab.js';
 import { DocTable } from './components/doc-table.js';
 import { DocTabs } from './components/doc-tabs.js';
 import { DocTerm } from './components/doc-term.js';
+import { DocTimeline } from './components/doc-timeline.js';
 import { DocToc } from './components/doc-toc.js';
 import { DocTree } from './components/doc-tree.js';
 import { DocWhy } from './components/doc-why.js';
 import { TAG_NAMES } from './core/contract.js';
-import { define, registeredTags } from './core/registry.js';
+import { define } from './core/registry.js';
 import { storeFor } from './core/store.js';
 import type { DocStore } from './core/types.js';
 
@@ -68,9 +84,11 @@ import type { DocStore } from './core/types.js';
  */
 const ELEMENTS = {
   'doc-action': DocAction,
+  'doc-badge': DocBadge,
   'doc-blocker': DocBlocker,
   'doc-blocks': DocBlocks,
   'doc-caption': DocCaption,
+  'doc-carousel': DocCarousel,
   'doc-checklist': DocChecklist,
   'doc-chip': DocChip,
   'doc-chips': DocChips,
@@ -78,24 +96,38 @@ const ELEMENTS = {
   'doc-code': DocCode,
   'doc-collapse': DocCollapse,
   'doc-compare': DocCompare,
+  'doc-decision': DocDecision,
   'doc-diff': DocDiff,
-  'doc-page': DocPage,
+  'doc-endpoint': DocEndpoint,
   'doc-figure': DocFigure,
   'doc-flow': DocFlow,
   'doc-flow-node': DocFlowNode,
   'doc-header': DocHeader,
   'doc-list': DocList,
+  'doc-matrix': DocMatrix,
+  'doc-milestone': DocMilestone,
   'doc-note': DocNote,
   'doc-option': DocOption,
+  'doc-owner': DocOwner,
+  'doc-owners': DocOwners,
+  'doc-page': DocPage,
+  'doc-param': DocParam,
+  'doc-params': DocParams,
   'doc-quote': DocQuote,
+  'doc-rating': DocRating,
   'doc-ref': DocRef,
   'doc-roadmap': DocRoadmap,
   'doc-section': DocSection,
   'doc-stage': DocStage,
+  'doc-stat': DocStat,
+  'doc-stats': DocStats,
+  'doc-step': DocStep,
+  'doc-steps': DocSteps,
   'doc-tab': DocTab,
   'doc-table': DocTable,
   'doc-tabs': DocTabs,
   'doc-term': DocTerm,
+  'doc-timeline': DocTimeline,
   'doc-toc': DocToc,
   'doc-tree': DocTree,
   'doc-why': DocWhy,
@@ -109,7 +141,7 @@ export function defineAll(): void {
 }
 
 /*
- * ── The public API ──────────────────────────────────────────────────────────
+ * ── The public API ────────────────────────────────────────────────────────
  *
  * These are deliberately *top-level* named exports rather than members of a
  * `ForgeDoc` object.
@@ -158,11 +190,3 @@ export function store(docPage?: Element): DocStore | null {
 }
 
 defineAll();
-
-export { parseBucket, serializeBucket } from './bucket/serialize.js';
-export { DocChoice } from './components/doc-choice.js';
-export { DocPage } from './components/doc-page.js';
-export { DocSection } from './components/doc-section.js';
-export { CODE_LANGUAGES, PRESET_AXES, TAG_NAMES, TAGS } from './core/contract.js';
-export * from './core/types.js';
-export { registeredTags };

@@ -1,0 +1,117 @@
+/* `doc-blocker` and its three enforced children. */
+
+@layer doc.theme {
+  doc-blocker {
+    --doc-blocker-line: var(--doc-warn-600);
+    --doc-blocker-tint: light-dark(
+    var(--doc-warn-50),
+    color-mix(in oklab, var(--doc-warn-900) 40%, var(--doc-shade-base))
+    );
+    margin-block: var(--doc-space-6);
+    padding: var(--doc-space-4) var(--doc-space-5);
+    border: var(--doc-border-width) solid
+    color-mix(in oklab, var(--doc-blocker-line) 40%, transparent);
+    border-radius: var(--doc-radius);
+    background: var(--doc-blocker-tint);
+    print-color-adjust: exact;
+  }
+
+  doc-blocker[severity="low"] {
+    --doc-blocker-line: var(--doc-info-600);
+    --doc-blocker-tint: light-dark(
+    var(--doc-info-50),
+    color-mix(in oklab, var(--doc-info-900) 40%, var(--doc-shade-base))
+    );
+  }
+
+  doc-blocker[severity="high"] {
+    --doc-blocker-line: var(--doc-danger-600);
+    --doc-blocker-tint: light-dark(
+    var(--doc-danger-50),
+    color-mix(in oklab, var(--doc-danger-900) 40%, var(--doc-shade-base))
+    );
+  }
+
+  doc-blocker [data-part="header"] {
+    gap: var(--doc-space-2) var(--doc-space-3);
+    margin-block-end: var(--doc-space-3);
+  }
+
+  doc-blocker [data-part="sequence"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 640;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-blocker [data-part="severity"] {
+    padding: 0 var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-blocker-line);
+    color: var(--doc-ink-on-solid);
+    font-size: var(--doc-text-xs);
+    font-weight: 640;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  doc-blocker [data-part="title"] {
+    font-size: var(--doc-text-lg);
+    font-weight: 660;
+    line-height: var(--doc-leading-tight);
+  }
+
+  /*
+  * why the label is positioned rather than a grid column: the author's text is
+  * *inline* content — "Every key is namespaced <code>…</code>, and the
+  * validator rejects…" — and every inline element child of a grid container
+  * becomes its own grid item. A two-column grid would therefore tear a sentence
+  * containing `<code>` into three cells. A hanging indent with an absolutely
+  * positioned label holds any mix of inline content.
+  */
+  doc-blocks,
+  doc-why,
+  doc-action {
+    padding-block: var(--doc-space-2);
+    padding-inline-start: 6rem;
+    border-block-start: var(--doc-border-width) solid
+    color-mix(in oklab, var(--doc-blocker-line) 22%, transparent);
+  }
+
+  doc-blocks [data-part="label"],
+  doc-why [data-part="label"],
+  doc-action [data-part="label"] {
+    width: 5.25rem;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 660;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+    line-height: 1.9;
+  }
+
+  doc-action {
+    font-weight: 560;
+  }
+
+  doc-action [data-part="label"] {
+    color: var(--doc-blocker-line);
+  }
+
+  @media (max-width: 640px) {
+    doc-blocks,
+    doc-why,
+    doc-action {
+      padding-inline-start: 0;
+      padding-block-start: var(--doc-space-6);
+    }
+
+    doc-blocks [data-part="label"],
+    doc-why [data-part="label"],
+    doc-action [data-part="label"] {
+      line-height: 1.4;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+/* `doc-badge` — inline tag badge. */
+
+@layer doc.components {
+  doc-badge {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+}

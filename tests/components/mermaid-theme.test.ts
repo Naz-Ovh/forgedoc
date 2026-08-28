@@ -72,7 +72,6 @@ describe('Mermaid theme variables', () => {
 
         expect(variables.fontSize).toMatch(/^[\d.]+px$/);
       });
-
     }
   }
 

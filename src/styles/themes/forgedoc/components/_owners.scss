@@ -1,0 +1,60 @@
+/* `doc-owners` / `doc-owner` — document owners and DRIs. */
+
+@layer doc.theme {
+  doc-owners {
+    gap: var(--doc-space-3);
+    margin-block: var(--doc-space-4);
+  }
+
+  doc-owner {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+  }
+
+  doc-owner [data-part="avatar"] {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+    font-weight: 700;
+    font-size: var(--doc-text-sm);
+    border: var(--doc-border-width) solid var(--doc-accent-edge);
+  }
+
+  doc-owner [data-part="name"] {
+    font-weight: 600;
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-1);
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-owner [data-part="role"] {
+    font-size: var(--doc-text-xs);
+    color: var(--doc-text-3);
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-owner [data-part="status"] {
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    padding: var(--doc-space-0-5) var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    margin-inline-start: var(--doc-space-2);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+  }
+
+  doc-owner [data-part="status"][data-status="approved"] {
+    background: var(--doc-success-tint);
+    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+  }
+
+  doc-owner [data-part="status"][data-status="reviewing"] {
+    background: var(--doc-info-tint);
+    color: light-dark(var(--doc-info-900), var(--doc-info-200));
+  }
+}

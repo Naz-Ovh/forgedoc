@@ -1,0 +1,166 @@
+/* `doc-endpoint` — compact API trigger and shared detail drawer structure. */
+
+@layer doc.components {
+  doc-endpoint {
+    display: block;
+  }
+
+  doc-endpoint [data-part="trigger"] {
+    display: grid;
+    grid-template-columns: auto minmax(12rem, 1fr) minmax(10rem, 1fr) auto auto;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  doc-endpoint [data-part="method"],
+  [data-part="endpoint-drawer-method"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  doc-endpoint [data-part="path"],
+  [data-part="endpoint-drawer-path"] {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  doc-endpoint [data-part="summary"] {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  doc-endpoint [data-part="status"] {
+    white-space: nowrap;
+  }
+
+  doc-endpoint [data-part="body"] {
+    display: none;
+  }
+
+  [data-part="path-param"] {
+    background: transparent;
+    font-weight: inherit;
+  }
+
+  [data-part="endpoint-drawer"] {
+    position: fixed;
+    inset: 0 0 0 auto;
+    flex-direction: column;
+    max-height: none;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  [data-part="endpoint-drawer"][open] {
+    display: flex;
+  }
+
+  [data-part="endpoint-drawer-header"] {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    flex: none;
+  }
+
+  [data-part="endpoint-drawer-close"],
+  [data-part="endpoint-drawer-copy"] {
+    cursor: pointer;
+  }
+
+  [data-part="endpoint-drawer-signature"] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    grid-column: 1 / -1;
+  }
+
+  [data-part="endpoint-drawer-content"] {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  [data-part="endpoint-drawer-metadata"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-part="endpoint-drawer-meta-item"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  [data-part="endpoint-drawer-parameters"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  [data-part="endpoint-drawer-parameter"] {
+    display: grid;
+    grid-template-columns: minmax(7rem, 1fr) auto auto auto;
+    align-items: baseline;
+  }
+
+  [data-part="endpoint-drawer-parameter-default"],
+  [data-part="endpoint-drawer-parameter-description"] {
+    grid-column: 1 / -1;
+  }
+
+  [data-part="endpoint-drawer-headers"] {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  [data-part="endpoint-drawer-response-status"] {
+    display: flex;
+    align-items: center;
+  }
+
+  [data-part="endpoint-drawer-example"] {
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 720px) {
+    doc-endpoint [data-part="trigger"] {
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+    }
+
+    doc-endpoint [data-part="summary"] {
+      grid-column: 2 / -1;
+      grid-row: 2;
+    }
+
+    [data-part="endpoint-drawer"] {
+      width: 100%;
+    }
+
+    [data-part="endpoint-drawer-metadata"] {
+      grid-template-columns: 1fr;
+    }
+
+    [data-part="endpoint-drawer-parameter"] {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
+    [data-part="endpoint-drawer-parameter-required"] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media print {
+    [data-part="endpoint-drawer"] {
+      display: none !important;
+    }
+
+    doc-endpoint [data-part="body"] {
+      display: block;
+    }
+  }
+}
