@@ -1,6 +1,6 @@
 # ForgeDoc cheatsheet
 
-Write **semantic markup only**. No `<style>`, `<script>`, classes, ids, or section numbers. Only use elements when necessary. File prefix: `PLAN_<name>.html` for plans, `DOC_<name>.html` for docs.
+Write **semantic markup only**. A prebuilt runtime supplies styling, layout, interactivity, persistence and feedback collection. Use an element only where the document needs it. Name the file `PLAN_<name>.html` for a plan, `DOC_<name>.html` for a document.
 
 ```html
 <style>/*@DOC_CSS@*/</style>   <!-- in <head> -->
@@ -11,56 +11,67 @@ Write **semantic markup only**. No `<style>`, `<script>`, classes, ids, or secti
 <script>//@DOC_JS@</script>    <!-- last line of <body> -->
 ```
 
-Build: `forgedoc build <file.html>` (`--offline` embeds runtime). Validate: `forgedoc validate <file.html> --format=json`.
+Build `forgedoc build <file.html>` · offline `--offline` · check `forgedoc validate <file.html> --format=json` · detail `forgedoc info <element>` · find one `forgedoc search <words>`.
 
-## Shell & Meta
+## Shell & meta
 
-| Tag | Attributes & Notes |
+| Tag | Attributes |
 | --- | --- |
-| `doc-page` | **`doc-id`** · `density` compact/comfortable/spacious · `scale` sm/md/lg · `accent` teal/indigo/slate/plum/amber · `measure` narrow/default/wide · `code` auto/light/dark · `toc` open/closed/docked/off · `numbering` counter/text |
-| `doc-header` | `kicker` — title is child text, optional `<p slot="lede">` |
-| `doc-section` | **`title`** — nests to depth 3; number, id and TOC entry are derived |
-| `doc-chips` › `doc-chip` | `kind` confirmed/info/action/pending |
-| `doc-owners` › `doc-owner` | **`name`** · `role` · `status` approved/reviewing/pending · `avatar` |
+| `doc-page` | **`doc-id`** slug · `density` compact/comfortable/spacious · `scale` sm/md/lg · `accent` teal/indigo/slate/plum/amber · `measure` narrow/default/wide · `code` auto/light/dark · `toc` open/closed/docked/off · `numbering` counter/text |
+| `doc-header` | `kicker` |
+| `doc-section` | **`title`** |
+| `doc-toc` | generated — never write it |
+| `doc-chips` › `doc-chip` | chip: `kind` confirmed/info/action/pending |
+| `doc-owners` › `doc-owner` | owner: **`name`** · `role` · `avatar` · `status` approved/pending/reviewing/rejected |
 
 ## Prose, callouts & specs
 
-| Tag | Attributes & Notes |
+| Tag | Attributes |
 | --- | --- |
+| `doc-decision` | **`title`** · `id` · `status` accepted/proposed/rejected/deprecated/superseded · `date` |
+| `doc-endpoint` | **`method`** get/post/put/patch/delete/options/head · **`path`** · `summary` · `description` · `auth` bearer/basic/api-key/session/none · `headers` · `params` · `request` · `status` · `response` |
+| `doc-params` › `doc-param` | param: **`name`** · `type` · `in` path/query/header/body · `required` · `default` |
+| `doc-steps` › `doc-step` | step: **`title`** · `status` completed/active/pending/optional |
+| `doc-badge` | `variant` info/success/warn/danger/neutral/accent |
 | `doc-note` | `kind` info/tip/warn/danger/success · `title` |
-| `doc-badge` | `variant` info/success/warn/danger/neutral/accent — inline |
-| `doc-blocker` | **`title`** · `severity` low/medium/high — needs `doc-blocks` + `doc-action`, optional `doc-why` |
-| `doc-list` | `marker` check/cross/arrow/dot/number · `title` · `kind` positive/negative/neutral — children are `<li>` |
-| `doc-compare` | `columns` (2) — children are `doc-list` blocks with a `title` |
-| `doc-table` · `doc-quote` | table takes `size` sm/md · `stack` auto/never. quote takes `cite` |
-| `doc-term` · `doc-ref` | inline: `doc-term` takes **`href`**, `doc-ref` takes **`to`** |
-| `doc-decision` | **`title`** · `id` · `status` proposed/accepted/rejected/superseded/deprecated · `date` |
-| `doc-endpoint` | **`path`** · **`method`** get/post/put/patch/delete/head/options · `summary` · `description` · `auth` · `headers` · `params` (`name:in:type:required|optional:description`) · `request` · `status` · `response` — opens the shared API drawer |
-| `doc-params` › `doc-param` | **`name`** · `type` · `in` path/query/header/body · `required` · `default` |
-| `doc-steps` › `doc-step` | **`title`** · `status` completed/active/pending/optional · `open` |
+| `doc-blocker` › `doc-blocks` + `doc-why` + `doc-action` | **`title`** · `severity` high/medium/low |
+| `doc-list` | `marker` check/cross/arrow/dot/number · `title` · `kind` positive/negative/neutral |
+| `doc-quote` | `cite` |
+| `doc-term` | **`href`** url |
+| `doc-ref` | **`to`** |
 
 ## Metrics, planning & interactive
 
-| Tag | Attributes & Notes |
+| Tag | Attributes |
 | --- | --- |
-| `doc-stats` › `doc-stat` | **`label`** · **`value`** · `diff` · `trend` up/down/neutral · `good` · `tone` good/bad/neutral |
-| `doc-timeline` › `doc-milestone` | **`date`** · **`title`** · `status` completed/in-progress/planned/delayed · `owner` |
-| `doc-matrix` | `type` raci/risk/comparison — wraps standard `<table>` |
-| `doc-choice` › `doc-option` | **`question`** · `mode` single/multi — option takes `recommended`, `value`, optional `<p slot="desc">` |
-| `doc-rating` | **`question`** · `scale` (5) · `mode` numeric/stars — scorecard saved to bucket |
+| `doc-stats` › `doc-stat` | stat: **`label`** · **`value`** · `trend` up/down/flat · `good` · `tone` good/bad/neutral · `diff` |
+| `doc-timeline` › `doc-milestone` | milestone: **`date`** · **`title`** · `status` completed/in-progress/planned/delayed · `owner` |
+| `doc-matrix` | `type` raci/risk/comparison/custom |
+| `doc-choice` › `doc-option` | **`question`** · `id` slug · `mode` single/multi — option: `label` · `value` · `hint` · `recommended` · `other` |
+| `doc-rating` | **`question`** · `id` slug · `scale` integer |
+| `doc-checklist` | no attributes |
+| `doc-tabs` › `doc-tab` | tab: **`label`** · `active` |
 | `doc-collapse` | **`title`** · `open` · `sticky` |
-| `doc-tabs` › `doc-tab` | tab takes **`label`** · `active` |
-| `doc-checklist` · `doc-carousel` | checklist children are `<li>`. carousel takes `title` · `autoplay` |
+| `doc-carousel` | `title` |
 
 ## Structure & content
 
-| Tag | Attributes & Notes |
+| Tag | Attributes |
 | --- | --- |
-| `doc-roadmap` › `doc-stage` | roadmap takes `start` (0) · stage takes **`title`**, `subtitle`, `current`, `open` |
-| `doc-flow` › `doc-flow-node` | node takes **`title`**, `active`; child text is subtitle |
-| `doc-code` · `doc-diff` | code takes **`lang`** · `title` · `wrap` · `highlight`. diff takes `lang` · `filename` |
-| `doc-figure` · `doc-caption` · `doc-tree` | figure takes `type` svg/image/mermaid/html · `src` · `alt` · `caption` (or `doc-caption`). tree takes `root` |
+| `doc-flow` › `doc-flow-node` | flow-node: **`title`** · `active` |
+| `doc-roadmap` › `doc-stage` | `start` integer — stage: **`title`** · `subtitle` · `current` · `open` |
+| `doc-code` | **`lang`** see allowlist · `title` · `highlight` · `wrap` |
+| `doc-diff` | `lang` see allowlist · `filename` |
+| `doc-figure` › `doc-caption` | `type` svg/image/mermaid/html · `caption` · `src` url · `alt` |
+| `doc-table` | `size` sm/md · `stack` auto/never |
+| `doc-tree` | `root` |
+| `doc-compare` | `columns` 2/3/4 |
 
-`lang` allowlist: `ts js tsx jsx html css json bash sh sql rust python yaml toml diff http text`. Use plain HTML for `<p> <ul> <ol> <li> <code> <a> <strong> <em> <table> <h1>–<h6>`. Never write `doc-toc`, `role=`, `aria-*`, `class=`, `id=`, or numbers.
+## Rules
 
-## Overriding order: 1. Preset attribute (`<doc-page density="compact">`) · 2. **Token** (`--doc-accent-600`) · 3. **Raw CSS** (`[data-part="title"]`).
+- Never write `<style>`, `<script>`, `class=`, `role=` or `aria-*` — the runtime owns all of them.
+- Never write section numbers (`1.2.1`), stage numbers, or option letters (`A`/`B`/`C`) — every one is derived, and a typed one goes stale.
+- Never write `id=` — ids come from `title` and `question`. Override only for an anchor that must survive a reworded heading.
+- Never write `doc-toc` — generated from your sections. Steer it with `<doc-page toc="docked">`.
+- Already styled, so there is no tag for them: `<p>` `<ul>` `<ol>` `<li>` `<code>` `<a>` `<strong>` `<em>` `<table>` `<h1>` `<h2>` `<h3>` `<h4>` `<h5>` `<h6>`. `lang` allowlist: ts js tsx jsx html css json bash sh sql rust python yaml toml diff http text.
+- Override in this order: preset attribute (`<doc-page density="compact">`), then **token** (`--doc-accent-600`), then **raw CSS** (`[data-part="title"]`, no `!important` needed).

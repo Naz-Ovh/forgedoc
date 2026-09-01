@@ -180,11 +180,8 @@ export const TAGS = {
     onlyInside: ['doc-chips'],
     attributes: {
       kind: {
-        kind: {
-          type: 'enum',
-          values: ['confirmed', 'open', 'tentative', 'rejected', 'info', 'neutral'],
-        },
-        doc: 'Semantic tone of the chip. Defaults to `neutral`.',
+        kind: { type: 'enum', values: ['confirmed', 'info', 'action', 'pending'] },
+        doc: 'Locked decision, plain context, an instruction to the reader, or something still open. Defaults to `info`.',
       },
     },
   },
@@ -199,13 +196,17 @@ export const TAGS = {
     onlyInside: ['doc-owners'],
     attributes: {
       name: { kind: { type: 'string' }, required: true, doc: 'Name of the person or team.' },
-      role: { kind: { type: 'string' }, doc: 'DRI, Reviewer, Lead, etc.' },
+      role: { kind: { type: 'string' }, doc: 'DRI, Reviewer, Lead, etc. Defaults to `Owner`.' },
+      avatar: {
+        kind: { type: 'string' },
+        doc: 'Glyph or initials for the avatar. Defaults to the first letter of `name`.',
+      },
       status: {
         kind: {
           type: 'enum',
           values: ['approved', 'pending', 'reviewing', 'rejected'],
         },
-        doc: 'Sign-off status. Defaults to `pending`.',
+        doc: 'Sign-off status. Defaults to `reviewing`.',
       },
     },
   },
@@ -341,6 +342,10 @@ export const TAGS = {
         doc: 'Directional indicator arrow.',
       },
       good: { kind: { type: 'boolean' }, doc: 'Whether the trend direction is positive.' },
+      tone: {
+        kind: { type: 'enum', values: ['good', 'bad', 'neutral'] },
+        doc: 'Colour of the delta when `good` does not apply. Defaults to `neutral`.',
+      },
       diff: { kind: { type: 'string' }, doc: 'Delta text (e.g. +15%, -2ms).' },
     },
   },
@@ -375,7 +380,7 @@ export const TAGS = {
           type: 'enum',
           values: ['raci', 'risk', 'comparison', 'custom'],
         },
-        doc: 'Type of matrix table. Defaults to custom.',
+        doc: 'Type of matrix table. Defaults to `comparison`.',
       },
     },
   },
@@ -399,11 +404,8 @@ export const TAGS = {
     doc: 'Callout block with icon and tone ramp.',
     attributes: {
       kind: {
-        kind: {
-          type: 'enum',
-          values: ['info', 'tip', 'warn', 'danger'],
-        },
-        doc: 'Tone: blue info (default), green tip, amber warn, red danger.',
+        kind: { type: 'enum', values: ['info', 'tip', 'warn', 'danger', 'success'] },
+        doc: 'Tone: blue info (default), green tip, amber warn, red danger, green success.',
       },
       title: { kind: { type: 'string' }, doc: 'Optional bold heading on the callout.' },
     },
@@ -446,11 +448,8 @@ export const TAGS = {
     doc: 'A list with custom markers (check, cross, arrow, dash, bullet, number).',
     attributes: {
       marker: {
-        kind: {
-          type: 'enum',
-          values: ['check', 'cross', 'arrow', 'dash', 'bullet', 'number'],
-        },
-        doc: 'Glyph or counter for items. Defaults to bullet.',
+        kind: { type: 'enum', values: ['check', 'cross', 'arrow', 'dot', 'number'] },
+        doc: 'Glyph or counter for items. Defaults to `dot`; `number` is drawn by a CSS counter.',
       },
       title: { kind: { type: 'string' }, doc: 'Optional heading above the list.' },
       kind: {
@@ -517,10 +516,9 @@ export const TAGS = {
     attributes: {
       id: { kind: { type: 'slug' }, doc: 'Stable key in the feedback bucket.' },
       question: { kind: { type: 'string' }, required: true, doc: 'Evaluation question or title.' },
-      scale: { kind: { type: 'integer' }, doc: 'Max rating score (default 5).' },
-      mode: {
-        kind: { type: 'enum', values: ['stars', 'numeric'] },
-        doc: 'Display mode: stars or numeric badges. Defaults to numeric.',
+      scale: {
+        kind: { type: 'integer' },
+        doc: 'Highest score on the scale. Clamped to 3–10; defaults to 5.',
       },
     },
   },
@@ -589,6 +587,7 @@ export const TAGS = {
         kind: { type: 'boolean' },
         doc: 'Highlights the active phase with an accent border.',
       },
+      open: { kind: { type: 'boolean' }, doc: 'Expands the stage body on load.' },
     },
   },
 
@@ -604,6 +603,10 @@ export const TAGS = {
       highlight: {
         kind: { type: 'string' },
         doc: 'Line numbers or ranges to highlight (e.g. `3`, `5-8`, `3, 5-8`).',
+      },
+      wrap: {
+        kind: { type: 'boolean' },
+        doc: 'Soft-wrap long lines instead of scrolling them horizontally.',
       },
     },
   },
@@ -623,8 +626,8 @@ export const TAGS = {
     doc: 'Diagram or illustration container with Mermaid rendering and caption.',
     attributes: {
       type: {
-        kind: { type: 'enum', values: ['mermaid', 'svg', 'image'] },
-        doc: 'Figure type. Defaults to `mermaid`.',
+        kind: { type: 'enum', values: ['svg', 'image', 'mermaid', 'html'] },
+        doc: 'Figure type. Defaults to `svg`. `html` renders inside a sandboxed `<iframe srcdoc>`.',
       },
       caption: { kind: { type: 'string' }, doc: 'Figure caption beneath the illustration.' },
       src: { kind: { type: 'url' }, doc: 'Image URL for `type="image"`.' },
@@ -645,6 +648,39 @@ export const TAGS = {
     },
   },
 
+  'doc-table': {
+    doc: 'Wraps a plain `<table>`. Adds a scroll port and, below 1050px, stacks rows into label/value cards.',
+    attributes: {
+      size: {
+        kind: { type: 'enum', values: ['sm', 'md'] },
+        doc: 'Cell padding and type size. Defaults to `md`.',
+      },
+      stack: {
+        kind: { type: 'enum', values: ['auto', 'never'] },
+        doc: 'Whether narrow viewports restack rows as cards (§8.3). Defaults to `auto`.',
+      },
+    },
+  },
+
+  'doc-quote': {
+    doc: 'Pull quote with its own typographic role. The quoted text is the default content.',
+    attributes: {
+      cite: { kind: { type: 'string' }, doc: 'Attribution line beneath the quote.' },
+    },
+  },
+
+  'doc-collapse': {
+    doc: 'Generic disclosure. Use `doc-stage` instead when the sections form a numbered sequence (§8.5).',
+    attributes: {
+      title: { kind: { type: 'string' }, required: true, doc: 'Summary text on the toggle.' },
+      open: { kind: { type: 'boolean' }, doc: 'Starts expanded.' },
+      sticky: {
+        kind: { type: 'boolean' },
+        doc: "Remembers the reader's choice in the store, so it outlives a reload. Without it `open` wins on every load.",
+      },
+    },
+  },
+
   'doc-compare': {
     doc: 'Side-by-side or column comparison container for options, pros/cons, before/after.',
     attributes: {
@@ -655,6 +691,137 @@ export const TAGS = {
     },
   },
 } as const satisfies Record<string, TagSpec>;
+
+export const PARTS: Readonly<Record<string, readonly string[]>> = {
+  'doc-page': [
+    'canvas',
+    'rail',
+    'prose',
+    'aside',
+    'toc',
+    'toc-backdrop',
+    'bucket',
+    'bucket-fab',
+    'bucket-panel',
+    'bucket-header',
+    'bucket-body',
+    'bucket-empty',
+    'bucket-item',
+    'bucket-item-remove',
+    'bucket-copy',
+    'bucket-copied',
+    'bucket-badge',
+    'bucket-note',
+    'settings-toggle',
+    'theme-toggle',
+    'density-toggle',
+  ],
+  'doc-header': ['title', 'lede', 'kicker', 'rule'],
+  'doc-section': ['heading', 'title', 'number', 'anchor', 'body'],
+  'doc-toc': ['title', 'list', 'item', 'link', 'number', 'label'],
+  'doc-note': ['icon', 'title', 'body'],
+  'doc-blocker': ['badge', 'title', 'blocks', 'why', 'action'],
+  'doc-blocks': ['label', 'content'],
+  'doc-why': ['label', 'content'],
+  'doc-action': ['label', 'content'],
+  'doc-list': ['title', 'item', 'marker'],
+  'doc-badge': [],
+  'doc-term': [],
+  'doc-ref': [],
+  'doc-chips': [],
+  'doc-chip': [],
+  'doc-owners': [],
+  'doc-owner': ['avatar', 'info', 'name', 'role', 'status'],
+  'doc-decision': ['header', 'badge-id', 'status', 'title', 'date', 'body'],
+  'doc-endpoint': [
+    'trigger',
+    'method',
+    'path',
+    'path-param',
+    'summary',
+    'status',
+    'open-icon',
+    'body',
+    'endpoint-drawer',
+    'endpoint-drawer-header',
+    'endpoint-drawer-signature',
+    'endpoint-drawer-content',
+    'endpoint-drawer-section',
+    'endpoint-drawer-parameter',
+    'endpoint-drawer-example',
+    'endpoint-drawer-response-status',
+  ],
+  'doc-params': [],
+  'doc-param': ['header', 'name', 'type', 'badge', 'default', 'body'],
+  'doc-steps': [],
+  'doc-step': ['marker', 'card', 'header', 'title', 'body'],
+  'doc-stats': [],
+  'doc-stat': ['label', 'value-row', 'value', 'diff', 'body'],
+  'doc-timeline': [],
+  'doc-milestone': ['header', 'marker', 'date', 'title', 'owner', 'status', 'body'],
+  'doc-matrix': [],
+  'doc-choice': ['sequence', 'question', 'note-toggle', 'note', 'other'],
+  'doc-option': [
+    'control',
+    'input',
+    'key',
+    'desc',
+    'recommended',
+    'other-label',
+    'other-hint',
+    'other-text',
+  ],
+  'doc-rating': ['question', 'scale', 'score-btn'],
+  'doc-tabs': ['strip', 'tab'],
+  'doc-tab': ['body'],
+  'doc-checklist': ['item', 'check'],
+  'doc-carousel': ['controls', 'prev-btn', 'next-btn', 'dots', 'dot'],
+  'doc-flow': ['arrow'],
+  'doc-flow-node': ['title', 'subtitle*'],
+  'doc-roadmap': [],
+  'doc-stage': ['header', 'badge', 'heading', 'title', 'subtitle', 'current-marker', 'body'],
+  'doc-code': [
+    'header',
+    'title',
+    'lang',
+    'copy',
+    'code',
+    'gutter',
+    'line-number',
+    'lines',
+    'line',
+    'feedback',
+  ],
+  'doc-diff': [
+    'header',
+    'filename',
+    'stat-add',
+    'stat-remove',
+    'code',
+    'row',
+    'old-number',
+    'new-number',
+    'sign',
+    'text',
+    'feedback',
+  ],
+  'doc-figure': ['content', 'caption', 'diagram-error', 'feedback'],
+  'doc-caption': [],
+  'doc-tree': ['list', 'node', 'connector', 'label', 'feedback'],
+  'doc-compare': ['column'],
+  'doc-table': ['table', 'scroll-hint'],
+  'doc-quote': ['body*', 'cite'],
+  'doc-collapse': ['summary', 'chevron', 'summary-text', 'body*'],
+};
+
+export const STATES: Readonly<Record<string, readonly string[]>> = {
+  'doc-page': ['toc-open', 'toc-docked'],
+  'doc-choice': ['answered', 'note-open', 'other-open'],
+  'doc-stage': ['open', 'current'],
+  'doc-flow-node': ['active'],
+  'doc-term': ['first-mention'],
+  'doc-collapse': ['open'],
+};
 
 export type TagName = keyof typeof TAGS;
 

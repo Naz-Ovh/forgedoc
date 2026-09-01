@@ -44,7 +44,7 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@11.13.0",
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsdown && npm run build:styles && npm run build:types",
     "build:styles": "node tools/build-styles.mjs",
@@ -56,7 +56,7 @@
     "test:visual:ci": "playwright test --grep-invert @pixel",
     "test:visual:update": "playwright test --update-snapshots",
     "preview": "node tools/make-preview.mjs",
-    "docs:reference": "node tools/gen-reference.mjs",
+    "docs:generate": "node tools/gen-docs.mjs",
     "lint": "biome lint . && npm run lint:no-shadow && npm run lint:styles && npm run lint:md",
     "lint:no-shadow": "node tools/check-no-shadow-dom.mjs",
     "lint:styles": "node tools/check-style-layers.mjs",

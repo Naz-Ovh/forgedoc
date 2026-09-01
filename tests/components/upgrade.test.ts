@@ -174,6 +174,26 @@ const CASES: readonly ComponentCase[] = [
     parts: ['list', 'node', 'label'],
   },
   {
+    tag: 'doc-table',
+    markup: `<doc-table size="sm" stack="auto">
+      <table>
+        <thead><tr><th>Variant</th><th>Format</th></tr></thead>
+        <tbody><tr><td>cdn</td><td>IIFE</td></tr></tbody>
+      </table>
+    </doc-table>`,
+    parts: ['table', 'scroll-hint'],
+  },
+  {
+    tag: 'doc-quote',
+    markup: `<doc-quote cite="§2.2">Never move author content.</doc-quote>`,
+    parts: ['cite'],
+  },
+  {
+    tag: 'doc-collapse',
+    markup: `<doc-collapse title="Detail" open><p>Body.</p></doc-collapse>`,
+    parts: ['summary', 'chevron', 'summary-text', 'body'],
+  },
+  {
     tag: 'doc-term',
     markup: `<p>Uses <doc-term href="https://example.com/a">ElementInternals</doc-term> here.</p>`,
     parts: [],

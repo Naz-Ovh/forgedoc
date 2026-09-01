@@ -15,10 +15,8 @@
   <doc-chips>
     <doc-chip kind="confirmed">Light DOM only — decided</doc-chip>
     <doc-chip kind="info">Runtime injected at build time</doc-chip>
-    <doc-chip kind="neutral">Answer the questions inline, then send the bucket back</doc-chip>
-    <doc-chip kind="open">Mermaid version pin still open</doc-chip>
-    <doc-chip kind="tentative">Draft RFC under review</doc-chip>
-    <doc-chip kind="rejected">Legacy XML syntax discarded</doc-chip>
+    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
+    <doc-chip kind="pending">Mermaid version pin still open</doc-chip>
   </doc-chips>
 
   <doc-owners>
@@ -43,6 +41,10 @@
 
     <doc-note kind="warn" title="Also fixed in this stage">
       <p>Table stacking below 1050px, which the reference document needs twice.</p>
+    </doc-note>
+
+    <doc-note kind="success" title="Already landed">
+      <p>The validator and the three build variants ship from one source tree.</p>
     </doc-note>
 
     <doc-note kind="danger" title="Do not do this">
@@ -72,14 +74,14 @@
     </doc-compare>
 
     <doc-compare columns="3">
-      <doc-list marker="dash">
-        <li>Dash marker item 1</li>
+      <doc-list marker="dot">
+        <li>Dot markers — the default</li>
       </doc-list>
       <doc-list marker="arrow">
         <li>Arrow markers</li>
       </doc-list>
-      <doc-list marker="bullet">
-        <li>Bullet markers</li>
+      <doc-list>
+        <li>No marker attribute, so also dot</li>
       </doc-list>
     </doc-compare>
 
@@ -93,8 +95,8 @@
       <doc-list marker="cross">
         <li>Cross markers</li>
       </doc-list>
-      <doc-list marker="dash">
-        <li>Dash markers</li>
+      <doc-list marker="dot">
+        <li>Dot markers</li>
       </doc-list>
     </doc-compare>
 
@@ -168,6 +170,18 @@
       <doc-param name="strict" type="boolean" default="false">
         <p>Enable strict linting warnings as hard build errors.</p>
       </doc-param>
+      <doc-param name="id" type="string" in="path" required>
+        <p>Plan identifier interpolated into the route.</p>
+      </doc-param>
+      <doc-param name="limit" type="integer" in="query" default="50">
+        <p>Maximum results per page.</p>
+      </doc-param>
+      <doc-param name="Authorization" type="string" in="header" required>
+        <p>Bearer credential for the request.</p>
+      </doc-param>
+      <doc-param name="markup" type="string" in="body" required>
+        <p>The document source, sent as the request body.</p>
+      </doc-param>
     </doc-params>
 
     <doc-steps>
@@ -202,6 +216,15 @@
       </doc-stat>
       <doc-stat label="Bundle Bloat Risk" value="High">
         <p>Preventing unbounded external vendor bundles.</p>
+      </doc-stat>
+      <doc-stat label="Validator Coverage" value="98%" trend="up" tone="good" diff="+6pp">
+        <p>Tone set explicitly rather than through <code>good</code>.</p>
+      </doc-stat>
+      <doc-stat label="Offline Payload" value="3.5 MB" trend="up" tone="bad" diff="+1.1 MB">
+        <p>Up is the wrong direction here, so the delta reads red.</p>
+      </doc-stat>
+      <doc-stat label="Open RFCs" value="4" trend="flat" tone="neutral" diff="0">
+        <p>Neither good nor bad — no colour.</p>
       </doc-stat>
     </doc-stats>
 
@@ -383,6 +406,50 @@
 
       <doc-figure type="image" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%2260%22%3E%3Crect%20width%3D%22240%22%20height%3D%2260%22%20fill%3D%22%2312907a%22%2F%3E%3C%2Fsvg%3E" alt="A solid teal rectangle" caption="Slide 2: Visual mockup card"></doc-figure>
     </doc-carousel>
+
+    <doc-figure type="html" caption="An isolated HTML mock, rendered in an iframe srcdoc">
+      &lt;div style="padding:12px;border:1px solid currentColor"&gt;Isolated markup&lt;/div&gt;
+    </doc-figure>
+  </doc-section>
+
+  <doc-section title="Tables, quotes and disclosures">
+    <doc-table size="md" stack="auto">
+      <caption>Build variants and what each one carries</caption>
+      <thead>
+        <tr><th>Variant</th><th>Format</th><th>Mermaid</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>cdn</td><td>IIFE</td><td>Loaded on demand</td></tr>
+        <tr><td>standalone</td><td>IIFE</td><td>Embedded</td></tr>
+        <tr><td>esm</td><td>ES</td><td>External import</td></tr>
+      </tbody>
+    </doc-table>
+
+    <doc-table size="sm" stack="never">
+      <thead>
+        <tr><th>Token</th><th>Default</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>--doc-space-unit</code></td><td>4px</td></tr>
+        <tr><td><code>--doc-measure</code></td><td>1200px</td></tr>
+      </tbody>
+    </doc-table>
+
+    <doc-quote cite="§2.2 — the constraint every component is built around">
+      Never move author content. Name it in place instead.
+    </doc-quote>
+
+    <doc-collapse title="The full markup contract, if you want it" sticky>
+      <p>Every tag, attribute and enumerated value lives in <code>src/core/contract.ts</code>.</p>
+      <doc-list kind="neutral">
+        <li>The validator reads it.</li>
+        <li>The CLI documentation commands render from it.</li>
+      </doc-list>
+    </doc-collapse>
+
+    <doc-collapse title="Closed by default, and not remembered">
+      <p>Without <code>sticky</code>, the <code>open</code> attribute wins on every load.</p>
+    </doc-collapse>
   </doc-section>
 
   <doc-section title="The roadmap">
@@ -411,8 +478,8 @@
   </doc-section>
 
   <doc-section title="Feedback &amp; Ratings">
-    <doc-rating question="Confidence level in delivering the unified docs toolkit:" scale="5" mode="numeric"></doc-rating>
-    <doc-rating question="Overall visual appeal:" scale="5" mode="stars"></doc-rating>
+    <doc-rating question="Confidence level in delivering the unified docs toolkit:" scale="5"></doc-rating>
+    <doc-rating question="Overall visual appeal:" scale="10"></doc-rating>
 
     <doc-choice mode="single" question="Should section numbers be CSS counters or real text nodes?">
       <doc-option recommended>

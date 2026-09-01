@@ -15,8 +15,24 @@ import { basename, dirname, extname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+import { isKnownTag } from '../src/core/contract.js';
 import { slugify } from '../src/core/slug.js';
 import {
+  elementDetail,
+  elementSummaries,
+  elementsJson,
+  globalAttributesJson,
+  normaliseTag,
+  renderCheatsheet,
+  renderElements,
+  renderInfo,
+  renderReference,
+  renderSearch,
+  searchDocs,
+  suggestTags,
+} from './docs.js';
+import {
+  availableThemes,
   type BundleFlavour,
   DEFAULT_THEME,
   injectAssets,
@@ -31,7 +47,36 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = HERE.endsWith('dist') ? HERE : join(HERE, '../dist');
 
 /** Commands supported by `forgedoc <command>`. */
-export type Command = 'build' | 'validate' | 'new' | 'version' | 'help';
+export type Command =
+  | 'build'
+  | 'validate'
+  | 'new'
+  | 'elements'
+  | 'info'
+  | 'cheatsheet'
+  | 'search'
+  | 'reference'
+  | 'themes'
+  | 'version'
+  | 'help';
+
+/**
+ * The read-only documentation commands.
+ *
+ * why they live in the CLI rather than a markdown file beside it: an authoring
+ * agent has the binary on PATH long before it knows which files the package
+ * shipped, and a file has to be kept in step by hand. These render from
+ * `src/core/contract.ts` — the same data the validator enforces — so the docs
+ * cannot describe markup that would fail the build.
+ */
+const DOCS_COMMANDS: readonly Command[] = [
+  'elements',
+  'info',
+  'cheatsheet',
+  'search',
+  'reference',
+  'themes',
+];
 
 interface ParsedArguments {
   readonly command: Command;
@@ -54,6 +99,18 @@ export async function run(argv: readonly string[]): Promise<number> {
       return runValidate(parsed);
     case 'new':
       return runNew(parsed);
+    case 'elements':
+      return runElements(parsed);
+    case 'info':
+      return runInfo(parsed);
+    case 'cheatsheet':
+      return runCheatsheet(parsed);
+    case 'search':
+      return runSearch(parsed);
+    case 'reference':
+      return runReference(parsed);
+    case 'themes':
+      return runThemes(parsed);
     case 'version':
       return runVersion(parsed);
     case 'help':
@@ -76,7 +133,14 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
     return { command: 'version', positionals: [], flags: new Map() };
   }
 
-  const knownCommands = new Set<Command>(['build', 'validate', 'new', 'version', 'help']);
+  const knownCommands = new Set<Command>([
+    'build',
+    'validate',
+    'new',
+    ...DOCS_COMMANDS,
+    'version',
+    'help',
+  ]);
   if (!knownCommands.has(first as Command)) {
     return { command: 'help', positionals: [], flags: new Map(), unknownCommand: first };
   }
@@ -114,7 +178,7 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
   return { command, positionals, flags };
 }
 
-const VALUE_FLAGS = new Set(['out', 'dir', 'format', 'theme']);
+const VALUE_FLAGS = new Set(['out', 'dir', 'format', 'theme', 'category']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // build
@@ -307,7 +371,7 @@ function skeleton(title: string, docId: string): string {
   </doc-header>
 
   <doc-chips>
-    <doc-chip kind="neutral">Answer the questions inline, then send the bucket back</doc-chip>
+    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
   </doc-chips>
 
   <doc-section title="What we are building">
@@ -340,6 +404,151 @@ function skeleton(title: string, docId: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// elements / info / cheatsheet / search / reference / themes
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The vocabulary, one line per element.
+ *
+ * Text output is markdown on purpose: an agent pipes it straight into its own
+ * context, and a human reads the same bytes in a terminal without a renderer.
+ */
+function runElements(parsed: ParsedArguments): number {
+  const categoryFlag = parsed.flags.get('category');
+  const category = typeof categoryFlag === 'string' ? categoryFlag : undefined;
+
+  if (isJson(parsed)) {
+    writeJson(elementsJson(category));
+    return 0;
+  }
+
+  process.stdout.write(renderElements(category));
+  return 0;
+}
+
+/** Everything about one element: attributes, parts, states, nesting, example. */
+function runInfo(parsed: ParsedArguments): number {
+  const query = parsed.positionals[0];
+  if (!query) {
+    process.stderr.write(
+      'forgedoc info: expected an element name, e.g. `forgedoc info doc-choice`.\n' +
+        '    `forgedoc elements` lists them; `forgedoc search <word>` finds one by what it does.\n',
+    );
+    return 1;
+  }
+
+  const tag = normaliseTag(query);
+  if (!isKnownTag(tag)) {
+    process.stderr.write(unknownElementMessage(query));
+    return 1;
+  }
+
+  if (isJson(parsed)) {
+    writeJson({
+      ...elementDetail(tag),
+      globalAttributes: globalAttributesJson(),
+    });
+    return 0;
+  }
+
+  process.stdout.write(renderInfo(tag));
+  return 0;
+}
+
+/**
+ * A near-miss is the common case — `doc-tab` for `doc-tabs`, `note` for
+ * `doc-note` — so spend the error message on candidates rather than on repeating
+ * what the user typed.
+ */
+function unknownElementMessage(query: string): string {
+  const suggestions = suggestTags(query);
+  const lines = [`forgedoc info: there is no element called "${query}".`];
+
+  if (suggestions.length > 0) {
+    lines.push(`    Did you mean: ${suggestions.map((tag) => `<${tag}>`).join(', ')}?`);
+  }
+  lines.push('    `forgedoc elements` lists every element.');
+
+  return `${lines.join('\n')}\n`;
+}
+
+/** The whole vocabulary on one page — the thing to keep open while authoring. */
+function runCheatsheet(parsed: ParsedArguments): number {
+  if (isJson(parsed)) {
+    writeJson(elementsJson());
+    return 0;
+  }
+
+  process.stdout.write(renderCheatsheet());
+  return 0;
+}
+
+/** Find an element by what it does, for when the tag name is not yet known. */
+function runSearch(parsed: ParsedArguments): number {
+  const query = parsed.positionals.join(' ').trim();
+  if (!query) {
+    process.stderr.write(
+      'forgedoc search: expected something to search for, e.g. `forgedoc search http endpoint`.\n',
+    );
+    return 1;
+  }
+
+  const hits = searchDocs(query);
+  if (isJson(parsed)) {
+    writeJson({ query, hits });
+    // why 0 rather than 1 on an empty result: "no element does that" is a valid
+    // answer to a valid question, and a harness reads the array, not the code.
+    return 0;
+  }
+
+  process.stdout.write(renderSearch(query));
+  return hits.length > 0 ? 0 : 1;
+}
+
+/** Every element in full, plus the styling and ARIA rules that span all of them. */
+function runReference(parsed: ParsedArguments): number {
+  if (isJson(parsed)) {
+    writeJson({
+      globalAttributes: globalAttributesJson(),
+      ...(elementsJson() as Record<string, unknown>),
+      elements: elementSummaries().map((summary) => elementDetail(summary.tag)),
+    });
+    return 0;
+  }
+
+  process.stdout.write(renderReference());
+  return 0;
+}
+
+/** The themes this installation can build with, named rather than guessed at. */
+async function runThemes(parsed: ParsedArguments): Promise<number> {
+  const themes = await availableThemes(DIST_DIR);
+
+  if (themes === null) {
+    const message = `no ${DIST_DIR}/themes — run \`npm run build\` first`;
+    if (isJson(parsed)) {
+      writeJson({ themes: [], default: DEFAULT_THEME, error: message });
+      return 1;
+    }
+    process.stderr.write(`forgedoc themes: ${message}.\n`);
+    return 1;
+  }
+
+  if (isJson(parsed)) {
+    writeJson({ themes, default: DEFAULT_THEME });
+    return 0;
+  }
+
+  const lines = themes.map((theme) => `  ${theme}${theme === DEFAULT_THEME ? '  (default)' : ''}`);
+  process.stdout.write(
+    `${lines.join('\n')}\n\n` +
+      'Pick one with `forgedoc build <file> --theme <name>`, or name it in the document:\n' +
+      '  <style>/*@DOC_CSS:<name>@*/</style>\n',
+  );
+  return 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // version
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -356,6 +565,12 @@ async function runVersion(parsed: ParsedArguments): Promise<number> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
+
+const isJson = (parsed: ParsedArguments): boolean => parsed.flags.get('format') === 'json';
+
+function writeJson(payload: unknown): void {
+  process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+}
 
 async function readSource(path: string): Promise<string | null> {
   try {
@@ -390,19 +605,32 @@ function escapeHtml(text: string): string {
 
 const USAGE = `Usage: forgedoc <command> [options]
 
-Commands:
-  forgedoc build <file.html>     Inject runtime assets into a plan document
+Authoring:
+  forgedoc new <name>            Scaffold a valid starting document
+    --dir=<path>                 Target directory (default: current directory)
+
+  forgedoc build <file.html>     Inject runtime assets into a document
     --offline                    Embed everything (Mermaid included) for file:// opening
-    --theme=<name>               Theme to apply: forgedoc (default), geist
+    --theme=<name>               Theme to apply (see \`forgedoc themes\`)
     --out=<file.html>            Output file path (default: .temp/<file>.html for offline)
     --no-validate                Skip validation before building
 
-  forgedoc validate <file.html>  Check a plan against the markup contract
+  forgedoc validate <file.html>  Check a document against the markup contract
     --format=json                Machine-readable output for agent harnesses
     --built                      Verify the file is a finished build (no placeholders)
 
-  forgedoc new <name>            Scaffold a valid starting document
-    --dir=<path>                 Target directory (default: current directory)
+Documentation — every element, generated from the same contract the validator
+enforces, so nothing here can describe markup that fails the build:
+
+  forgedoc cheatsheet            The whole vocabulary on one page
+  forgedoc elements              One line per element
+    --category=<name>            Limit to one group (Shell, Interactive, Content, …)
+  forgedoc info <element>        Attributes, parts, states, nesting and an example
+  forgedoc search <words>        Find an element by what it does
+  forgedoc reference             Every element in full, plus the styling rules
+  forgedoc themes                Themes this installation can build with
+
+  Each accepts --format=json.
 
   forgedoc version               Print the package version
   forgedoc help                  Show this message

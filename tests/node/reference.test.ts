@@ -1,10 +1,10 @@
 /**
- * `skills/better-plan/REFERENCE.md` is generated from the contract, so it can never drift from
- * the validator. This fails if the checked-in file is stale.
+ * `REFERENCE.md` and `CHEATSHEET.md` are generated from the contract, so neither
+ * can drift from the validator. This fails if either checked-in file is stale.
  *
- * why a staleness check rather than generating at build time: the reference is
- * read on GitHub, in an editor, and by an agent that has only the repository —
- * none of which run the build.
+ * why a staleness check rather than generating at build time: they are read on
+ * GitHub, in an editor, and by an agent that has only the repository — none of
+ * which run the build.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -18,25 +18,33 @@ import { TAG_NAMES, TAGS, type TagSpec } from '../../src/core/contract.js';
 const REFERENCE_PATH = fileURLToPath(
   new URL('../../skills/better-plan/REFERENCE.md', import.meta.url),
 );
-const GENERATOR = fileURLToPath(new URL('../../tools/gen-reference.mjs', import.meta.url));
+const CHEATSHEET_PATH = fileURLToPath(
+  new URL('../../skills/better-plan/CHEATSHEET.md', import.meta.url),
+);
+const GENERATOR = fileURLToPath(new URL('../../tools/gen-docs.mjs', import.meta.url));
 
 const committed = readFileSync(REFERENCE_PATH, 'utf8');
+const committedCheatsheet = readFileSync(CHEATSHEET_PATH, 'utf8');
 
 afterAll(() => {
   // The generator writes in place; restore whatever was committed so a failing
   // run never leaves the working tree dirty.
   writeFileSync(REFERENCE_PATH, committed, 'utf8');
+  writeFileSync(CHEATSHEET_PATH, committedCheatsheet, 'utf8');
 });
 
 describe('skills/better-plan/REFERENCE.md', () => {
   it('is up to date with src/core/contract.ts', () => {
     execFileSync(process.execPath, [GENERATOR], { stdio: 'pipe' });
-    const regenerated = readFileSync(REFERENCE_PATH, 'utf8');
 
     expect(
-      regenerated,
-      'skills/better-plan/REFERENCE.md is stale — run `npm run docs:reference` and commit the result.',
+      readFileSync(REFERENCE_PATH, 'utf8'),
+      'skills/better-plan/REFERENCE.md is stale — run `npm run docs:generate` and commit the result.',
     ).toBe(committed);
+    expect(
+      readFileSync(CHEATSHEET_PATH, 'utf8'),
+      'skills/better-plan/CHEATSHEET.md is stale — run `npm run docs:generate` and commit the result.',
+    ).toBe(committedCheatsheet);
   });
 
   it('documents every tag, including the generated and child-only ones', () => {

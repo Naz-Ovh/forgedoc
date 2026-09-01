@@ -12,9 +12,28 @@ Do not write `<style>`, `<script>`, `class=`, `id=`, `role=`, `aria-*`, option
 letters (`A`/`B`/`C`), section numbers (`1.2.1`), or stage numbers. Every one of
 those is derived. Writing them by hand either fails the build or goes stale.
 
-Read `CHEATSHEET.md` for the full tag list. It fits on one page; keep it open.
-`REFERENCE.md`, beside it, is the per-attribute detail — reach for it only when
-the cheatsheet leaves a question open.
+## Looking the markup up
+
+The CLI carries the documentation, generated from the same contract
+`forgedoc validate` enforces — so nothing it tells you can fail the build.
+
+- `forgedoc cheatsheet` — the whole vocabulary on one page.
+- `forgedoc elements` — one line per element; `--category=<name>` narrows it.
+- `forgedoc info doc-choice` — everything about one element.
+- `forgedoc search http endpoint` — "which element does X?"
+- `forgedoc reference` — every element in full, plus the styling and ARIA rules.
+- `forgedoc themes` — the themes this installation can build with.
+
+Every one accepts `--format=json`.
+
+Start with `forgedoc cheatsheet` and keep it open; it fits on one page. Reach for
+`forgedoc info <element>` when the cheatsheet leaves a question open — it carries
+the attribute table, the `data-part` styling surface and a copy-pastable example.
+When you do not know the element's name, `forgedoc search` matches on what an
+element does, not just on what it is called.
+
+`CHEATSHEET.md` and `REFERENCE.md` beside this file are the same bytes, committed
+for when the CLI is not on PATH.
 
 ## File naming convention
 
@@ -38,7 +57,7 @@ the cheatsheet leaves a question open.
    If the user asked for a particular theme, name it in that first line —
    `<style>/*@DOC_CSS:geist@*/</style>`. The build then compiles that theme in.
    Leave it bare unless they asked; the default is `forgedoc`. Run
-   `forgedoc build --theme wrong` to see the list of themes that exist.
+   `forgedoc themes` for the list.
 
 2. Write the document inside a single `<doc-page doc-id="a-unique-slug">`.
    The `doc-id` is mandatory — it namespaces the reader's stored answers, and

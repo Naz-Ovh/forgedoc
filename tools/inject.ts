@@ -230,20 +230,31 @@ export async function resolveAssets(
   return { mode: 'embed', css, js };
 }
 
-/** Fail with the list of themes that do exist, rather than a bare "not found". */
-async function requireTheme(theme: string, from: string): Promise<void> {
-  let available: string[];
+/**
+ * The themes this installation can compile in, by name.
+ *
+ * `null` when `dist/themes` is not there at all — a built package always has it,
+ * so the distinction is "not built yet" rather than "no themes", and the two want
+ * different messages.
+ */
+export async function availableThemes(from: string): Promise<string[] | null> {
   try {
-    available = (await readdir(resolve(from, 'themes')))
+    return (await readdir(resolve(from, 'themes')))
       .filter((entry) => entry.endsWith('.css'))
       .map((entry) => entry.replace(/\.css$/, ''))
       .sort();
   } catch {
-    // No dist/themes at all: `readBundle`'s "run the build first" message is
-    // the more useful one, and the offline path will produce it.
-    return;
+    return null;
   }
+}
 
+/** Fail with the list of themes that do exist, rather than a bare "not found". */
+async function requireTheme(theme: string, from: string): Promise<void> {
+  const available = await availableThemes(from);
+
+  // No dist/themes at all: `readBundle`'s "run the build first" message is
+  // the more useful one, and the offline path will produce it.
+  if (available === null) return;
   if (available.includes(theme)) return;
 
   throw new InjectionError(
