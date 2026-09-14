@@ -20,12 +20,16 @@
     width: max-content;
     max-width: calc(100vw - var(--doc-space-8));
     border: var(--doc-rule);
+
     border-radius: var(--doc-radius-lg);
-    background: color-mix(in oklab, var(--doc-surface-1) 92%, transparent);
-    backdrop-filter: blur(10px);
+
+    background: var(--doc-surface-1);
+
+    backdrop-filter: none;
+
     box-shadow: var(--doc-shadow-1);
     font-size: var(--doc-text-sm);
-  }
+    }
 
   doc-toc [data-part="header"] {
     gap: var(--doc-space-2);
@@ -39,12 +43,16 @@
     border-radius: var(--doc-radius-sm);
     background: none;
     color: var(--doc-text-2);
-    font-size: var(--doc-text-xs);
-    font-weight: 620;
-    letter-spacing: var(--doc-tracking-wide);
-    text-transform: uppercase;
+
+    font-size: var(--doc-text-sm);
+
+    font-weight: 500;
+
+    letter-spacing: normal;
+
+    text-transform: none;
     text-align: start;
-  }
+    }
 
   doc-toc [data-part="toggle"]::before {
     font-size: var(--doc-text-sm);
@@ -113,12 +121,13 @@
 
   doc-toc [data-part="entry"] {
     gap: var(--doc-space-2);
-    padding: calc(var(--doc-space-unit) * 0.75) var(--doc-space-2);
+
+    padding: var(--doc-space-2) var(--doc-space-3);
     border-radius: var(--doc-radius-sm);
     color: var(--doc-text-2);
     text-decoration: none;
     line-height: var(--doc-leading-tight);
-  }
+    }
 
   doc-toc [data-part="entry"]:hover {
     background: var(--doc-surface-2);
@@ -126,10 +135,12 @@
   }
 
   doc-toc [data-part="entry"][aria-current] {
-    background: var(--doc-accent-tint);
-    color: var(--doc-accent-text);
-    font-weight: 600;
-  }
+    background: var(--doc-surface-2);
+
+    color: var(--doc-text-1);
+
+    font-weight: 500;
+    }
 
   doc-toc [data-part="entry-number"] {
     font-variant-numeric: var(--doc-numeric);

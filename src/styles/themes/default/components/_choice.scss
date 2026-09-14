@@ -1,0 +1,212 @@
+/*
+ * `doc-choice` / `doc-option` — the question card.
+ *
+ * The card is the design's; the option rows are its card treatment at one step
+ * in, and selection is the accent tint-plus-edge pair rather than a fill. That
+ * matters here more than anywhere else in the vocabulary: an option holds the
+ * author's own prose, and a saturated fill behind it would put reversed text
+ * under whatever inline code or link they wrote.
+ *
+ * MUST (§8.4): every free-text field shares one visual style — same border,
+ * padding, radius and background as `--doc-field-*` below.
+ */
+@layer doc.theme {
+  doc-choice {
+    margin-block: var(--doc-space-6);
+    padding: var(--doc-space-4-5) var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+  }
+
+  doc-choice [data-part="sequence"] {
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 550;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-choice [data-part="question"] {
+    margin-block: var(--doc-space-1) var(--doc-space-3-5);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-lg);
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  /*
+   * Three columns, not two.
+   *
+   * why: `base/` gives the option `auto 1fr` and drops `[data-part="desc"]`
+   * and `[data-part="recommended"]` into column 2, which auto-places them onto
+   * rows 2 and 3 — so a recommended option costs three rows and a full row-gap
+   * for a pill holding one word. A third track lets the pill share row 1 with
+   * the label it belongs to, which is where the design puts a chip anyway, and
+   * the option loses a whole row of height.
+   */
+  doc-option {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    /* 2px of row gap: the label and its description are one thought, and the
+     * description already carries its own line-height. */
+    gap: 2px var(--doc-space-3);
+    margin-block: var(--doc-space-2);
+    padding: var(--doc-space-3) var(--doc-space-3-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-option:hover {
+    border-color: var(--doc-border-2);
+    background: color-mix(in oklab, var(--doc-accent-400) 4%, var(--doc-surface-1));
+  }
+
+  doc-option[data-selected] {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+    color: var(--doc-text-1);
+    print-color-adjust: exact;
+  }
+
+  doc-option [data-part="control"] {
+    gap: var(--doc-space-2);
+  }
+
+  doc-option [data-part="input"] {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    accent-color: var(--doc-accent-solid);
+  }
+
+  doc-option [data-part="key"] {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+  }
+
+  doc-option[data-selected] [data-part="key"] {
+    color: var(--doc-accent-text);
+  }
+
+  doc-option [data-part="desc"] {
+    grid-column: 2 / -1;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+  }
+
+  doc-option[data-selected] [data-part="desc"] {
+    color: var(--doc-text-2);
+  }
+
+  doc-option [data-part="recommended"] {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    padding: 3px var(--doc-space-2-5);
+    border: var(--doc-border-width) solid var(--doc-accent-200);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-100);
+    color: var(--doc-accent-text);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+    line-height: 1.4;
+    print-color-adjust: exact;
+  }
+
+  doc-option[data-part="other"] [data-part="other-label"] {
+    font-weight: 550;
+  }
+
+  doc-option[data-part="other"] [data-part="other-hint"] {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-meta);
+  }
+
+  doc-option[data-part="other"] [data-part="other-text"] {
+    grid-column: 2 / -1;
+    margin-block-start: var(--doc-space-2-5);
+  }
+
+  doc-choice [data-part="note-toggle"] {
+    margin-block-start: var(--doc-space-2);
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border: 0;
+    border-radius: var(--doc-radius);
+    background: transparent;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+  }
+
+  doc-choice [data-part="note-toggle"]:hover {
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+  }
+
+  doc-choice [data-part="note"] {
+    margin-block-start: var(--doc-space-2);
+  }
+
+  doc-choice:state(note-open) [data-part="note-toggle"] {
+    color: var(--doc-accent-text);
+  }
+
+  /* MUST (§8.4): one field style, shared with the bucket's composer. */
+  doc-choice textarea {
+    width: 100%;
+    padding: var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-1);
+    font-family: inherit;
+    font-size: var(--doc-text-ui);
+    line-height: 1.55;
+  }
+
+  doc-choice textarea::placeholder {
+    color: var(--doc-default-faint);
+  }
+
+  doc-choice textarea:focus-visible {
+    border-color: var(--doc-accent-line);
+    outline: 2px solid var(--doc-accent-edge);
+    outline-offset: 1px;
+  }
+
+  @media (max-width: 720px) {
+    doc-choice {
+      padding: var(--doc-space-4-5);
+    }
+
+    doc-option {
+      padding: var(--doc-space-3);
+    }
+
+    /*
+     * Too narrow for a third track: both trailing chips drop under the label.
+     * Left in row 1 they are `auto` columns with a min-content floor, so the
+     * option would widen the page rather than wrap.
+     */
+    doc-option[data-part="other"] [data-part="other-hint"],
+    doc-option [data-part="recommended"] {
+      grid-column: 2 / -1;
+      grid-row: auto;
+      justify-self: start;
+    }
+  }
+}

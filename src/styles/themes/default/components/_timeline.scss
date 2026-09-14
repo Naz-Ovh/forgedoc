@@ -1,0 +1,92 @@
+/*
+ * `doc-timeline` / `doc-milestone` — delivery milestones.
+ *
+ * This is the design's roadmap block at its most literal: an 11px filled dot
+ * with a soft ring, a quiet 2px connector, a mono date in the faint tier, and
+ * a tinted status pill. No card — a timeline is a list, and boxing each row
+ * would double the number of edges on the page.
+ */
+
+@layer doc.theme {
+  doc-timeline {
+    gap: var(--doc-space-5);
+    margin-block: var(--doc-space-6);
+    padding-inline-start: var(--doc-space-4);
+    border-inline-start: 2px solid var(--doc-border-1);
+  }
+
+  doc-milestone {
+    padding-inline-start: var(--doc-space-5);
+  }
+
+  doc-milestone [data-part="header"] {
+    gap: var(--doc-space-2-5);
+    margin-block-end: var(--doc-space-1);
+  }
+
+  doc-milestone [data-part="marker"] {
+    position: absolute;
+    left: calc(-1 * var(--doc-space-4) - 6px);
+    top: 6px;
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--doc-default-faint);
+    border-radius: 50%;
+    background: var(--doc-surface-0);
+    print-color-adjust: exact;
+  }
+
+  doc-milestone [data-part="marker"][data-status="completed"] {
+    border-color: var(--doc-success-line);
+    background: var(--doc-success-line);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--doc-success-400) 16%, transparent);
+  }
+
+  doc-milestone [data-part="marker"][data-status="in-progress"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-solid);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--doc-accent-400) 18%, transparent);
+  }
+
+  doc-milestone [data-part="marker"][data-status="delayed"] {
+    border-color: var(--doc-danger-line);
+    background: var(--doc-danger-line);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--doc-danger-400) 16%, transparent);
+  }
+
+  doc-milestone [data-part="date"] {
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 500;
+  }
+
+  doc-milestone [data-part="title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+  }
+
+  doc-milestone [data-part="owner"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-meta);
+  }
+
+  doc-milestone [data-part="status"] {
+    padding: 3px var(--doc-space-2-5);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+    print-color-adjust: exact;
+  }
+
+  doc-milestone [data-part="body"] {
+    max-width: var(--doc-measure-prose);
+    margin-block-start: 7px;
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+  }
+}

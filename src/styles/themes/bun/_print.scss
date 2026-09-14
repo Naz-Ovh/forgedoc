@@ -1,0 +1,16 @@
+/* Bun's screen depth collapses to crisp black, white and pink on paper. */
+
+@layer doc.theme {
+  @media print {
+    doc-page {
+      --doc-shadow-1: none;
+      --doc-shadow-2: none;
+      background: #ffffff;
+    }
+
+    doc-header,
+    doc-section > [data-part="heading"] {
+      break-after: avoid;
+    }
+  }
+}

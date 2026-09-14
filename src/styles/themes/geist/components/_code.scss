@@ -18,27 +18,35 @@
 
   doc-code [data-part="header"] {
     gap: var(--doc-space-3);
-    padding: var(--doc-space-2) var(--doc-space-3);
+
+    padding: var(--doc-space-3) var(--doc-space-4);
     border-block-end: var(--doc-border-width) solid var(--doc-code-border);
-    background: color-mix(in oklab, var(--doc-code-surface) 80%, var(--doc-surface-2));
+
+    background: var(--doc-code-surface);
+
     font-size: var(--doc-text-xs);
-  }
+    }
 
   doc-code [data-part="header"] [data-part="title"] {
     font-family: var(--doc-font-mono);
-    font-weight: 620;
+    font-weight: 600;
     color: var(--doc-code-text);
   }
 
   doc-code [data-part="lang"] {
     padding: 0 var(--doc-space-2);
     border-radius: var(--doc-radius-pill);
-    background: var(--doc-surface-3);
-    color: var(--doc-text-2);
-    font-weight: 640;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
+
+    background: none;
+
+    color: var(--doc-code-comment);
+
+    font-weight: 400;
+
+    letter-spacing: normal;
+
+    text-transform: none;
+    }
 
   doc-code [data-part="copy"] {
     margin-inline-start: auto;
@@ -56,23 +64,27 @@
   }
 
   doc-code [data-part="gutter"] {
-    padding: var(--doc-space-3) var(--doc-space-2) var(--doc-space-3) var(--doc-space-3);
-    border-inline-end: var(--doc-border-width) solid var(--doc-code-border);
+    padding: var(--doc-space-4) var(--doc-space-3);
+
+    border-inline-end: 0;
     color: var(--doc-code-gutter);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-sm);
-    line-height: var(--doc-leading-tight);
+
+    line-height: 1.5;
     text-align: end;
-  }
+    }
 
   doc-code [data-part="code"] {
     margin: 0;
-    padding: var(--doc-space-3);
+
+    padding: var(--doc-space-4);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-sm);
-    line-height: var(--doc-leading-tight);
+
+    line-height: 1.5;
     tab-size: 2;
-  }
+    }
 
   doc-code [data-part="code"] code {
     padding: 0;
@@ -94,8 +106,9 @@
   /* ── Prism token theme, driven entirely by --doc-code-* tokens ─────────── */
   doc-code :where(.token.comment, .token.prolog, .token.cdata) {
     color: var(--doc-code-comment);
-    font-style: italic;
-  }
+
+    font-style: normal;
+    }
 
   doc-code :where(.token.punctuation, .token.operator) {
     color: var(--doc-code-punctuation);
@@ -118,10 +131,10 @@
   }
 
   doc-code :where(.token.deleted) {
-    color: var(--doc-danger-600);
+    color: var(--doc-danger-text);
   }
 
   doc-code :where(.token.inserted) {
-    color: var(--doc-success-600);
+    color: var(--doc-success-text);
   }
 }

@@ -1,0 +1,653 @@
+/*
+ * The feedback bucket.
+ *
+ * These are the Svelte panel's styles, and they live here rather than in a
+ * `<style>` block inside the component (§10.1). That keeps them inside the
+ * layer system, where the `--doc-*` tokens reach them and where a single line
+ * of unlayered author CSS still overrides them.
+ *
+ * Two controls from the design carry the whole panel: its primary CTA — accent
+ * fill, on-accent ink, 9px radius — for the one action that commits (Copy,
+ * Add comment, Reveal), and its secondary button — card surface, hairline
+ * border — for everything else. Nothing here is inverted to ink, because the
+ * design never does that.
+ */
+
+@layer doc.theme {
+  [data-part="bucket-trigger"] {
+    gap: var(--doc-space-2-5);
+    min-height: 2.5rem;
+    padding: var(--doc-space-2-5) var(--doc-space-4-5);
+    border: 0;
+    border-radius: var(--doc-radius);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  /*
+   * An inverted pill, not a wash of the trigger's own ink.
+   *
+   * why: a 22% white wash over the accent lands on a mid-tone that neither
+   * white nor the accent reads against — it measured 3.2:1 on the emerald
+   * accent. Swapping the two colours makes the badge's contrast identical to
+   * the button's by construction, whatever the accent is set to.
+   */
+  [data-part="bucket-count"] {
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding-inline: 0.35em;
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-on-solid);
+    color: var(--doc-accent-text);
+    font-weight: 650;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  /*
+   * The trigger while selection commenting is off.
+   *
+   * The fill is left alone deliberately. The count is the reason this button
+   * exists, and hollowing the pill out to signal a preference would cost the
+   * reader the one thing on it that must stay legible from across the page —
+   * so the state is carried by an added mark rather than by taking emphasis
+   * away from what is already there.
+   */
+  [data-part="bucket-trigger-muted"] {
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 1.5px solid currentcolor;
+    border-radius: 50%;
+    opacity: 0.75;
+  }
+
+  [data-part="bucket-trigger-muted"]::after {
+    border-block-start: 1.5px solid currentcolor;
+  }
+
+  /*
+  * The review panel.
+  *
+  * `min-height` matters as much as `max-height`: with only a cap, a panel
+  * holding one item collapsed to a strip barely taller than its own header,
+  * and the reader could not see the list they had opened it to read. It now
+  * always opens at a size worth opening.
+  */
+  [data-part="bucket-panel"] {
+    width: min(30rem, calc(100vw - var(--doc-space-8)));
+    min-height: min(27rem, calc(100vh - var(--doc-space-20)));
+    max-height: min(42rem, calc(100vh - var(--doc-space-20)));
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  [data-part="bucket-header"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-3-5) var(--doc-space-4-5);
+    border-block-end: var(--doc-rule);
+    background: var(--doc-surface-2);
+  }
+
+  [data-part="bucket-title"] {
+    color: var(--doc-text-1);
+    font-weight: 650;
+  }
+
+  [data-part="bucket-close"] {
+    border: 0;
+    background: none;
+    color: var(--doc-text-3);
+  }
+
+  [data-part="bucket-close"]:hover {
+    color: var(--doc-text-1);
+  }
+
+  /* ── The selection-composer switch, in the title row ────────────────────── */
+  [data-part="bucket-selection-toggle"] {
+    /* Padding rather than bare edges: the switch is 16px tall, and the control
+       around it has to be big enough to hit without aiming. */
+    padding: var(--doc-space-2);
+    margin-inline: calc(var(--doc-space-2) * -1);
+    border: 0;
+    border-radius: var(--doc-radius-sm);
+    background: none;
+    font: inherit;
+  }
+
+  [data-part="bucket-switch"] {
+    width: 1.75rem;
+    height: 1rem;
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-border-3);
+    transition: background var(--doc-transition);
+  }
+
+  [data-part="bucket-switch"]::after {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    /* The knob has to read against both track colours, so it tracks the page
+       surface rather than a fixed white. */
+    background: var(--doc-surface-1);
+    translate: 0.125rem -50%;
+    transition: translate var(--doc-transition);
+  }
+
+  [data-part="bucket-selection-toggle"][aria-pressed="true"] [data-part="bucket-switch"] {
+    background: var(--doc-accent-solid);
+  }
+
+  [data-part="bucket-selection-toggle"][aria-pressed="true"] [data-part="bucket-switch"]::after {
+    translate: 0.875rem -50%;
+  }
+
+  /* The design's keycap, at the size chrome wants it. */
+  [data-part="bucket-shortcut"] {
+    flex: none;
+    padding: 2px var(--doc-space-1-5);
+    border: var(--doc-rule);
+    border-block-end-width: 2px;
+    border-radius: 5px;
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 600;
+  }
+
+  /*
+   * Sits directly above the trigger, matching its inline edge, so the
+   * confirmation appears where the reader's attention already is.
+   */
+  [data-part="bucket-flash"] {
+    inset-block-end: calc(var(--doc-space-12) + var(--doc-space-5));
+    inset-inline-end: var(--doc-space-5);
+    margin: 0;
+    padding: var(--doc-space-2-5) var(--doc-space-3-5);
+    border-radius: var(--doc-radius);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  [data-part="bucket-warning"] {
+    margin: 0;
+    padding: var(--doc-space-2-5) var(--doc-space-4-5);
+    background: var(--doc-warn-tint);
+    color: var(--doc-warn-text);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+  }
+
+  [data-part="bucket-empty"] {
+    margin: 0;
+    padding: var(--doc-space-6);
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-ui);
+    text-align: center;
+  }
+
+  [data-part="bucket-list"] {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  [data-part="bucket-item"] {
+    gap: var(--doc-space-1);
+    border-block-end: var(--doc-rule);
+  }
+
+  [data-part="bucket-item-body"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-3) var(--doc-space-4-5);
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    transition: background-color var(--doc-transition);
+  }
+
+  [data-part="bucket-item-body"]:hover {
+    background: color-mix(in oklab, var(--doc-accent-400) 4%, var(--doc-surface-1));
+  }
+
+  [data-part="bucket-item-index"] {
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-variant-numeric: var(--doc-numeric);
+    line-height: 1.9;
+  }
+
+  [data-part="bucket-item-text"] {
+    gap: 2px;
+    min-width: 0;
+  }
+
+  [data-part="bucket-item-heading"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-2xs);
+    line-height: var(--doc-leading-tight);
+    -webkit-line-clamp: 2;
+  }
+
+  [data-part="bucket-item-answer"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+    line-height: var(--doc-leading-tight);
+  }
+
+  [data-part="bucket-item-at"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-2xs);
+  }
+
+  [data-part="bucket-item-orphaned"] {
+    color: var(--doc-warn-text);
+    font-size: var(--doc-text-2xs);
+    font-weight: 600;
+  }
+
+  [data-part="bucket-item-remove"] {
+    padding: var(--doc-space-3) var(--doc-space-3) 0 0;
+    border: 0;
+    background: none;
+    color: var(--doc-default-faint);
+  }
+
+  [data-part="bucket-item-remove"]:hover {
+    color: var(--doc-danger-text);
+  }
+
+  [data-part="bucket-actions"] {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-4);
+    border-block-start: var(--doc-rule);
+    background: var(--doc-surface-2);
+  }
+
+  [data-part="bucket-actions"] button {
+    min-height: 2rem;
+    padding: 7px var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+    box-shadow: var(--doc-shadow-1);
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="bucket-actions"] button:hover {
+    border-color: var(--doc-border-2);
+    color: var(--doc-text-1);
+  }
+
+  /* Ordered after the shared button rule inside the same layer, so it wins on
+  order rather than on `!important` — which the layer system makes needless. */
+  [data-part="bucket-actions"] [data-part="bucket-copy"] {
+    border-color: transparent;
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    font-weight: 600;
+  }
+
+  [data-part="bucket-actions"] [data-part="bucket-copy"]:hover {
+    border-color: transparent;
+    background: var(--doc-accent-800);
+    color: var(--doc-accent-on-solid);
+  }
+
+  /* ── The comment composer ───────────────────────────────────────────────── */
+  /*
+  * `width: max-content` rather than a fixed width, so the popover grows with
+  * its textarea: the composer resizes on both axes, and a box that stayed
+  * 22rem wide would clip a reader who dragged it wider.
+  *
+  * The start offset is clamped rather than used raw. A block's Comment button
+  * sits in the block's *right* corner, so anchoring the composer to it put the
+  * whole thing off the edge of the window — half of it unreachable, including
+  * the Add comment button.
+  */
+  [data-part="bucket-popover"] {
+    /* Room the composer needs; the clamp below keeps that much on screen. */
+    --doc-popover-reserve: 29rem;
+    width: max-content;
+    max-width: calc(100vw - var(--doc-space-8));
+    padding: var(--doc-space-3-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  [data-part="bucket-popover-target"] {
+    max-width: 24rem;
+    margin: 0 0 var(--doc-space-2);
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-2xs);
+  }
+
+  [data-part="bucket-popover-quote"] {
+    color: var(--doc-text-2);
+    font-weight: 550;
+    -webkit-line-clamp: 2;
+  }
+
+  /*
+  * MUST: resizable on both axes. A comment on a plan is often a paragraph, and
+  * the reader is the only one who knows how much room they need for it.
+  *
+  * MUST (§8.4): the same field style as `doc-choice`'s textareas.
+  */
+  [data-part="bucket-draft"] {
+    width: min(26rem, calc(100vw - var(--doc-space-12)));
+    min-width: 14rem;
+    max-width: calc(100vw - var(--doc-space-12));
+    min-height: 5rem;
+    padding: var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-1);
+    font-family: inherit;
+    font-size: var(--doc-text-ui);
+    line-height: 1.55;
+  }
+
+  [data-part="bucket-draft"]::placeholder {
+    color: var(--doc-default-faint);
+  }
+
+  [data-part="bucket-draft"]:focus-visible {
+    border-color: var(--doc-accent-line);
+    outline: 2px solid var(--doc-accent-edge);
+    outline-offset: 1px;
+  }
+
+  [data-part="bucket-popover-actions"] {
+    gap: var(--doc-space-2);
+    margin-block-start: var(--doc-space-2-5);
+  }
+
+  [data-part="bucket-popover-hint"] {
+    margin-inline-start: auto;
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-2xs);
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  [data-part="bucket-save"] {
+    min-height: 2rem;
+    padding: 7px var(--doc-space-4);
+    border: 0;
+    border-radius: var(--doc-radius);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+  }
+
+  [data-part="bucket-save"]:hover {
+    background: var(--doc-accent-800);
+  }
+
+  [data-part="bucket-cancel"] {
+    min-height: 2rem;
+    padding: 7px var(--doc-space-3-5);
+    border: 0;
+    background: none;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+  }
+
+  [data-part="bucket-cancel"]:hover {
+    color: var(--doc-text-1);
+  }
+
+  /* ── The detail window ──────────────────────────────────────────────────── */
+  [data-part="detail-backdrop"] {
+    background: light-dark(rgb(24 22 60 / 30%), rgb(0 0 0 / 58%));
+    backdrop-filter: blur(3px);
+  }
+
+  /*
+  * Deliberately large: this window exists to show the document text and the
+  * reader's own words side by side, and a comparison that has to be scrolled
+  * one pane at a time is not a comparison.
+  */
+  [data-part="detail"] {
+    width: min(58rem, calc(100vw - var(--doc-space-8)));
+    /* A fixed generous height, so the two panes stay aligned from item to item
+    instead of the window jumping about as the reader steps through them. */
+    min-height: min(30rem, calc(100vh - var(--doc-space-12)));
+    max-height: min(44rem, calc(100vh - var(--doc-space-12)));
+    padding: var(--doc-space-5) var(--doc-space-6-5) var(--doc-space-4-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  [data-part="detail-header"] {
+    gap: var(--doc-space-4);
+  }
+
+  [data-part="detail-heading"] {
+    gap: var(--doc-space-3);
+    font-size: var(--doc-text-2xs);
+    font-weight: 650;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  [data-part="detail-kind"] {
+    padding: 2px var(--doc-space-2-5);
+    border: var(--doc-border-width) solid var(--doc-accent-200);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-100);
+    color: var(--doc-accent-text);
+    font-weight: 550;
+    letter-spacing: normal;
+  }
+
+  [data-part="detail-at"] {
+    color: var(--doc-default-faint);
+    font-weight: 550;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  [data-part="detail-close"] {
+    border: 0;
+    background: none;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-md);
+  }
+
+  [data-part="detail-close"]:hover {
+    color: var(--doc-text-1);
+  }
+
+  [data-part="detail-title"] {
+    margin: var(--doc-space-2-5) 0 var(--doc-space-4);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-lg);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+    letter-spacing: -0.01em;
+  }
+
+  [data-part="detail-panes"] {
+    gap: var(--doc-space-4);
+    min-height: 0;
+  }
+
+  [data-part="detail-pane"] {
+    gap: var(--doc-space-2-5);
+    min-height: 0;
+    padding: var(--doc-space-4-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-2);
+  }
+
+  /* The reader's own words sit on the card surface; the document quote sits on
+   * the muted one, so the two panes are told apart before either is read. */
+  [data-part="detail-pane"][data-side="feedback"] {
+    background: var(--doc-surface-1);
+  }
+
+  [data-part="detail-pane-title"] {
+    margin: 0;
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-2xs);
+    font-weight: 650;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  [data-part="detail-context"] {
+    margin: 0;
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    line-height: var(--doc-leading);
+  }
+
+  [data-part="detail-quote"] {
+    padding: 1px 2px;
+    border-radius: 2px;
+    background: var(--doc-highlight-bg);
+    color: var(--doc-highlight-text);
+    font-weight: 550;
+  }
+
+  [data-part="detail-block"] {
+    margin: 0;
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    line-height: 1.7;
+  }
+
+  [data-part="detail-options"] {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  [data-part="detail-option"] {
+    gap: var(--doc-space-2-5);
+    padding-block: var(--doc-space-1);
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-ui);
+  }
+
+  [data-part="detail-option"][data-chosen] {
+    color: var(--doc-text-1);
+    font-weight: 550;
+  }
+
+  [data-part="detail-option-mark"] {
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-block-start: 0.28rem;
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-pill);
+  }
+
+  [data-part="detail-option"][data-chosen] [data-part="detail-option-mark"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-solid);
+    box-shadow: inset 0 0 0 2px var(--doc-surface-1);
+  }
+
+  [data-part="detail-feedback"],
+  [data-part="detail-note"] {
+    margin: 0;
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-md);
+    line-height: var(--doc-leading);
+  }
+
+  [data-part="detail-note"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+  }
+
+  [data-part="detail-orphaned"] {
+    margin: 0;
+    padding: var(--doc-space-2-5);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-warn-tint);
+    color: var(--doc-warn-text);
+    font-size: var(--doc-text-2xs);
+    font-weight: 550;
+  }
+
+  [data-part="detail-actions"] {
+    gap: var(--doc-space-2);
+    margin-block-start: var(--doc-space-4);
+  }
+
+  [data-part="detail-actions"] button {
+    min-height: 2rem;
+    padding: 7px var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+    box-shadow: var(--doc-shadow-1);
+  }
+
+  [data-part="detail-actions"] button:hover {
+    border-color: var(--doc-border-2);
+    color: var(--doc-text-1);
+  }
+
+  [data-part="detail-actions"] button:disabled {
+    opacity: 0.5;
+  }
+
+  [data-part="detail-reveal"] {
+    border-color: transparent;
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    font-weight: 600;
+  }
+
+  [data-part="detail-reveal"]:hover {
+    border-color: transparent;
+    background: var(--doc-accent-800);
+    color: var(--doc-accent-on-solid);
+  }
+
+  [data-part="detail-remove"] {
+    color: var(--doc-danger-text);
+  }
+
+  [data-part="detail-remove"]:hover {
+    border-color: var(--doc-danger-edge);
+    color: var(--doc-danger-text);
+  }
+
+  [data-part="detail-done"] {
+    margin-inline-start: auto;
+  }
+}

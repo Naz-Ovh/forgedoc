@@ -1,0 +1,90 @@
+/* `doc-steps` / `doc-step` — Geist theme vertical guide. */
+
+@layer doc.theme {
+  doc-steps {
+    margin-block: var(--doc-space-6);
+    gap: var(--doc-space-4);
+  }
+
+  doc-step {
+    grid-template-columns: var(--doc-space-8) 1fr;
+    gap: var(--doc-space-4);
+    align-items: start;
+  }
+
+  doc-step::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: calc(var(--doc-space-8) / 2 - 1px);
+    top: var(--doc-space-8);
+    bottom: calc(-1 * var(--doc-space-4));
+    width: 1px;
+    background: var(--doc-border-2);
+    z-index: 0;
+  }
+
+  doc-step:last-child::before {
+    display: none;
+  }
+
+  doc-step [data-part="marker"] {
+    width: var(--doc-space-8);
+    height: var(--doc-space-8);
+    border-radius: 50%;
+    background: var(--doc-surface-0);
+    border: 1px solid var(--doc-border-2);
+    color: var(--doc-text-2);
+    font-weight: 600;
+    font-size: var(--doc-text-sm);
+    font-family: var(--doc-font-mono);
+    z-index: 1;
+    print-color-adjust: exact;
+  }
+
+  doc-step [data-part="marker"]::before {
+    content: counter(doc-step);
+  }
+
+  doc-step[status="completed"] [data-part="marker"] {
+    border-color: var(--doc-success-line);
+    background: var(--doc-success-tint);
+    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+  }
+
+  doc-step[status="active"] [data-part="marker"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+  }
+
+  doc-step[status="optional"] [data-part="marker"] {
+    border-style: dashed;
+    color: var(--doc-text-3);
+  }
+
+  doc-step [data-part="card"] {
+    background: var(--doc-surface-1);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    padding: var(--doc-space-4);
+  }
+
+  doc-step [data-part="header"] {
+    margin-bottom: var(--doc-space-2);
+  }
+
+  doc-step [data-part="title"] {
+    margin: 0;
+    font-weight: 600;
+    font-size: var(--doc-text-md);
+    color: var(--doc-text-1);
+    line-height: var(--doc-leading-tight);
+    letter-spacing: var(--doc-tracking-tight);
+  }
+
+  doc-step [data-part="body"] {
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+  }
+}

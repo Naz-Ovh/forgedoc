@@ -58,22 +58,29 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # `npx skills add MrBns/plankit` is the advertised install. A typo in the
-      # frontmatter, or a rename of skills/better-plan/, breaks it silently —
-      # nothing else in this job reads SKILL.md as the CLI does.
-      - name: Skill is discoverable by the skills CLI
+      # `npx skills add naz-ovh/forgedoc` is the advertised install. A typo in a
+      # frontmatter block, or a rename of either skills/ directory, breaks it
+      # silently — nothing else in this job reads SKILL.md as the CLI does.
+      - name: Both skills are discoverable by the skills CLI
         env:
           DISABLE_TELEMETRY: '1'
-        run: npx --yes skills add ./ --list | grep -q better-plan
+        run: |
+          listed=$(npx --yes skills add ./ --list)
+          echo "$listed"
+          for skill in better-plan better-docs; do
+            echo "$listed" | grep -q "$skill" || {
+              echo "::error::$skill is not discoverable by the skills CLI"
+              exit 1
+            }
+          done
 
       - name: Fail if the working tree is dirty
         # skills/better-plan/REFERENCE.md is generated; a stale commit shows up here.
         run: git diff --exit-code
 
-  layout:
-    name: Layout and print rules
+  browser:
+    name: Delivered-artefact behaviour
     runs-on: ubuntu-latest
-    # Pinned so text metrics — which the geometry assertions measure — stay put.
     container:
       image: mcr.microsoft.com/playwright:v1.62.0-noble
 
@@ -90,17 +97,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
 
-      # Pixel baselines are generated and therefore not stored in the repo, so
-      # `@pixel` tests have nothing to compare against here and are excluded.
-      # What remains is the deterministic half: reading-column centring at four
-      # widths, TOC docking geometry, the collapsed-panel size rule, print
-      # chrome, and the whole offline `file://` suite.
-      - name: Layout geometry, print rules, offline document
-        run: pnpm run test:visual:ci
+      # Behaviour only — the offline `file://` document, the CDN-linked one, and
+      # the Geist build's embedded fonts. Nothing here asserts on appearance.
+      - name: Offline, CDN and themed-build behaviour
+        run: pnpm run test:visual
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: visual-diff
+          name: browser-failure-context
           path: tests/visual/.output
           retention-days: 7

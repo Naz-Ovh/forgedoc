@@ -1,0 +1,69 @@
+/*
+ * `doc-quote`, `doc-term` and `doc-ref` — the inline and quotation roles.
+ *
+ * MUST NOT (§6.5): no serif face here, or anywhere. The pull quote gets its
+ * distinct typographic role from the rule, the measure, the italic and the
+ * step up in size — not from a different family.
+ *
+ * The rule is the accent rather than the neutral line a bare `<blockquote>`
+ * gets in `_elements.scss`: two quotation roles that look identical are one
+ * role with two tags.
+ */
+
+@layer doc.theme {
+  doc-quote {
+    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-6);
+    padding: 2px 0 2px var(--doc-space-5);
+    border-inline-start: 3px solid var(--doc-accent-line);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-lg);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.5;
+    letter-spacing: normal;
+    text-wrap: pretty;
+  }
+
+  doc-quote [data-part="cite"] {
+    display: block;
+    margin-block-start: var(--doc-space-3);
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-ui);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /*
+   * A dotted underline, so a defined term never reads as a link. `doc-term`
+   * and `<a>` sit in the same sentence often enough that the two need to be
+   * told apart without hovering.
+   */
+  doc-term {
+    color: var(--doc-accent-text);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  /* First mention carries the weight; repeats read as ordinary prose. */
+  doc-term:state(first-mention) {
+    font-weight: 650;
+  }
+
+  doc-term:not(:state(first-mention)) {
+    color: inherit;
+    text-decoration-color: var(--doc-border-2);
+  }
+
+  doc-ref {
+    color: var(--doc-accent-text);
+    font-variant-numeric: var(--doc-numeric);
+    font-weight: 600;
+  }
+
+  doc-ref:hover {
+    text-decoration: underline;
+  }
+}

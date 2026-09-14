@@ -1,36 +1,23 @@
-/*
- * `doc-compare` — the two-column panel.
- *
- * MUST (§8.6): stacks vertically below 1050px.
- */
-
+/* Compare is ForgeDoc-specific: Geist base material around related columns. */
 @layer doc.theme {
   doc-compare {
-    gap: var(--doc-space-4);
+    gap: 0;
     margin-block: var(--doc-space-6);
-  }
-
-  doc-compare > [data-part="column"] {
-    margin-block: 0;
-    padding: var(--doc-space-4) var(--doc-space-5);
     border: var(--doc-rule);
     border-radius: var(--doc-radius);
     background: var(--doc-surface-1);
   }
-
-  doc-compare > [data-part="column"][kind="positive"] {
-    border-color: color-mix(in oklab, var(--doc-success-400) 45%, transparent);
-    background: light-dark(
-    var(--doc-success-50),
-    color-mix(in oklab, var(--doc-success-900) 30%, var(--doc-shade-base))
-    );
+  doc-compare > [data-part="column"] {
+    margin: 0;
+    padding: var(--doc-space-5);
+    border: 0;
+    background: transparent;
   }
-
-  doc-compare > [data-part="column"][kind="negative"] {
-    border-color: color-mix(in oklab, var(--doc-danger-400) 45%, transparent);
-    background: light-dark(
-    var(--doc-danger-50),
-    color-mix(in oklab, var(--doc-danger-900) 30%, var(--doc-shade-base))
-    );
+  doc-compare > [data-part="column"] + [data-part="column"] { border-inline-start: var(--doc-rule); }
+  @media (max-width: 1049px) {
+    doc-compare > [data-part="column"] + [data-part="column"] {
+      border-inline-start: 0;
+      border-block-start: var(--doc-rule);
+    }
   }
 }

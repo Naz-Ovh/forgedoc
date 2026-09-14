@@ -1,0 +1,63 @@
+/* `doc-tree` — directory layouts drawn from indented text. */
+
+@layer doc.theme {
+  doc-tree {
+    margin-block: var(--doc-space-5);
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-sm);
+    line-height: 1.75;
+  }
+
+  doc-tree [data-part="node"] {
+    gap: var(--doc-space-2);
+    /* One indent step per depth, computed from the same spacing unit. */
+    padding-inline-start: calc(var(--doc-space-5) * attr(data-depth type(<number>), 0));
+  }
+
+  doc-tree [data-part="connector"] {
+    color: var(--doc-code-gutter);
+  }
+
+  doc-tree [data-part="node"][data-kind="directory"] [data-part="label"] {
+    color: var(--doc-accent-text);
+    font-weight: 620;
+  }
+}
+
+/*
+* Fallback for engines without `attr()` type support in arbitrary properties,
+* which is still most of them. Three explicit depths cover the practical range;
+* deeper trees are unreadable in a plan anyway.
+*/
+@layer doc.theme {
+  @supports not (padding-inline-start: attr(data-depth type(<number>), 0)) {
+    doc-tree [data-part="node"] {
+      padding-inline-start: 0;
+    }
+
+    doc-tree [data-part="node"][data-depth="1"] {
+      padding-inline-start: var(--doc-space-5);
+    }
+
+    doc-tree [data-part="node"][data-depth="2"] {
+      padding-inline-start: calc(var(--doc-space-5) * 2);
+    }
+
+    doc-tree [data-part="node"][data-depth="3"] {
+      padding-inline-start: calc(var(--doc-space-5) * 3);
+    }
+
+    doc-tree [data-part="node"][data-depth="4"] {
+      padding-inline-start: calc(var(--doc-space-5) * 4);
+    }
+
+    doc-tree [data-part="node"][data-depth="5"] {
+      padding-inline-start: calc(var(--doc-space-5) * 5);
+    }
+  }
+}

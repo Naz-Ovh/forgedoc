@@ -1,0 +1,102 @@
+/*
+ * `doc-owners` / `doc-owner` — DRI and approver lists.
+ *
+ * A grid of equal cards, not a wrapping row of inline-flex items.
+ *
+ * why the theme overrides the base layout here, which it does nowhere else:
+ * `base/` lays these out as `flex-wrap: wrap` on intrinsically sized children,
+ * so every owner is a different width and the row breaks wherever it runs out
+ * of space — four owners land three-then-one, the status pills never line up,
+ * and a long role pushes its pill out past the name beside it. There is nothing
+ * a colour or a padding can do about that. `auto-fit` columns give every owner
+ * the same box, so the names align, the pills align, and the wrap point is the
+ * same for all of them (F2 sanctions exactly this: a theme that needs different
+ * structure overrides it from `doc.theme`).
+ */
+@layer doc.theme {
+  doc-owners {
+    display: grid;
+    /* `min()` so a container narrower than one track shrinks it rather than
+     * overflowing — a docked TOC on a small laptop gets close. */
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    gap: var(--doc-space-3);
+    margin-block: var(--doc-space-6);
+  }
+
+  doc-owner {
+    display: flex;
+    align-items: center;
+    gap: var(--doc-space-3);
+    min-width: 0;
+    padding: var(--doc-space-3) var(--doc-space-3-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+  }
+
+  doc-owner [data-part="avatar"] {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: var(--doc-rule);
+    border-radius: 50%;
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+  }
+
+  /* Holds the two text lines; `min-width: 0` lets a long name ellipse rather
+   * than widen the card past its grid track. */
+  doc-owner [data-part="details"] {
+    min-width: 0;
+  }
+
+  doc-owner [data-part="name"] {
+    overflow: hidden;
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-ui);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  doc-owner [data-part="role"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    line-height: 1.5;
+  }
+
+  /* Pinned to the trailing edge, so every card's status sits on one line. */
+  doc-owner [data-part="status"] {
+    flex: none;
+    margin-inline-start: auto;
+    padding: 3px var(--doc-space-2-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+    white-space: nowrap;
+    print-color-adjust: exact;
+  }
+
+  doc-owner [data-part="status"][data-status="approved"] {
+    border-color: var(--doc-success-200);
+    background: var(--doc-success-100);
+    color: var(--doc-success-text);
+  }
+
+  doc-owner [data-part="status"][data-status="reviewing"] {
+    border-color: var(--doc-info-200);
+    background: var(--doc-info-100);
+    color: var(--doc-info-text);
+  }
+
+  doc-owner [data-part="status"][data-status="rejected"] {
+    border-color: var(--doc-danger-200);
+    background: var(--doc-danger-100);
+    color: var(--doc-danger-text);
+  }
+}

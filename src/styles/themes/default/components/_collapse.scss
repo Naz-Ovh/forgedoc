@@ -1,0 +1,124 @@
+/*
+ * `doc-collapse` — the design's accordion.
+ *
+ * The design draws a group of disclosures as rows inside one card, and ForgeDoc
+ * has no group element to be that card, so adjacent `doc-collapse` siblings
+ * fuse into one instead: the pair loses the border and radius between them, and
+ * only the last row in a run keeps the shadow, which then reads as the group's.
+ *
+ * why: hidden-until-found bodies stay in place for browser find (§2.2).
+ */
+@layer doc.theme {
+  doc-collapse {
+    margin-block: var(--doc-space-3-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-1);
+  }
+
+  /*
+   * Specificity here is not decoration: `_doc.scss` sets `margin-block-start`
+   * on every top-level sibling at (0,2,2), so a bare `doc-collapse +
+   * doc-collapse` would lose and the rows would never close up.
+   */
+  doc-collapse:not([data-doc-chrome]) + doc-collapse:not([data-doc-chrome]) {
+    margin-block-start: 0;
+    border-block-start: 0;
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+
+  doc-collapse:has(+ doc-collapse) {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+    /* Stacked rows each casting shadow-1 would band along every seam. */
+    box-shadow: none;
+  }
+
+  doc-collapse > [data-part="summary"] {
+    gap: var(--doc-space-4);
+    width: 100%;
+    padding: var(--doc-space-4-5) var(--doc-space-6-5);
+    border: 0;
+    background: transparent;
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 550;
+    line-height: var(--doc-leading-tight);
+    letter-spacing: normal;
+    text-align: start;
+    transition: background-color var(--doc-transition);
+  }
+
+  /* A 4% accent wash — the design's hover, and barely a colour at all. */
+  doc-collapse > [data-part="summary"]:hover {
+    background: color-mix(in oklab, var(--doc-accent-400) 4%, var(--doc-surface-1));
+    color: var(--doc-text-1);
+  }
+
+  /* Open rows tint toward the muted surface, so state reads without a line. */
+  doc-collapse:state(open) > [data-part="summary"] {
+    background: color-mix(in oklab, var(--doc-surface-2) 55%, transparent);
+  }
+
+  doc-collapse [data-part="chevron"] {
+    order: 1;
+    margin-inline-start: auto;
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-ui);
+    transition:
+      transform var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  doc-collapse:state(open) [data-part="chevron"] {
+    color: var(--doc-accent-text);
+  }
+
+  doc-collapse > [data-part="body"] {
+    padding-inline: var(--doc-space-6-5);
+    border-block-start: var(--doc-rule);
+    color: var(--doc-text-2);
+    line-height: 1.75;
+  }
+
+  /*
+   * The first and last blocks inside an open disclosure lose their outer
+   * margin.
+   *
+   * why: the body is the author's own node named in place (§2.2), so it keeps
+   * whatever `margin-block` its component sets — a checklist brings 20px of its
+   * own. That stacked on the body's padding and left a 40px band of empty card
+   * above the first block and below the last. The padding is the card's inset;
+   * the margin is for separating siblings, and at the edges there is no sibling.
+   */
+  doc-collapse > [data-part="header"] + [data-part="body"],
+  doc-collapse > [data-part="summary"] + [data-part="body"] {
+    margin-block-start: 0;
+  }
+
+  doc-collapse > [data-part="body"]:last-child {
+    margin-block-end: 0;
+  }
+
+  doc-collapse:state(open) > [data-part="body"]:first-of-type {
+    padding-block-start: var(--doc-space-4);
+  }
+
+  doc-collapse > [data-part="body"]:last-child {
+    padding-block-end: var(--doc-space-4-5);
+  }
+
+  /*
+   * `hidden="until-found"` sets `content-visibility: hidden`, which hides the
+   * contents but keeps the element's own box — so a collapsed row would show a
+   * band of empty padding and a stray rule. Zeroing both is what makes closed
+   * actually look closed, without giving up find-in-page.
+   */
+  doc-collapse > [data-part="body"][hidden] {
+    padding-block: 0;
+    margin-block: 0;
+    border-block-start: 0;
+  }
+}

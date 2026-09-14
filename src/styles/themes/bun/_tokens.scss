@@ -1,0 +1,209 @@
+/*
+ * Design tokens — the `bun` theme.
+ *
+ * The colour and type anchors come from Bun's current documentation site:
+ * pure-white / near-black canvases, #ff1f8f interaction pink, Archivo display
+ * type and Martian Mono code. The softer geometry and layered elevations are
+ * the theme's modern retouch; semantic ramps are deepened only where ForgeDoc
+ * needs white text on a solid status colour.
+ */
+
+@layer doc.tokens {
+  :root,
+  doc-page {
+    --doc-space-unit: 4.5px;
+
+    --doc-text-base: 16px;
+    --doc-text-ratio: 1.2;
+    --doc-leading: 1.6;
+    --doc-leading-tight: 1.35;
+    --doc-leading-heading: 1.08;
+    --doc-tracking-tight: -0.025em;
+    --doc-tracking-wide: 0.055em;
+
+    --doc-font-sans:
+      ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    --doc-font-display:
+      "Bun Archivo", Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --doc-font-mono:
+      "Bun Martian Mono", "Martian Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+      monospace;
+    --doc-numeric: tabular-nums lining-nums;
+
+    --doc-measure: 1120px;
+    --doc-measure-prose: 72ch;
+    --doc-toc-width: 19rem;
+    --doc-radius-sm: 6px;
+    --doc-radius: 10px;
+    --doc-radius-lg: 16px;
+    --doc-radius-pill: 999px;
+    --doc-border-width: 1px;
+
+    /* Bun pink is the default accent, regardless of the contract's legacy
+       `teal` label. Dark ink on the 600 step clears small-text contrast. */
+    --doc-accent-50: #fff0f7;
+    --doc-accent-100: #ffe0ef;
+    --doc-accent-200: #ffb8da;
+    --doc-accent-400: #ff5bab;
+    --doc-accent-600: #ff1f8f;
+    --doc-accent-800: #b90058;
+    --doc-accent-900: #7a073d;
+
+    --doc-shade-base: #0d0a0c;
+    --doc-ink-on-solid: #ffffff;
+    --doc-ink-on-accent: #fff7fb;
+
+    --doc-surface-0: light-dark(#ffffff, var(--doc-shade-base));
+    --doc-surface-1: light-dark(#ffffff, #121114);
+    --doc-surface-2: light-dark(#f7f7f8, #1b191d);
+    --doc-surface-3: light-dark(#efeff1, #252329);
+    --doc-text-1: light-dark(#18181b, #f4f4f5);
+    --doc-text-2: light-dark(#52525b, #b4b4bc);
+    --doc-text-3: light-dark(#71717a, #9696a0);
+    --doc-text-inverse: light-dark(#ffffff, #0d0a0c);
+    --doc-border-1: light-dark(#e4e4e7, #2d2b31);
+    --doc-border-2: light-dark(#d4d4d8, #49464f);
+    --doc-border-3: light-dark(#a1a1aa, #6b6673);
+
+    /* Layer separation is deliberately neutral: pink signals interaction, not
+       elevation. Borders keep the same hierarchy legible in dark mode. */
+    --doc-shadow-1:
+      0 1px 2px rgb(24 24 27 / 6%),
+      0 8px 24px rgb(24 24 27 / 6%);
+    --doc-shadow-2:
+      0 2px 4px rgb(24 24 27 / 8%),
+      0 18px 48px rgb(24 24 27 / 14%);
+
+    --doc-series-a-600: #7c3aed;
+    --doc-series-a-400: #a78bfa;
+    --doc-series-b-600: #d60066;
+    --doc-series-b-400: #ff73b5;
+    --doc-series-c-600: #0d7c73;
+    --doc-series-c-400: #43c9bd;
+
+    --doc-info-600: #1450dc;
+    --doc-info-400: #5f8eff;
+    --doc-info-200: #b8ccff;
+    --doc-info-50: #eef3ff;
+    --doc-info-900: #15306f;
+
+    --doc-success-600: #087b4a;
+    --doc-success-400: #28dc82;
+    --doc-success-200: #a4edc9;
+    --doc-success-50: #ebfbf3;
+    --doc-success-900: #104b32;
+
+    --doc-warn-600: #966000;
+    --doc-warn-400: #f5b43c;
+    --doc-warn-200: #f8d999;
+    --doc-warn-50: #fff8e9;
+    --doc-warn-900: #5b3d08;
+
+    --doc-danger-600: #c61f2d;
+    --doc-danger-400: #ff5a5a;
+    --doc-danger-200: #ffb8bc;
+    --doc-danger-50: #fff0f1;
+    --doc-danger-900: #65151d;
+
+    /* Syntax colours mirror Bun's live Shiki palette. */
+    --doc-code-surface: light-dark(#f6f6f6, #0e0e0e);
+    --doc-code-text: light-dark(#24211d, #e9e6e1);
+    --doc-code-border: light-dark(#e2e2e2, #28282b);
+    --doc-code-gutter: light-dark(#707070, #92928f);
+    --doc-code-comment: light-dark(#736c62, #7d7a8c);
+    --doc-code-keyword: light-dark(#c41a68, #ff7eb6);
+    --doc-code-string: light-dark(#4d7c1b, #b5e48c);
+    --doc-code-number: light-dark(#a8520a, #ffb977);
+    --doc-code-function: light-dark(#2f5fd0, #8fb4ff);
+    --doc-code-punctuation: light-dark(#68635d, #aaa6a0);
+    --doc-code-highlight-row: light-dark(#fff0f7, #280016);
+
+    --doc-highlight-text: light-dark(#3f2604, #fff1d5);
+
+    --doc-z-toc: 40;
+    --doc-z-popover: 60;
+    --doc-z-bucket: 70;
+    --doc-z-banner: 80;
+    --doc-transition: 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  doc-page,
+  doc-page * {
+    --doc-space-0: 0px;
+    --doc-space-1: calc(var(--doc-space-unit) * 1);
+    --doc-space-2: calc(var(--doc-space-unit) * 2);
+    --doc-space-3: calc(var(--doc-space-unit) * 3);
+    --doc-space-4: calc(var(--doc-space-unit) * 4);
+    --doc-space-5: calc(var(--doc-space-unit) * 5);
+    --doc-space-6: calc(var(--doc-space-unit) * 6);
+    --doc-space-7: calc(var(--doc-space-unit) * 7);
+    --doc-space-8: calc(var(--doc-space-unit) * 8);
+    --doc-space-9: calc(var(--doc-space-unit) * 9);
+    --doc-space-10: calc(var(--doc-space-unit) * 10);
+    --doc-space-11: calc(var(--doc-space-unit) * 11);
+    --doc-space-12: calc(var(--doc-space-unit) * 12);
+    --doc-space-16: calc(var(--doc-space-unit) * 16);
+    --doc-space-20: calc(var(--doc-space-unit) * 20);
+
+    --doc-text-xs: calc(var(--doc-text-base) / var(--doc-text-ratio) / var(--doc-text-ratio));
+    --doc-text-sm: calc(var(--doc-text-base) / var(--doc-text-ratio));
+    --doc-text-md: var(--doc-text-base);
+    --doc-text-lg: calc(var(--doc-text-base) * var(--doc-text-ratio));
+    --doc-text-xl: calc(var(--doc-text-lg) * var(--doc-text-ratio));
+    --doc-text-2xl: calc(var(--doc-text-xl) * var(--doc-text-ratio));
+    --doc-text-3xl: calc(var(--doc-text-2xl) * var(--doc-text-ratio));
+    --doc-text-4xl: calc(var(--doc-text-3xl) * var(--doc-text-ratio));
+
+    --doc-gutter: var(--doc-space-6);
+    --doc-rule: var(--doc-border-width) solid var(--doc-border-1);
+
+    --doc-accent-text: light-dark(var(--doc-accent-800), var(--doc-accent-200));
+    --doc-accent-line: light-dark(var(--doc-accent-600), var(--doc-accent-400));
+    --doc-accent-solid: var(--doc-accent-600);
+    --doc-accent-on-solid: #0b0a08;
+    --doc-accent-tint: light-dark(
+      var(--doc-accent-50),
+      color-mix(in oklab, var(--doc-accent-900) 42%, var(--doc-shade-base))
+    );
+    --doc-accent-edge: light-dark(
+      var(--doc-accent-200),
+      color-mix(in oklab, var(--doc-accent-400) 36%, var(--doc-shade-base))
+    );
+
+    --doc-info-tint: light-dark(
+      var(--doc-info-50),
+      color-mix(in oklab, var(--doc-info-900) 42%, var(--doc-shade-base))
+    );
+    --doc-success-tint: light-dark(
+      var(--doc-success-50),
+      color-mix(in oklab, var(--doc-success-900) 42%, var(--doc-shade-base))
+    );
+    --doc-warn-tint: light-dark(
+      var(--doc-warn-50),
+      color-mix(in oklab, var(--doc-warn-900) 42%, var(--doc-shade-base))
+    );
+    --doc-danger-tint: light-dark(
+      var(--doc-danger-50),
+      color-mix(in oklab, var(--doc-danger-900) 42%, var(--doc-shade-base))
+    );
+
+    --doc-series-1: light-dark(var(--doc-accent-600), var(--doc-accent-400));
+    --doc-series-2: light-dark(var(--doc-info-600), var(--doc-info-400));
+    --doc-series-3: light-dark(var(--doc-warn-600), var(--doc-warn-400));
+    --doc-series-4: light-dark(var(--doc-success-600), var(--doc-success-400));
+    --doc-series-5: light-dark(var(--doc-danger-600), var(--doc-danger-400));
+    --doc-series-6: light-dark(var(--doc-series-a-600), var(--doc-series-a-400));
+    --doc-series-7: light-dark(var(--doc-series-b-600), var(--doc-series-b-400));
+    --doc-series-8: light-dark(var(--doc-series-c-600), var(--doc-series-c-400));
+
+    --doc-highlight-bg: light-dark(
+      color-mix(in oklab, var(--doc-warn-200) 72%, transparent),
+      rgb(160 120 20 / 42%)
+    );
+  }
+
+  :root {
+    --doc-highlight-bg: light-dark(rgb(248 217 153 / 72%), rgb(160 120 20 / 42%));
+  }
+}

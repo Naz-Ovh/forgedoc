@@ -1,0 +1,42 @@
+/* `doc-checklist` — persistent reader-facing ticks. */
+
+@layer doc.theme {
+  doc-checklist {
+    margin-block: var(--doc-space-5);
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+  }
+
+  /* Hanging indent, for the same reason as doc-list: an `<li>` holds inline
+  content, and grid would promote each inline element to its own item. */
+  /* Same UA list-marker problem as doc-list — see the note there. */
+  doc-checklist > li,
+  doc-checklist > [data-part="item"] {
+    list-style: none;
+  }
+
+  doc-checklist > [data-part="item"] {
+    padding-block: var(--doc-space-2);
+    padding-inline-start: var(--doc-space-7);
+    max-width: var(--doc-measure-prose);
+  }
+
+  doc-checklist > [data-part="item"] + [data-part="item"] {
+    border-block-start: var(--doc-rule);
+  }
+
+  doc-checklist [data-part="check"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+    accent-color: var(--doc-accent-solid);
+  }
+
+  doc-checklist > [data-part="item"][data-checked] {
+    color: var(--doc-text-3);
+    text-decoration: line-through;
+    text-decoration-color: var(--doc-border-2);
+  }
+}

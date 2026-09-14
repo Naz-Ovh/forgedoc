@@ -40,8 +40,21 @@ import BucketDetail from './BucketDetail.svelte';
   /** Id of the item whose detail window is open, or null. */
   let openDetailId = $state<string | null>(null);
   let composer = $state<HTMLTextAreaElement | null>(null);
+  /** Transient confirmation, so the keyboard shortcut is not a silent change. */
+  let flashMessage = $state('');
+  let flashTimer: ReturnType<typeof setTimeout> | undefined;
 
   const hasHighlightApi = highlightApi() !== null;
+
+  /*
+   * ⌘ on Apple keyboards, Ctrl everywhere else.
+   *
+   * why sniff at all: the label is muscle memory, and `Ctrl+K` shown to someone
+   * whose keyboard has no Ctrl in that position is worse than no hint. The
+   * handler accepts either modifier regardless of what this says.
+   */
+  const APPLE = /mac|iphone|ipad|ipod/i.test(navigator.userAgent);
+  const shortcutLabel = APPLE ? '\u2318K' : 'Ctrl+K';
 
   /*
    * `$store` — the store contract in §9.2 exists precisely so this works with
@@ -51,7 +64,23 @@ import BucketDetail from './BucketDetail.svelte';
    */
   const docState = $derived<DocState>($store);
 
-  $effect(() => watchSelection(docPage, (event) => (pendingSelection = event)));
+  const selectionPopup = $derived(docState.selectionPopup);
+
+  /*
+   * The selection watcher exists only while the preference is on.
+   *
+   * why detach the listeners rather than ignore events inside the callback:
+   * `watchSelection` binds `pointerup` and `keyup` on `document`, and a reader
+   * who turned the composer off did so to stop the document reacting to their
+   * selections at all. Reading `selectionPopup` here is what re-runs this
+   * effect on toggle; Svelte calls the returned teardown before re-running.
+   */
+  $effect(() => {
+    if (!selectionPopup) return;
+    return watchSelection(docPage, (event) => (pendingSelection = event));
+  });
+
+  $effect(() => () => clearTimeout(flashTimer));
 
   /*
    * A block's own button opens the same composer as a text selection.
@@ -140,6 +169,53 @@ import BucketDetail from './BucketDetail.svelte';
     window.getSelection()?.removeAllRanges();
   }
 
+  function flash(message: string): void {
+    flashMessage = message;
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => (flashMessage = ''), 1800);
+  }
+
+  /**
+   * Turn the selection composer on or off, and say so.
+   *
+   * why an unsaved draft survives being switched off: the shortcut is a single
+   * keystroke, and `Ctrl+K` is close enough to the keys used while typing that
+   * it will be hit by accident mid-comment. Throwing away words the reader had
+   * already written would be the worst possible response to a mistyped
+   * shortcut, so a composer holding text stays up to be saved or cancelled
+   * deliberately — only an empty one is dismissed. Either way no *new* popover
+   * opens after this point.
+   */
+  function setSelectionPopup(on: boolean): void {
+    store.set('selectionPopup', on);
+    if (!on && draftComment.trim() === '') cancelComment();
+
+    /*
+     * The confirmation is only for the shortcut used against a closed panel.
+     * With the panel open the switch is right there changing state, and the
+     * toast would land underneath the panel anyway — both are anchored to the
+     * same corner as the trigger.
+     */
+    if (!panelOpen) flash(on ? 'Selection comments on' : 'Selection comments off');
+  }
+
+  /**
+   * ⌘/Ctrl + K toggles the composer from anywhere in the document.
+   *
+   * why this one is safe to claim: `⌘/Ctrl+K` is the de-facto page-level
+   * command shortcut on the web and browsers let a page take it, unlike the
+   * genuinely reserved `Ctrl+T`/`Ctrl+N`/`Ctrl+W`. Chords carrying Alt or Shift
+   * are left alone so this does not shadow a browser or OS binding that merely
+   * starts the same way.
+   */
+  function onWindowKeydown(event: KeyboardEvent): void {
+    if (event.key.toLowerCase() !== 'k') return;
+    if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
+
+    event.preventDefault();
+    setSelectionPopup(!selectionPopup);
+  }
+
   /** ⌘/Ctrl + Enter saves; Escape abandons. Both are muscle memory. */
   function onComposerKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
@@ -207,21 +283,79 @@ import BucketDetail from './BucketDetail.svelte';
   the composer reads as "the reader selected nothing" and closes the composer
   before a single character can be typed.
 -->
-<div data-part="bucket-root" data-doc-ui data-open={panelOpen ? '' : undefined}>
+<svelte:window onkeydown={onWindowKeydown} />
+
+<div
+  data-part="bucket-root"
+  data-doc-ui
+  data-open={panelOpen ? '' : undefined}
+  data-selection={selectionPopup ? 'on' : 'off'}
+>
+  <!--
+    `role="status"` rather than an alert: this confirms something the reader
+    just asked for, so it should reach a screen reader without stealing focus
+    or interrupting what is being read.
+  -->
+  {#if flashMessage}
+    <p data-part="bucket-flash" role="status">{flashMessage}</p>
+  {/if}
+
+  <!--
+    The trigger carries the composer's state, not just the count.
+
+    why: the switch that turns selection commenting off lives inside the panel,
+    so once the panel is closed the only evidence of the change was that
+    selecting text stopped doing anything — which reads as a broken document
+    rather than a setting. The slashed mark says "off" from across the page,
+    and the tooltip says how to undo it without opening anything.
+  -->
   <button
     data-part="bucket-trigger"
     type="button"
     aria-expanded={panelOpen}
+    title={selectionPopup
+      ? undefined
+      : `Selection comments are off — ${shortcutLabel} turns them back on`}
     onclick={() => (panelOpen = !panelOpen)}
   >
+    {#if !selectionPopup}
+      <span data-part="bucket-trigger-muted">
+        <span data-doc-visually-hidden>Selection comments off.</span>
+      </span>
+    {/if}
     <span data-part="bucket-trigger-label">Feedback</span>
     <span data-part="bucket-count">{count}</span>
   </button>
 
   {#if panelOpen}
     <section data-part="bucket-panel" aria-label="Feedback review">
+      <!--
+        The switch sits in the title row rather than on a settings band of its
+        own.
+
+        why the visible label went: it is the panel's only preference, and a
+        full row spent spelling out "Comment on text selection" restated what
+        the switch beside it already shows — while pushing the list of the
+        reader's own feedback further down the panel. The name survives as the
+        accessible name and as the tooltip, so nothing is lost to a screen
+        reader or to a reader who hovers; the keycap keeps the other half of
+        the old row's job, which was telling people the shortcut exists.
+      -->
       <header data-part="bucket-header">
         <span data-part="bucket-title">Your feedback</span>
+
+        <button
+          data-part="bucket-selection-toggle"
+          type="button"
+          aria-pressed={selectionPopup}
+          aria-label="Comment on text selection"
+          title="Comment on text selection ({shortcutLabel})"
+          onclick={() => setSelectionPopup(!selectionPopup)}
+        >
+          <span data-part="bucket-switch" aria-hidden="true"></span>
+        </button>
+        <kbd data-part="bucket-shortcut">{shortcutLabel}</kbd>
+
         <button
           data-part="bucket-close"
           type="button"
@@ -245,9 +379,19 @@ import BucketDetail from './BucketDetail.svelte';
       {/if}
 
       {#if count === 0}
+        <!--
+          The instructions have to match the switch above them. Telling a reader
+          to select text when selection has been turned off sends them off to
+          try the one route that has been closed.
+        -->
         <p data-part="bucket-empty">
-          Answer a question, select any text in the document, or use the Comment button on a
-          diagram or code block.
+          {#if selectionPopup}
+            Answer a question, select any text in the document, or use the Comment button on a
+            diagram or code block.
+          {:else}
+            Answer a question, or use the Comment button on a diagram or code block. Commenting by
+            selecting text is off — press {shortcutLabel} to turn it back on.
+          {/if}
         </p>
       {:else}
         <ol data-part="bucket-list">

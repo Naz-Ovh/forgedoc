@@ -20,26 +20,26 @@
 
   doc-diff [data-part="filename"] {
     font-family: var(--doc-font-mono);
-    font-weight: 620;
+    font-weight: 600;
   }
 
   doc-diff [data-part="stat-add"] {
     margin-inline-start: auto;
-    color: var(--doc-success-600);
-    font-weight: 700;
+    color: var(--doc-success-text);
+    font-weight: 600;
     font-variant-numeric: var(--doc-numeric);
   }
 
   doc-diff [data-part="stat-remove"] {
-    color: var(--doc-danger-600);
-    font-weight: 700;
+    color: var(--doc-danger-text);
+    font-weight: 600;
     font-variant-numeric: var(--doc-numeric);
   }
 
   doc-diff [data-part="code"] {
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-sm);
-    line-height: var(--doc-leading-tight);
+    line-height: 1.5;
   }
 
   doc-diff :where([data-part="old-number"], [data-part="new-number"]) {
@@ -51,31 +51,25 @@
 
   doc-diff [data-part="sign"] {
     text-align: center;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   doc-diff [data-part="row"][data-kind="add"] {
-    background: light-dark(
-    color-mix(in oklab, var(--doc-success-200) 45%, transparent),
-    color-mix(in oklab, var(--doc-success-900) 45%, transparent)
-    );
+    background: var(--doc-success-tint);
     print-color-adjust: exact;
   }
 
   doc-diff [data-part="row"][data-kind="add"] [data-part="sign"] {
-    color: var(--doc-success-600);
+    color: var(--doc-success-text);
   }
 
   doc-diff [data-part="row"][data-kind="remove"] {
-    background: light-dark(
-    color-mix(in oklab, var(--doc-danger-200) 45%, transparent),
-    color-mix(in oklab, var(--doc-danger-900) 45%, transparent)
-    );
+    background: var(--doc-danger-tint);
     print-color-adjust: exact;
   }
 
   doc-diff [data-part="row"][data-kind="remove"] [data-part="sign"] {
-    color: var(--doc-danger-600);
+    color: var(--doc-danger-text);
   }
 
   doc-diff [data-part="row"][data-kind="meta"] {

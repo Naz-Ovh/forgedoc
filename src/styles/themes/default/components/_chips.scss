@@ -1,0 +1,52 @@
+/*
+ * `doc-chips` / `doc-chip` — the pill row under the lede.
+ *
+ * The design's chip carries three things at once: a tinted fill, a tinted
+ * border at a *stronger* mix than the fill, and text in the full hue. Dropping
+ * the border is what makes tinted pills look flat elsewhere — at 12% fill there
+ * is not enough contrast against a card for the shape to read on its own.
+ */
+@layer doc.theme {
+  doc-chips {
+    gap: var(--doc-space-2-5);
+    margin-block: var(--doc-space-5);
+  }
+
+  doc-chip {
+    gap: var(--doc-space-2);
+    padding: 5px var(--doc-space-3-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+    line-height: 1.4;
+  }
+
+  doc-chip [data-part="icon"] {
+    width: 1em;
+    height: 1em;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  doc-chip[kind="confirmed"] {
+    border-color: var(--doc-success-200);
+    background: var(--doc-success-100);
+    color: var(--doc-success-text);
+  }
+
+  doc-chip[kind="action"] {
+    border-color: var(--doc-info-200);
+    background: var(--doc-info-100);
+    color: var(--doc-info-text);
+  }
+
+  doc-chip[kind="pending"] {
+    border-color: var(--doc-warn-200);
+    background: var(--doc-warn-100);
+    color: var(--doc-warn-text);
+  }
+}

@@ -90,20 +90,25 @@ import { parseBucket, TAGS } from 'forgedoc';
 import 'forgedoc/style.css';
 ```
 
-## The agent skill
+## The agent skills
 
 The markup is meant to be written by an agent, so the instructions for writing it
-ship as an installable skill. One command, no clone, no copy-paste:
+ship as installable skills. One command, no clone, no copy-paste:
 
 ```sh
-npx skills add MrBns/plankit
+npx skills add naz-ovh/forgedoc
 ```
 
-That installs the `better-plan` skill into whichever agents you pick — Claude Code, Codex,
-Cursor, Copilot, opencode, Amp, Antigravity, Windsurf. Add `-g` to install it once
-for every project on the machine instead of just this one.
+That installs both skills into whichever agents you pick — Claude Code, Codex,
+Cursor, Copilot, opencode, Amp, Antigravity, Windsurf. Add `-g` to install them
+once for every project on the machine instead of just this one.
 
-The skill still needs the `forgedoc` binary on PATH to build what it writes:
+| Skill | Use it for |
+| --- | --- |
+| `better-plan` | Planning documents, design docs, proposals — anything that asks the reader to decide something, and reads their answers back. |
+| `better-docs` | Reader-facing documentation: guides, tutorials, references, runbooks, ADRs, onboarding. |
+
+Both need the `forgedoc` binary on PATH to build what they write:
 
 ```sh
 npm install -g forgedoc
@@ -111,19 +116,50 @@ npm install -g forgedoc
 
 ## Docs
 
-|                                                                        |                                                                             |
-|------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| [`skills/better-plan/SKILL.md`](skills/better-plan/SKILL.md)           | The skill itself, including the rules for reading a pasted feedback bucket. |
-| [`skills/better-plan/CHEATSHEET.md`](skills/better-plan/CHEATSHEET.md) | One page. The authoring agent's primary reference.                          |
-| [`skills/better-plan/REFERENCE.md`](skills/better-plan/REFERENCE.md)   | Full per-component API. Generated from the contract.                        |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md)                               | Open questions, flagged deviations, dependency justifications.              |
+|                                                                        |                                                                               |
+|------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [`skills/better-plan/SKILL.md`](skills/better-plan/SKILL.md)           | The planning skill, including the rules for reading a pasted feedback bucket. |
+| [`skills/better-docs/SKILL.md`](skills/better-docs/SKILL.md)           | The documentation skill.                                                      |
+| [`skills/better-plan/CHEATSHEET.md`](skills/better-plan/CHEATSHEET.md) | One page. The authoring agent's primary reference.                            |
+| [`skills/better-plan/REFERENCE.md`](skills/better-plan/REFERENCE.md)   | Full per-component API. Generated from the contract.                          |
+| [`docs/GEIST.md`](docs/GEIST.md)                                       | The Geist theme: what it changes and how it embeds its fonts.                 |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md)                               | Open questions, flagged deviations, dependency justifications.                |
+
+## Themes
+
+A document ships exactly one stylesheet, so the theme is chosen at **build**
+time, never swapped at runtime.
+
+| Theme | |
+| --- | --- |
+| `default` | What you get when you ask for nothing. Vendors Plus Jakarta Sans and JetBrains Mono. |
+| `geist` | Tighter, more technical. Vendors Geist Sans and Geist Mono — see [`docs/GEIST.md`](docs/GEIST.md). |
+| `bun` | High-contrast, heavier display type. |
+| `forgedoc` | The original teal editorial look, and the reference the other themes are checked against. |
+
+```sh
+forgedoc build DOC_plan.html --theme geist
+forgedoc themes                            # what this installation can build with
+```
+
+The document can also name its own theme, so the choice travels with the source
+rather than with the command that built it:
+
+```html
+<style>/*@DOC_CSS:geist@*/</style>
+```
+
+A theme that vendors typefaces embeds them in its stylesheet, so `--offline`
+documents keep their fonts on a machine that has never seen them.
 
 ## CLI
 
 ```text
-forgedoc build <file.html> [--out <file>] [--offline] [--no-validate]
+forgedoc build <file.html> [--out <file>] [--offline] [--theme <name>] [--no-validate]
 forgedoc validate <file.html> [--format=json] [--built]
 forgedoc new <name> [--dir <path>]
+forgedoc themes [--format=json]
+forgedoc cheatsheet | elements | info <element> | search <words> | reference
 forgedoc version
 ```
 
@@ -160,7 +196,7 @@ npx playwright install chromium
 
 npm run dev              # QA page: tests/fixtures/kitchen-sink.html
 npm test                 # browser tests (real Chromium) + Node tests
-npm run test:visual      # visual regression
+npm run test:visual      # browser e2e: offline, CDN and themed builds
 npm run check            # format, lint, typecheck, build, test
 ```
 
@@ -171,27 +207,17 @@ here, so a green suite under either would be meaningless. The Node project cover
 the validator, which parses raw HTML with parse5 and never imports the browser
 runtime.
 
-### Visual regression
+### Browser end-to-end suite
 
-The suite has two halves.
+`npm run test:visual` drives the artefacts as delivered: the offline `file://`
+document, a CDN-linked document, and a Geist build with its fonts embedded. It
+asserts what they _do_ — elements upgrade, answers persist across a reload, the
+feedback block round-trips, no network request escapes an offline build.
 
-`npm run test:visual:ci` runs the deterministic half — reading-column centring at
-four widths, TOC docking geometry, the collapsed-panel size rule, the print
-rules, and the whole offline `file://` document. No baselines, no binaries, so
-it runs anywhere.
-
-`npm run test:visual` adds the `@pixel` tests, which compare full-page
-screenshots at 390 / 768 / 1280 / 2560 in both colour schemes, plus print.
-**Those baselines are generated, so they are not stored in the repo** — they are
-reproducible from source, valid only on the machine and fonts that recorded
-them, and re-recording writes megabytes of unreviewable binaries into history.
-
-On a fresh checkout there are no baselines yet, so record them once:
-
-```sh
-npm run test:visual:update    # records
-npm run test:visual           # compares from here on
-```
+**It does not test appearance.** There are no screenshots and no computed-style
+assertions anywhere in the suite. Styling changes often and on purpose, so a
+test that fails when a colour, a margin or a breakpoint moves reports a decision
+as a defect. Themes are checked by looking at them — see the next section.
 
 ### Previewing a theme
 
@@ -204,12 +230,13 @@ Each preview is the kitchen sink built as a reader receives it — one file, no
 server, and the feedback bucket persists to localStorage so you can leave
 comments in it. Open two side by side to compare themes.
 
-The dev server (`npm run dev`) can only ever show the reference theme, because
-`src/index.ts` imports exactly one.
+The dev server (`npm run dev`) can only ever show one theme, because
+`src/index.ts` imports exactly one — the default.
 
 ### Adding a theme
 
-1. `cp -r src/styles/themes/forgedoc src/styles/themes/<name>` — the copy is the
+1. `cp -r src/styles/themes/forgedoc src/styles/themes/<name>` — copy the
+   _reference_ theme, whichever one is currently the default. The copy is the
    visual layer; `src/styles/base/` is shared and must not be touched.
 2. Retune `_tokens.scss` and `_presets.scss`. Most of a theme is these two.
 3. Adjust only the `components/*.scss` that genuinely differ in shape rather
@@ -229,7 +256,7 @@ The dev server (`npm run dev`) can only ever show the reference theme, because
    Add both to the matching `index.scss`.
 4. `src/index.ts` — register it.
 5. `tests/fixtures/kitchen-sink.html` — `npm test` fails if you skip this.
-6. `npm run docs:reference` — `npm test` fails if you skip this too.
+6. `npm run docs:generate` — `npm test` fails if you skip this too.
 
 ## Licence
 

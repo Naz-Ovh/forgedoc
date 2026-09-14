@@ -1,0 +1,92 @@
+/*
+ * `doc-note` — the design's alert block.
+ *
+ * Three things carry the semantics and none of them is the body text: an 11%
+ * tint of the hue over the card surface, a border at 38% of the hue over the
+ * line colour, and the icon plus title in the hue at full strength. The prose
+ * itself stays in `--body` so a four-line warning is still comfortable to read
+ * — which is the point of tinting the panel instead of the words.
+ *
+ * why a hanging indent rather than a two-column grid (§2.2): the body is author
+ * content and may be bare text or inline markup. In a grid container every
+ * inline element child becomes its own grid item, which tears a sentence
+ * containing `<code>` into separate cells.
+ */
+@layer doc.theme {
+  doc-note {
+    --doc-note-hue: var(--doc-info-text);
+    --doc-note-tint: var(--doc-info-tint);
+    --doc-note-edge: var(--doc-info-edge);
+
+    margin-block: var(--doc-space-3-5);
+    padding: var(--doc-space-4) var(--doc-space-5);
+    /* Clears the icon: 20px of padding, an 18px disc, a 12px gap. */
+    padding-inline-start: calc(var(--doc-space-5) + 1.875rem);
+    border: var(--doc-border-width) solid var(--doc-note-edge);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-note-tint);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-md);
+    line-height: var(--doc-leading);
+    print-color-adjust: exact;
+  }
+
+  doc-note[kind="tip"] {
+    --doc-note-hue: var(--doc-accent-text);
+    --doc-note-tint: var(--doc-accent-tint);
+    --doc-note-edge: var(--doc-accent-edge);
+  }
+
+  doc-note[kind="success"] {
+    --doc-note-hue: var(--doc-success-text);
+    --doc-note-tint: var(--doc-success-tint);
+    --doc-note-edge: var(--doc-success-edge);
+  }
+
+  doc-note[kind="warn"] {
+    --doc-note-hue: var(--doc-warn-text);
+    --doc-note-tint: var(--doc-warn-tint);
+    --doc-note-edge: var(--doc-warn-edge);
+  }
+
+  doc-note[kind="danger"] {
+    --doc-note-hue: var(--doc-danger-text);
+    --doc-note-tint: var(--doc-danger-tint);
+    --doc-note-edge: var(--doc-danger-edge);
+  }
+
+  /*
+   * An outlined disc rather than a filled one: the design's alert icons are
+   * stroked line art in the hue, and a solid dot beside a tinted panel reads as
+   * a bullet instead of a status.
+   */
+  doc-note [data-part="icon"] {
+    inset-inline-start: var(--doc-space-5);
+    inset-block-start: calc(var(--doc-space-4) + 3px);
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1.5px solid currentcolor;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--doc-note-hue);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  doc-note [data-part="title"] {
+    margin-block-end: 3px;
+    color: var(--doc-note-hue);
+    font-size: var(--doc-text-sm);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-note [data-part="body"] {
+    max-width: var(--doc-measure-prose);
+  }
+
+  doc-note [data-part="body"] + [data-part="body"] {
+    margin-block-start: var(--doc-space-2);
+  }
+}

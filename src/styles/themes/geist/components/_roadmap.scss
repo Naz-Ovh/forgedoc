@@ -42,7 +42,7 @@
     background: var(--doc-surface-0);
     color: var(--doc-text-2);
     font-variant-numeric: var(--doc-numeric);
-    font-weight: 700;
+    font-weight: 600;
     print-color-adjust: exact;
   }
 
@@ -52,7 +52,7 @@
 
   doc-stage [data-part="title"] {
     font-size: var(--doc-text-lg);
-    font-weight: 640;
+    font-weight: 600;
     line-height: var(--doc-leading-tight);
   }
 
@@ -65,13 +65,18 @@
     margin-inline-start: auto;
     padding: 0 var(--doc-space-2);
     border-radius: var(--doc-radius-pill);
-    background: var(--doc-accent-solid);
-    color: var(--doc-accent-on-solid);
+
+    background: var(--doc-surface-1);
+
+    color: var(--doc-text-1);
     font-size: var(--doc-text-xs);
-    font-weight: 660;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
+
+    font-weight: 500;
+
+    letter-spacing: normal;
+
+    text-transform: none;
+    }
 
   /*
   * The dark "current stage" treatment.
@@ -83,24 +88,27 @@
   * body stays on the ordinary reading surface.
   */
   doc-stage:state(current) {
-    border-color: var(--doc-accent-line);
-  }
+    border-color: var(--doc-border-2);
+    }
 
   doc-stage:state(current) > [data-part="header"] {
-    background: light-dark(var(--doc-accent-900), var(--doc-accent-800));
-    color: var(--doc-ink-on-accent);
+    background: var(--doc-surface-2);
+
+    color: var(--doc-text-1);
     print-color-adjust: exact;
-  }
+    }
 
   doc-stage:state(current) > [data-part="header"] [data-part="badge"] {
-    border-color: var(--doc-accent-line);
-    background: var(--doc-accent-solid);
-    color: var(--doc-accent-on-solid);
-  }
+    border-color: var(--doc-text-1);
+
+    background: var(--doc-text-1);
+
+    color: var(--doc-text-inverse);
+    }
 
   doc-stage:state(current) > [data-part="header"] [data-part="subtitle"] {
-    color: var(--doc-accent-200);
-  }
+    color: var(--doc-text-2);
+    }
 
   doc-stage > [data-part="body"] {
     padding-inline: var(--doc-space-4);

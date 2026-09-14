@@ -1,0 +1,37 @@
+/*
+ * Bun's public variable fonts. A file:// build falls through to the system
+ * stack when offline; the document remains complete and usable without them.
+ */
+
+@font-face {
+  font-family: "Bun Archivo";
+  src:
+    local("Archivo"),
+    url("https://bun.com/fonts/Archivo.var.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bun Archivo";
+  src:
+    local("Archivo Italic"),
+    url("https://bun.com/fonts/Archivo-italic.var.woff2") format("woff2-variations");
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bun Martian Mono";
+  src:
+    local("Martian Mono"),
+    url("https://bun.com/fonts/MartianMono.var.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 100 800;
+  font-stretch: 75% 112.5%;
+  font-display: swap;
+}

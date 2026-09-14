@@ -37,7 +37,15 @@ export class DocCode extends DocElement {
 
     const title = this.attr('title');
     if (title) header.append(createPart('title', 'span', { text: title }));
-    header.append(createPart('lang', 'span', { text: language }));
+
+    // why the language is also an attribute and not only the label text: a
+    // theme cannot select on text content, so language-aware chrome — the
+    // per-language icon the `default` theme draws — has nothing to hook. The
+    // text stays, so a theme that wants a plain label needs no change.
+    const lang = createPart('lang', 'span', { text: language });
+    lang.dataset.lang = language.toLowerCase();
+    header.append(lang);
+
     header.append(this.#createCopyButton());
 
     this.prepend(header);

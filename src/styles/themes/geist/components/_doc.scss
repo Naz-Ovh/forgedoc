@@ -8,10 +8,10 @@
 
 @layer doc.theme {
   doc-page {
-    padding-block: var(--doc-space-12) var(--doc-space-20);
+    padding-block: max(80px, var(--doc-space-20)) var(--doc-space-20);
     padding-inline: var(--doc-gutter);
     min-height: 100vh;
-  }
+    }
 
   /*
   * A docked contents panel pushes the reading column across rather than
@@ -46,41 +46,35 @@
     }
   }
 
-  @media (min-width: 2560px) {
-    /* On a very large display the measure may widen, unless the author pinned it. */
-    doc-page:not([measure]) {
-      --doc-measure: 1600px;
-    }
-  }
 
   /* Vertical rhythm between top-level blocks. */
   doc-page > *:not([data-doc-chrome]) + *:not([data-doc-chrome]) {
     margin-block-start: var(--doc-space-6);
   }
 
+  doc-page > :not([data-doc-chrome]) + doc-section:not([data-doc-chrome]) {
+    margin-block-start: var(--doc-space-20);
+  }
+
+  @media print { doc-page { padding-block-start: 0; } }
+
   /* MUST (§9.3): loud, permanent, non-dismissible. */
   doc-page > [data-part="storage-warning"] {
     padding: var(--doc-space-3) var(--doc-space-4);
     border: var(--doc-border-width) solid var(--doc-warn-400);
     border-radius: var(--doc-radius);
-    background: light-dark(
-    var(--doc-warn-50),
-    color-mix(in oklab, var(--doc-warn-900) 55%, var(--doc-shade-base))
-    );
-    color: light-dark(var(--doc-warn-900), var(--doc-warn-200));
+    background: var(--doc-warn-tint);
+    color: var(--doc-warn-text);
     font-size: var(--doc-text-sm);
-    font-weight: 560;
+    font-weight: 500;
   }
 
   doc-page > [data-part="dev-banner"] {
     padding: var(--doc-space-3) var(--doc-space-4);
     border: var(--doc-border-width) solid var(--doc-danger-600);
     border-radius: var(--doc-radius);
-    background: light-dark(
-    var(--doc-danger-50),
-    color-mix(in oklab, var(--doc-danger-900) 55%, var(--doc-shade-base))
-    );
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    background: var(--doc-danger-tint);
+    color: var(--doc-danger-text);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-sm);
   }

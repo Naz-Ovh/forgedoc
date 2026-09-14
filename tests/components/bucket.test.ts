@@ -44,6 +44,7 @@ const stateOf = (docPage: Element): DocState => {
     tabs: store.get('tabs'),
     checks: store.get('checks'),
     toc: store.get('toc'),
+    selectionPopup: store.get('selectionPopup'),
   };
 };
 
@@ -123,7 +124,11 @@ describe('the bucket panel', () => {
     expect(items[0]?.getAttribute('data-kind')).toBe('answer');
     expect(items[1]?.getAttribute('data-kind')).toBe('comment');
 
-    (items[1]!.querySelector('[data-part="bucket-item-remove"]') as HTMLElement).click();
+    // Not an optional chain: a missing button would silently click nothing and
+    // leave the assertions below passing against an unchanged bucket.
+    const remove = items[1]?.querySelector<HTMLElement>('[data-part="bucket-item-remove"]');
+    if (!remove) throw new Error('the second bucket item has no remove button');
+    remove.click();
     await settle(50);
 
     expect(docPage.querySelectorAll('[data-part="bucket-item"]')).toHaveLength(1);
@@ -230,7 +235,7 @@ describe('the full reader journey', () => {
     expect(bucketCount(second, restoredState)).toBe(3);
 
     const choices = second.querySelectorAll('doc-choice');
-    expect((choices[0]!.querySelector('input') as HTMLInputElement).checked).toBe(true);
+    expect(choices[0]?.querySelector<HTMLInputElement>('input')?.checked).toBe(true);
     expect(restoredState.answers[choices[1]?.id ?? '']?.keys).toEqual(['A', 'B']);
     expect(restoredState.answers[choices[0]?.id ?? '']?.note).toBe(
       'only if we can still see who read it',

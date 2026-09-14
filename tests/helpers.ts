@@ -59,3 +59,21 @@ export function authorNodesOf(root: Element): Node[] {
 export function settle(milliseconds = 320): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
+
+/**
+ * Poll until `read` returns something truthy, then hand it back.
+ *
+ * why polling rather than a fixed `settle()`: some of what these tests wait on
+ * is a browser milestone with no fixed duration — an `<iframe srcdoc>` parsing
+ * its document, say. A hard-coded delay is either slower than it needs to be or,
+ * on a loaded machine, fails for a reason unrelated to the assertion.
+ */
+export async function waitFor<T>(read: () => T | null | undefined, timeout = 2000): Promise<T> {
+  const deadline = Date.now() + timeout;
+  for (;;) {
+    const value = read();
+    if (value) return value;
+    if (Date.now() > deadline) throw new Error('waitFor: timed out');
+    await settle(16);
+  }
+}

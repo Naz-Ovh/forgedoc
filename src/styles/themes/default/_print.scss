@@ -1,0 +1,145 @@
+/*
+ * Print — a `doc-page` responsibility (§8.8).
+ *
+ * The PDF is a real deliverable, not an afterthought. Two things about this
+ * theme need undoing on paper: the shadows, which print as grey smears on every
+ * card, and the deep indigo code panel, which is 30cm² of toner per snippet.
+ * Both are what makes the screen design work and neither survives the page.
+ */
+
+@layer doc.theme {
+  @media print {
+    /* TOC flattened into a real contents page, whatever the on-screen state. */
+    doc-toc,
+    doc-page:state(toc-open) doc-toc,
+    doc-page:state(toc-docked) doc-toc {
+      width: auto;
+      max-width: none;
+      max-height: none;
+      margin-block-end: var(--doc-space-8);
+      border: 0;
+      border-block-end: 2px solid var(--doc-border-2);
+      border-radius: 0;
+      background: none;
+      backdrop-filter: none;
+      box-shadow: none;
+    }
+
+    doc-toc [data-part="entry"] {
+      border-inline-start: 0;
+      padding-inline-start: 0;
+    }
+
+    /* Docking is an on-screen convenience; the printed page is never offset. */
+    doc-page:state(toc-docked) {
+      padding-inline-start: var(--doc-gutter);
+    }
+
+    doc-toc [data-part="toggle"] {
+      font-size: var(--doc-text-lg);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    doc-toc [data-part="entry"]::after {
+      color: var(--doc-default-faint);
+    }
+
+    /*
+     * Every elevation goes flat. A two-layer shadow is invisible on screen and
+     * unmissable on paper — printers render the 4% and 9% alphas as a hard grey
+     * band under every card.
+     */
+    doc-page *,
+    doc-page *::before,
+    doc-page *::after {
+      box-shadow: none;
+    }
+
+    /* The one exception: the emphasised-code rail and the diff signs are
+     * information, not elevation. */
+    doc-code [data-part="line"][data-emphasised] {
+      box-shadow: inset 2px 0 0 var(--doc-warn-600);
+    }
+
+    /*
+     * The code panel inverts for print: dark ink on white, keeping the token
+     * hues from the `code="light"` preset so the syntax colouring survives
+     * without flooding the page.
+     */
+    doc-code,
+    doc-diff,
+    doc-tree {
+      --doc-default-code-bg: #ffffff;
+      --doc-default-code-line: #dadbe8;
+      --doc-default-code-fg: #181a24;
+      --doc-default-code-faint: #878da0;
+      --doc-default-code-kw: #6a48c8;
+      --doc-default-code-str: #1a7d50;
+      --doc-default-code-fn: #9a5f0c;
+      --doc-default-code-cm: #767c91;
+      --doc-default-code-num: #b6633c;
+
+      border: var(--doc-border-width) solid #dadbe8;
+    }
+
+    /* Tabs flatten to sequential sections with their labels as sub-headings. */
+    doc-tab::before {
+      margin-block-end: var(--doc-space-2);
+      font-size: var(--doc-text-lg);
+      font-weight: 650;
+    }
+
+    doc-tab + doc-tab {
+      border-block-start: var(--doc-rule);
+    }
+
+    /* Link URLs printed after the link text, for external hrefs only. */
+    doc-page a[href^="http"]::after {
+      color: var(--doc-default-faint);
+      font-size: var(--doc-text-xs);
+    }
+
+    doc-term::after {
+      color: var(--doc-default-faint);
+      font-size: var(--doc-text-xs);
+    }
+
+    /*
+     * Background colours preserved on callouts and code. These carry meaning —
+     * a warning that prints as a plain paragraph is a warning the reader skips.
+     */
+    doc-note,
+    doc-blocker,
+    doc-code,
+    doc-diff,
+    doc-chip,
+    doc-badge,
+    doc-tree,
+    doc-stage:state(current) [data-part="badge"],
+    doc-flow-node:state(active),
+    doc-option[data-selected] {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    doc-page {
+      padding: 0;
+      min-height: 0;
+    }
+
+    doc-page > *:not([data-doc-chrome]) {
+      width: 100%;
+      max-width: none;
+    }
+
+    /* On paper the reading measure comes from the page box, not from a cap. */
+    doc-page :where(p, li, blockquote) {
+      max-width: none;
+    }
+
+    @page {
+      margin: 18mm 16mm;
+    }
+  }
+}

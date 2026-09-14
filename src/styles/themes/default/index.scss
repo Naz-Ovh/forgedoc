@@ -1,0 +1,63 @@
+/*
+ * The `default` theme.
+ *
+ * A polished long-form documentation surface: soft near-white and deep indigo
+ * grounds, violet accent, Plus Jakarta Sans for prose, JetBrains Mono for code,
+ * 12px cards lifted on two-layer shadows, and a deep indigo code panel that
+ * does not change colour between light and dark.
+ *
+ * Order is the cascade. `layers` first (§4.4), then fonts, tokens, presets, the
+ * shared headless base, and everything painted in `doc.theme`.
+ */
+
+@use "../../layers";
+
+// The typefaces this theme is built on, inlined at build time (§2.3).
+@use "fonts";
+
+@use "tokens";
+@use "presets";
+
+// Structure, shared with every other theme.
+@use "../../base";
+
+// Everything this theme paints, in doc.theme.
+@use "elements";
+
+// `doc` first: it owns the top-level rhythm rule that later partials override.
+@use "components/doc";
+@use "components/toc";
+@use "components/header";
+@use "components/section";
+@use "components/chips";
+@use "components/owners";
+@use "components/note";
+@use "components/blocker";
+@use "components/list";
+@use "components/badge";
+@use "components/decision";
+@use "components/endpoint";
+@use "components/params";
+@use "components/steps";
+@use "components/stats";
+@use "components/timeline";
+@use "components/matrix";
+@use "components/rating";
+@use "components/carousel";
+@use "components/compare";
+@use "components/table";
+@use "components/choice";
+@use "components/collapse";
+@use "components/roadmap";
+@use "components/tabs";
+@use "components/checklist";
+@use "components/flow";
+@use "components/code";
+@use "components/diff";
+@use "components/figure";
+@use "components/tree";
+@use "components/quote";
+@use "components/feedback";
+@use "components/bucket";
+
+@use "print";

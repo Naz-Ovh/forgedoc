@@ -1,73 +1,17 @@
-/*
- * The Geist typefaces, loaded by the theme itself.
- *
- * A theme owns how it looks, and for this one the typeface *is* most of the
- * look — Geist on a system grotesque is a different design. So the theme loads
- * it from the stylesheet rather than leaving a `<link>` for the document to
- * remember, which would make the theme's appearance depend on markup written
- * somewhere else and silently wrong when someone forgot.
- *
- * ── Two sources, and why the fallback is a font stack ───────────────────────
- *
- * Google Fonts first, jsDelivr second.
- *
- * The obvious way to write that is one `@font-face` with two `url()`s in its
- * `src`, which does fall back on a failed fetch. It cannot be used here:
- * Google's `gstatic` URLs carry a content hash that changes whenever they
- * re-cut the font, so hardcoding one guarantees a dead link on some future
- * Tuesday. Asking Google for the *stylesheet* instead — the `@import` below —
- * keeps that indirection on their side, but then their `@font-face` and ours
- * would both claim the same family, and for identical descriptors the last one
- * declared wins. Ours would shadow theirs, which is backwards.
- *
- * So the two sources use different family names and the fallback happens in the
- * font stack, in `_tokens.scss`:
- *
- *     "Geist", "Geist Fallback", ui-sans-serif, system-ui, …
- *
- * "Geist" is Google's. If that request fails the family simply does not
- * resolve, the browser moves to the next name, and "Geist Fallback" — declared
- * here against jsDelivr — loads instead. If both fail it lands on the system
- * grotesque. No timeouts, no JavaScript, and each step degrades on its own.
- *
- * ── Consequences worth knowing ──────────────────────────────────────────────
- *
- * Both sources are the network, so a `--offline` document renders in the system
- * stack. That is the trade for not carrying ~190 kB of base64 in every
- * stylesheet; it is the same trade the CDN flavour already makes for the
- * runtime.
- *
- * `@import` MUST stay the first rule in the compiled file. CSS allows only
- * `@charset` and `@layer` *statements* before it, which is why this partial is
- * loaded immediately after `layers` and before anything that emits a rule.
- *
- * MUST: the jsDelivr URL is version-pinned, never `@latest` — same rule as the
- * Mermaid pin (C5) and `CDN_BASE`. A floating version silently re-cuts the type
- * in documents that were published years ago.
- *
- * `@font-face` sits outside `@layer` because it has to: it is not a style rule
- * and takes part in no cascade. This is the one documented exception to §4.4.
+/* Geist 1.7.2, SIL Open Font License (fonts/OFL.txt).
+ * why: build-styles embeds these assets so typography works offline (§2.3).
  */
-
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
-
 @font-face {
-  font-family: "Geist Fallback";
-  src: url("https://cdn.jsdelivr.net/npm/geist@1.7.2/dist/fonts/geist-sans/Geist-Variable.woff2")
-    format("woff2-variations");
-  font-weight: 100 900;
+  font-family: "Geist";
+  src: url("./fonts/GeistSans.woff2") format("woff2");
   font-style: normal;
-  /* `swap` rather than `block`: this is the second source, so by the time it is
-     reached the reader has already waited out one failed request. Show them the
-     system stack immediately and upgrade when it arrives. */
+  font-weight: 100 900;
   font-display: swap;
 }
-
 @font-face {
-  font-family: "Geist Mono Fallback";
-  src: url("https://cdn.jsdelivr.net/npm/geist@1.7.2/dist/fonts/geist-mono/GeistMono-Variable.woff2")
-    format("woff2-variations");
-  font-weight: 100 900;
+  font-family: "Geist Mono";
+  src: url("./fonts/GeistMono.woff2") format("woff2");
   font-style: normal;
+  font-weight: 100 900;
   font-display: swap;
 }

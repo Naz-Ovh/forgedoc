@@ -1,0 +1,70 @@
+/*
+ * `doc-flow` — the horizontal chain.
+ *
+ * The active node is marked with the accent tint and edge, not an inverted
+ * fill. Every other committed or current state in this theme is a tint, and a
+ * chain of light cards with one black one in the middle reads as an error.
+ *
+ * why the subtitle typography sits on the host (§8.5 + §2.2): the subtitle
+ * arrives as a bare author text node, so there is no element to name without
+ * moving it. The title is generated from an attribute and overrides it.
+ */
+@layer doc.theme {
+  doc-flow {
+    gap: var(--doc-space-3);
+    margin-block: var(--doc-space-8);
+  }
+
+  doc-flow [data-part="arrow"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-lg);
+  }
+
+  doc-flow-node {
+    min-width: 0;
+    padding: var(--doc-space-4) var(--doc-space-4-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    line-height: 1.55;
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition);
+  }
+
+  doc-flow-node [data-part="title"] {
+    margin-block-end: var(--doc-space-1-5);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-ui);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-flow-node [data-part="subtitle"] {
+    color: inherit;
+    font-size: inherit;
+  }
+
+  doc-flow-node:state(active) {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+    color: var(--doc-text-2);
+    print-color-adjust: exact;
+  }
+
+  doc-flow-node:state(active) [data-part="title"] {
+    color: var(--doc-accent-text);
+  }
+
+  @media (max-width: 1049px) {
+    doc-flow-node {
+      flex-basis: auto;
+    }
+
+    doc-flow [data-part="arrow"] {
+      margin-inline-start: var(--doc-space-5);
+    }
+  }
+}

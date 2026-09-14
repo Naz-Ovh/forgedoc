@@ -1,0 +1,343 @@
+/*
+ * `doc-code` — the syntax-highlighted block, plus the Prism token theme.
+ *
+ * The panel carries no border. It is a deep indigo slab on a near-white page,
+ * lifted by `--doc-shadow-2` rather than outlined — a 1px line around something
+ * already this dark only muddies the edge.
+ *
+ * Line height is 1.85, which is loose for code and deliberate: at 13.5px on a
+ * dark ground it is what keeps a nine-line snippet readable. The gutter must
+ * carry the *same* leading, because the emphasised-row overlay is a grid of
+ * `1lh` rows — mismatch them and every highlight drifts one line further down
+ * the block.
+ */
+
+@layer doc.theme {
+  doc-code {
+    margin-block: var(--doc-space-5);
+    border: 0;
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    box-shadow: var(--doc-shadow-2);
+    print-color-adjust: exact;
+  }
+
+  doc-code [data-part="header"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-2-5) var(--doc-space-3-5) var(--doc-space-2-5)
+      var(--doc-space-2-5);
+    border-block-end: var(--doc-border-width) solid var(--doc-code-border);
+    background: transparent;
+    font-size: var(--doc-text-xs);
+  }
+
+  /*
+   * The filename reads as a tab sitting on the panel. The fill is a wash of the
+   * panel's own text colour rather than a literal white alpha, so `code="light"`
+   * gets a legible chip instead of an invisible one.
+   */
+  doc-code [data-part="header"] [data-part="title"] {
+    padding: var(--doc-space-1-5) var(--doc-space-3-5);
+    border-radius: 7px;
+    background: color-mix(in oklab, var(--doc-code-text) 9%, transparent);
+    color: var(--doc-code-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+  }
+
+  /*
+   * ── The language marker ────────────────────────────────────────────────
+   *
+   * A brand-coloured monogram chip, which is how VS Code's Material icon set
+   * renders the lettered languages — TS, JS, JSON, MD, YML are all a tinted
+   * square with the abbreviation in the language's own colour. The grey pill
+   * this replaced carried the same text and told the reader nothing they could
+   * not already read off the filename.
+   *
+   * why a monogram rather than 30 drawn logos: every mark would have to be an
+   * inline SVG data URI in this stylesheet — the offline build reaches for
+   * nothing (§2.3) — and a set where six languages have a real logo and the
+   * other twenty-four have a letter looks unfinished. One consistent treatment,
+   * carrying the brand hue, reads as deliberate at 10px.
+   *
+   * Both derived colours are mixed against `--doc-code-text` rather than being
+   * literal, so a brand hue that is legible on the indigo panel stays legible
+   * on the `code="light"` one — the mix follows the panel instead of fighting
+   * it. `--doc-lang-hue` defaults to the gutter colour, so an unlisted or
+   * missing language degrades to the quiet neutral chip rather than vanishing.
+   */
+  doc-code [data-part="lang"] {
+    --doc-lang-hue: var(--doc-code-gutter);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: color-mix(in oklab, var(--doc-lang-hue) 78%, var(--doc-code-text));
+    font-family: var(--doc-font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  /*
+   * The swatch carries the brand hue at full strength; the monogram beside it
+   * carries the meaning.
+   *
+   * why the mark has no chip behind it: a chip tinted with the language's own
+   * hue raises the backdrop for exactly the hues that are already darkest, so
+   * PHP's purple and TypeScript's blue landed at 4.1:1 against their own fill.
+   * On the bare panel the same monogram reads at 4.7:1 and can be far more
+   * saturated. The swatch is a solid block with no text on it, so it keeps the
+   * unmixed hex and still clears the 3:1 asked of a non-text graphic.
+   */
+  doc-code [data-part="lang"]::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--doc-lang-hue);
+  }
+
+  /* The palette is VS Code's Material icon theme, by language. */
+  doc-code [data-part="lang"]:is([data-lang="ts"], [data-lang="tsx"], [data-lang="typescript"]) {
+    --doc-lang-hue: #3178c6;
+  }
+
+  doc-code
+    [data-part="lang"]:is(
+      [data-lang="js"],
+      [data-lang="jsx"],
+      [data-lang="mjs"],
+      [data-lang="cjs"],
+      [data-lang="javascript"]
+    ) {
+    --doc-lang-hue: #ffca28;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="json"], [data-lang="jsonc"], [data-lang="json5"]) {
+    --doc-lang-hue: #fbc02d;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="html"], [data-lang="htm"]) {
+    --doc-lang-hue: #e44d26;
+  }
+
+  doc-code [data-part="lang"][data-lang="css"] {
+    --doc-lang-hue: #42a5f5;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="scss"], [data-lang="sass"], [data-lang="less"]) {
+    --doc-lang-hue: #cf649a;
+  }
+
+  doc-code
+    [data-part="lang"]:is(
+      [data-lang="bash"],
+      [data-lang="sh"],
+      [data-lang="shell"],
+      [data-lang="zsh"],
+      [data-lang="console"]
+    ) {
+    --doc-lang-hue: #8bc34a;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="md"], [data-lang="markdown"], [data-lang="mdx"]) {
+    --doc-lang-hue: #42a5f5;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="yaml"], [data-lang="yml"]) {
+    --doc-lang-hue: #ffa726;
+  }
+
+  doc-code [data-part="lang"][data-lang="toml"] {
+    --doc-lang-hue: #a1887f;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="py"], [data-lang="python"]) {
+    --doc-lang-hue: #3c78aa;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="rs"], [data-lang="rust"]) {
+    --doc-lang-hue: #ff7043;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="go"], [data-lang="golang"]) {
+    --doc-lang-hue: #29b6f6;
+  }
+
+  doc-code [data-part="lang"][data-lang="sql"] {
+    --doc-lang-hue: #ff8f00;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="diff"], [data-lang="patch"]) {
+    --doc-lang-hue: #8bc34a;
+  }
+
+  doc-code [data-part="lang"][data-lang="java"] {
+    --doc-lang-hue: #f44336;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="kt"], [data-lang="kotlin"]) {
+    --doc-lang-hue: #a97bff;
+  }
+
+  doc-code
+    [data-part="lang"]:is([data-lang="c"], [data-lang="cpp"], [data-lang="h"], [data-lang="hpp"]) {
+    --doc-lang-hue: #0288d1;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="cs"], [data-lang="csharp"]) {
+    --doc-lang-hue: #66bb6a;
+  }
+
+  doc-code [data-part="lang"][data-lang="php"] {
+    --doc-lang-hue: #7e57c2;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="rb"], [data-lang="ruby"]) {
+    --doc-lang-hue: #d32f2f;
+  }
+
+  doc-code [data-part="lang"][data-lang="swift"] {
+    --doc-lang-hue: #ff7043;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="graphql"], [data-lang="gql"]) {
+    --doc-lang-hue: #e535ab;
+  }
+
+  doc-code [data-part="lang"][data-lang="svelte"] {
+    --doc-lang-hue: #ff3e00;
+  }
+
+  doc-code [data-part="lang"][data-lang="vue"] {
+    --doc-lang-hue: #41b883;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="xml"], [data-lang="svg"]) {
+    --doc-lang-hue: #ff7043;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="docker"], [data-lang="dockerfile"]) {
+    --doc-lang-hue: #2496ed;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="make"], [data-lang="makefile"]) {
+    --doc-lang-hue: #f57c00;
+  }
+
+  doc-code [data-part="lang"]:is([data-lang="ini"], [data-lang="conf"], [data-lang="env"]) {
+    --doc-lang-hue: #90a4ae;
+  }
+
+  doc-code [data-part="copy"] {
+    margin-inline-start: auto;
+    padding: var(--doc-space-1-5) var(--doc-space-2-5);
+    border: 0;
+    border-radius: var(--doc-radius-sm);
+    background: none;
+    color: var(--doc-code-gutter);
+    font-family: var(--doc-font-sans);
+    font-size: var(--doc-text-xs);
+    font-weight: 550;
+    transition:
+      background-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  doc-code [data-part="copy"]:hover {
+    background: color-mix(in oklab, var(--doc-code-text) 9%, transparent);
+    color: var(--doc-code-text);
+  }
+
+  /* No rule between gutter and code — the colour step is the separation. */
+  doc-code [data-part="gutter"] {
+    padding: var(--doc-space-3) var(--doc-space-3-5) var(--doc-space-5)
+      var(--doc-space-5-5);
+    border-inline-end: 0;
+    color: var(--doc-code-gutter);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    line-height: 1.85;
+    text-align: end;
+  }
+
+  doc-code [data-part="code"] {
+    margin: 0;
+    padding: var(--doc-space-3) var(--doc-space-6) var(--doc-space-5)
+      var(--doc-space-2);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    line-height: 1.85;
+    tab-size: 2;
+  }
+
+  doc-code [data-part="code"] code {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: inherit;
+  }
+
+  doc-code [data-part="line"] {
+    height: 1lh;
+  }
+
+  doc-code [data-part="line"][data-emphasised] {
+    background: var(--doc-code-highlight-row);
+    box-shadow: inset 2px 0 0 var(--doc-code-function);
+    print-color-adjust: exact;
+  }
+
+  /* ── Prism token theme, driven entirely by --doc-code-* tokens ─────────── */
+  doc-code :where(.token.comment, .token.prolog, .token.cdata) {
+    color: var(--doc-code-comment);
+    font-style: italic;
+  }
+
+  doc-code :where(.token.punctuation, .token.operator) {
+    color: var(--doc-code-punctuation);
+  }
+
+  doc-code :where(.token.keyword, .token.atrule, .token.rule, .token.important, .token.selector) {
+    color: var(--doc-code-keyword);
+  }
+
+  doc-code :where(.token.string, .token.char, .token.attr-value, .token.regex) {
+    color: var(--doc-code-string);
+  }
+
+  doc-code :where(.token.number, .token.boolean, .token.constant, .token.symbol) {
+    color: var(--doc-code-number);
+  }
+
+  doc-code :where(.token.function, .token.class-name, .token.tag, .token.attr-name) {
+    color: var(--doc-code-function);
+  }
+
+  doc-code :where(.token.deleted) {
+    color: var(--doc-default-code-del-ink);
+  }
+
+  doc-code :where(.token.inserted) {
+    color: var(--doc-default-code-add-ink);
+  }
+
+  @media (max-width: 720px) {
+    doc-code [data-part="gutter"] {
+      padding-inline: var(--doc-space-3) var(--doc-space-2);
+    }
+
+    doc-code [data-part="code"] {
+      padding-inline: var(--doc-space-2) var(--doc-space-4);
+    }
+  }
+}

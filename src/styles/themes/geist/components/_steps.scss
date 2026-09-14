@@ -7,10 +7,10 @@
   }
 
   doc-step {
-    grid-template-columns: var(--doc-space-8) 1fr;
+    grid-template-columns: var(--doc-space-8) minmax(0, 1fr);
     gap: var(--doc-space-4);
     align-items: start;
-  }
+    }
 
   doc-step::before {
     content: "";
@@ -48,14 +48,16 @@
   doc-step[status="completed"] [data-part="marker"] {
     border-color: var(--doc-success-line);
     background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+    color: var(--doc-success-text);
   }
 
   doc-step[status="active"] [data-part="marker"] {
-    border-color: var(--doc-accent-line);
-    background: var(--doc-accent-tint);
-    color: var(--doc-accent-text);
-  }
+    border-color: var(--doc-text-1);
+
+    background: var(--doc-text-1);
+
+    color: var(--doc-text-inverse);
+    }
 
   doc-step[status="optional"] [data-part="marker"] {
     border-style: dashed;
@@ -63,11 +65,13 @@
   }
 
   doc-step [data-part="card"] {
-    background: var(--doc-surface-1);
-    border: var(--doc-border-width) solid var(--doc-border-1);
+    background: transparent;
+
+    border: 0;
     border-radius: var(--doc-radius);
-    padding: var(--doc-space-4);
-  }
+
+    padding: var(--doc-space-1) 0 var(--doc-space-5);
+    }
 
   doc-step [data-part="header"] {
     margin-bottom: var(--doc-space-2);

@@ -1,245 +1,198 @@
-/*
- * Design tokens — the `geist` theme.
- *
- * Modelled on Vercel's Geist design system: a high-contrast, near-monochrome
- * palette where colour is semantic rather than decorative, hairline borders,
- * small radii, and type that gets out of the way.
- *
- * ── How the values were arrived at ──────────────────────────────────────────
- *
- * Geist publishes its scales as ten steps with *fixed roles*, and that mapping
- * is what this file reproduces:
- *
- *     100  default background      600  active border
- *     200  hover background        700  high-contrast (solid) background
- *     300  active background       800  hover solid background
- *     400  default border          900  secondary text and icons
- *     500  hover border           1000  primary text and icons
- *
- * plus a two-value `backgrounds` scale — element background and the secondary
- * background behind it.
- *
- * The concrete values live behind an interactive tool on vercel.com/geist, not
- * in the published text, so the ramps below are reconstructed: anchored on the
- * Vercel colours that have been stable and public for years — #0070f3 blue,
- * #7928ca purple, #ff0080 pink, #50e3c2 teal, #f5a623 amber, the #eaeaea /
- * #333 border pair, the #fafafa / #000 page backgrounds — and interpolated
- * between them to honour the role of each step. It reads as Geist and behaves
- * as Geist; it is not claimed to be hex-identical to Vercel's tool.
- *
- * ── The typefaces ───────────────────────────────────────────────────────────
- *
- * Loaded by the theme, from Google Fonts with a version-pinned jsDelivr
- * fallback — see `_fonts.scss`. This is a deliberate departure from §6.5's "no
- * web fonts": Geist rendered in a system grotesque is a different design, and
- * a theme that cannot guarantee its own typeface is not really a theme. The
- * cost is that an `--offline` document falls back to the system stack.
- *
- * Everything below follows the same rules as every other theme: primitives on
- * `:root, doc-page` so a preset can move them, derived tokens re-declared on
- * `doc-page, doc-page *` so a subtree override reaches the whole scale. See
- * `themes/forgedoc/_tokens.scss` for why that split exists.
+/* Geist foundations, read from vercel.com/geist/colors and /typography.
+ * sRGB values inspected 2026-09-10; P3 is deliberately not required offline.
+ * The --doc-* contract remains theme-independent. Geist steps are namespaced
+ * so an embedded document cannot overwrite a host application's --ds-* tokens.
+ * why: derived values resolve per subtree so author overrides stay local (§6.1).
  */
-
 @layer doc.tokens {
-  /* ═══ Primitives ═══════════════════════════════════════════════════════════
-     Everything a preset or an author may want to move. No var() references. */
   :root,
   doc-page {
-    /* Spacing: keep the default rhythm dense, as Geist's layout demands. */
-    --doc-space-unit: 3.5px;
-
-    /* Type: one base, one ratio. A smaller ratio than the reference theme, so
-       headings stay close to body size and hierarchy comes from weight and
-       colour instead of size. That is most of what makes Geist read as Geist. */
-    --doc-text-base: 15px;
-    --doc-text-ratio: 1.16;
-
-    --doc-leading: 1.6;
-    --doc-leading-tight: 1.3;
+    --doc-space-unit: 4px;
+    --doc-text-base: 16px;
+    --doc-text-ratio: 1.25;
+    --doc-leading: 1.5;
+    --doc-leading-tight: 1.428571;
     --doc-leading-heading: 1.2;
-    /* Geist Sans is drawn tight; -0.02em at heading sizes matches the display
-       tracking Vercel uses, and stays legible at body size. */
-    --doc-tracking-tight: -0.02em;
-    --doc-tracking-wide: 0.06em;
-
-    /* Fonts (§6.5). MUST NOT use serif for body, headings or code. Serif is
-       permitted only if the author explicitly sets --doc-font-display. No web
-       fonts ship in either build. */
-    /* Geist from Google Fonts, then the jsDelivr copy, then the system. The
-       fallback between the first two is the stack itself — see `_fonts.scss`
-       for why it is not an `src:` list. */
-    --doc-font-sans:
-      Geist, "Geist Fallback", ui-sans-serif, system-ui, -apple-system,
-      "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-    --doc-font-mono:
-      "Geist Mono", "Geist Mono Fallback", ui-monospace, "SF Mono", SFMono-Regular,
-      "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    /* Tabular numerals in tables, code and every derived number. */
+    --doc-tracking-tight: -0.04em;
+    --doc-tracking-wide: 0.02em;
+    --doc-tracking-wider: 0.06em;
+    --doc-font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --doc-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --doc-font-display: var(--doc-font-sans);
     --doc-numeric: tabular-nums lining-nums;
-
-    /* Layout. */
-    --doc-measure: 1140px;
-    --doc-measure-prose: 72ch;
-    /* Width of the contents panel, and of the gap it pushes open when docked. */
-    --doc-toc-width: 19rem;
-    /* Geist's material presets are 6px for everyday surfaces and 12px for
-       raised ones, with 16px reserved for fullscreen. */
+    --doc-measure: 1040px;
+    --doc-measure-prose: 68ch;
+    --doc-toc-width: 17rem;
     --doc-radius-sm: 4px;
     --doc-radius: 6px;
     --doc-radius-lg: 12px;
     --doc-radius-pill: 999px;
     --doc-border-width: 1px;
-
-    /* Accent ramp. One definition per accent; dark mode picks other steps
-       rather than restating the ramp. */
-    --doc-accent-50: #ebf5ff;
-    --doc-accent-100: #d5e9ff;
-    --doc-accent-200: #a9ceff;
-    --doc-accent-400: #52a8ff;
-    --doc-accent-600: #0070f3;
-    --doc-accent-800: #004a99;
-    --doc-accent-900: #06315e;
-
-    /* The colour every dark-mode tint mixes toward.
-
-       It is the dark step of `--doc-surface-0`, and it was written out as the
-       literal `#101214` in eleven component files before it was a token. A
-       theme that moves its dark surface has to move its tints with it, and
-       eleven copies is eleven chances to forget one. */
     --doc-shade-base: #000000;
-
-    /* Ink for text sitting on a saturated fill rather than on a surface.
-       Scheme-independent on purpose: the fills these sit on — a 600-step ramp,
-       a 900-step accent — are the same in light and dark, so the ink must be
-       too, or it inverts against an unchanged background. */
     --doc-ink-on-solid: #ffffff;
-    --doc-ink-on-accent: #f2f8ff;
-
-    /* Surfaces and text. */
-    /* Geist's two-value `backgrounds` scale: surface-0 is the page behind
-       everything, surface-1 the element sitting on it. Note that they invert
-       relative to the usual assumption — in dark mode the *page* is pure black
-       and the card is lifted to #0a0a0a, which is what gives Vercel's UI its
-       edge-lit look. Chasing that with a lighter page would flatten it. */
-    --doc-surface-0: light-dark(#fafafa, var(--doc-shade-base));
-    --doc-surface-1: light-dark(#ffffff, #0a0a0a);
-    /* gray 100 / 200 — the hover and active backgrounds. */
-    --doc-surface-2: light-dark(#f2f2f2, #1a1a1a);
-    --doc-surface-3: light-dark(#ebebeb, #242424);
-    /* gray 1000 / 900, plus a third step for the quietest metadata. Near-black
-       on near-white is the whole point: Geist buys its calm with contrast, not
-       with grey text. */
-    --doc-text-1: light-dark(#000000, #ededed);
-    --doc-text-2: light-dark(#666666, #a1a1a1);
-    /* Two steps darker than Geist's quietest grey. That step is drawn for icons
-       and dividers, but this token also carries flow-node subtitles, chip text,
-       sequence labels and citations — all prose, all needing 4.5:1. It has to
-       clear that against the *callout tints* too, which are lighter than the
-       page, so it lands darker than the page alone would require. */
-    --doc-text-3: light-dark(#6b6b6b, #949494);
-    --doc-text-inverse: light-dark(#fafafa, #0a0a0a);
-    /* gray 400 / 600 — the hairlines. #eaeaea and #333 have been the Vercel
-       border pair for years and are most of the system's signature. */
-    --doc-border-1: light-dark(#eaeaea, #2e2e2e);
-    --doc-border-2: light-dark(#d4d4d4, #454545);
-    /* Geist separates surfaces with a hairline first and a shadow second, so
-       these are deliberately shallower than the reference theme's. The dark
-       values stay strong: on a pure-black page a soft shadow is invisible, and
-       the border is doing the work anyway. */
-    --doc-shadow-1: light-dark(0 1px 2px rgb(0 0 0 / 4%), 0 1px 2px rgb(0 0 0 / 60%));
-    --doc-shadow-2:
-      light-dark(0 2px 4px rgb(0 0 0 / 4%), 0 2px 6px rgb(0 0 0 / 60%)),
-      light-dark(0 8px 24px rgb(0 0 0 / 8%), 0 10px 30px rgb(0 0 0 / 55%));
-
-    /* Three extra categorical hues. A scale — pie slices, journey bands, class
-       fill types — needs more distinguishable colours than the accent plus the
-       four semantic ramps supply, and reusing a semantic ramp for "the fifth
-       category" would say danger where none is meant. One 600/400 pair each,
-       the same shape as every ramp above, so a theme moves them the same way. */
-    /* Vercel's own gradient trio — purple, pink and teal — which is where the
-       brand keeps its colour, and the obvious place for a categorical scale to
-       reach once the semantic ramps are spent. */
-    --doc-series-a-600: #7928ca;
-    --doc-series-a-400: #a06ce0;
-    --doc-series-b-600: #ff0080;
-    --doc-series-b-400: #ff4da6;
-    --doc-series-c-600: #17a398;
-    --doc-series-c-400: #50e3c2;
-
-    /*
-     * Semantic ramps. MUST NOT change with `accent` (§6.4).
-     *
-     * The 600 step is doing two jobs at once here — it is the solid fill under
-     * white ink *and* the marker colour on the matching 50 tint — so it has to
-     * clear 4.5:1 against both. Vercel's published brand colours do not: white
-     * on #f5a623 is 2.0:1 and on #e5484d is 3.9:1, because in the real Geist
-     * those are the 700 "high contrast background" step and the ink on them is
-     * dark, not white.
-     *
-     * Rather than split the token in two and change the contract every theme
-     * shares, the 600s below are deepened until they carry white, and the brand
-     * hex keeps its place at the 400 step — where it is used for borders,
-     * markers and dark-mode lines, and where it looks like itself.
-     */
-    --doc-info-600: #0062d6;
-    --doc-info-400: #52a8ff;
-    --doc-info-200: #a9ceff;
-    --doc-info-50: #ebf5ff;
-    --doc-info-900: #06315e;
-
-    --doc-success-600: #2f7d3f;
-    --doc-success-400: #62c073;
-    --doc-success-200: #b7e3bf;
-    --doc-success-50: #eefbf0;
-    --doc-success-900: #1b4721;
-
-    --doc-warn-600: #9a6100;
-    --doc-warn-400: #f5a623;
-    --doc-warn-200: #fbdfae;
-    --doc-warn-50: #fff8eb;
-    --doc-warn-900: #5c3d05;
-
-    --doc-danger-600: #c9252b;
-    --doc-danger-400: #ef7f83;
-    --doc-danger-200: #fac7c9;
-    --doc-danger-50: #fff0f0;
-    --doc-danger-900: #5b1418;
-
-    /* Code theme (§6.3, the `code` axis). */
-    --doc-code-surface: light-dark(#fafafa, #0a0a0a);
-    --doc-code-text: light-dark(#171717, #ededed);
-    --doc-code-border: light-dark(#eaeaea, #2e2e2e);
-    /* Gutter and comment are the two that read as "quiet" and get set too light
-       by instinct; both carry meaning a reader has to be able to follow, so
-       they sit at a real text step rather than a divider one. */
-    --doc-code-gutter: light-dark(#6f6f6f, #949494);
-    --doc-code-comment: light-dark(#767676, #8f8f8f);
-    --doc-code-keyword: light-dark(#7928ca, #b98cf0);
-    --doc-code-string: light-dark(#0f7a72, #50e3c2);
-    --doc-code-number: light-dark(#9a6100, #f7bb5c);
-    --doc-code-function: light-dark(#0062d6, #52a8ff);
-    --doc-code-punctuation: light-dark(#666666, #a1a1a1);
-    --doc-code-highlight-row: light-dark(#fff8eb, #211a06);
-
-    --doc-highlight-text: light-dark(#3b2c07, #f4e9cf);
-
-    /* Elevation. */
+    --doc-ink-on-accent: #ffffff;
+    --doc-text-inverse: light-dark(#ffffff, #0a0a0a);
+    --doc-shadow-1: 0 1px 2px light-dark(#0000000a, #00000029);
+    --doc-shadow-2: 0 1px 1px #00000005, 0 4px 8px -4px #0000000a, 0 16px 24px -8px #0000000f;
+    --doc-highlight-text: light-dark(#482300, #ffefcf);
     --doc-z-toc: 40;
     --doc-z-popover: 60;
     --doc-z-bucket: 70;
     --doc-z-banner: 80;
-
-    --doc-transition: 140ms cubic-bezier(0.32, 0.72, 0.32, 1);
+    --doc-transition: 150ms ease;
+    --doc-geist-gray-100: light-dark(hsla(0, 0%, 95%, 1), hsla(0, 0%, 10%, 1));
+    --doc-geist-gray-200: light-dark(hsla(0, 0%, 92%, 1), hsla(0, 0%, 12%, 1));
+    --doc-geist-gray-300: light-dark(hsla(0, 0%, 90%, 1), hsla(0, 0%, 16%, 1));
+    --doc-geist-gray-400: light-dark(hsla(0, 0%, 92%, 1), hsla(0, 0%, 18%, 1));
+    --doc-geist-gray-500: light-dark(hsla(0, 0%, 79%, 1), hsla(0, 0%, 27%, 1));
+    --doc-geist-gray-600: light-dark(hsla(0, 0%, 66%, 1), hsla(0, 0%, 53%, 1));
+    --doc-geist-gray-700: hsla(0, 0%, 56%, 1);
+    --doc-geist-gray-800: hsla(0, 0%, 49%, 1);
+    --doc-geist-gray-900: light-dark(hsla(0, 0%, 30%, 1), hsla(0, 0%, 63%, 1));
+    --doc-geist-gray-1000: light-dark(hsla(0, 0%, 9%, 1), hsla(0, 0%, 93%, 1));
+    --doc-geist-blue-100: light-dark(hsla(212, 100%, 97%, 1), hsla(216, 50%, 12%, 1));
+    --doc-geist-blue-200: light-dark(hsla(210, 100%, 96%, 1), hsla(214, 59%, 15%, 1));
+    --doc-geist-blue-300: light-dark(hsla(210, 100%, 94%, 1), hsla(213, 71%, 20%, 1));
+    --doc-geist-blue-400: light-dark(hsla(209, 100%, 90%, 1), hsla(212, 78%, 23%, 1));
+    --doc-geist-blue-500: light-dark(hsla(209, 100%, 80%, 1), hsla(211, 86%, 27%, 1));
+    --doc-geist-blue-600: light-dark(hsla(208, 100%, 66%, 1), hsla(206, 100%, 50%, 1));
+    --doc-geist-blue-700: hsla(212, 100%, 48%, 1);
+    --doc-geist-blue-800: hsla(212, 100%, 41%, 1);
+    --doc-geist-blue-900: light-dark(hsla(211, 100%, 42%, 1), hsla(210, 100%, 66%, 1));
+    --doc-geist-blue-1000: light-dark(hsla(211, 100%, 15%, 1), hsla(206, 100%, 96%, 1));
+    --doc-geist-red-100: light-dark(hsla(0, 100%, 97%, 1), hsla(357, 37%, 12%, 1));
+    --doc-geist-red-200: light-dark(hsla(0, 100%, 96%, 1), hsla(357, 46%, 16%, 1));
+    --doc-geist-red-300: light-dark(hsla(0, 100%, 95%, 1), hsla(356, 54%, 22%, 1));
+    --doc-geist-red-400: light-dark(hsla(0, 90%, 92%, 1), hsla(357, 55%, 26%, 1));
+    --doc-geist-red-500: light-dark(hsla(0, 82%, 85%, 1), hsla(357, 60%, 32%, 1));
+    --doc-geist-red-600: light-dark(hsla(359, 90%, 71%, 1), hsla(358, 75%, 59%, 1));
+    --doc-geist-red-700: hsla(358, 75%, 59%, 1);
+    --doc-geist-red-800: light-dark(hsla(358, 70%, 52%, 1), hsla(358, 69%, 52%, 1));
+    --doc-geist-red-900: light-dark(hsla(358, 66%, 48%, 1), hsla(358, 100%, 69%, 1));
+    --doc-geist-red-1000: light-dark(hsla(355, 49%, 15%, 1), hsla(353, 90%, 96%, 1));
+    --doc-geist-amber-100: light-dark(hsla(39, 100%, 95%, 1), hsla(35, 100%, 8%, 1));
+    --doc-geist-amber-200: light-dark(hsla(44, 100%, 92%, 1), hsla(32, 100%, 10%, 1));
+    --doc-geist-amber-300: light-dark(hsla(43, 96%, 90%, 1), hsla(33, 100%, 15%, 1));
+    --doc-geist-amber-400: light-dark(hsla(42, 100%, 78%, 1), hsla(35, 100%, 17%, 1));
+    --doc-geist-amber-500: light-dark(hsla(38, 100%, 71%, 1), hsla(35, 91%, 22%, 1));
+    --doc-geist-amber-600: light-dark(hsla(36, 90%, 62%, 1), hsla(39, 85%, 49%, 1));
+    --doc-geist-amber-700: hsla(39, 100%, 57%, 1);
+    --doc-geist-amber-800: hsla(35, 100%, 52%, 1);
+    --doc-geist-amber-900: light-dark(hsla(30, 100%, 32%, 1), hsla(39, 90%, 50%, 1));
+    --doc-geist-amber-1000: light-dark(hsla(20, 79%, 17%, 1), hsla(40, 94%, 93%, 1));
+    --doc-geist-green-100: light-dark(hsla(120, 60%, 96%, 1), hsla(136, 50%, 9%, 1));
+    --doc-geist-green-200: light-dark(hsla(120, 60%, 95%, 1), hsla(137, 50%, 12%, 1));
+    --doc-geist-green-300: light-dark(hsla(120, 60%, 91%, 1), hsla(136, 50%, 14%, 1));
+    --doc-geist-green-400: light-dark(hsla(122, 60%, 86%, 1), hsla(135, 70%, 16%, 1));
+    --doc-geist-green-500: light-dark(hsla(124, 60%, 75%, 1), hsla(135, 70%, 23%, 1));
+    --doc-geist-green-600: light-dark(hsla(125, 60%, 64%, 1), hsla(135, 70%, 34%, 1));
+    --doc-geist-green-700: hsla(131, 41%, 46%, 1);
+    --doc-geist-green-800: hsla(132, 43%, 39%, 1);
+    --doc-geist-green-900: light-dark(hsla(133, 50%, 32%, 1), hsla(131, 43%, 57%, 1));
+    --doc-geist-green-1000: light-dark(hsla(128, 29%, 15%, 1), hsla(136, 73%, 94%, 1));
+    --doc-geist-teal-100: light-dark(hsla(169, 70%, 96%, 1), hsla(169, 78%, 7%, 1));
+    --doc-geist-teal-200: light-dark(hsla(167, 70%, 94%, 1), hsla(170, 74%, 9%, 1));
+    --doc-geist-teal-300: light-dark(hsla(168, 70%, 90%, 1), hsla(171, 75%, 13%, 1));
+    --doc-geist-teal-400: light-dark(hsla(170, 70%, 85%, 1), hsla(171, 85%, 13%, 1));
+    --doc-geist-teal-500: light-dark(hsla(170, 70%, 72%, 1), hsla(172, 85%, 20%, 1));
+    --doc-geist-teal-600: light-dark(hsla(170, 70%, 57%, 1), hsla(172, 85%, 32%, 1));
+    --doc-geist-teal-700: hsla(173, 80%, 36%, 1);
+    --doc-geist-teal-800: hsla(173, 83%, 30%, 1);
+    --doc-geist-teal-900: light-dark(hsla(174, 91%, 25%, 1), hsla(174, 90%, 41%, 1));
+    --doc-geist-teal-1000: light-dark(hsla(171, 80%, 13%, 1), hsla(166, 71%, 93%, 1));
+    --doc-geist-purple-100: light-dark(hsla(276, 100%, 97%, 1), hsla(283, 30%, 12%, 1));
+    --doc-geist-purple-200: light-dark(hsla(277, 87%, 97%, 1), hsla(281, 38%, 16%, 1));
+    --doc-geist-purple-300: light-dark(hsla(274, 78%, 95%, 1), hsla(279, 44%, 23%, 1));
+    --doc-geist-purple-400: light-dark(hsla(276, 71%, 92%, 1), hsla(277, 46%, 28%, 1));
+    --doc-geist-purple-500: light-dark(hsla(274, 70%, 82%, 1), hsla(274, 49%, 35%, 1));
+    --doc-geist-purple-600: light-dark(hsla(273, 72%, 73%, 1), hsla(272, 51%, 54%, 1));
+    --doc-geist-purple-700: hsla(272, 51%, 54%, 1);
+    --doc-geist-purple-800: hsla(272, 47%, 45%, 1);
+    --doc-geist-purple-900: light-dark(hsla(274, 71%, 43%, 1), hsla(275, 80%, 71%, 1));
+    --doc-geist-purple-1000: light-dark(hsla(276, 100%, 15%, 1), hsla(281, 73%, 96%, 1));
+    --doc-geist-pink-100: light-dark(hsla(330, 100%, 96%, 1), hsla(335, 32%, 12%, 1));
+    --doc-geist-pink-200: light-dark(hsla(340, 90%, 96%, 1), hsla(335, 43%, 16%, 1));
+    --doc-geist-pink-300: light-dark(hsla(340, 82%, 94%, 1), hsla(335, 47%, 21%, 1));
+    --doc-geist-pink-400: light-dark(hsla(341, 76%, 91%, 1), hsla(335, 51%, 22%, 1));
+    --doc-geist-pink-500: light-dark(hsla(340, 75%, 84%, 1), hsla(335, 57%, 27%, 1));
+    --doc-geist-pink-600: light-dark(hsla(341, 75%, 73%, 1), hsla(336, 75%, 40%, 1));
+    --doc-geist-pink-700: hsla(336, 80%, 58%, 1);
+    --doc-geist-pink-800: hsla(336, 74%, 51%, 1);
+    --doc-geist-pink-900: light-dark(hsla(336, 65%, 45%, 1), hsla(341, 90%, 67%, 1));
+    --doc-geist-pink-1000: light-dark(hsla(333, 74%, 15%, 1), hsla(333, 90%, 96%, 1));
+    --doc-geist-background-100: light-dark(hsla(0, 0%, 100%, 1), hsla(0, 0%, 4%, 1));
+    --doc-geist-background-200: light-dark(hsla(0, 0%, 98%, 1), hsla(0, 0%, 0%, 1));
+    --doc-surface-0: var(--doc-geist-background-200);
+    --doc-surface-1: var(--doc-geist-background-100);
+    --doc-surface-2: var(--doc-geist-gray-100);
+    --doc-surface-3: var(--doc-geist-gray-200);
+    --doc-text-1: var(--doc-geist-gray-1000);
+    --doc-text-2: var(--doc-geist-gray-900);
+    --doc-text-3: var(--doc-geist-gray-900);
+    --doc-border-1: var(--doc-geist-gray-400);
+    --doc-border-2: var(--doc-geist-gray-500);
+    --doc-border-3: var(--doc-geist-gray-600);
+    --doc-surface-base: var(--doc-surface-1);
+    --doc-accent-50: hsla(212, 100%, 97%, 1);
+    --doc-accent-100: hsla(210, 100%, 96%, 1);
+    --doc-accent-200: hsla(212, 78%, 23%, 1);
+    --doc-accent-400: hsla(206, 100%, 50%, 1);
+    --doc-accent-600: hsla(211, 100%, 42%, 1);
+    --doc-accent-800: hsla(211, 100%, 42%, 1);
+    --doc-accent-900: hsla(211, 100%, 15%, 1);
+    --doc-info-50: hsla(212, 100%, 97%, 1);
+    --doc-info-100: hsla(210, 100%, 96%, 1);
+    --doc-info-200: hsla(212, 78%, 23%, 1);
+    --doc-info-400: hsla(206, 100%, 50%, 1);
+    --doc-info-600: hsla(211, 100%, 42%, 1);
+    --doc-info-800: hsla(211, 100%, 42%, 1);
+    --doc-info-900: hsla(211, 100%, 15%, 1);
+    --doc-success-50: hsla(120, 60%, 96%, 1);
+    --doc-success-100: hsla(120, 60%, 95%, 1);
+    --doc-success-200: hsla(135, 70%, 16%, 1);
+    --doc-success-400: hsla(135, 70%, 34%, 1);
+    --doc-success-600: hsla(133, 50%, 32%, 1);
+    --doc-success-800: hsla(133, 50%, 32%, 1);
+    --doc-success-900: hsla(128, 29%, 15%, 1);
+    --doc-warn-50: hsla(39, 100%, 95%, 1);
+    --doc-warn-100: hsla(44, 100%, 92%, 1);
+    --doc-warn-200: hsla(35, 100%, 17%, 1);
+    --doc-warn-400: hsla(39, 85%, 49%, 1);
+    --doc-warn-600: hsla(30, 100%, 32%, 1);
+    --doc-warn-800: hsla(30, 100%, 32%, 1);
+    --doc-warn-900: hsla(20, 79%, 17%, 1);
+    --doc-danger-50: hsla(0, 100%, 97%, 1);
+    --doc-danger-100: hsla(0, 100%, 96%, 1);
+    --doc-danger-200: hsla(357, 55%, 26%, 1);
+    --doc-danger-400: hsla(358, 75%, 59%, 1);
+    --doc-danger-600: hsla(358, 66%, 48%, 1);
+    --doc-danger-800: hsla(358, 66%, 48%, 1);
+    --doc-danger-900: hsla(355, 49%, 15%, 1);
+    --doc-series-a-600: hsla(274, 71%, 43%, 1);
+    --doc-series-a-400: hsla(275, 80%, 71%, 1);
+    --doc-series-b-600: hsla(336, 65%, 45%, 1);
+    --doc-series-b-400: hsla(341, 90%, 67%, 1);
+    --doc-series-c-600: hsla(174, 91%, 25%, 1);
+    --doc-series-c-400: hsla(174, 90%, 41%, 1);
+    --doc-code-surface: var(--doc-geist-background-100);
+    --doc-code-text: var(--doc-geist-gray-1000);
+    --doc-code-border: var(--doc-geist-gray-400);
+    --doc-code-gutter: var(--doc-geist-gray-900);
+    --doc-code-comment: var(--doc-geist-gray-900);
+    --doc-code-keyword: var(--doc-geist-pink-900);
+    --doc-code-string: var(--doc-geist-green-900);
+    --doc-code-number: var(--doc-geist-amber-900);
+    --doc-code-function: var(--doc-geist-blue-900);
+    --doc-code-punctuation: var(--doc-geist-gray-900);
+    --doc-code-highlight-row: var(--doc-geist-amber-100);
   }
 
-  /* ═══ Derived ══════════════════════════════════════════════════════════════
-     Re-substituted at every element so a preset on `doc-page` and a token
-     override on any subtree both reach the whole scale. */
   doc-page,
   doc-page * {
-    --doc-space-0: 0px;
+    --doc-space-0: calc(var(--doc-space-unit) * 0);
+    --doc-space-0-5: calc(var(--doc-space-unit) * 0.5);
     --doc-space-1: calc(var(--doc-space-unit) * 1);
+    --doc-space-1-5: calc(var(--doc-space-unit) * 1.5);
     --doc-space-2: calc(var(--doc-space-unit) * 2);
     --doc-space-3: calc(var(--doc-space-unit) * 3);
     --doc-space-4: calc(var(--doc-space-unit) * 4);
@@ -253,84 +206,51 @@
     --doc-space-12: calc(var(--doc-space-unit) * 12);
     --doc-space-16: calc(var(--doc-space-unit) * 16);
     --doc-space-20: calc(var(--doc-space-unit) * 20);
-
-    --doc-text-xs: calc(var(--doc-text-base) / var(--doc-text-ratio) / var(--doc-text-ratio));
-    --doc-text-sm: calc(var(--doc-text-base) / var(--doc-text-ratio));
-    --doc-text-md: var(--doc-text-base);
-    --doc-text-lg: calc(var(--doc-text-base) * var(--doc-text-ratio));
-    --doc-text-xl: calc(var(--doc-text-lg) * var(--doc-text-ratio));
-    --doc-text-2xl: calc(var(--doc-text-xl) * var(--doc-text-ratio));
-    --doc-text-3xl: calc(var(--doc-text-2xl) * var(--doc-text-ratio));
-    --doc-text-4xl: calc(var(--doc-text-3xl) * var(--doc-text-ratio));
-
-    --doc-gutter: var(--doc-space-5);
+    --doc-text-2xs: calc(var(--doc-text-base) * 0.75);
+    --doc-text-xs: calc(var(--doc-text-base) * 0.75);
+    --doc-text-sm: calc(var(--doc-text-base) * 0.875);
+    --doc-text-md: calc(var(--doc-text-base) * 1);
+    --doc-text-lg: calc(var(--doc-text-base) * 1.25);
+    --doc-text-xl: calc(var(--doc-text-base) * 1.5);
+    --doc-text-2xl: calc(var(--doc-text-base) * 2);
+    --doc-text-3xl: calc(var(--doc-text-base) * 2.5);
+    --doc-text-4xl: calc(var(--doc-text-base) * 3);
+    --doc-gutter: var(--doc-space-6);
     --doc-rule: var(--doc-border-width) solid var(--doc-border-1);
-
-    /* Accent, resolved against the current colour scheme. Components use these,
-       not the raw ramp, so one ramp serves both schemes. */
-    --doc-accent-text: light-dark(var(--doc-accent-800), var(--doc-accent-200));
-    --doc-accent-line: light-dark(var(--doc-accent-600), var(--doc-accent-400));
-    --doc-accent-solid: light-dark(var(--doc-accent-600), var(--doc-accent-400));
-    --doc-accent-on-solid: light-dark(#ffffff, #06201c);
-    --doc-accent-tint: light-dark(
-      var(--doc-accent-50),
-      color-mix(in oklab, var(--doc-accent-900) 42%, #101214)
-    );
-    --doc-accent-edge: light-dark(
-      var(--doc-accent-200),
-      color-mix(in oklab, var(--doc-accent-400) 34%, #101214)
-    );
-
-    /* Semantic tints, in the same shape as `--doc-accent-tint`. Callouts and
-       diagrams both need "the 50 step, or a dark surface tinted toward the 900
-       step"; it was written out four times in `note.css` before a Mermaid gantt
-       needed the danger one too. */
-    --doc-info-tint: light-dark(
-      var(--doc-info-50),
-      color-mix(in oklab, var(--doc-info-900) 42%, #101214)
-    );
-    --doc-success-tint: light-dark(
-      var(--doc-success-50),
-      color-mix(in oklab, var(--doc-success-900) 42%, #101214)
-    );
-    --doc-warn-tint: light-dark(
-      var(--doc-warn-50),
-      color-mix(in oklab, var(--doc-warn-900) 42%, #101214)
-    );
-    --doc-danger-tint: light-dark(
-      var(--doc-danger-50),
-      color-mix(in oklab, var(--doc-danger-900) 42%, #101214)
-    );
-
-    /* Categorical series — pie slices, journey sections, class fill types.
-       Nothing in the document reads a *ramp step* directly, so these follow the
-       same `light-dark(600, 400)` shape as `--doc-accent-line`: a hue that is
-       dark enough to read on paper and light enough to read on a dark page.
-       Series 1 tracks the accent preset; the rest are the semantic ramps plus
-       two extra hues, because a five-slice pie needs five distinguishable
-       colours and the semantic ramps only supply four. Diagrams cycle. */
-    --doc-series-1: light-dark(var(--doc-accent-600), var(--doc-accent-400));
-    --doc-series-2: light-dark(var(--doc-info-600), var(--doc-info-400));
-    --doc-series-3: light-dark(var(--doc-warn-600), var(--doc-warn-400));
-    --doc-series-4: light-dark(var(--doc-success-600), var(--doc-success-400));
-    --doc-series-5: light-dark(var(--doc-danger-600), var(--doc-danger-400));
-    --doc-series-6: light-dark(var(--doc-series-a-600), var(--doc-series-a-400));
-    --doc-series-7: light-dark(var(--doc-series-b-600), var(--doc-series-b-400));
-    --doc-series-8: light-dark(var(--doc-series-c-600), var(--doc-series-c-400));
-
-    /* Feedback highlight (CSS Custom Highlight API, §10.2). */
-    --doc-highlight-bg: light-dark(
-      color-mix(in oklab, var(--doc-warn-200) 70%, transparent),
-      rgb(160 120 20 / 42%)
-    );
+    --doc-accent-text: var(--doc-geist-blue-900);
+    --doc-accent-line: var(--doc-geist-blue-600);
+    --doc-accent-solid: var(--doc-geist-blue-700);
+    --doc-accent-on-solid: #ffffff;
+    --doc-accent-tint: var(--doc-geist-blue-100);
+    --doc-accent-edge: var(--doc-geist-blue-400);
+    --doc-info-tint: var(--doc-geist-blue-100);
+    --doc-info-line: var(--doc-geist-blue-600);
+    --doc-info-text: var(--doc-geist-blue-900);
+    --doc-info-edge: var(--doc-geist-blue-400);
+    --doc-success-tint: var(--doc-geist-green-100);
+    --doc-success-line: var(--doc-geist-green-600);
+    --doc-success-text: var(--doc-geist-green-900);
+    --doc-success-edge: var(--doc-geist-green-400);
+    --doc-warn-tint: var(--doc-geist-amber-100);
+    --doc-warn-line: var(--doc-geist-amber-600);
+    --doc-warn-text: var(--doc-geist-amber-900);
+    --doc-warn-edge: var(--doc-geist-amber-400);
+    --doc-danger-tint: var(--doc-geist-red-100);
+    --doc-danger-line: var(--doc-geist-red-600);
+    --doc-danger-text: var(--doc-geist-red-900);
+    --doc-danger-edge: var(--doc-geist-red-400);
+    --doc-series-1: var(--doc-accent-text);
+    --doc-series-2: var(--doc-geist-blue-900);
+    --doc-series-3: var(--doc-geist-amber-900);
+    --doc-series-4: var(--doc-geist-green-900);
+    --doc-series-5: var(--doc-geist-red-900);
+    --doc-series-6: var(--doc-geist-purple-900);
+    --doc-series-7: var(--doc-geist-pink-900);
+    --doc-series-8: var(--doc-geist-teal-900);
+    --doc-highlight-bg: light-dark(#ffdf9c99, #a078146b);
   }
 
-  /* The highlight pseudo-element is painted at the document level, not inside
-     `doc-page`, so it needs the token on the root as well. */
   :root {
-    --doc-highlight-bg: light-dark(
-      color-mix(in oklab, #f5d9a4 70%, transparent),
-      rgb(160 120 20 / 42%)
-    );
+    --doc-highlight-bg: light-dark(#ffdf9c99, #a078146b);
   }
 }

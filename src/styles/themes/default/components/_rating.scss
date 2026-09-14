@@ -1,0 +1,51 @@
+/*
+ * `doc-rating` — the score scale.
+ *
+ * The buttons are the design's small secondary control: card surface, hairline
+ * border, 9px radius. Selection fills with the accent rather than with ink, so
+ * a chosen score matches every other committed answer on the page.
+ */
+@layer doc.theme {
+  doc-rating {
+    gap: var(--doc-space-3);
+    margin-block: var(--doc-space-6);
+  }
+
+  doc-rating [data-part="question"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+  }
+
+  doc-rating [data-part="scale"] {
+    gap: var(--doc-space-2);
+  }
+
+  doc-rating [data-part="score-btn"] {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+    font-variant-numeric: var(--doc-numeric);
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  doc-rating [data-part="score-btn"]:hover {
+    border-color: var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+  }
+
+  doc-rating [data-part="score-btn"][data-selected="true"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    print-color-adjust: exact;
+  }
+}

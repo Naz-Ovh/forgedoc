@@ -1,170 +1,133 @@
-/*
- * `doc-choice` / `doc-option` — the question card.
- *
- * MUST (§8.4): every free-text field shares one visual style — same border,
- * padding, radius and background. `--doc-field-*` below is that one style, used
- * by the Other textarea, the note textarea and the bucket's comment composer.
- */
-
+/* Geist Choicebox: leading letter controls, a title-row badge and secondary copy.
+ * Keep ForgeDoc's native inputs and author nodes in place (§2.2). */
 @layer doc.theme {
   doc-choice {
     margin-block: var(--doc-space-8);
-    padding: var(--doc-space-5) var(--doc-space-5) var(--doc-space-4);
+    padding: var(--doc-space-6);
     border: var(--doc-rule);
     border-radius: var(--doc-radius-lg);
     background: var(--doc-surface-1);
-    box-shadow: var(--doc-shadow-1);
   }
-
-  doc-choice:state(answered) {
-    border-color: var(--doc-accent-edge);
-  }
-
   doc-choice [data-part="sequence"] {
-    color: var(--doc-accent-text);
+    color: var(--doc-text-2);
     font-size: var(--doc-text-xs);
-    font-weight: 660;
-    letter-spacing: var(--doc-tracking-wide);
+    font-weight: 500;
     font-variant-numeric: var(--doc-numeric);
   }
-
   doc-choice [data-part="question"] {
-    margin-block: var(--doc-space-2) var(--doc-space-4);
-    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-2) var(--doc-space-5);
+    color: var(--doc-text-1);
     font-size: var(--doc-text-lg);
-    font-weight: 620;
-    line-height: var(--doc-leading-tight);
-    text-wrap: pretty;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
   }
-
   doc-option {
     gap: var(--doc-space-1) var(--doc-space-3);
-    margin-block: var(--doc-space-2);
-    padding: var(--doc-space-3);
-    border: var(--doc-border-width) solid var(--doc-border-1);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    margin-block: var(--doc-space-3);
+    padding: var(--doc-space-4);
+    border: var(--doc-rule);
     border-radius: var(--doc-radius);
     background: var(--doc-surface-1);
+    color: var(--doc-text-1);
+    /* why: the bare author title inherits its type without being wrapped (§2.2). */
+    font-size: var(--doc-text-md);
+    font-weight: 600;
+    line-height: 1.5;
   }
-
-  doc-option:hover {
-    border-color: var(--doc-border-2);
-    background: var(--doc-surface-2);
-  }
-
+  doc-option:hover { border-color: var(--doc-border-2); background: var(--doc-surface-0); }
   doc-option[data-selected] {
     border-color: var(--doc-accent-line);
     background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
   }
-
   doc-option [data-part="control"] {
-    gap: var(--doc-space-2);
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+    width: 1.75rem;
+    height: 1.75rem;
   }
-
+  /* The real input covers the letter tile, preserving keyboard and native input
+     behavior. Its checked and focus states are painted on the visible key. */
   doc-option [data-part="input"] {
-    accent-color: var(--doc-accent-solid);
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
     margin: 0;
-    width: 1rem;
-    height: 1rem;
+    opacity: 0;
+    cursor: pointer;
   }
-
   doc-option [data-part="key"] {
-    min-width: 1.5rem;
-    height: 1.5rem;
-    padding-inline: 0.35em;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: var(--doc-border-width) solid var(--doc-border-2);
     border-radius: var(--doc-radius-sm);
-    background: var(--doc-surface-3);
+    background: var(--doc-surface-1);
     color: var(--doc-text-2);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-xs);
-    font-weight: 700;
+    font-weight: 500;
   }
-
+  doc-option [data-part="control"]:has(input:focus-visible) [data-part="key"] {
+    outline: 2px solid var(--doc-geist-blue-700);
+    outline-offset: 2px;
+  }
   doc-option[data-selected] [data-part="key"] {
+    border-color: var(--doc-accent-solid);
     background: var(--doc-accent-solid);
     color: var(--doc-accent-on-solid);
   }
-
+  doc-option[data-selected] [data-part="desc"] { color: var(--doc-accent-text); }
   doc-option [data-part="desc"] {
-    margin-block-start: var(--doc-space-1);
+    grid-column: 2 / -1;
+    margin: 0;
     color: var(--doc-text-2);
     font-size: var(--doc-text-sm);
+    font-weight: 400;
+    line-height: 1.5;
   }
-
   doc-option [data-part="recommended"] {
-    margin-block-start: var(--doc-space-2);
-    padding: 0 var(--doc-space-2);
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    justify-self: end;
+    margin-block-start: 2px;
+    white-space: nowrap;
+    padding: 2px var(--doc-space-2);
     border-radius: var(--doc-radius-pill);
-    background: var(--doc-accent-tint);
-    color: var(--doc-accent-text);
-    border: var(--doc-border-width) solid var(--doc-accent-edge);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-2);
     font-size: var(--doc-text-xs);
-    font-weight: 640;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    font-weight: 500;
+    line-height: 1.333333;
   }
-
-  /* ── The appended Other option ──────────────────────────────────────────── */
-  doc-option[data-part="other"] [data-part="other-label"] {
-    font-weight: 560;
-  }
-
-  /* MUST (§8.4): the hint is smaller and on the same line as the label. */
-  doc-option[data-part="other"] [data-part="other-hint"] {
-    color: var(--doc-text-3);
-    font-size: var(--doc-text-xs);
-  }
-
-  /*
-  * The textarea lives *inside* the Other block so it reads as part of that
-  * choice — never as a stray field below the list.
-  */
-  doc-option[data-part="other"] [data-part="other-text"] {
-    margin-block-start: var(--doc-space-2);
-  }
-
-  /* ── The note field ─────────────────────────────────────────────────────── */
+  doc-option[data-part="other"] [data-part="other-label"] { grid-column: 2 / -1; font-weight: 600; }
+  doc-option[data-part="other"] [data-part="other-hint"] { grid-column: 2 / -1; grid-row: 2; justify-self: start; color: var(--doc-text-2); font-size: var(--doc-text-sm); font-weight: 400; }
+  doc-option[data-part="other"] [data-part="other-text"] { grid-column: 2 / -1; margin-block-start: var(--doc-space-2); }
   doc-choice [data-part="note-toggle"] {
-    margin-block-start: var(--doc-space-3);
-    padding: var(--doc-space-1) var(--doc-space-2);
+    margin-block-start: var(--doc-space-2);
+    padding: var(--doc-space-2);
     border: 0;
-    border-radius: var(--doc-radius-sm);
-    background: none;
+    border-radius: var(--doc-radius);
+    background: transparent;
     color: var(--doc-text-2);
     font-size: var(--doc-text-sm);
   }
-
-  doc-choice [data-part="note-toggle"]:hover {
-    background: var(--doc-surface-2);
-    color: var(--doc-text-1);
-  }
-
-  doc-choice [data-part="note"] {
-    margin-block-start: var(--doc-space-2);
-  }
-
-  doc-choice:state(note-open) [data-part="note-toggle"] {
-    color: var(--doc-accent-text);
-  }
-
-  /* ── The one shared field style ─────────────────────────────────────────── */
-  doc-choice textarea {
-    width: 100%;
-    padding: var(--doc-space-2) var(--doc-space-3);
-    border: var(--doc-border-width) solid var(--doc-border-2);
-    border-radius: var(--doc-radius);
-    background: var(--doc-surface-2);
-    color: var(--doc-text-1);
-    font-family: inherit;
-    font-size: var(--doc-text-sm);
-    line-height: var(--doc-leading);
-  }
-
-  doc-choice textarea::placeholder {
-    color: var(--doc-text-3);
-  }
-
-  doc-choice textarea:focus {
-    border-color: var(--doc-accent-line);
-    background: var(--doc-surface-1);
+  doc-choice [data-part="note-toggle"]:hover { background: var(--doc-surface-2); color: var(--doc-text-1); }
+  doc-choice [data-part="note"] { margin-block-start: var(--doc-space-2); }
+  doc-choice:state(note-open) [data-part="note-toggle"] { color: var(--doc-text-1); }
+  doc-choice textarea { width: 100%; }
+  @media (max-width: 720px) {
+    doc-choice { padding: var(--doc-space-4); }
+    doc-option { padding: var(--doc-space-3); }
+    doc-option[data-part="other"] [data-part="other-hint"] {
+      grid-row: 2;
+      justify-self: start;
+    }
   }
 }

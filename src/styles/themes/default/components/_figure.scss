@@ -1,0 +1,92 @@
+/* `doc-figure` — one frame for SVG, images, Mermaid and isolated HTML. */
+
+@layer doc.theme {
+  doc-figure {
+    margin-block: var(--doc-space-6);
+    padding: var(--doc-space-4-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+  }
+
+  doc-figure [data-part="content"] {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  doc-figure[data-figure-type="mermaid"] [data-part="content"] svg {
+    width: 100%;
+    height: auto;
+  }
+
+  /*
+  * Mermaid is themed from tokens in `vendor/mermaid.ts`, and that covers
+  * everything it exposes as a theme variable. These are the leftovers: colours
+  * written literally into a diagram's stylesheet, where no variable reaches.
+  *
+  * why `!important`, which is otherwise banned in this stylesheet: Mermaid
+  * emits its rules in a `<style>` inside the SVG, unlayered. An unlayered
+  * declaration beats every layered one, so a normal rule here cannot win. For
+  * *important* declarations the layer order reverses and unlayered ranks
+  * lowest — so a layered `!important` is the only thing that does.
+  */
+  /* A user journey paints every band from the categorical palette but writes
+  its labels in the body text colour, which is the one colour guaranteed
+  *not* to read on a saturated fill — too dark on the light-mode band, too
+  light on the dark-mode one. The class names below are journey's alone: a
+  gantt task label is `text.taskText`, and a flowchart node label is
+  `span.nodeLabel`, so neither is caught here. */
+  doc-figure[data-figure-type="mermaid"] :is(text.journey-section, text.task) {
+    fill: var(--doc-accent-on-solid) !important;
+  }
+
+  doc-figure[data-figure-type="mermaid"] :is(div.journey-section, div.task) > .label {
+    color: var(--doc-accent-on-solid) !important;
+  }
+
+  /* Isolated author HTML gets the page ground, so it cannot be mistaken for
+   * part of the figure's own frame. */
+  doc-figure[data-figure-type="html"] [data-part="content"] {
+    min-height: 12rem;
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-0);
+  }
+
+  doc-figure :where([data-part="caption"], doc-caption) {
+    margin-block-start: var(--doc-space-3-5);
+    padding-block-start: var(--doc-space-3-5);
+    border-block-start: var(--doc-rule);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  doc-figure [data-part="diagram-error"] {
+    padding: var(--doc-space-3-5) var(--doc-space-4);
+    border: var(--doc-border-width) solid var(--doc-danger-edge);
+    border-radius: var(--doc-radius);
+    background: var(--doc-danger-tint);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    print-color-adjust: exact;
+  }
+
+  doc-figure [data-part="diagram-error-title"] {
+    color: var(--doc-danger-text);
+    font-weight: 650;
+  }
+
+  doc-figure [data-part="diagram-error-source"] {
+    margin-block-start: var(--doc-space-2-5);
+    padding: var(--doc-space-2-5);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    line-height: 1.7;
+  }
+}

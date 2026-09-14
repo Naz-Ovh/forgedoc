@@ -1,0 +1,45 @@
+/*
+ * `doc-matrix` — RACI, risk and comparison grids.
+ *
+ * The same card and header treatment as `doc-table`, so the two never look
+ * like different table engines on one page.
+ */
+@layer doc.theme {
+  doc-matrix {
+    margin-block: var(--doc-space-6);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+  }
+
+  doc-matrix table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--doc-text-table);
+  }
+
+  doc-matrix th {
+    padding: 13px var(--doc-space-5-5);
+    border-block-end: var(--doc-border-width) solid var(--doc-border-2);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-ui);
+    font-weight: 650;
+    text-align: start;
+  }
+
+  doc-matrix td {
+    padding: 15px var(--doc-space-5-5);
+    border-block-end: var(--doc-rule);
+    color: var(--doc-text-2);
+    line-height: 1.6;
+  }
+
+  doc-matrix tbody tr:hover {
+    background: color-mix(in oklab, var(--doc-surface-2) 55%, transparent);
+  }
+
+  doc-matrix tr:last-child td {
+    border-block-end: 0;
+  }
+}

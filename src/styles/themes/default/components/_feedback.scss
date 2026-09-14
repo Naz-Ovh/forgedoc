@@ -1,0 +1,105 @@
+/*
+ * Block-level feedback: the Comment button, and the mark left on a block that
+ * has one.
+ *
+ * The button is the design's "Was this page helpful?" control — card surface,
+ * hairline border, 9px radius — and it picks up the accent on hover the way
+ * those buttons pick up green and red.
+ *
+ * why blocks get their own affordance (§10.2): the bucket collects comments
+ * from a text selection, and there is nothing to select in an image, an `<svg>`
+ * or a rendered Mermaid chart. Without a button the most arguable parts of a
+ * plan are the only parts a reader cannot argue with.
+ */
+
+@layer doc.theme {
+  [data-part="feedback"] {
+    padding: var(--doc-space-1-5) var(--doc-space-3);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 550;
+    line-height: 1.4;
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="feedback"]:hover {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+  }
+
+  /* In a block that already has a header row, the button joins it. */
+  doc-code [data-part="header"] [data-part="feedback"],
+  doc-diff [data-part="header"] [data-part="feedback"] {
+    border: 0;
+    background: none;
+    color: var(--doc-code-gutter);
+    font-size: inherit;
+    box-shadow: none;
+  }
+
+  doc-code [data-part="header"] [data-part="feedback"]:hover,
+  doc-diff [data-part="header"] [data-part="feedback"]:hover {
+    background: color-mix(in oklab, var(--doc-code-text) 9%, transparent);
+    color: var(--doc-code-text);
+  }
+
+  /*
+   * No `auto` margin here, unlike most themes: `doc-diff`'s `+n/-n` counts
+   * already claim one, and two of them in a flex row split the free space
+   * between them — which parked the counts in the middle of the header
+   * instead of beside the button. The counts push the pair right together.
+   */
+  /*
+  * In a block with no header, the button floats in the corner and stays quiet
+  * until the reader looks at the block. It is always visible without a pointer,
+  * because "hover to discover" is not an interaction a touch reader has.
+  */
+  doc-figure > [data-part="feedback"],
+  doc-tree > [data-part="feedback"] {
+    opacity: 0;
+  }
+
+  doc-figure:hover > [data-part="feedback"],
+  doc-figure:focus-within > [data-part="feedback"],
+  doc-tree:hover > [data-part="feedback"],
+  doc-tree:focus-within > [data-part="feedback"],
+  doc-figure > [data-part="feedback"]:focus-visible,
+  doc-tree > [data-part="feedback"]:focus-visible {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    doc-figure > [data-part="feedback"],
+    doc-tree > [data-part="feedback"] {
+      opacity: 1;
+    }
+  }
+
+  /*
+  * A block that carries a comment.
+  *
+  * why an outline rather than a highlight: `CSS.highlights` paints text ranges,
+  * and the whole point of a block comment is that there is no text to paint.
+  */
+  [data-doc-commented] {
+    outline: 2px solid var(--doc-accent-edge);
+    outline-offset: 2px;
+  }
+
+  [data-doc-commented="active"] {
+    outline-color: var(--doc-accent-solid);
+  }
+
+  @media print {
+    [data-doc-commented] {
+      outline: none;
+    }
+  }
+}

@@ -1,0 +1,92 @@
+/*
+ * Print — a `doc-page` responsibility (§8.8).
+ *
+ * The PDF is a real deliverable, not an afterthought. Every MUST from §8.8 is
+ * implemented here; retrofitting print across 22 components later is miserable,
+ * which is why this file exists from the start rather than at the end.
+ */
+
+@layer doc.theme {
+  @media print {
+    /* TOC flattened into a real contents page, whatever the on-screen state. */
+    doc-toc,
+    doc-page:state(toc-open) doc-toc,
+    doc-page:state(toc-docked) doc-toc {
+      width: auto;
+      max-width: none;
+      max-height: none;
+      margin-block-end: var(--doc-space-8);
+      border: 0;
+      border-block-end: 2px solid var(--doc-border-2);
+      border-radius: 0;
+      background: none;
+      backdrop-filter: none;
+      box-shadow: none;
+    }
+
+    /* Docking is an on-screen convenience; the printed page is never offset. */
+    doc-page:state(toc-docked) {
+      padding-inline-start: var(--doc-gutter);
+    }
+
+    doc-toc [data-part="toggle"] {
+      font-size: var(--doc-text-lg);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    doc-toc [data-part="entry"]::after {
+      color: var(--doc-text-3);
+    }
+
+    /* Tabs flatten to sequential sections with their labels as sub-headings. */
+    doc-tab::before {
+      margin-block-end: var(--doc-space-2);
+      font-size: var(--doc-text-lg);
+      font-weight: 660;
+    }
+
+    doc-tab + doc-tab {
+      border-block-start: var(--doc-rule);
+    }
+
+    /* Link URLs printed after the link text, for external hrefs only. */
+    doc-page a[href^="http"]::after {
+      color: var(--doc-text-3);
+      font-size: var(--doc-text-xs);
+    }
+
+    doc-term::after {
+      color: var(--doc-text-3);
+      font-size: var(--doc-text-xs);
+    }
+
+    /* Background colours preserved on callouts and code. */
+    doc-note,
+    doc-blocker,
+    doc-code,
+    doc-diff,
+    doc-chip,
+    doc-tree,
+    doc-stage:state(current),
+    doc-flow-node:state(active),
+    doc-option[data-selected] {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    doc-page {
+      padding: 0;
+      min-height: 0;
+    }
+
+    doc-page > *:not([data-doc-chrome]) {
+      width: 100%;
+      max-width: none;
+    }
+
+    @page {
+      margin: 18mm 16mm;
+    }
+  }
+}

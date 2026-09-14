@@ -1,0 +1,31 @@
+/*
+ * `doc-compare` — the two-column panel.
+ *
+ * Two cards with a gap, not one card with a divider. The design's card grid is
+ * built that way and it is the better reading of the component: the columns are
+ * *alternatives*, and a shared box implies they are parts of one thing.
+ *
+ * MUST (§8.6): stacks vertically below 1050px — the base layer collapses the
+ * grid, and the gap carries over unchanged.
+ */
+@layer doc.theme {
+  doc-compare {
+    gap: var(--doc-space-4);
+    margin-block: var(--doc-space-6);
+    border: 0;
+    background: transparent;
+  }
+
+  doc-compare > [data-part="column"] {
+    margin: 0;
+    padding: var(--doc-space-6) var(--doc-space-6-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    transition: border-color var(--doc-transition);
+  }
+
+  doc-compare > [data-part="column"]:hover {
+    border-color: var(--doc-border-2);
+  }
+}

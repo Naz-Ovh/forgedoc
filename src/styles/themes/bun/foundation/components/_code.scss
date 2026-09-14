@@ -1,0 +1,127 @@
+/*
+ * `doc-code` — the syntax-highlighted block, plus the Prism token theme.
+ *
+ * The gutter and the emphasised-row overlay are both grids of empty `1lh` rows
+ * sitting alongside and over the code. Using the `lh` unit means neither needs a
+ * JavaScript measurement, so they stay aligned when the reader zooms.
+ */
+
+@layer doc.theme {
+  doc-code {
+    margin-block: var(--doc-space-5);
+    border: var(--doc-border-width) solid var(--doc-code-border);
+    border-radius: var(--doc-radius);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    print-color-adjust: exact;
+  }
+
+  doc-code [data-part="header"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border-block-end: var(--doc-border-width) solid var(--doc-code-border);
+    background: color-mix(in oklab, var(--doc-code-surface) 80%, var(--doc-surface-2));
+    font-size: var(--doc-text-xs);
+  }
+
+  doc-code [data-part="header"] [data-part="title"] {
+    font-family: var(--doc-font-mono);
+    font-weight: 620;
+    color: var(--doc-code-text);
+  }
+
+  doc-code [data-part="lang"] {
+    padding: 0 var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-3);
+    color: var(--doc-text-2);
+    font-weight: 640;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  doc-code [data-part="copy"] {
+    margin-inline-start: auto;
+    padding: var(--doc-space-1) var(--doc-space-2);
+    border: var(--doc-border-width) solid var(--doc-code-border);
+    border-radius: var(--doc-radius-sm);
+    background: none;
+    color: var(--doc-text-2);
+    font-size: inherit;
+  }
+
+  doc-code [data-part="copy"]:hover {
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+  }
+
+  doc-code [data-part="gutter"] {
+    padding: var(--doc-space-3) var(--doc-space-2) var(--doc-space-3) var(--doc-space-3);
+    border-inline-end: var(--doc-border-width) solid var(--doc-code-border);
+    color: var(--doc-code-gutter);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-sm);
+    line-height: var(--doc-leading-tight);
+    text-align: end;
+  }
+
+  doc-code [data-part="code"] {
+    margin: 0;
+    padding: var(--doc-space-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-sm);
+    line-height: var(--doc-leading-tight);
+    tab-size: 2;
+  }
+
+  doc-code [data-part="code"] code {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: inherit;
+  }
+
+  doc-code [data-part="line"] {
+    height: 1lh;
+  }
+
+  doc-code [data-part="line"][data-emphasised] {
+    background: var(--doc-code-highlight-row);
+    box-shadow: inset 2px 0 0 var(--doc-warn-600);
+    print-color-adjust: exact;
+  }
+
+  /* ── Prism token theme, driven entirely by --doc-code-* tokens ─────────── */
+  doc-code :where(.token.comment, .token.prolog, .token.cdata) {
+    color: var(--doc-code-comment);
+    font-style: italic;
+  }
+
+  doc-code :where(.token.punctuation, .token.operator) {
+    color: var(--doc-code-punctuation);
+  }
+
+  doc-code :where(.token.keyword, .token.atrule, .token.rule, .token.important, .token.selector) {
+    color: var(--doc-code-keyword);
+  }
+
+  doc-code :where(.token.string, .token.char, .token.attr-value, .token.regex) {
+    color: var(--doc-code-string);
+  }
+
+  doc-code :where(.token.number, .token.boolean, .token.constant, .token.symbol) {
+    color: var(--doc-code-number);
+  }
+
+  doc-code :where(.token.function, .token.class-name, .token.tag, .token.attr-name) {
+    color: var(--doc-code-function);
+  }
+
+  doc-code :where(.token.deleted) {
+    color: var(--doc-danger-600);
+  }
+
+  doc-code :where(.token.inserted) {
+    color: var(--doc-success-600);
+  }
+}

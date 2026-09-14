@@ -176,6 +176,12 @@ function migrate(parsed: Partial<DocState>, docId: string): DocState {
     tabs: isRecord(parsed.tabs) ? parsed.tabs : fresh.tabs,
     checks: isRecord(parsed.checks) ? parsed.checks : fresh.checks,
     toc: migrateToc(parsed.toc, fresh.toc),
+    // Added after the first release, so a blob written before it says nothing
+    // about it. `undefined` must read as the default rather than as `false` —
+    // reopening an old document with the composer silently disabled would look
+    // exactly like the bug this preference exists to fix.
+    selectionPopup:
+      typeof parsed.selectionPopup === 'boolean' ? parsed.selectionPopup : fresh.selectionPopup,
   };
 }
 

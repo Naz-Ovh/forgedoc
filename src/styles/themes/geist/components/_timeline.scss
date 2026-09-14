@@ -28,7 +28,7 @@
   }
 
   doc-milestone [data-part="marker"][data-status="completed"] {
-    border-color: var(--doc-success-600);
+    border-color: var(--doc-success-text);
     background: var(--doc-success-600);
   }
 
@@ -38,14 +38,14 @@
   }
 
   doc-milestone [data-part="marker"][data-status="delayed"] {
-    border-color: var(--doc-danger-600);
+    border-color: var(--doc-danger-text);
     background: var(--doc-danger-600);
   }
 
   doc-milestone [data-part="date"] {
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-xs);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--doc-text-3);
   }
 

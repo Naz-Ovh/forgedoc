@@ -17,13 +17,12 @@
     text-align: start;
     transition:
       border-color var(--doc-transition),
-      background-color var(--doc-transition),
-      translate var(--doc-transition);
+      background-color var(--doc-transition);
 
     &:hover {
       border-color: var(--doc-accent-edge);
       background: color-mix(in oklab, var(--doc-accent-tint) 34%, var(--doc-surface-1));
-      translate: 2px 0;
+
     }
   }
 
@@ -37,31 +36,31 @@
     color: var(--doc-text-2);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-xs);
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: var(--doc-tracking-wide);
     line-height: 1.2;
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="get"] {
     background: var(--doc-info-tint);
-    color: light-dark(var(--doc-info-900), var(--doc-info-200));
+    color: var(--doc-info-text);
   }
 
   :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="post"] {
     background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+    color: var(--doc-success-text);
   }
 
   :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="put"],
   :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="patch"] {
     background: var(--doc-warn-tint);
-    color: light-dark(var(--doc-warn-900), var(--doc-warn-200));
+    color: var(--doc-warn-text);
   }
 
   :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="delete"] {
     background: var(--doc-danger-tint);
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    color: var(--doc-danger-text);
   }
 
   doc-endpoint [data-part="path"],
@@ -72,7 +71,7 @@
     color: var(--doc-text-1);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-sm);
-    font-weight: 620;
+    font-weight: 600;
   }
 
   [data-part="path-param"] {
@@ -92,12 +91,12 @@
     color: var(--doc-text-3);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-xs);
-    font-weight: 650;
+    font-weight: 600;
   }
 
   doc-endpoint [data-part="status"][data-status="2xx"] {
     background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+    color: var(--doc-success-text);
   }
 
   doc-endpoint [data-part="open-icon"] {
@@ -105,11 +104,13 @@
     place-items: center;
     width: 1.75rem;
     height: 1.75rem;
-    border-radius: 50%;
-    background: var(--doc-surface-2);
+
+    border-radius: var(--doc-radius);
+
+    background: transparent;
     color: var(--doc-text-2);
-    font-weight: 700;
-  }
+    font-weight: 600;
+    }
 
   [data-part="endpoint-drawer"] {
     width: clamp(38rem, 46vw, 48rem);
@@ -138,9 +139,9 @@
   [data-part="endpoint-drawer-eyebrow"] {
     color: var(--doc-text-3);
     font-size: var(--doc-text-xs);
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: var(--doc-tracking-wider);
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   [data-part="endpoint-drawer-close"] {
@@ -175,7 +176,7 @@
     background: var(--doc-surface-1);
     color: var(--doc-text-2);
     font-size: var(--doc-text-xs);
-    font-weight: 650;
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-content"] {
@@ -189,7 +190,7 @@
 
   [data-part="endpoint-drawer-title"] {
     font-size: var(--doc-text-xl);
-    font-weight: 650;
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-description"] {
@@ -214,9 +215,9 @@
   [data-part="endpoint-drawer-meta-label"] {
     color: var(--doc-text-3);
     font-size: var(--doc-text-xs);
-    font-weight: 650;
+    font-weight: 600;
     letter-spacing: var(--doc-tracking-wide);
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   [data-part="endpoint-drawer-meta-value"] {
@@ -224,7 +225,7 @@
     color: var(--doc-text-1);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-sm);
-    font-weight: 650;
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-section"] {
@@ -235,7 +236,7 @@
     margin-block-end: var(--doc-space-3);
     color: var(--doc-text-1);
     font-size: var(--doc-text-md);
-    font-weight: 650;
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-parameters"] {
@@ -259,7 +260,7 @@
     border: 0;
     background: transparent;
     color: var(--doc-text-1);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-parameter-in"],
@@ -271,8 +272,8 @@
   }
 
   [data-part="endpoint-drawer-parameter-required"][data-required="true"] {
-    color: var(--doc-danger-600);
-    font-weight: 700;
+    color: var(--doc-danger-text);
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-parameter-default"],
@@ -319,7 +320,7 @@
     border: 0;
     background: transparent;
     color: var(--doc-text-1);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   [data-part="endpoint-drawer-response-label"] {

@@ -26,8 +26,13 @@ export const JS_PLACEHOLDER = '//@DOC_JS@';
  * Themes are chosen at *build* time, never at runtime: a document ships exactly
  * one stylesheet, so shipping five and switching between them would mean
  * sending four the reader never sees. `dist/themes/<name>.css` is the unit.
+ *
+ * `forgedoc` remains the *reference* theme — the one `check-style-layers`
+ * reads the required token set from, and the one the token tests assert
+ * against by importing it directly. Reference and default are separate jobs
+ * and this is the only place the difference is decided.
  */
-export const DEFAULT_THEME = 'forgedoc';
+export const DEFAULT_THEME = 'default';
 
 /** `/*@DOC_CSS:geist@*\/` — the placeholder, naming the theme it wants. */
 const CSS_PLACEHOLDER_THEMED = /\/\*@DOC_CSS(?::([a-z0-9-]+))?@\*\//;

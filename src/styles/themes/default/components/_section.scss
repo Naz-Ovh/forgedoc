@@ -1,0 +1,74 @@
+/*
+ * `doc-section` — the heading hierarchy.
+ *
+ * The gaps are the design's: 80px between top-level sections, halving with
+ * depth. That spacing is doing the work a border would do in a denser theme, so
+ * it is not decoration to trim — a section at 48px reads as a subsection.
+ *
+ * MUST (§8.1): the number is at least as large as its heading text and shrinks
+ * with it. It is never small chrome beside a big heading — so it inherits the
+ * heading's size and steps back in weight and colour instead.
+ */
+@layer doc.theme {
+  doc-section {
+    margin-block-start: var(--doc-space-20);
+  }
+
+  doc-section doc-section {
+    margin-block-start: var(--doc-space-12);
+  }
+
+  doc-section doc-section doc-section {
+    margin-block-start: var(--doc-space-8);
+  }
+
+  doc-section > [data-part="heading"] {
+    gap: var(--doc-space-3);
+    margin-block-end: var(--doc-space-3);
+    color: var(--doc-text-1);
+    font-weight: 700;
+    line-height: var(--doc-leading-heading);
+    letter-spacing: -0.01em;
+  }
+
+  doc-section > [data-part="heading"] [data-part="number"] {
+    color: var(--doc-default-faint);
+    font-size: inherit;
+    font-weight: 450;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-section[data-depth="1"] > [data-part="heading"] {
+    font-size: var(--doc-text-xl);
+  }
+
+  doc-section[data-depth="2"] > [data-part="heading"] {
+    font-size: var(--doc-text-lg);
+    font-weight: 650;
+  }
+
+  doc-section[data-depth="3"] > [data-part="heading"] {
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+    letter-spacing: normal;
+  }
+
+  /*
+   * The lead paragraph of a section sits a little wider of its heading than an
+   * ordinary paragraph does, matching the design's 22px gap before the first
+   * block of content.
+   */
+  doc-section > [data-part="body"] + [data-part="body"] {
+    margin-block-start: var(--doc-space-5);
+  }
+
+  @media (max-width: 720px) {
+    doc-section {
+      margin-block-start: var(--doc-space-12);
+    }
+
+    doc-section doc-section {
+      margin-block-start: var(--doc-space-8);
+    }
+  }
+}

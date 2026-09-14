@@ -60,7 +60,7 @@ describeBuilt('forgedoc build — the offline document', () => {
     await run(['build', FIXTURE, '--offline', '--out', outputPath]);
     const output = await readFile(outputPath, 'utf8');
 
-    // Attributes that would reach the network. `src="data:"` is fine — that is
+    // Anything that would reach the network. `src="data:"` is fine — that is
     // how the kitchen sink embeds its image.
     const external = [
       /<link\b[^>]*\brel=["']?stylesheet/i,
@@ -68,12 +68,36 @@ describeBuilt('forgedoc build — the offline document', () => {
       /\bsrc=["'](?!data:)(https?:)?\/\//i,
       /\bhref=["']https?:\/\/[^"']*\.(css|js)/i,
       /@import\s+url\(/i,
-      /@font-face/i,
     ];
 
     for (const pattern of external) {
       expect(pattern.test(output), `matched ${pattern}`).toBe(false);
     }
+
+    /*
+     * Webfonts the reader would have to fetch.
+     *
+     * why this is not simply `expect(/@font-face/.test(output)).toBe(false)`,
+     * which is what it used to be: a theme is allowed to ship its own
+     * typefaces, and the `default` theme does — `build-styles.mjs` embeds each
+     * as a base64 `data:` URI, which is exactly as offline as the embedded
+     * image above. Banning the at-rule outright held only for as long as no
+     * theme had type of its own, and would have had to be deleted rather than
+     * tightened the first time one did. What actually breaks §2.3 is a font
+     * `src` pointing anywhere but `data:` — a remote URL, or a relative path
+     * that resolves against wherever the reader saved the file.
+     *
+     * Written as a scan rather than one regex because the quoting is optional
+     * and `url(\s*["']?(?!data:)` silently passes everything: the lookahead
+     * gets tested at the quote when the optional group matches empty.
+     */
+    const fontUrls = [...output.matchAll(/\bsrc:\s*([^;}]*)/gi)]
+      .flatMap(([, declaration = '']) => [
+        ...declaration.matchAll(/url\(\s*(["']?)([^)]*?)\1\s*\)/gi),
+      ])
+      .map(([, , url = '']) => url.trim());
+
+    expect(fontUrls.filter((url) => !url.startsWith('data:'))).toEqual([]);
   });
 
   it('puts the embedded styles in <head> so nothing flashes unstyled', async () => {

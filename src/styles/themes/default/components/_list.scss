@@ -1,0 +1,55 @@
+/*
+ * `doc-list` — the marked list, and the atom underneath `doc-compare`.
+ *
+ * why: hanging indentation keeps bare text and inline elements together (§2.2).
+ */
+@layer doc.theme {
+  doc-list {
+    --doc-list-marker: var(--doc-default-faint);
+
+    margin-block: var(--doc-space-4);
+  }
+
+  doc-list:is([kind="positive"], [marker="check"]) {
+    --doc-list-marker: var(--doc-success-text);
+  }
+
+  doc-list:is([kind="negative"], [marker="cross"]) {
+    --doc-list-marker: var(--doc-danger-text);
+  }
+
+  doc-list[marker="arrow"] {
+    --doc-list-marker: var(--doc-accent-text);
+  }
+
+  doc-list > [data-part="title"] {
+    margin-block-end: var(--doc-space-3);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-ui);
+    font-weight: 650;
+  }
+
+  doc-list > li,
+  doc-list > [data-part="item"] {
+    list-style: none;
+  }
+
+  /* 16px at 1.65 with an 8px gap — the design's list rhythm. */
+  doc-list > [data-part="item"] {
+    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-2);
+    padding-inline-start: 1.75em;
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-md);
+    line-height: 1.65;
+  }
+
+  doc-list > [data-part="item"] > [data-part="marker"],
+  doc-list[marker="number"] > [data-part="item"]::before {
+    width: 1.25em;
+    color: var(--doc-list-marker);
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: var(--doc-numeric);
+  }
+}

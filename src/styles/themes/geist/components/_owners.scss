@@ -1,60 +1,17 @@
-/* `doc-owners` / `doc-owner` — document owners and DRIs. */
-
+/* Geist Avatar and Entity styling for ownership metadata. */
 @layer doc.theme {
-  doc-owners {
-    gap: var(--doc-space-3);
-    margin-block: var(--doc-space-4);
-  }
-
-  doc-owner {
-    gap: var(--doc-space-3);
-    padding: var(--doc-space-2) var(--doc-space-3);
-    border: var(--doc-border-width) solid var(--doc-border-1);
-    border-radius: var(--doc-radius);
-    background: var(--doc-surface-1);
-  }
-
+  doc-owners { gap: var(--doc-space-6); margin-block: var(--doc-space-6); }
+  doc-owner { gap: var(--doc-space-3); padding-block: var(--doc-space-2); }
   doc-owner [data-part="avatar"] {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: var(--doc-accent-tint);
-    color: var(--doc-accent-text);
-    font-weight: 700;
-    font-size: var(--doc-text-sm);
-    border: var(--doc-border-width) solid var(--doc-accent-edge);
+    width: 2rem; height: 2rem;
+    border: var(--doc-rule); border-radius: 50%;
+    background: var(--doc-surface-1); color: var(--doc-text-1);
+    font-size: var(--doc-text-xs); font-weight: 500;
   }
-
-  doc-owner [data-part="name"] {
-    font-weight: 600;
-    font-size: var(--doc-text-sm);
-    color: var(--doc-text-1);
-    line-height: var(--doc-leading-tight);
-  }
-
-  doc-owner [data-part="role"] {
-    font-size: var(--doc-text-xs);
-    color: var(--doc-text-3);
-    line-height: var(--doc-leading-tight);
-  }
-
-  doc-owner [data-part="status"] {
-    font-size: var(--doc-text-xs);
-    font-weight: 600;
-    padding: var(--doc-space-0-5) var(--doc-space-2);
-    border-radius: var(--doc-radius-pill);
-    margin-inline-start: var(--doc-space-2);
-    background: var(--doc-surface-2);
-    color: var(--doc-text-3);
-  }
-
-  doc-owner [data-part="status"][data-status="approved"] {
-    background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
-  }
-
-  doc-owner [data-part="status"][data-status="reviewing"] {
-    background: var(--doc-info-tint);
-    color: light-dark(var(--doc-info-900), var(--doc-info-200));
-  }
+  doc-owner [data-part="name"] { color: var(--doc-text-1); font-size: var(--doc-text-sm); font-weight: 500; line-height: var(--doc-leading-tight); }
+  doc-owner [data-part="role"] { color: var(--doc-text-2); font-size: var(--doc-text-xs); line-height: 1.5; }
+  doc-owner [data-part="status"] { margin-inline-start: var(--doc-space-2); padding: 2px var(--doc-space-2); border-radius: var(--doc-radius-pill); background: var(--doc-surface-3); color: var(--doc-text-2); font-size: var(--doc-text-xs); font-weight: 500; }
+  doc-owner [data-part="status"][data-status="approved"] { background: var(--doc-geist-green-200); color: var(--doc-success-text); }
+  doc-owner [data-part="status"][data-status="reviewing"] { background: var(--doc-geist-blue-200); color: var(--doc-info-text); }
+  doc-owner [data-part="status"][data-status="rejected"] { background: var(--doc-geist-red-200); color: var(--doc-danger-text); }
 }

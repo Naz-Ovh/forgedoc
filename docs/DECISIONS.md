@@ -208,16 +208,16 @@ is what guarantees a reader's highlights survive.
 Recorded because each one was invisible in code review and only surfaced when the
 criterion was actually executed. Every one now has a regression test.
 
-| Found by                                          | Bug                                                                                                                                                                                                                                                                                                                                                          |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Acceptance 8 (`tests/components/presets.test.ts`) | Derived tokens declared on `:root` are substituted _there_, so `density="compact"` and every subtree token override silently did nothing. The whole scale had to move to `doc-page, doc-page *`.                                                                                                                                                             |
-| §13.4 screenshots, dark mode                      | Mermaid rejected every accent token: `getComputedStyle().getPropertyValue()` returns a custom property's _token stream_, so it received the literal text `color-mix(in oklab, …)`. Resolving through a real property then produced `oklab(…)`, which it also rejects. Only `rgb(from … r g b)` works. Every diagram in every dark document was an error box. |
-| §13.4 screenshots, 1280px                         | The emphasised-line overlay in `doc-code` is absolutely positioned, so it painted _over_ the code — highlighted lines rendered blank.                                                                                                                                                                                                                        |
-| §13.4 screenshots                                 | `doc-diff` never dedented its source, so `+`/`-` were not at the start of a line and every row classified as unchanged context.                                                                                                                                                                                                                              |
-| §13.4 screenshots                                 | Inline elements inside a `display: grid` container each become their own grid item, so any roadblock, list item or callout containing `<code>` was torn into separate cells. Four components moved to hanging indents.                                                                                                                                       |
-| §13.4 screenshots                                 | An `<li>` keeps `display: list-item` when its parent is a custom element rather than a `<ul>`, so every marked list drew both a UA bullet and its own glyph.                                                                                                                                                                                                 |
-| Acceptance 3 (`tests/visual/offline.spec.ts`)     | `window.ForgeDoc.version` was `undefined`. An IIFE wrapper makes the module namespace _be_ the global, so an inner `ForgeDoc` object put the documented `ForgeDoc.chips.add(…)` one hop too deep. The API is now top-level named exports.                                                                                                                    |
-| Acceptance 6                                      | `resolveRange` fell back to a stale offset when the quoted text was gone, painting a reader's comment over unrelated prose instead of reporting it orphaned.                                                                                                                                                                                                 |
+| Found by                                                              | Bug                                                                                                                                                                                                                                                                                                                                                          |
+|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Acceptance 8 (then `tests/components/presets.test.ts`, since removed) | Derived tokens declared on `:root` are substituted _there_, so `density="compact"` and every subtree token override silently did nothing. The whole scale had to move to `doc-page, doc-page *`.                                                                                                                                                             |
+| §13.4 screenshots, dark mode                                          | Mermaid rejected every accent token: `getComputedStyle().getPropertyValue()` returns a custom property's _token stream_, so it received the literal text `color-mix(in oklab, …)`. Resolving through a real property then produced `oklab(…)`, which it also rejects. Only `rgb(from … r g b)` works. Every diagram in every dark document was an error box. |
+| §13.4 screenshots, 1280px                                             | The emphasised-line overlay in `doc-code` is absolutely positioned, so it painted _over_ the code — highlighted lines rendered blank.                                                                                                                                                                                                                        |
+| §13.4 screenshots                                                     | `doc-diff` never dedented its source, so `+`/`-` were not at the start of a line and every row classified as unchanged context.                                                                                                                                                                                                                              |
+| §13.4 screenshots                                                     | Inline elements inside a `display: grid` container each become their own grid item, so any roadblock, list item or callout containing `<code>` was torn into separate cells. Four components moved to hanging indents.                                                                                                                                       |
+| §13.4 screenshots                                                     | An `<li>` keeps `display: list-item` when its parent is a custom element rather than a `<ul>`, so every marked list drew both a UA bullet and its own glyph.                                                                                                                                                                                                 |
+| Acceptance 3 (`tests/visual/offline.spec.ts`)                         | `window.ForgeDoc.version` was `undefined`. An IIFE wrapper makes the module namespace _be_ the global, so an inner `ForgeDoc` object put the documented `ForgeDoc.chips.add(…)` one hop too deep. The API is now top-level named exports.                                                                                                                    |
+| Acceptance 6                                                          | `resolveRange` fell back to a stale offset when the quoted text was gone, painting a reader's comment over unrelated prose instead of reporting it orphaned.                                                                                                                                                                                                 |
 
 ---
 
@@ -313,14 +313,14 @@ which `skills/better-plan/SKILL.md` now tells the reading agent to resolve by.
 
 Small choices not covered by the specification.
 
-| Decision                                                                                                                   | Reasoning                                                                                                                                                                                                                                                                                                                                                                            |
-|----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `forgedoc build` defaults to the **standalone** bundle; `--cdn` selects the lighter one. `--standalone` is still accepted. | §5.3 promises `forgedoc build DOC_foo.html` produces a file with "no network, no CDN, no dependencies". Only the standalone bundle keeps that promise, so it is the default.                                                                                                                                                                                                         |
-| Storage key is `forgedoc:<doc-id>:state`.                                                                                  | §9.3 specifies `forgedoc:<doc-id>:<field>`; §9.1 specifies one blob. `state` is the one field.                                                                                                                                                                                                                                                                                       |
-| `doc-page` accepts `numbering` and `doc-figure` accepts `alt`.                                                             | `numbering` implements C1. `alt` is needed for `type="image"` to be accessible at all.                                                                                                                                                                                                                                                                                               |
-| `doc-list` accepts `title` and `kind`.                                                                                     | §8.6 requires them for `doc-compare` columns, but §8.3 lists only `marker`.                                                                                                                                                                                                                                                                                                          |
-| `doc-page` sets `role="article"` and takes its label from the header title.                                                | §2.2 blocks a `heading` role on `doc-header` — the title is a bare text node beside the lede, and a heading whose accessible name swallowed the lede would be worse than none. Section headings still provide navigation.                                                                                                                                                            |
-| Derived tokens are declared on `doc-page, doc-page *`, primitives on `:root, doc-page`.                                    | A `var()` inside a custom property is substituted where it is _declared_. Declaring the whole scale on `:root` bakes in the root's unit, so `density="compact"` and `<doc-table style="--doc-space-unit:9px">` would both silently do nothing. This was caught by `tests/components/presets.test.ts`. The cost is a universal selector carrying ~30 declarations, paid deliberately. |
+| Decision                                                                                                                   | Reasoning                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `forgedoc build` defaults to the **standalone** bundle; `--cdn` selects the lighter one. `--standalone` is still accepted. | §5.3 promises `forgedoc build DOC_foo.html` produces a file with "no network, no CDN, no dependencies". Only the standalone bundle keeps that promise, so it is the default.                                                                                                                                                                                                                                                                    |
+| Storage key is `forgedoc:<doc-id>:state`.                                                                                  | §9.3 specifies `forgedoc:<doc-id>:<field>`; §9.1 specifies one blob. `state` is the one field.                                                                                                                                                                                                                                                                                                                                                  |
+| `doc-page` accepts `numbering` and `doc-figure` accepts `alt`.                                                             | `numbering` implements C1. `alt` is needed for `type="image"` to be accessible at all.                                                                                                                                                                                                                                                                                                                                                          |
+| `doc-list` accepts `title` and `kind`.                                                                                     | §8.6 requires them for `doc-compare` columns, but §8.3 lists only `marker`.                                                                                                                                                                                                                                                                                                                                                                     |
+| `doc-page` sets `role="article"` and takes its label from the header title.                                                | §2.2 blocks a `heading` role on `doc-header` — the title is a bare text node beside the lede, and a heading whose accessible name swallowed the lede would be worse than none. Section headings still provide navigation.                                                                                                                                                                                                                       |
+| Derived tokens are declared on `doc-page, doc-page *`, primitives on `:root, doc-page`.                                    | A `var()` inside a custom property is substituted where it is _declared_. Declaring the whole scale on `:root` bakes in the root's unit, so `density="compact"` and `<doc-table style="--doc-space-unit:9px">` would both silently do nothing. This was caught by `tests/components/presets.test.ts`, since removed along with the rest of the appearance tests. The cost is a universal selector carrying ~30 declarations, paid deliberately. |
 
 ---
 
@@ -455,6 +455,147 @@ line in a list — the reader is scanning titles — and five of them at card
 height cost most of a screen. The open state keeps its full padding; nothing is
 gained by cramping prose once the reader has committed to it.
 
+### F9. The `bun` theme uses Bun's public variable-font endpoints
+
+The `bun` theme maps the current Bun documentation design onto the full
+ForgeDoc vocabulary: Archivo display type, Martian Mono code, `#ff1f8f` as the
+default accent, a pure-white canvas, layered neutral surfaces, softened radii,
+and warm `#0d0a0c` dark surfaces. Its component paint starts from the existing
+neutral `geist` partials and then overrides geometry in one Bun-specific
+partial. Most of those component files were byte-identical across the first two
+themes; a third copied set would add maintenance surface without creating a
+different render.
+
+Like `geist`, this bends §6.5: exact type loads from the public
+`bun.com/fonts/` endpoints, while an offline reader falls through to the system
+stack. The font files are not embedded because doing so would permanently add
+their weight to every document built with this theme. Unlike a package CDN,
+these URLs cannot be version-pinned; the system fallback is therefore part of
+the theme contract rather than a claim that historical documents will always
+receive the same remote font bytes.
+
+### F10. `default` is the default theme
+
+`DEFAULT_THEME` in `tools/inject.ts` is now `default`, so a document that names
+no theme gets it, `src/index.ts` compiles it in for the dev server and the
+browser tests, and `dist/forgedoc.css` — the documented filename, unchanged —
+is built from it. `build-styles.mjs` parses the constant out of `inject.ts`
+rather than naming it a second time, because two copies of "which theme is the
+default" would eventually disagree and the symptom would be a `forgedoc.css`
+that is not the theme documents actually build with.
+
+`forgedoc` stays the **reference** theme, which is a different job and the
+reason both still exist: `check-style-layers.mjs` reads the required token set
+from it, and the token tests import it directly. Default is what a reader sees;
+reference is what the contract is measured against.
+
+Two test assertions had been standing in for "the default theme" and were
+retargeted rather than deleted: `cdn.spec.ts` probed a note's radius as `8px`,
+which is the reference theme's, and `offline-build.test.ts` asserted that a
+built document contains no `@font-face` at all. The second is the more
+interesting one — see below.
+
+### F11. The `default` theme, and the five rules it bends
+
+`themes/default/` maps a supplied design canvas (`Docs Design System v4`) onto
+the full vocabulary: Plus Jakarta Sans for prose, JetBrains Mono for code, a
+violet accent, near-white `#fdfdfe` and `#171825` grounds, 12px cards on a
+single hairline shadow, 1.7 reading leading, and a deep indigo code panel that
+does **not** change colour between light and dark — the design's own point, so
+a reader switching schemes mid-page sees the same syntax colours.
+
+Five departures worth recording.
+
+**§6.5, "no web fonts ship in either build."** The design is its typefaces, so
+this theme vendors them under `themes/default/fonts/` and `build-styles.mjs`
+embeds each as a data URI. That keeps §2.3 intact — the built document renders
+correctly from `file://` with no network — at a cost of ~160 kB on the
+stylesheet. Only the `latin` subsets ship, plus `latin-ext` for the sans, where
+accented prose actually turns up; code is Latin. Both faces are OFL, and the
+licences travel with them.
+
+The embedding is also no longer Geist-specific: the pattern in
+`build-styles.mjs` named two files literally, so the next theme to vendor a
+typeface would have compiled clean and shipped a stylesheet pointing at a file
+that is not in `dist/` — no error, no fallback, just a document silently
+rendering in the system stack. It now matches any `./fonts/*.woff2` and throws
+on a missing one.
+
+**The design's hues, at the step that carries text.** This is F6's problem
+again, and it is resolved the same way. The palette is tuned for tinted panels,
+where it is excellent; used unchanged for 12px metadata it puts green at 3.0:1,
+amber at 3.2:1 and the quiet `--faint` tier at 3.3:1. Each role therefore
+carries three values — the design's own hex for tints, edges, dots and rails; an
+`-ink` step deepened until it carries as text; and a `-fill` step deepened until
+a solid of it carries `on-solid` ink. Only light mode needs them to differ.
+Every value is solved rather than picked: the nearest lightness in OKLCH, hue
+and chroma held, that clears 4.6:1 against every backdrop the role lands on.
+Swept the way F7 describes, the theme reports **0 sub-AA text pairs in both
+schemes**.
+
+**Opaque highlights and a translucent code chip.** A reader highlight runs
+across whatever the author wrote — prose, an inline `<code>` with its own pill,
+then out onto a tinted `doc-blocker`. At 62% alpha the same colour composited
+to three different results, so one comment spanning a paragraph read as three
+separate highlights with the code chips left out; and an _opaque_ inline-code
+background then painted over the overlay entirely. Both halves are fixed:
+`--doc-highlight-bg` and `::selection` are opaque and set their ink, and inline
+code and `kbd` use a translucent wash of the same colour so the highlight
+shows through. This is the one place the theme's colour choices are load-bearing
+for a feature rather than for looks.
+
+**`doc-owners` overrides its base layout.** The only component where this theme
+changes structure rather than paint. `base/` wraps intrinsically sized children,
+so every owner was a different width, the row broke wherever it ran out of
+space, and a long role pushed its status pill past the name beside it. `auto-fit`
+columns give every owner the same box. F2 sanctions exactly this.
+
+**`doc-code` gained a `data-lang` attribute.** A theme cannot select on text
+content, so language-aware chrome had nothing to hook. The label text is
+unchanged, so a theme that wants a plain language pill needs no change; this one
+draws a brand-coloured swatch and monogram per language. The mark sits on the
+bare panel rather than in a hue-tinted chip, because tinting the chip with the
+language's own hue raises the backdrop for exactly the hues that are already
+darkest — PHP's purple and TypeScript's blue measured 4.1:1 against their own
+fill and 4.7:1 without it.
+
+Two further judgements, neither a rule:
+
+- **Shadows are one layer.** The design puts a two-layer shadow on every card.
+  At the density of a plan document — a roadmap is five stacked cards, a stat
+  row is nine — the outer 14px layer pools between them into visible grey bands,
+  so `--doc-shadow-1` is a single tight layer and the second elevation is
+  reserved for things that genuinely float.
+- **Two measures, not one.** `--doc-measure` is 1100px so tables, code and card
+  grids use the display; `--doc-measure-prose` is 42em (~672px) so paragraphs
+  stay at a readable line length. It is set in `em` rather than `ch` because
+  `ch` is the width of the "0" glyph, and in Plus Jakarta that figure is wide
+  enough that 74ch measured 888px — about 107 characters a line.
+
+### F12. Three ways wider type broke the layout at 390px
+
+Making this the default theme turned one visual test red — "the reading column
+is centred at every width" — and all three causes were the same shape: a
+min-content floor that the reference theme's narrower type had squeezed under.
+Worth recording because the next theme with generous type will hit them again.
+
+- **A bare `<table>` has no scroll container.** §8.7 keeps `<table>` a plain
+  element, so an author can write one into a section with no `doc-table` around
+  it. `max-width: 100%` cannot save it — a cell holding an inline `<code>` chip
+  is `nowrap`, which sets a floor the box may not shrink below. It now gets
+  `display: block; overflow-x: auto`, which is what makes `overflow-x` apply at
+  all on a table box; the rows keep their table-internal display values, so an
+  anonymous table is regenerated around them and the columns stay aligned.
+- **`1fr` is `minmax(auto, 1fr)`.** `doc-step`'s content track refused to
+  shrink below the min-content of a card holding a `nowrap` code chip and
+  widened the document instead. `minmax(0, 1fr)` throughout.
+- **`nowrap` suppresses the breaks `overflow-wrap` creates.** A chip like
+  `forgedoc:<doc-id>:state` is 370px of mono in a 350px column, with no soft
+  wrap opportunity anywhere. Below 720px inline code gets its `white-space`
+  back along with `overflow-wrap: anywhere`, so it wraps rather than pushing
+  the page sideways. Normal wrapping still only breaks when the line would
+  otherwise overflow, so a chip that fits is untouched.
+
 ---
 
 ## E. Dependencies
@@ -550,3 +691,21 @@ The related trap — a formatter splitting `<style>/*@DOC_CSS@*/</style>` across
 lines in the documentation, shipping a snippet that cannot be built — is now
 covered by Biome having no Markdown formatter at all rather than by Prettier's
 `embeddedLanguageFormatting: "off"`.
+
+### Geist source rewrite and embedded typefaces
+
+The Geist theme now uses the color roles and typography inspected from Vercel's
+published design system rather than reconstructed brand ramps. Component styles
+live at their declaration sites; the incremental refinement layer was removed.
+[The mapping and reference sources](GEIST.md) distinguish official foundations
+from ForgeDoc-specific component adaptations.
+
+Geist Sans and Geist Mono **1.7.2** are vendored font assets, licensed under the
+SIL Open Font License (the license ships beside the WOFF2 files). This is an asset
+dependency, not a runtime package dependency. The stylesheet builder embeds the
+fonts so `file://` documents use the intended type with no network (§2.3), at a
+cost of approximately 190 kB of CSS before compression. This supersedes F6's
+network-font exception for Geist; Bun retains its own font policy.
+
+Bun's previous component foundation is now local to Bun. Rewriting Geist must not
+implicitly redesign another theme through cross-theme Sass imports.

@@ -48,14 +48,13 @@ npm run build        # tsdown: 3 runtime variants + CLI, then tsc for .d.ts
 npm run dev          # Vite dev server, opens the kitchen-sink QA page
 npm test             # Vitest: real Chromium + node projects
 npm run check        # format, lint, typecheck, build, test — run before finishing
-npm run docs:reference   # regenerate skills/better-plan/REFERENCE.md
-npm run test:visual:ci   # layout/print/offline assertions — no baselines needed
-npm run test:visual      # adds @pixel screenshot comparison (baselines are local)
+npm run docs:generate    # regenerate skills/better-plan/REFERENCE.md + CHEATSHEET.md
+npm run test:visual      # browser e2e: offline, CDN and themed builds
 ```
 
-**Pixel baselines are not in the repo.** They are generated, so `test:visual`
-needs `npm run test:visual:update` once on a fresh checkout before it can
-`test:visual:ci` needs nothing, which is why it is the half worth running.
+**Appearance is not tested.** No screenshots, no computed-style assertions, no
+geometry. Styling is expected to change, so breaking it is not a test failure —
+check themes by looking at them (`npm run preview`).
 
 **Vite does not build.** `npm run build` is tsdown; Vite is the dev server and
 the Vitest runner only, and never writes to `dist/`.

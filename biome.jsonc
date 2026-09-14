@@ -9,13 +9,19 @@
       "!dist",
       "!node_modules",
       "!coverage",
-      "!tests/visual/__screenshots__",
       "!tests/visual/.output",
       "!skills/better-plan/REFERENCE.md",
       "!docs/PLAN.md",
       "!*.build.html",
       "!**/*.build.html",
       "!**/*.svelte",
+
+      // Design canvases. A `.dc.html` is a generated artboard — inline styles,
+      // template placeholders, decorative SVG with no title — so every a11y and
+      // style rule fires on markup nobody hand-edits and nothing ships. They
+      // are read as a visual reference when authoring a theme, not built.
+      "!*.dc.html",
+      "!**/*.dc.html",
 
       // Test data. Whitespace is significant — the content of doc-code,
       // doc-diff and doc-tree is rendered verbatim, and the validator tests

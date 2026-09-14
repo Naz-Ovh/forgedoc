@@ -1,0 +1,37 @@
+/*
+ * `doc-checklist` — persistent reader-facing ticks.
+ *
+ * why: hanging indentation preserves inline author nodes (§2.2).
+ */
+@layer doc.theme {
+  doc-checklist {
+    margin-block: var(--doc-space-5);
+  }
+
+  doc-checklist > li,
+  doc-checklist > [data-part="item"] {
+    list-style: none;
+  }
+
+  doc-checklist > [data-part="item"] {
+    max-width: var(--doc-measure-prose);
+    padding-block: var(--doc-space-2);
+    padding-inline-start: var(--doc-space-7);
+    color: var(--doc-text-2);
+    line-height: 1.65;
+  }
+
+  doc-checklist [data-part="check"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+    accent-color: var(--doc-accent-solid);
+  }
+
+  /* Struck through *and* stepped back — either alone is easy to miss. */
+  doc-checklist > [data-part="item"][data-checked] {
+    color: var(--doc-default-faint);
+    text-decoration: line-through;
+    text-decoration-color: var(--doc-border-2);
+  }
+}

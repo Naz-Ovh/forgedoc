@@ -1,0 +1,59 @@
+/*
+ * `doc-header` — the title block.
+ *
+ * why no rule underneath, unlike most themes: this design separates structure
+ * with air, not lines. The title block ends in a deep run of whitespace and the
+ * sections that follow are 80px apart, which is the same device at a different
+ * amplitude — adding a border here would be the one hard edge on the page.
+ *
+ * The gap is 40px rather than the design's 64px because whatever follows brings
+ * its own top margin — a chip row adds 20px — and the two together read as a
+ * dropped section rather than as a title block.
+ *
+ * Bare title nodes inherit the display type without being moved (§2.2).
+ */
+@layer doc.theme {
+  doc-header {
+    margin-block-end: var(--doc-space-10);
+    font-family: var(--doc-font-display);
+    font-size: var(--doc-text-2xl);
+    font-weight: 700;
+    line-height: var(--doc-leading-heading);
+    letter-spacing: var(--doc-tracking-tight);
+    color: var(--doc-text-1);
+    text-wrap: balance;
+  }
+
+  /* The breadcrumb tier: quiet, small, and set back in the muted colour. */
+  doc-header [data-part="kicker"] {
+    margin-block-end: var(--doc-space-5);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+    line-height: var(--doc-leading-tight);
+    letter-spacing: normal;
+  }
+
+  doc-header [data-part="title"] {
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  doc-header [data-part="lede"] {
+    max-width: var(--doc-measure-prose);
+    margin-block-start: var(--doc-space-4);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-md);
+    font-weight: 400;
+    line-height: var(--doc-leading);
+    letter-spacing: var(--doc-tracking-body);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 720px) {
+    doc-header {
+      margin-block-end: var(--doc-space-10);
+      font-size: var(--doc-text-xl);
+    }
+  }
+}

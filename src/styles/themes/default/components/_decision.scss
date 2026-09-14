@@ -1,0 +1,89 @@
+/*
+ * `doc-decision` — the ADR card.
+ *
+ * The status pill is the one place this theme puts a border on a tinted pill
+ * *and* means it: an ADR's status is the field a reader scans for, and at
+ * 12.5px a fill alone does not hold its shape against the card.
+ */
+
+@layer doc.theme {
+  doc-decision {
+    margin-block: var(--doc-space-5);
+    padding: var(--doc-space-5) var(--doc-space-6);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+  }
+
+  doc-decision [data-part="header"] {
+    gap: var(--doc-space-2-5);
+    margin-block-end: var(--doc-space-3-5);
+    padding-block-end: var(--doc-space-3-5);
+    border-block-end: var(--doc-rule);
+  }
+
+  doc-decision [data-part="badge-id"] {
+    padding: 2px var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 700;
+  }
+
+  doc-decision [data-part="status"] {
+    padding: 3px var(--doc-space-2-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    font-weight: 600;
+    letter-spacing: normal;
+    print-color-adjust: exact;
+  }
+
+  doc-decision [data-part="status"][data-status="accepted"] {
+    border-color: var(--doc-success-200);
+    background: var(--doc-success-100);
+    color: var(--doc-success-text);
+  }
+
+  doc-decision [data-part="status"][data-status="proposed"] {
+    border-color: var(--doc-info-200);
+    background: var(--doc-info-100);
+    color: var(--doc-info-text);
+  }
+
+  doc-decision [data-part="status"][data-status="rejected"],
+  doc-decision [data-part="status"][data-status="deprecated"] {
+    border-color: var(--doc-danger-200);
+    background: var(--doc-danger-100);
+    color: var(--doc-danger-text);
+  }
+
+  doc-decision [data-part="status"][data-status="superseded"] {
+    border-color: var(--doc-warn-200);
+    background: var(--doc-warn-100);
+    color: var(--doc-warn-text);
+  }
+
+  doc-decision [data-part="title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+  }
+
+  doc-decision [data-part="date"] {
+    margin-inline-start: auto;
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+  }
+
+  doc-decision [data-part="body"] {
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+  }
+}

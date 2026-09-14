@@ -1,0 +1,123 @@
+/*
+ * Attribute presets.
+ *
+ * why each accent is four declarations rather than a restated ramp: `_tokens.scss`
+ * derives every tint, edge, dot and border from `--doc-default-accent`, so
+ * recolouring the document stays close to the single-property change the
+ * design's own accent picker makes. The hues are that picker's list.
+ *
+ * The other three are the accessibility steps `_tokens.scss` documents: `-ink`
+ * is the hue deepened until it carries as text, `-fill` until a solid of it
+ * carries `on-accent`, and `on-accent` is that ink. Only light mode needs them
+ * to differ — every dark value below is the one light-dark() pair member that
+ * already sits on a near-black ground. Emerald and terracotta are the two that
+ * genuinely move: white on #0e9373 is 3.9:1.
+ *
+ * The preset names stay ForgeDoc's contract (`teal`, `indigo`, `slate`, `plum`,
+ * `amber`) so a document written for another theme keeps working; the hues they
+ * resolve to are this design's.
+ */
+@layer doc.preset {
+  doc-page[density="compact"] {
+    --doc-space-unit: 3px;
+    --doc-leading: 1.55;
+  }
+
+  doc-page[density="spacious"] {
+    --doc-space-unit: 5px;
+    --doc-leading: 1.8;
+  }
+
+  doc-page[scale="sm"] {
+    --doc-text-base: 14px;
+  }
+
+  doc-page[scale="lg"] {
+    --doc-text-base: 18px;
+  }
+
+  doc-page[measure="narrow"] {
+    --doc-measure: 720px;
+    --doc-measure-prose: 36em;
+  }
+
+  doc-page[measure="wide"] {
+    --doc-measure: 1440px;
+    --doc-measure-prose: 48em;
+  }
+
+  /* Emerald — the design's default accent in its published props. */
+  doc-page[accent="teal"] {
+    --doc-default-accent: light-dark(#0e9373, #3cc39c);
+    --doc-default-accent-ink: light-dark(#007b5d, #3cc39c);
+    --doc-default-accent-fill: light-dark(#008667, #3cc39c);
+    --doc-default-on-accent: light-dark(#ffffff, #04231a);
+  }
+
+  doc-page[accent="indigo"] {
+    --doc-default-accent: light-dark(#5865e0, #8f99f0);
+    --doc-default-accent-ink: light-dark(#515cd7, #8f99f0);
+    --doc-default-accent-fill: light-dark(#5865e0, #8f99f0);
+    --doc-default-on-accent: light-dark(#ffffff, #0d1030);
+  }
+
+  /*
+   * Slate is the one preset with no hue to derive from, so it is the neutral
+   * ramp instead — a document that wants no colour at all still needs its
+   * links, dots and selected states to read as deliberate.
+   */
+  doc-page[accent="slate"] {
+    --doc-default-accent: light-dark(#34518f, #8298d8);
+    --doc-default-accent-ink: light-dark(#34518f, #8298d8);
+    --doc-default-accent-fill: light-dark(#34518f, #8298d8);
+    --doc-default-on-accent: light-dark(#ffffff, #0a1226);
+  }
+
+  doc-page[accent="plum"] {
+    --doc-default-accent: light-dark(#c74357, #ee7b8d);
+    --doc-default-accent-ink: light-dark(#bd3a4f, #ee7b8d);
+    --doc-default-accent-fill: light-dark(#c74357, #ee7b8d);
+    --doc-default-on-accent: light-dark(#ffffff, #2d0a12);
+  }
+
+  doc-page[accent="amber"] {
+    --doc-default-accent: light-dark(#b6633c, #e0916b);
+    --doc-default-accent-ink: light-dark(#a5542c, #e0916b);
+    --doc-default-accent-fill: light-dark(#b15f38, #e0916b);
+    --doc-default-on-accent: light-dark(#ffffff, #2b1206);
+  }
+
+  /*
+   * `code="light"` opts out of the deep indigo panel.
+   *
+   * why the token colours change and not only the surface: the five syntax
+   * hues are picked to sit on #191a26 and none of them reads on white — the
+   * light panel needs a genuinely different, darker set.
+   */
+  doc-page[code="light"] {
+    --doc-default-code-bg: light-dark(#fefeff, #171825);
+    --doc-default-code-line: light-dark(#e9e9f1, #282a3d);
+    --doc-default-code-bar: light-dark(#f3f3f8, #1e2030);
+    --doc-default-code-fg: light-dark(#181a24, #eef0f8);
+    --doc-default-code-faint: light-dark(#878da0, #6a7088);
+    --doc-default-code-kw: light-dark(#6a48c8, #a3b3ff);
+    --doc-default-code-str: light-dark(#1a7d50, #8fd6a0);
+    --doc-default-code-fn: light-dark(#9a5f0c, #efc272);
+    --doc-default-code-cm: light-dark(#767c91, #7d84a3);
+    --doc-default-code-num: light-dark(#b6633c, #f0a075);
+  }
+
+  /* The default in this theme, named so a document can pin it explicitly. */
+  doc-page[code="dark"] {
+    --doc-default-code-bg: light-dark(#191a26, #14151f);
+    --doc-default-code-line: light-dark(#2a2c3e, #252738);
+    --doc-default-code-bar: light-dark(#303458, #2a2e50);
+    --doc-default-code-fg: light-dark(#dde0ee, #d3d7e8);
+    --doc-default-code-faint: light-dark(#8a90b0, #8087a8);
+    --doc-default-code-kw: #a3b3ff;
+    --doc-default-code-str: #8fd6a0;
+    --doc-default-code-fn: #efc272;
+    --doc-default-code-cm: #7d84a3;
+    --doc-default-code-num: #f0a075;
+  }
+}

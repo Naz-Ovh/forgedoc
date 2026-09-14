@@ -30,6 +30,27 @@
   }
 
   /*
+   * The trigger while selection commenting is off.
+   *
+   * The fill is left alone deliberately. The count is the reason this button
+   * exists, and hollowing the pill out to signal a preference would cost the
+   * reader the one thing on it that must stay legible from across the page —
+   * so the state is carried by an added mark rather than by taking emphasis
+   * away from what is already there.
+   */
+  [data-part="bucket-trigger-muted"] {
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 1.5px solid currentcolor;
+    border-radius: 50%;
+    opacity: 0.75;
+  }
+
+  [data-part="bucket-trigger-muted"]::after {
+    border-block-start: 1.5px solid currentcolor;
+  }
+
+  /*
   * The review panel.
   *
   * `min-height` matters as much as `max-height`: with only a cap, a panel
@@ -48,6 +69,7 @@
   }
 
   [data-part="bucket-header"] {
+    gap: var(--doc-space-3);
     padding: var(--doc-space-3) var(--doc-space-4);
     border-block-end: var(--doc-rule);
     background: var(--doc-surface-2);
@@ -61,6 +83,72 @@
     border: 0;
     background: none;
     color: var(--doc-text-2);
+  }
+
+  /* ── The selection-composer switch, in the title row ────────────────────── */
+  [data-part="bucket-selection-toggle"] {
+    /* Padding rather than bare edges: the switch is 16px tall, and the control
+       around it has to be big enough to hit without aiming. */
+    padding: var(--doc-space-2);
+    margin-inline: calc(var(--doc-space-2) * -1);
+    border: 0;
+    border-radius: var(--doc-radius-sm);
+    background: none;
+    font: inherit;
+  }
+
+  [data-part="bucket-switch"] {
+    width: 1.75rem;
+    height: 1rem;
+    border-radius: 1rem;
+    background: var(--doc-border-3);
+    transition: background var(--doc-transition);
+  }
+
+  [data-part="bucket-switch"]::after {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    /* The knob has to read against both track colours, so it tracks the
+       page surface rather than a fixed white. */
+    background: var(--doc-surface-1);
+    translate: 0.125rem -50%;
+    transition: translate var(--doc-transition);
+  }
+
+  [data-part="bucket-selection-toggle"][aria-pressed="true"] [data-part="bucket-switch"] {
+    background: var(--doc-accent-solid);
+  }
+
+  [data-part="bucket-selection-toggle"][aria-pressed="true"] [data-part="bucket-switch"]::after {
+    translate: 0.875rem -50%;
+  }
+
+  [data-part="bucket-shortcut"] {
+    flex: none;
+    padding: 2px var(--doc-space-2);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs, var(--doc-text-xs));
+  }
+
+  /*
+   * Sits directly above the trigger, matching its inline edge, so the
+   * confirmation appears where the reader's attention already is.
+   */
+  [data-part="bucket-flash"] {
+    inset-block-end: calc(var(--doc-space-12) + var(--doc-space-5));
+    inset-inline-end: var(--doc-space-5);
+    margin: 0;
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border-radius: var(--doc-radius);
+    background: var(--doc-text-1);
+    color: var(--doc-text-inverse);
+    font-size: var(--doc-text-xs);
+    box-shadow: var(--doc-shadow-2);
   }
 
   [data-part="bucket-warning"] {

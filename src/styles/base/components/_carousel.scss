@@ -8,6 +8,27 @@
     overflow: hidden;
   }
 
+  /*
+   * MUST: the slide the component hid has to actually disappear.
+   *
+   * why this rule is load-bearing rather than redundant with the UA sheet:
+   * `[hidden] { display: none }` is a *user-agent* declaration, and
+   * `_elements.scss` hands every `doc-*` tag an author-origin `display` so it
+   * does not flash inline before upgrade (§7.5). Author origin outranks UA
+   * origin whatever the specificity or layer, so `<doc-figure hidden>` — the
+   * usual slide — kept rendering and every slide stacked up at once. The
+   * prev/next buttons then looked dead: they were toggling an attribute no
+   * longer attached to any visual change.
+   *
+   * Scoped to the direct children because that is exactly what `#showSlide`
+   * toggles, and left in `doc.components` so it outranks `doc.base` while a
+   * theme can still override it. `doc-tab[hidden]` in `_tabs.scss` earns its
+   * keep the same way.
+   */
+  doc-carousel > [hidden] {
+    display: none;
+  }
+
   doc-carousel [data-part="controls"] {
     display: flex;
     align-items: center;

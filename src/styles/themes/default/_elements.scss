@@ -1,0 +1,405 @@
+/*
+ * Element resets, prose and typography.
+ *
+ * §8.7: there are deliberately no custom tags for `<code>`, `<a>`, `<strong>`,
+ * `<em>`, `<ul>`, `<ol>`, `<li>`, `<p>`, `<h*>` or `<table>`. The reference
+ * document uses all of them heavily and none needs a custom element — they are
+ * styled here instead.
+ *
+ * Everything is scoped under `doc-page` so the CDN build can sit inside a host
+ * page without redecorating it.
+ */
+
+@layer doc.reset {
+  /*
+   * Claim the colour scheme on the frame too, not only on `doc-page`.
+   *
+   * why (recorded as F7): `light-dark()` resolves against the *used* colour
+   * scheme of the element it is written on, and the two rules below paint
+   * `html` and `body`, which sit outside `doc-page`. Without this they resolve
+   * every token to its light value and paint the frame near-white behind a dark
+   * document — visible in the overscroll area and behind the scrollbar.
+   *
+   * Scoped with `:has(doc-page)` so the CDN build cannot restyle a host page's
+   * scrollbars and form controls.
+   */
+  html:has(doc-page) {
+    color-scheme: light dark;
+    background: var(--doc-surface-0);
+    /* The design anchors in-page navigation on smooth scrolling; the base layer
+     * already neutralises it under `prefers-reduced-motion`. */
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html:has(doc-page) {
+      scroll-behavior: auto;
+    }
+  }
+
+  body:has(doc-page) {
+    margin: 0;
+    background: var(--doc-surface-0);
+  }
+
+  doc-page :where(h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, figure, blockquote, pre) {
+    margin: 0;
+  }
+
+  doc-page :where(ul, ol) {
+    padding: 0;
+    list-style: none;
+  }
+
+  doc-page :where(img, svg, video, canvas, iframe) {
+    max-width: 100%;
+  }
+
+  doc-page :where(button, input, textarea, select) {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+@layer doc.base {
+  /* ── Document frame ───────────────────────────────────────────────────────── */
+  doc-page {
+    /* MUST (§6.4): one token set, `light-dark()`, no media-query duplication. */
+    color-scheme: light dark;
+    font-family: var(--doc-font-sans);
+    font-size: var(--doc-text-md);
+    line-height: var(--doc-leading);
+    letter-spacing: var(--doc-tracking-body);
+    /*
+     * The reading colour is `--body`, not `--text`. Headings, `<strong>` and
+     * component titles step up to `--text` explicitly below — the gap between
+     * the two is what makes long-form pages in this design read softly rather
+     * than shouting every line at full contrast.
+     */
+    color: var(--doc-text-2);
+    background: var(--doc-surface-0);
+    /* Both faces are variable across the weights used, so nothing needs
+     * synthesising and faux-bold would only smear the geometric forms. */
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    hanging-punctuation: first;
+  }
+
+  /* ── Prose ────────────────────────────────────────────────────────────────── */
+  doc-page :where(p) {
+    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-4) 0;
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+    text-wrap: pretty;
+  }
+
+  doc-page :where(p):first-child {
+    margin-block-start: 0;
+  }
+
+  /*
+   * A paragraph the runtime named as a part is laid out by its component, not
+   * by prose rhythm.
+   *
+   * why this rule is load-bearing: `nameAuthorContent` names the author's own
+   * `<p>` in place (§2.2), so a note's body, a stat's caption and a step's
+   * description are all `p[data-part="body"]` — and most of those components
+   * space their children with `gap`, which *adds* to a margin rather than
+   * collapsing with it. Without this, every one of them opened with the
+   * component's gap plus 16px of paragraph margin, and a first body paragraph
+   * is never first-child because the runtime prepends the icon and title.
+   *
+   * Runs of consecutive body paragraphs still need their gap, so it is given
+   * back below and components that want a different one override it.
+   */
+  doc-page :where(p)[data-part] {
+    margin-block-start: 0;
+  }
+
+  doc-page :where(p)[data-part] + :where(p)[data-part] {
+    margin-block-start: var(--doc-space-4);
+  }
+
+  doc-page :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--doc-font-display);
+    font-weight: 650;
+    line-height: var(--doc-leading-heading);
+    letter-spacing: var(--doc-tracking-tight);
+    color: var(--doc-text-1);
+    text-wrap: balance;
+  }
+
+  /* 34 / 26 / 20 against a 16px base, tracked in as they grow. */
+  doc-page :where(h1) {
+    font-size: var(--doc-text-2xl);
+    font-weight: 700;
+  }
+
+  doc-page :where(h2) {
+    font-size: var(--doc-text-xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  doc-page :where(h3) {
+    font-size: var(--doc-text-lg);
+    letter-spacing: -0.01em;
+  }
+
+  doc-page :where(h4, h5, h6) {
+    font-size: var(--doc-text-md);
+    letter-spacing: normal;
+  }
+
+  doc-page :where(strong, b) {
+    font-weight: 650;
+    color: var(--doc-text-1);
+  }
+
+  doc-page :where(em, i) {
+    /* A real italic ships with the theme — see `_fonts.scss`. */
+    font-style: italic;
+  }
+
+  /*
+   * Links carry colour and weight, not a rule.
+   *
+   * why no resting underline: the design sets `text-decoration:none` and brings
+   * the rule back on hover, and prose in this theme is dense with inline code
+   * and `doc-term` — three underline styles in one sentence is noise. The
+   * underline still appears on hover *and* on focus, so a keyboard reader is
+   * never relying on hue alone, and `doc-term`/`doc-ref` keep their own dotted
+   * and numeric treatments so link kinds stay distinguishable.
+   */
+  doc-page :where(a) {
+    color: var(--doc-accent-text);
+    font-weight: 550;
+    text-decoration: none;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-color: var(--doc-accent-edge);
+    border-radius: 2px;
+  }
+
+  doc-page :where(a):hover,
+  doc-page :where(a):focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--doc-accent-line);
+  }
+
+  doc-page :where(code, kbd, samp) {
+    font-family: var(--doc-font-mono);
+    font-size: 0.88em;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  /*
+   * Inline code only — `doc-code` and `doc-diff` restyle their own `<code>`.
+   *
+   * why the fill is a translucent wash and not `--doc-surface-2`, which is the
+   * same colour: an opaque background on an inline element paints *over* the
+   * highlight overlay it sits inside. A reader selecting a sentence containing
+   * `file://` got an amber band with a white gap punched in it for every code
+   * chip — and a comment saved on that range showed the same holes for as long
+   * as the document lived. A wash lets the highlight through and is
+   * indistinguishable from the flat colour anywhere else.
+   */
+  doc-page :where(:not(pre) > code) {
+    padding: 1px 6px;
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-sm);
+    background: color-mix(in oklab, var(--doc-text-1) 6%, transparent);
+    color: var(--doc-text-1);
+  }
+
+  /*
+   * A keycap, not a code span: the doubled bottom border is the whole illusion
+   * and is why `⌘ K` reads as a key rather than as an identifier.
+   */
+  doc-page :where(kbd) {
+    padding: 3px 8px;
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-block-end-width: 2px;
+    border-radius: var(--doc-radius-sm);
+    /* Translucent for the same reason as inline code, above. */
+    background: color-mix(in oklab, var(--doc-text-1) 6%, transparent);
+    color: var(--doc-text-2);
+    font-size: 0.72em;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /*
+   * On a narrow viewport a long identifier wraps rather than widening the page.
+   *
+   * `base/` sets `white-space: nowrap` on inline code so an identifier never
+   * breaks mid-token, which is right on a desktop column. On a phone it means a
+   * chip like `forgedoc:<doc-id>:state` — 370px of mono in a 350px column — has
+   * no soft wrap opportunity at all, so it pushes the whole document 74px wider
+   * than the viewport and throws the reading column off centre. `overflow-wrap`
+   * cannot rescue it: `nowrap` suppresses the very break opportunities that
+   * property creates, so the `white-space` has to be given back first.
+   *
+   * `anywhere` rather than `break-word` so the break is allowed inside an
+   * unbroken token, and normal wrapping still only breaks when the line would
+   * otherwise overflow — a chip that fits is left alone.
+   */
+  @media (max-width: 720px) {
+    doc-page :where(:not(pre) > code) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  doc-page :where(ul, ol):not(doc-list *, doc-checklist *, doc-toc *) {
+    margin-block: var(--doc-space-4) 0;
+    padding-inline-start: var(--doc-space-5);
+    list-style: revert;
+  }
+
+  doc-page :where(li):not(doc-list > li, doc-checklist > li, doc-toc *) {
+    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-2);
+    color: var(--doc-text-2);
+    line-height: 1.65;
+  }
+
+  doc-page :where(li)::marker {
+    color: var(--doc-default-faint);
+  }
+
+  /*
+   * A bare `<blockquote>` — `doc-quote` is the pull quote and is styled in
+   * `components/_quote.scss`. This is the quiet inline variant: a rule, an
+   * italic, and the muted tier.
+   */
+  doc-page :where(blockquote):not(doc-quote, doc-quote *) {
+    max-width: var(--doc-measure-prose);
+    margin-block: var(--doc-space-5);
+    padding: 2px 0 2px var(--doc-space-5);
+    border-inline-start: 3px solid var(--doc-border-2);
+    color: var(--doc-text-3);
+    font-style: italic;
+  }
+
+  doc-page :where(blockquote):not(doc-quote, doc-quote *) :where(p) {
+    color: inherit;
+  }
+
+  /*
+   * A bare `<table>`, outside `doc-table` and `doc-matrix`.
+   *
+   * §8.7 keeps `<table>` a plain element, so an author can write one straight
+   * into a section and the runtime just names it as a body part — with no
+   * `doc-table` around it there is no scroll container, and nothing stops it
+   * widening the whole document. That is what happened here at 390px: this
+   * theme's type is wider than the reference theme's, so the same markup that
+   * just fitted before pushed the page 107px past the viewport and threw the
+   * reading column off centre. `max-width` makes the columns compress, and
+   * letting cell text break stops one long token undoing it again.
+   */
+  doc-page :where(table):not(doc-table table, doc-matrix table) {
+    /*
+     * `display: block` is what makes `overflow-x` apply — a `table` box
+     * ignores it. The rows keep their table-internal display values, so the
+     * browser regenerates an anonymous table around them and the columns stay
+     * aligned; only the scrolling changes. `max-width` alone cannot work here
+     * because a cell holding an inline `<code>` chip is `nowrap`, which sets a
+     * min-content floor the box is not allowed to shrink below.
+     */
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--doc-text-table);
+  }
+
+  doc-page :where(table):not(doc-table table, doc-matrix table) :where(th, td) {
+    padding: var(--doc-space-2-5) var(--doc-space-3-5);
+    border-block-end: var(--doc-rule);
+    color: var(--doc-text-2);
+    text-align: start;
+    overflow-wrap: break-word;
+  }
+
+  doc-page :where(table):not(doc-table table, doc-matrix table) :where(th) {
+    color: var(--doc-text-1);
+    font-weight: 650;
+  }
+
+  doc-page :where(table):not(doc-table table, doc-matrix table) :where(caption) {
+    padding-block-end: var(--doc-space-2);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+    text-align: start;
+  }
+
+  doc-page :where(hr) {
+    height: 0;
+    margin-block: var(--doc-space-10);
+    border: 0;
+    border-top: var(--doc-rule);
+  }
+
+  doc-page :where(small) {
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-3);
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────────── */
+  doc-page :where(:focus-visible) {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  /*
+   * ── Selection ────────────────────────────────────────────────────────────
+   *
+   * Opaque, for the reason the highlight tokens are: a reader dragging across
+   * a callout that contains inline code got a band that faded out over every
+   * chip. Setting the ink alongside the fill is required once it is opaque —
+   * without it, selecting inside the dark code panel would put its light text
+   * on a light band.
+   */
+  doc-page ::selection {
+    background: color-mix(in oklab, var(--doc-accent-400) 30%, var(--doc-surface-1));
+    color: var(--doc-text-1);
+  }
+
+  /* ── Feedback highlights (§10.2) ──────────────────────────────────────────── */
+  /*
+  * MUST: highlights are painted with the CSS Custom Highlight API, never by
+  * wrapping ranges in <mark>. Wrapping mutates the DOM the reader is selecting
+  * from, which invalidates every offset captured afterwards and nests badly on
+  * overlapping highlights.
+  */
+  ::highlight(doc-feedback) {
+    background-color: var(--doc-highlight-bg);
+    color: var(--doc-highlight-text);
+  }
+
+  ::highlight(doc-feedback-active) {
+    background-color: color-mix(in oklab, var(--doc-accent-400) 38%, var(--doc-surface-1));
+    color: var(--doc-text-1);
+  }
+
+  /* The <mark> fallback, used only where CSS.highlights is unavailable. */
+  doc-page mark[data-doc-highlight] {
+    background: var(--doc-highlight-bg);
+    color: var(--doc-highlight-text);
+    border-radius: 2px;
+  }
+}
+
+@layer doc.utilities {
+  /* Visually hidden but reachable by assistive tech and by find-in-page. */
+  doc-page [data-doc-visually-hidden] {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    clip-path: inset(50%);
+  }
+}

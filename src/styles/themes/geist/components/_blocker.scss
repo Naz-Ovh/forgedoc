@@ -3,10 +3,7 @@
 @layer doc.theme {
   doc-blocker {
     --doc-blocker-line: var(--doc-warn-600);
-    --doc-blocker-tint: light-dark(
-    var(--doc-warn-50),
-    color-mix(in oklab, var(--doc-warn-900) 40%, var(--doc-shade-base))
-    );
+    --doc-blocker-tint: var(--doc-warn-tint);
     margin-block: var(--doc-space-6);
     padding: var(--doc-space-4) var(--doc-space-5);
     border: var(--doc-border-width) solid
@@ -18,18 +15,12 @@
 
   doc-blocker[severity="low"] {
     --doc-blocker-line: var(--doc-info-600);
-    --doc-blocker-tint: light-dark(
-    var(--doc-info-50),
-    color-mix(in oklab, var(--doc-info-900) 40%, var(--doc-shade-base))
-    );
+    --doc-blocker-tint: var(--doc-info-tint);
   }
 
   doc-blocker[severity="high"] {
     --doc-blocker-line: var(--doc-danger-600);
-    --doc-blocker-tint: light-dark(
-    var(--doc-danger-50),
-    color-mix(in oklab, var(--doc-danger-900) 40%, var(--doc-shade-base))
-    );
+    --doc-blocker-tint: var(--doc-danger-tint);
   }
 
   doc-blocker [data-part="header"] {
@@ -40,9 +31,9 @@
   doc-blocker [data-part="sequence"] {
     color: var(--doc-text-3);
     font-size: var(--doc-text-xs);
-    font-weight: 640;
+    font-weight: 600;
     letter-spacing: var(--doc-tracking-wide);
-    text-transform: uppercase;
+    text-transform: none;
     font-variant-numeric: var(--doc-numeric);
   }
 
@@ -52,14 +43,14 @@
     background: var(--doc-blocker-line);
     color: var(--doc-ink-on-solid);
     font-size: var(--doc-text-xs);
-    font-weight: 640;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
   }
 
   doc-blocker [data-part="title"] {
     font-size: var(--doc-text-lg);
-    font-weight: 660;
+    font-weight: 600;
     line-height: var(--doc-leading-tight);
   }
 
@@ -86,14 +77,14 @@
     width: 5.25rem;
     color: var(--doc-text-3);
     font-size: var(--doc-text-xs);
-    font-weight: 660;
+    font-weight: 600;
     letter-spacing: var(--doc-tracking-wide);
-    text-transform: uppercase;
+    text-transform: none;
     line-height: 1.9;
   }
 
   doc-action {
-    font-weight: 560;
+    font-weight: 500;
   }
 
   doc-action [data-part="label"] {

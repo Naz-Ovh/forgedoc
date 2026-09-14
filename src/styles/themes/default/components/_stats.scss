@@ -1,0 +1,73 @@
+/*
+ * `doc-stat` — the design's metric tile.
+ *
+ * The value is set in mono, which is the whole reason a row of these reads as
+ * a dashboard: tabular figures put the decimal points and unit suffixes of
+ * three unrelated numbers on the same rhythm. The delta is coloured bold text
+ * rather than a pill — at 12.5px a pill around "▲ 0.02" is more chrome than
+ * number, and the direction is already carried by the glyph and the hue.
+ */
+@layer doc.theme {
+  doc-stats {
+    gap: var(--doc-space-4);
+    margin-block: var(--doc-space-6);
+  }
+
+  doc-stat {
+    gap: var(--doc-space-3-5);
+    padding: var(--doc-space-5-5) var(--doc-space-6);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-1);
+    transition: border-color var(--doc-transition);
+  }
+
+  doc-stat:hover {
+    border-color: var(--doc-border-2);
+  }
+
+  doc-stat [data-part="label"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+    font-weight: 550;
+  }
+
+  doc-stat [data-part="value-row"] {
+    gap: var(--doc-space-2-5);
+    flex-wrap: wrap;
+  }
+
+  doc-stat [data-part="value"] {
+    color: var(--doc-text-1);
+    font-family: var(--doc-font-mono);
+    /* 24px. Deliberately not `--doc-text-xl` (26px, the h2 step): a metric
+     * tile that matches a section heading competes with it. Written against
+     * the base so `scale` still moves it. */
+    font-size: calc(var(--doc-text-base) * 1.5);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-stat [data-part="diff"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    font-weight: 600;
+  }
+
+  doc-stat [data-part="diff"][data-tone="good"] {
+    color: var(--doc-success-text);
+  }
+
+  doc-stat [data-part="diff"][data-tone="bad"] {
+    color: var(--doc-danger-text);
+  }
+
+  doc-stat [data-part="body"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-meta);
+    line-height: 1.55;
+  }
+}

@@ -1,20 +1,22 @@
 {
   "name": "forgedoc",
-  "version": "1.0.0",
-  "description": "Web components for AI-authored interactive planning documents.",
+  "version": "1.1.0",
+  "description": "Web components for AI-authored interactive planning documents and documentation.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MrBns/plankit.git"
+    "url": "git+https://github.com/naz-ovh/forgedoc.git"
   },
-  "homepage": "https://github.com/MrBns/plankit#readme",
-  "bugs": "https://github.com/MrBns/plankit/issues",
+  "homepage": "https://github.com/naz-ovh/forgedoc#readme",
+  "bugs": "https://github.com/naz-ovh/forgedoc/issues",
   "keywords": [
     "web-components",
     "planning",
     "ai-agents",
     "agent-skill",
-    "design-doc"
+    "design-doc",
+    "documentation",
+    "html"
   ],
   "type": "module",
   "main": "./dist/forgedoc.js",
@@ -26,7 +28,8 @@
     "dist",
     "!dist/**/*.map",
     "skills",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
@@ -53,8 +56,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:visual": "playwright test",
-    "test:visual:ci": "playwright test --grep-invert @pixel",
-    "test:visual:update": "playwright test --update-snapshots",
     "preview": "node tools/make-preview.mjs",
     "docs:generate": "node tools/gen-docs.mjs",
     "lint": "biome lint . && npm run lint:no-shadow && npm run lint:styles && npm run lint:md",

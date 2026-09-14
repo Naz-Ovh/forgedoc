@@ -20,10 +20,10 @@
  * per file, since the kitchen sink has a Mermaid figure and the offline bundle
  * carries Mermaid.
  *
- * Note for `geist`: its typefaces load from the network (see
- * `themes/geist/_fonts.scss`), so a preview opened offline renders in the
- * system stack and looks like a different theme. That is the documented trade,
- * not a broken build.
+ * Note for `geist` and `bun`: their signature typefaces load from the network
+ * (see each theme's `_fonts.scss`), so a preview opened without network access
+ * renders in the system stack and looks less exact. That is the documented
+ * trade, not a broken build.
  */
 
 import { execFileSync } from 'node:child_process';

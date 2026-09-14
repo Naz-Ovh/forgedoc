@@ -1,0 +1,439 @@
+/*
+ * `default` foundations, read off the Lumen docs design system (v4).
+ *
+ * The design exposes exactly three knobs — a font, one accent hue and a corner
+ * radius — and derives every surface, tint and edge from four neutrals plus
+ * five semantic hues. This file keeps that shape: the raw palette is the
+ * `--doc-default-*` block, and every `--doc-*` contract token below it is
+ * either one of those values or a `color-mix()` of them at the design's own
+ * percentages (11% for a tint, 32% for a chip edge, 38% for a callout border).
+ *
+ * why one hue per role rather than a 10-step ramp: `_presets.scss` changes an
+ * accent by rewriting a single custom property, exactly as the design's accent
+ * picker does. A ramp would need seven values restated per preset and would
+ * drift from the source on the first edit.
+ *
+ * why the values are namespaced: an embedded document must not overwrite a host
+ * application's tokens (§6.1), and the derived half resolves per subtree so an
+ * author override stays local to the element it was written on.
+ *
+ * Dark mode is one `light-dark()` pair per value — no media query, no class
+ * toggle, no second block to keep in sync (MUST, §6.4).
+ */
+@layer doc.tokens {
+  :root,
+  doc-page {
+    /* ── Scale roots ──────────────────────────────────────────────────────── */
+    --doc-space-unit: 4px;
+    --doc-text-base: 16px;
+    --doc-text-ratio: 1.25;
+
+    /*
+     * 1.7 is the design's reading line height, and it is the single value that
+     * most defines how the theme feels — "tuned for long reading sessions".
+     * `-tight` is the UI-chrome leading; `-heading` the display one.
+     */
+    --doc-leading: 1.7;
+    --doc-leading-tight: 1.5;
+    --doc-leading-heading: 1.15;
+
+    /*
+     * Display type is tracked in, body copy very slightly out. The positive
+     * body tracking is deliberate in the source (`letter-spacing:0.005em` on
+     * every paragraph) and is what keeps 16px Plus Jakarta from looking dense.
+     */
+    --doc-tracking-tight: -0.015em;
+    --doc-tracking-body: 0.005em;
+    --doc-tracking-wide: 0.02em;
+    --doc-tracking-wider: 0.09em;
+
+    --doc-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", sans-serif;
+    --doc-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+      monospace;
+    --doc-font-display: var(--doc-font-sans);
+    --doc-numeric: tabular-nums lining-nums;
+
+    /*
+     * Two widths, because they answer different questions.
+     *
+     * `--doc-measure` is the document's column: tables, code, card grids and
+     * roadmaps get all of it, and on a wide display leaving 400px of empty
+     * gutter on each side wastes the screen the reader actually has.
+     *
+     * `--doc-measure-prose` is the reading measure, and it is deliberately
+     * shorter — the design caps paragraphs well inside its column, which is
+     * what keeps long-form pages comfortable.
+     *
+     * why `em` and not `ch`: `ch` is the width of the "0" glyph, and in Plus
+     * Jakarta that figure is far wider than the average letter — 74ch measured
+     * 888px, which is about 107 characters a line, well past the point where a
+     * reader loses their place returning to the left margin. 42em is ~672px
+     * here, close to the design's own 620–640px cap, and being font-relative it
+     * widens correctly for `doc-quote` at 20px rather than holding every size
+     * to one pixel count.
+     */
+    --doc-measure: 1100px;
+    --doc-measure-prose: 42em;
+    --doc-toc-width: 15rem;
+
+    /* ── Geometry ─────────────────────────────────────────────────────────── */
+    /* The design's `--r` is 12px and every card uses it; controls sit at 9px
+     * and the small chrome (kbd, inline code, method pills) at 6px. */
+    --doc-radius-sm: 6px;
+    --doc-radius: 9px;
+    --doc-radius-lg: 12px;
+    --doc-radius-pill: 999px;
+    --doc-border-width: 1px;
+
+    /* ── Raw neutrals ─────────────────────────────────────────────────────── */
+    --doc-default-bg: light-dark(#fdfdfe, #101118);
+    --doc-default-surface: light-dark(#fefeff, #171825);
+    --doc-default-surface-2: light-dark(#f3f3f8, #1e2030);
+    --doc-default-line: light-dark(#e9e9f1, #282a3d);
+    --doc-default-line-strong: light-dark(#dadbe8, #373a52);
+    --doc-default-line-stronger: light-dark(#c6c8da, #474c69);
+
+    /*
+     * Four text tiers, not three. The design separates the colour a heading is
+     * set in (`--text`) from the colour a paragraph is set in (`--body`), and
+     * collapsing them is the single change that would make this theme stop
+     * looking like the source: 16px #2f3444 at 1.7 is the "soft, low-glare"
+     * surface the whole system is described by.
+     */
+    --doc-default-text: light-dark(#181a24, #eef0f8);
+    --doc-default-body: light-dark(#2f3444, #d2d6e4);
+    --doc-default-muted: light-dark(#525869, #a8aec5);
+    /* The design's `--faint` is #878da0 / #6a7088, which reads at 3.3:1 and
+     * 3.6:1 — this is the same hue at the nearest lightness that clears 4.6:1
+     * on every ground it is used on, including the blocker tints. */
+    --doc-default-faint: light-dark(#64697b, #8a90a9);
+
+    /*
+     * ── Raw hues, and the two steps derived from them ─────────────────────
+     *
+     * Each role carries three values, and which one a rule reaches for is the
+     * whole accessibility story of this theme:
+     *
+     *   `--doc-default-<role>`      the design's own hex. Tints, edges, rings,
+     *                               dots, rails — anywhere no text sits on it.
+     *   `--doc-default-<role>-ink`  the same hue, deepened in light mode until
+     *                               it clears 4.6:1 as *text* on this design's
+     *                               tinted surfaces.
+     *   `--doc-default-<role>-fill` the same hue, deepened until a solid fill
+     *                               of it carries `on-solid` ink.
+     *
+     * why the split rather than one value per role: the design's palette is
+     * tuned for tinted panels, where these hues are excellent, and using them
+     * unchanged for 12px metadata puts green at 3.0:1 and amber at 3.2:1. The
+     * precedent is recorded as F6 — deepen the step that carries text, keep the
+     * brand hex where it is only ever a border or a dot, and never change the
+     * contract. Dark mode needs no deepening: there the hues are already the
+     * light half of the pair, sitting on a near-black ground.
+     *
+     * Values are solved, not eyeballed: each is the *nearest* lightness in
+     * OKLCH, hue and chroma held, that clears the target against every
+     * backdrop the role actually lands on.
+     */
+    --doc-default-accent: light-dark(#7c5cd6, #9d84f0);
+    --doc-default-accent-ink: light-dark(#7453cd, #9d84f0);
+    --doc-default-accent-fill: light-dark(#7c5cd6, #9d84f0);
+    --doc-default-on-accent: light-dark(#ffffff, #17122b);
+
+    --doc-default-info: light-dark(#2f6fd0, #6fa2ee);
+    --doc-default-info-ink: light-dark(#2868c9, #6fa2ee);
+    --doc-default-info-fill: light-dark(#2f6fd0, #6fa2ee);
+
+    --doc-default-success: light-dark(#1f9e63, #54c08a);
+    --doc-default-success-ink: light-dark(#007e45, #54c08a);
+    --doc-default-success-fill: light-dark(#00884e, #54c08a);
+
+    --doc-default-warn: light-dark(#b0770f, #dcab5c);
+    --doc-default-warn-ink: light-dark(#955e00, #dcab5c);
+    --doc-default-warn-fill: light-dark(#a26a00, #dcab5c);
+
+    --doc-default-danger: light-dark(#d93030, #f26a6a);
+    --doc-default-danger-ink: light-dark(#cf2427, #f26a6a);
+    --doc-default-danger-fill: light-dark(#d93030, #f26a6a);
+
+    --doc-shade-base: #0b0c12;
+    --doc-ink-on-solid: light-dark(#ffffff, #101118);
+    --doc-ink-on-accent: var(--doc-default-on-accent);
+    --doc-text-inverse: light-dark(#fdfdfe, #101118);
+
+    /* ── Surfaces and borders ─────────────────────────────────────────────── */
+    --doc-surface-0: var(--doc-default-bg);
+    --doc-surface-1: var(--doc-default-surface);
+    --doc-surface-2: var(--doc-default-surface-2);
+    --doc-surface-3: var(--doc-default-line);
+    --doc-surface-base: var(--doc-surface-1);
+    --doc-border-1: var(--doc-default-line);
+    --doc-border-2: var(--doc-default-line-strong);
+    --doc-border-3: var(--doc-default-line-stronger);
+    --doc-text-1: var(--doc-default-text);
+    --doc-text-2: var(--doc-default-body);
+    --doc-text-3: var(--doc-default-muted);
+
+    /*
+     * Two elevations, both from the design verbatim. They are tinted toward the
+     * violet the page is built on rather than neutral black, which is why cards
+     * lift off `--bg` without looking cut out of it.
+     */
+    /*
+     * Two elevations, and only two things use the second one.
+     *
+     * `--doc-shadow-1` is a single tight layer — a hairline lift, not a halo.
+     * The design puts a two-layer shadow on every card, and at the density of
+     * a plan document (a roadmap is five stacked cards, a stat row is nine)
+     * the outer 14px layer pools between them into visible grey bands. One
+     * layer reads as "this sits on the page" and stacks cleanly.
+     *
+     * `--doc-shadow-2` is real elevation and is reserved for things that
+     * genuinely float over the document: the TOC panel, the bucket, popovers,
+     * the endpoint drawer, and the dark code slab.
+     *
+     * why `light-dark()` sits on each colour rather than around the whole
+     * value: the function takes two comma-separated arguments, and a two-layer
+     * shadow already contains a comma — wrapping the pair would not parse.
+     */
+    --doc-shadow-1: 0 1px 2px light-dark(rgb(24 22 60 / 4%), rgb(0 0 0 / 32%));
+    --doc-shadow-2:
+      0 2px 4px light-dark(rgb(24 22 60 / 5%), rgb(0 0 0 / 40%)),
+      0 12px 32px light-dark(rgb(24 22 60 / 9%), rgb(0 0 0 / 40%));
+
+    /* ── The code panel ───────────────────────────────────────────────────── */
+    /*
+     * "A deep indigo panel in both themes keeps syntax colors stable." The
+     * surface shifts a little between schemes so it still sits *on* the page,
+     * but the five token colours do not move at all — a reader who switches
+     * themes mid-page sees the same code.
+     */
+    /*
+     * The gutter and comment tiers are lightened off the design's #8a90b0 and
+     * #7d84a3. Those two are the colours a reader spends the longest on — line
+     * numbers and comments — and the design's values read at 4.1:1 against the
+     * diff row tints and the language pill, which are lighter than the panel
+     * they were chosen against. Everything else on this panel is the design's.
+     */
+    --doc-default-code-bg: light-dark(#191a26, #14151f);
+    --doc-default-code-line: light-dark(#2a2c3e, #252738);
+    --doc-default-code-bar: light-dark(#303458, #2a2e50);
+    --doc-default-code-fg: light-dark(#dde0ee, #d3d7e8);
+    --doc-default-code-faint: #959cbd;
+    --doc-default-code-kw: #a3b3ff;
+    --doc-default-code-str: #8fd6a0;
+    --doc-default-code-fn: #efc272;
+    --doc-default-code-cm: #959cbc;
+    --doc-default-code-num: #f0a075;
+    --doc-default-code-add: rgb(96 200 140 / 13%);
+    --doc-default-code-del: rgb(230 110 110 / 13%);
+    --doc-default-code-add-ink: #79d49c;
+    --doc-default-code-del-ink: #f09090;
+
+    --doc-code-surface: var(--doc-default-code-bg);
+    --doc-code-text: var(--doc-default-code-fg);
+    --doc-code-border: var(--doc-default-code-line);
+    --doc-code-gutter: var(--doc-default-code-faint);
+    --doc-code-comment: var(--doc-default-code-cm);
+    --doc-code-keyword: var(--doc-default-code-kw);
+    --doc-code-string: var(--doc-default-code-str);
+    --doc-code-number: var(--doc-default-code-num);
+    --doc-code-function: var(--doc-default-code-fn);
+    /* Punctuation is the code colour stepped back toward the panel, so it
+     * recedes without becoming as quiet as a comment. */
+    --doc-code-punctuation: color-mix(
+      in oklab,
+      var(--doc-default-code-fg) 74%,
+      var(--doc-default-code-bg)
+    );
+    --doc-code-highlight-row: color-mix(in oklab, var(--doc-default-code-fn) 13%, transparent);
+
+    /*
+     * ── Reader highlights (§10.2) ─────────────────────────────────────────
+     *
+     * Opaque, and that is the whole point.
+     *
+     * why not the usual translucent wash: a highlight in this library runs
+     * across whatever the author wrote — prose, then an inline `<code>` with
+     * its own near-white pill, then out onto a pink `doc-blocker` tint. At 62%
+     * alpha the same colour composites to three different results, so a single
+     * comment spanning a paragraph looked like three separate highlights with
+     * the code chips left out. An opaque fill paints identically over every
+     * surface, so one range reads as one band.
+     *
+     * The consequence is that `--doc-highlight-text` is load-bearing rather
+     * than cosmetic: an opaque light fill would swallow light text, so the ink
+     * has to be set too, and both halves are set for both schemes.
+     */
+    --doc-highlight-bg: light-dark(#ffe0a3, #5a4212);
+    --doc-highlight-text: light-dark(#402604, #ffeed0);
+
+    /* ── Stacking and motion ──────────────────────────────────────────────── */
+    --doc-z-toc: 40;
+    --doc-z-popover: 60;
+    --doc-z-bucket: 70;
+    --doc-z-banner: 80;
+    --doc-transition: 150ms ease;
+  }
+
+  /*
+   * The derived half.
+   *
+   * Scoped to `doc-page` and its descendants rather than `:root` so a value the
+   * author overrides on one element re-derives for that subtree alone (§6.1) —
+   * `<doc-table style="--doc-space-unit:6px">` loosens that table and nothing
+   * else, and `doc-page[accent="emerald"]` recolours every tint below it from
+   * the one hue the preset rewrote.
+   */
+  doc-page,
+  doc-page * {
+    --doc-space-0: calc(var(--doc-space-unit) * 0);
+    --doc-space-0-5: calc(var(--doc-space-unit) * 0.5);
+    --doc-space-1: calc(var(--doc-space-unit) * 1);
+    --doc-space-1-5: calc(var(--doc-space-unit) * 1.5);
+    --doc-space-2: calc(var(--doc-space-unit) * 2);
+    --doc-space-3: calc(var(--doc-space-unit) * 3);
+    --doc-space-4: calc(var(--doc-space-unit) * 4);
+    --doc-space-5: calc(var(--doc-space-unit) * 5);
+    --doc-space-6: calc(var(--doc-space-unit) * 6);
+    --doc-space-7: calc(var(--doc-space-unit) * 7);
+    --doc-space-8: calc(var(--doc-space-unit) * 8);
+    --doc-space-9: calc(var(--doc-space-unit) * 9);
+    --doc-space-10: calc(var(--doc-space-unit) * 10);
+    --doc-space-11: calc(var(--doc-space-unit) * 11);
+    --doc-space-12: calc(var(--doc-space-unit) * 12);
+    --doc-space-16: calc(var(--doc-space-unit) * 16);
+    --doc-space-20: calc(var(--doc-space-unit) * 20);
+
+    /*
+     * The half steps — 10, 14, 18, 22, 26, 30px at the default unit.
+     *
+     * The design insets almost everything at an even-plus-two value: 14px of
+     * pill padding, 18px accordion rows, 22px table cells, 26px accordion
+     * bodies, 30px card interiors. Rounding them to the whole ramp tightens
+     * every one of those by 2px, and doing that consistently is what makes an
+     * otherwise faithful copy of a design read as cramped. They still derive
+     * from the one unit, so `density` scales them with everything else (§6.2).
+     */
+    --doc-space-2-5: calc(var(--doc-space-unit) * 2.5);
+    --doc-space-3-5: calc(var(--doc-space-unit) * 3.5);
+    --doc-space-4-5: calc(var(--doc-space-unit) * 4.5);
+    --doc-space-5-5: calc(var(--doc-space-unit) * 5.5);
+    --doc-space-6-5: calc(var(--doc-space-unit) * 6.5);
+    --doc-space-7-5: calc(var(--doc-space-unit) * 7.5);
+
+    /*
+     * The type ramp is tuned to the design's headings — 34 / 26 / 20 against a
+     * 16px base — rather than to a geometric ratio. `--doc-text-ui` (13.5px)
+     * and `--doc-text-meta` (12.5px) are the two chrome tiers the source uses
+     * for nav rows, table headers and pills; they sit between `xs` and `sm`,
+     * which is why they are named rather than squeezed into the ramp.
+     */
+    --doc-text-2xs: calc(var(--doc-text-base) * 0.6875);
+    --doc-text-xs: calc(var(--doc-text-base) * 0.75);
+    --doc-text-meta: calc(var(--doc-text-base) * 0.78125);
+    --doc-text-ui: calc(var(--doc-text-base) * 0.84375);
+    --doc-text-sm: calc(var(--doc-text-base) * 0.875);
+    --doc-text-table: calc(var(--doc-text-base) * 0.9375);
+    --doc-text-md: calc(var(--doc-text-base) * 1);
+    --doc-text-lg: calc(var(--doc-text-base) * 1.25);
+    --doc-text-xl: calc(var(--doc-text-base) * 1.625);
+    --doc-text-2xl: calc(var(--doc-text-base) * 2.125);
+    --doc-text-3xl: calc(var(--doc-text-base) * 2.625);
+    --doc-text-4xl: calc(var(--doc-text-base) * 3.25);
+
+    --doc-gutter: var(--doc-space-8);
+    --doc-rule: var(--doc-border-width) solid var(--doc-border-1);
+
+    /*
+     * The five role ramps, all from one formula. The percentages are the
+     * design's own: 11% over the card surface is a tint, 32% over the line
+     * colour is a chip edge, 38% is a callout border.
+     */
+    --doc-accent-text: var(--doc-default-accent-ink);
+    --doc-accent-line: var(--doc-default-accent);
+    --doc-accent-solid: var(--doc-default-accent-fill);
+    --doc-accent-on-solid: var(--doc-default-on-accent);
+    --doc-accent-tint: color-mix(in oklab, var(--doc-default-accent) 11%, var(--doc-surface-1));
+    --doc-accent-edge: color-mix(in oklab, var(--doc-default-accent) 32%, var(--doc-border-1));
+    --doc-accent-50: color-mix(in oklab, var(--doc-default-accent) 6%, var(--doc-surface-1));
+    --doc-accent-100: color-mix(in oklab, var(--doc-default-accent) 12%, var(--doc-surface-1));
+    --doc-accent-200: color-mix(in oklab, var(--doc-default-accent) 32%, transparent);
+    --doc-accent-400: var(--doc-default-accent);
+    --doc-accent-600: var(--doc-default-accent-ink);
+    --doc-accent-800: color-mix(in oklab, var(--doc-default-accent) 86%, var(--doc-shade-base));
+    --doc-accent-900: color-mix(in oklab, var(--doc-default-accent) 55%, var(--doc-shade-base));
+
+    --doc-info-text: var(--doc-default-info-ink);
+    --doc-info-line: var(--doc-default-info);
+    --doc-info-solid: var(--doc-default-info-fill);
+    --doc-info-tint: color-mix(in oklab, var(--doc-default-info) 11%, var(--doc-surface-1));
+    --doc-info-edge: color-mix(in oklab, var(--doc-default-info) 38%, var(--doc-border-1));
+    --doc-info-50: color-mix(in oklab, var(--doc-default-info) 6%, var(--doc-surface-1));
+    --doc-info-100: color-mix(in oklab, var(--doc-default-info) 12%, var(--doc-surface-1));
+    --doc-info-200: color-mix(in oklab, var(--doc-default-info) 32%, transparent);
+    --doc-info-400: var(--doc-default-info);
+    --doc-info-600: var(--doc-default-info-ink);
+    --doc-info-800: color-mix(in oklab, var(--doc-default-info) 86%, var(--doc-shade-base));
+    --doc-info-900: color-mix(in oklab, var(--doc-default-info) 55%, var(--doc-shade-base));
+
+    --doc-success-text: var(--doc-default-success-ink);
+    --doc-success-line: var(--doc-default-success);
+    --doc-success-solid: var(--doc-default-success-fill);
+    --doc-success-tint: color-mix(in oklab, var(--doc-default-success) 11%, var(--doc-surface-1));
+    --doc-success-edge: color-mix(in oklab, var(--doc-default-success) 38%, var(--doc-border-1));
+    --doc-success-50: color-mix(in oklab, var(--doc-default-success) 6%, var(--doc-surface-1));
+    --doc-success-100: color-mix(in oklab, var(--doc-default-success) 12%, var(--doc-surface-1));
+    --doc-success-200: color-mix(in oklab, var(--doc-default-success) 32%, transparent);
+    --doc-success-400: var(--doc-default-success);
+    --doc-success-600: var(--doc-default-success-ink);
+    --doc-success-800: color-mix(in oklab, var(--doc-default-success) 86%, var(--doc-shade-base));
+    --doc-success-900: color-mix(in oklab, var(--doc-default-success) 55%, var(--doc-shade-base));
+
+    --doc-warn-text: var(--doc-default-warn-ink);
+    --doc-warn-line: var(--doc-default-warn);
+    --doc-warn-solid: var(--doc-default-warn-fill);
+    --doc-warn-tint: color-mix(in oklab, var(--doc-default-warn) 12%, var(--doc-surface-1));
+    --doc-warn-edge: color-mix(in oklab, var(--doc-default-warn) 40%, var(--doc-border-1));
+    --doc-warn-50: color-mix(in oklab, var(--doc-default-warn) 6%, var(--doc-surface-1));
+    --doc-warn-100: color-mix(in oklab, var(--doc-default-warn) 14%, var(--doc-surface-1));
+    --doc-warn-200: color-mix(in oklab, var(--doc-default-warn) 32%, transparent);
+    --doc-warn-400: var(--doc-default-warn);
+    --doc-warn-600: var(--doc-default-warn-ink);
+    --doc-warn-800: color-mix(in oklab, var(--doc-default-warn) 86%, var(--doc-shade-base));
+    --doc-warn-900: color-mix(in oklab, var(--doc-default-warn) 55%, var(--doc-shade-base));
+
+    --doc-danger-text: var(--doc-default-danger-ink);
+    --doc-danger-line: var(--doc-default-danger);
+    --doc-danger-solid: var(--doc-default-danger-fill);
+    --doc-danger-tint: color-mix(in oklab, var(--doc-default-danger) 11%, var(--doc-surface-1));
+    --doc-danger-edge: color-mix(in oklab, var(--doc-default-danger) 38%, var(--doc-border-1));
+    --doc-danger-50: color-mix(in oklab, var(--doc-default-danger) 6%, var(--doc-surface-1));
+    --doc-danger-100: color-mix(in oklab, var(--doc-default-danger) 12%, var(--doc-surface-1));
+    --doc-danger-200: color-mix(in oklab, var(--doc-default-danger) 32%, transparent);
+    --doc-danger-400: var(--doc-default-danger);
+    --doc-danger-600: var(--doc-default-danger-ink);
+    --doc-danger-800: color-mix(in oklab, var(--doc-default-danger) 86%, var(--doc-shade-base));
+    --doc-danger-900: color-mix(in oklab, var(--doc-default-danger) 55%, var(--doc-shade-base));
+
+    /*
+     * The categorical palette is the design's own accent picker, in its own
+     * order — eight hues already chosen to sit together on this background,
+     * so a chart and an accent swap can never clash.
+     */
+    --doc-series-1: var(--doc-default-accent);
+    --doc-series-2: light-dark(#3d6ee0, #7ba6f2);
+    --doc-series-3: light-dark(#0e9373, #3cc39c);
+    --doc-series-4: light-dark(#b6633c, #e0916b);
+    --doc-series-5: light-dark(#c74357, #ee7b8d);
+    --doc-series-6: light-dark(#5865e0, #8f99f0);
+    --doc-series-7: light-dark(#2f7d5a, #63b48d);
+    --doc-series-8: light-dark(#34518f, #8298d8);
+    --doc-series-a-600: #7c5cd6;
+    --doc-series-a-400: #9d84f0;
+    --doc-series-b-600: #c74357;
+    --doc-series-b-400: #ee7b8d;
+    --doc-series-c-600: #0e9373;
+    --doc-series-c-400: #3cc39c;
+  }
+}

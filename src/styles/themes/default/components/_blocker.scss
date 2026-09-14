@@ -1,0 +1,132 @@
+/*
+ * `doc-blocker` and its three enforced children.
+ *
+ * A blocker is the alert block promoted to a card: same tint-and-edge formula,
+ * but with the design's card radius, a solid severity pill, and hairline
+ * dividers between Blocks / Why / Action so the three answers read as a record
+ * rather than as one long paragraph.
+ */
+
+@layer doc.theme {
+  doc-blocker {
+    --doc-blocker-line: var(--doc-default-warn);
+    --doc-blocker-ink: var(--doc-warn-text);
+    --doc-blocker-solid: var(--doc-warn-solid);
+    --doc-blocker-tint: var(--doc-warn-tint);
+    --doc-blocker-edge: var(--doc-warn-edge);
+
+    margin-block: var(--doc-space-6);
+    padding: var(--doc-space-5) var(--doc-space-6);
+    border: var(--doc-border-width) solid var(--doc-blocker-edge);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-blocker-tint);
+    print-color-adjust: exact;
+  }
+
+  doc-blocker[severity="low"] {
+    --doc-blocker-line: var(--doc-default-info);
+    --doc-blocker-ink: var(--doc-info-text);
+    --doc-blocker-solid: var(--doc-info-solid);
+    --doc-blocker-tint: var(--doc-info-tint);
+    --doc-blocker-edge: var(--doc-info-edge);
+  }
+
+  doc-blocker[severity="high"] {
+    --doc-blocker-line: var(--doc-default-danger);
+    --doc-blocker-ink: var(--doc-danger-text);
+    --doc-blocker-solid: var(--doc-danger-solid);
+    --doc-blocker-tint: var(--doc-danger-tint);
+    --doc-blocker-edge: var(--doc-danger-edge);
+  }
+
+  doc-blocker [data-part="header"] {
+    gap: var(--doc-space-2) var(--doc-space-3);
+    margin-block-end: var(--doc-space-4);
+  }
+
+  doc-blocker [data-part="sequence"] {
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-meta);
+    font-weight: 600;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-blocker [data-part="severity"] {
+    padding: 3px var(--doc-space-2-5);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-blocker-solid);
+    color: var(--doc-ink-on-solid);
+    font-size: var(--doc-text-meta);
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    print-color-adjust: exact;
+  }
+
+  doc-blocker [data-part="title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-lg);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+    letter-spacing: -0.01em;
+  }
+
+  /*
+  * why the label is positioned rather than a grid column: the author's text is
+  * *inline* content — "Every key is namespaced <code>…</code>, and the
+  * validator rejects…" — and every inline element child of a grid container
+  * becomes its own grid item. A two-column grid would therefore tear a sentence
+  * containing `<code>` into three cells. A hanging indent with an absolutely
+  * positioned label holds any mix of inline content.
+  */
+  doc-blocks,
+  doc-why,
+  doc-action {
+    padding-block: var(--doc-space-3);
+    padding-inline-start: 6rem;
+    border-block-start: var(--doc-border-width) solid
+      color-mix(in oklab, var(--doc-blocker-line) 20%, transparent);
+    color: var(--doc-text-2);
+  }
+
+  doc-blocks [data-part="label"],
+  doc-why [data-part="label"],
+  doc-action [data-part="label"] {
+    inset-block-start: var(--doc-space-3);
+    width: 5.25rem;
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+    line-height: 1.9;
+  }
+
+  /* The resolution is the one line a reader must not skim past. */
+  doc-action {
+    color: var(--doc-text-1);
+    font-weight: 550;
+  }
+
+  doc-action [data-part="label"] {
+    color: var(--doc-blocker-ink);
+  }
+
+  @media (max-width: 640px) {
+    doc-blocks,
+    doc-why,
+    doc-action {
+      padding-inline-start: 0;
+      padding-block-start: var(--doc-space-7);
+    }
+
+    doc-blocks [data-part="label"],
+    doc-why [data-part="label"],
+    doc-action [data-part="label"] {
+      line-height: 1.4;
+    }
+  }
+}

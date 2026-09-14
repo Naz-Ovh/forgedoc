@@ -1,0 +1,424 @@
+/*
+ * `doc-endpoint` — the API operation row and its detail drawer.
+ *
+ * The method pill is the design's HTTP verb chip verbatim: mono, 600, a 7px
+ * radius, a 12% fill and a 32% border of the hue. The hues are the design's
+ * too — GET is green and POST is amber, which is the docs convention it
+ * illustrates rather than the traffic-light one.
+ */
+
+@layer doc.theme {
+  doc-endpoint {
+    margin-block: var(--doc-space-2);
+  }
+
+  doc-endpoint [data-part="trigger"] {
+    gap: var(--doc-space-2-5);
+    min-height: 3.25rem;
+    padding: var(--doc-space-1-5) var(--doc-space-3);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-1);
+    text-align: start;
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition);
+  }
+
+  doc-endpoint [data-part="trigger"]:hover {
+    border-color: var(--doc-accent-edge);
+    background: color-mix(in oklab, var(--doc-accent-400) 4%, var(--doc-surface-1));
+  }
+
+  doc-endpoint [data-part="method"],
+  [data-part="endpoint-drawer-method"] {
+    min-width: 4.7rem;
+    padding: 5px var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: 7px;
+    background: var(--doc-surface-2);
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    letter-spacing: var(--doc-tracking-wide);
+    line-height: 1.2;
+    text-transform: uppercase;
+    print-color-adjust: exact;
+  }
+
+  :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="get"] {
+    border-color: var(--doc-success-200);
+    background: var(--doc-success-100);
+    color: var(--doc-success-text);
+  }
+
+  :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="post"] {
+    border-color: var(--doc-warn-200);
+    background: var(--doc-warn-100);
+    color: var(--doc-warn-text);
+  }
+
+  :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="put"],
+  :is(doc-endpoint [data-part="method"], [data-part="endpoint-drawer-method"])[data-method="patch"] {
+    border-color: var(--doc-info-200);
+    background: var(--doc-info-100);
+    color: var(--doc-info-text);
+  }
+
+  :is(
+    doc-endpoint [data-part="method"],
+    [data-part="endpoint-drawer-method"]
+  )[data-method="delete"] {
+    border-color: var(--doc-danger-200);
+    background: var(--doc-danger-100);
+    color: var(--doc-danger-text);
+  }
+
+  doc-endpoint [data-part="path"],
+  [data-part="endpoint-drawer-path"] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--doc-text-1);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+  }
+
+  /* A `:id` segment is the one part of a path the reader has to substitute. */
+  [data-part="path-param"] {
+    padding: 0;
+    color: var(--doc-accent-text);
+  }
+
+  doc-endpoint [data-part="summary"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-ui);
+  }
+
+  doc-endpoint [data-part="status"] {
+    padding: 2px var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 600;
+  }
+
+  doc-endpoint [data-part="status"][data-status="2xx"] {
+    background: var(--doc-success-100);
+    color: var(--doc-success-text);
+  }
+
+  doc-endpoint [data-part="open-icon"] {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--doc-surface-2);
+    color: var(--doc-default-faint);
+    font-weight: 700;
+  }
+
+  doc-endpoint [data-part="trigger"]:hover [data-part="open-icon"] {
+    background: var(--doc-accent-100);
+    color: var(--doc-accent-text);
+  }
+
+  /* ── The drawer ─────────────────────────────────────────────────────────── */
+  [data-part="endpoint-drawer"] {
+    width: clamp(38rem, 46vw, 48rem);
+    height: 100dvh;
+    padding: 0;
+    border: 0;
+    border-inline-start: var(--doc-rule);
+    border-radius: 0;
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  [data-part="endpoint-drawer"]::backdrop {
+    background: light-dark(rgb(24 22 60 / 28%), rgb(0 0 0 / 62%));
+    backdrop-filter: blur(3px);
+  }
+
+  [data-part="endpoint-drawer-header"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-5) var(--doc-space-6) var(--doc-space-4);
+    border-block-end: var(--doc-rule);
+    background: var(--doc-surface-1);
+  }
+
+  [data-part="endpoint-drawer-eyebrow"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+    letter-spacing: var(--doc-tracking-wider);
+    text-transform: uppercase;
+  }
+
+  [data-part="endpoint-drawer-close"] {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-lg);
+    line-height: 1;
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="endpoint-drawer-close"]:hover {
+    border-color: var(--doc-border-2);
+    color: var(--doc-text-1);
+  }
+
+  /*
+   * The signature is a method and a path, not a code sample.
+   *
+   * why it is not on the code surface: the dark slab means "this is source you
+   * would paste into an editor". A URL with a copy button is a field — putting
+   * it on the same ground as a snippet makes the drawer look like it opens with
+   * a code block, and it was read that way in review.
+   */
+  [data-part="endpoint-drawer-signature"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-2-5) var(--doc-space-3);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-2);
+  }
+
+  [data-part="endpoint-drawer-copy"] {
+    padding: var(--doc-space-1-5) var(--doc-space-2-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 550;
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="endpoint-drawer-copy"]:hover {
+    border-color: var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+  }
+
+  [data-part="endpoint-drawer-content"] {
+    padding: var(--doc-space-6);
+  }
+
+  [data-part="endpoint-drawer-overview"] {
+    padding-block-end: var(--doc-space-5);
+    border-block-end: var(--doc-rule);
+  }
+
+  [data-part="endpoint-drawer-title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-lg);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  [data-part="endpoint-drawer-description"] {
+    margin-block-start: var(--doc-space-2);
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+  }
+
+  [data-part="endpoint-drawer-metadata"] {
+    gap: var(--doc-space-3-5);
+    margin: var(--doc-space-4) 0 0;
+  }
+
+  [data-part="endpoint-drawer-meta-item"] {
+    gap: var(--doc-space-1);
+    padding: var(--doc-space-3-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-2);
+  }
+
+  [data-part="endpoint-drawer-meta-label"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  [data-part="endpoint-drawer-meta-value"] {
+    margin: 0;
+    color: var(--doc-text-1);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+  }
+
+  [data-part="endpoint-drawer-section"] {
+    margin-block-start: var(--doc-space-7);
+  }
+
+  [data-part="endpoint-drawer-section-title"] {
+    margin-block-end: var(--doc-space-3);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+  }
+
+  [data-part="endpoint-drawer-parameters"] {
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    overflow: hidden;
+  }
+
+  [data-part="endpoint-drawer-parameter"] {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-3-5) var(--doc-space-4-5);
+    background: var(--doc-surface-1);
+  }
+
+  [data-part="endpoint-drawer-parameter"] + [data-part="endpoint-drawer-parameter"] {
+    border-block-start: var(--doc-rule);
+  }
+
+  [data-part="endpoint-drawer-parameter-name"] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--doc-text-1);
+    font-weight: 600;
+  }
+
+  [data-part="endpoint-drawer-parameter-in"],
+  [data-part="endpoint-drawer-parameter-type"],
+  [data-part="endpoint-drawer-parameter-required"] {
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-meta);
+  }
+
+  [data-part="endpoint-drawer-parameter-required"][data-required="true"] {
+    color: var(--doc-danger-text);
+    font-weight: 700;
+  }
+
+  [data-part="endpoint-drawer-parameter-default"],
+  [data-part="endpoint-drawer-parameter-description"] {
+    margin: 0;
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-meta);
+  }
+
+  [data-part="endpoint-drawer-headers"] {
+    gap: var(--doc-space-2);
+  }
+
+  [data-part="endpoint-drawer-header-value"] {
+    padding: var(--doc-space-1-5) var(--doc-space-2-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-xs);
+  }
+
+  [data-part="endpoint-drawer-response-status"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-3-5) var(--doc-space-4-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-2);
+  }
+
+  [data-part="endpoint-drawer-response-status"][data-status="2xx"] {
+    border-color: var(--doc-success-edge);
+    background: var(--doc-success-tint);
+  }
+
+  [data-part="endpoint-drawer-response-status"][data-status="4xx"],
+  [data-part="endpoint-drawer-response-status"][data-status="5xx"] {
+    border-color: var(--doc-danger-edge);
+    background: var(--doc-danger-tint);
+  }
+
+  [data-part="endpoint-drawer-response-code"] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--doc-text-1);
+    font-weight: 700;
+  }
+
+  [data-part="endpoint-drawer-response-label"] {
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+  }
+
+  [data-part="endpoint-drawer-example"] {
+    margin: var(--doc-space-3) 0 0;
+    padding: var(--doc-space-4);
+    border: 0;
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    line-height: 1.85;
+  }
+
+  [data-part="endpoint-drawer-example-code"] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  @media (max-width: 720px) {
+    doc-endpoint [data-part="trigger"] {
+      gap: var(--doc-space-2);
+    }
+
+    doc-endpoint [data-part="summary"] {
+      padding-inline-start: var(--doc-space-1);
+    }
+
+    doc-endpoint [data-part="status"] {
+      display: none;
+    }
+
+    [data-part="endpoint-drawer"] {
+      max-width: none;
+    }
+
+    [data-part="endpoint-drawer-header"],
+    [data-part="endpoint-drawer-content"] {
+      padding-inline: var(--doc-space-4);
+    }
+  }
+
+  @media print {
+    doc-endpoint [data-part="trigger"] {
+      box-shadow: none;
+    }
+
+    doc-endpoint [data-part="body"] {
+      padding: var(--doc-space-3-5) var(--doc-space-4-5);
+      border: var(--doc-rule);
+      border-block-start: 0;
+    }
+  }
+}

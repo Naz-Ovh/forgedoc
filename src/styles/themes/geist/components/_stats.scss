@@ -1,62 +1,12 @@
-/* `doc-stats` / `doc-stat` — metric cards. */
-
+/* Geist heading-32 values, label-14 metadata, base material cards. */
 @layer doc.theme {
-  doc-stats {
-    gap: var(--doc-space-4);
-    margin-block: var(--doc-space-5);
-  }
-
-  doc-stat {
-    padding: var(--doc-space-4);
-    border: var(--doc-border-width) solid var(--doc-border-1);
-    border-radius: var(--doc-radius);
-    background: var(--doc-surface-1);
-    gap: var(--doc-space-2);
-  }
-
-  doc-stat [data-part="label"] {
-    font-size: var(--doc-text-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: var(--doc-tracking-wide);
-    color: var(--doc-text-3);
-  }
-
-  doc-stat [data-part="value-row"] {
-    gap: var(--doc-space-3);
-  }
-
-  doc-stat [data-part="value"] {
-    font-size: var(--doc-text-2xl);
-    font-weight: 700;
-    color: var(--doc-text-1);
-    font-variant-numeric: var(--doc-numeric);
-    line-height: 1.1;
-  }
-
-  doc-stat [data-part="diff"] {
-    font-size: var(--doc-text-xs);
-    font-weight: 600;
-    font-variant-numeric: var(--doc-numeric);
-    padding: var(--doc-space-0-5) var(--doc-space-1-5);
-    border-radius: var(--doc-radius-sm);
-    background: var(--doc-surface-2);
-    color: var(--doc-text-3);
-  }
-
-  doc-stat [data-part="diff"][data-tone="good"] {
-    background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
-  }
-
-  doc-stat [data-part="diff"][data-tone="bad"] {
-    background: var(--doc-danger-tint);
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
-  }
-
-  doc-stat [data-part="body"] {
-    font-size: var(--doc-text-xs);
-    color: var(--doc-text-3);
-    margin-top: var(--doc-space-1);
-  }
+  doc-stats { gap: var(--doc-space-4); margin-block: var(--doc-space-6); }
+  doc-stat { gap: var(--doc-space-3); padding: var(--doc-space-6); border: var(--doc-rule); border-radius: var(--doc-radius); background: var(--doc-surface-1); }
+  doc-stat [data-part="label"] { color: var(--doc-text-2); font-size: var(--doc-text-sm); font-weight: 400; }
+  doc-stat [data-part="value-row"] { gap: var(--doc-space-3); }
+  doc-stat [data-part="value"] { color: var(--doc-text-1); font-size: var(--doc-text-2xl); font-weight: 600; line-height: 1.25; letter-spacing: -0.04em; font-variant-numeric: var(--doc-numeric); }
+  doc-stat [data-part="diff"] { padding: 2px var(--doc-space-2); border-radius: var(--doc-radius-pill); background: var(--doc-surface-2); color: var(--doc-text-2); font-size: var(--doc-text-xs); font-weight: 500; }
+  doc-stat [data-part="diff"][data-tone="good"] { background: var(--doc-geist-green-200); color: var(--doc-success-text); }
+  doc-stat [data-part="diff"][data-tone="bad"] { background: var(--doc-geist-red-200); color: var(--doc-danger-text); }
+  doc-stat [data-part="body"] { color: var(--doc-text-2); font-size: var(--doc-text-xs); }
 }

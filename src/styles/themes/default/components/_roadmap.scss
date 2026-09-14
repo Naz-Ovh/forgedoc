@@ -1,0 +1,190 @@
+/*
+ * `doc-roadmap` / `doc-stage` — a numbered sequence with a current marker.
+ *
+ * The rail is a single pseudo-element on the roadmap rather than a border per
+ * stage, so it runs unbroken behind the number badges.
+ *
+ * The current stage is marked the way the design marks it: an accent badge with
+ * a soft ring around it, an accent border on the card, and a tinted pill. It is
+ * *not* an inverted header — a stage body holds arbitrary author content, each
+ * block with its own surface, and this design's emphasis vocabulary is tint and
+ * glow rather than reversal.
+ */
+
+@layer doc.theme {
+  doc-roadmap {
+    margin-block: var(--doc-space-8);
+    padding-inline-start: var(--doc-space-9);
+  }
+
+  doc-roadmap::before {
+    width: 2px;
+    border-radius: 2px;
+    background: var(--doc-border-1);
+  }
+
+  doc-stage {
+    margin-block: var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    transition: border-color var(--doc-transition);
+  }
+
+  /*
+   * The header is a distinct region, not the top of the body.
+   *
+   * why it needs its own fill and a rule under it: a stage's body is arbitrary
+   * author content — a paragraph, a checklist, a code block — and with the
+   * header on the same surface there was nothing to say where the title ended
+   * and the content began. The muted surface plus one hairline is the same
+   * device `doc-table` uses for its head, so the two read as one system.
+   */
+  doc-stage > [data-part="header"] {
+    gap: var(--doc-space-3);
+    width: 100%;
+    padding: var(--doc-space-3-5) var(--doc-space-5);
+    border: 0;
+    border-radius: var(--doc-radius-lg) var(--doc-radius-lg) 0 0;
+    background: var(--doc-surface-2);
+    color: inherit;
+    text-align: start;
+    transition: background-color var(--doc-transition);
+  }
+
+  doc-stage > [data-part="header"]:hover {
+    background: color-mix(in oklab, var(--doc-accent-400) 5%, var(--doc-surface-2));
+  }
+
+  /* Closed, the header *is* the card, so it keeps all four corners. */
+  doc-stage:not(:state(open)) > [data-part="header"] {
+    border-radius: inherit;
+  }
+
+  doc-stage:state(open) > [data-part="header"] {
+    border-block-end: var(--doc-rule);
+  }
+
+  doc-stage:state(current) > [data-part="header"] {
+    background: var(--doc-accent-tint);
+  }
+
+  doc-stage:state(current) > [data-part="header"]:hover {
+    background: color-mix(in oklab, var(--doc-accent-400) 16%, var(--doc-surface-1));
+  }
+
+  /*
+   * The badge sits on the rail. `--doc-surface-0` rather than the card colour
+   * so the rail is visibly interrupted behind it — a badge filled with the card
+   * surface on a page of the same family reads as floating.
+   */
+  doc-stage [data-part="badge"] {
+    width: var(--doc-space-8);
+    height: var(--doc-space-8);
+    border: 2px solid var(--doc-border-2);
+    border-radius: 50%;
+    background: var(--doc-surface-0);
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+    font-variant-numeric: var(--doc-numeric);
+    print-color-adjust: exact;
+  }
+
+  doc-stage [data-part="heading"] {
+    gap: var(--doc-space-1) var(--doc-space-2-5);
+  }
+
+  doc-stage [data-part="title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-stage [data-part="subtitle"] {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-meta);
+  }
+
+  doc-stage [data-part="current-marker"] {
+    margin-inline-start: auto;
+    padding: 3px var(--doc-space-2-5);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-100);
+    color: var(--doc-accent-text);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+    letter-spacing: normal;
+    text-transform: none;
+    print-color-adjust: exact;
+  }
+
+  doc-stage:state(current) {
+    border-color: var(--doc-accent-edge);
+  }
+
+  /* The design's dot glow: a 4px ring at 18% of the hue, no hard edge. */
+  doc-stage:state(current) [data-part="badge"] {
+    border-color: var(--doc-accent-line);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--doc-accent-400) 18%, transparent);
+  }
+
+  doc-stage > [data-part="body"] {
+    padding-inline: var(--doc-space-5);
+    color: var(--doc-text-2);
+  }
+
+  /*
+   * The first and last blocks inside an open disclosure lose their outer
+   * margin.
+   *
+   * why: the body is the author's own node named in place (§2.2), so it keeps
+   * whatever `margin-block` its component sets — a checklist brings 20px of its
+   * own. That stacked on the body's padding and left a 40px band of empty card
+   * above the first block and below the last. The padding is the card's inset;
+   * the margin is for separating siblings, and at the edges there is no sibling.
+   */
+  doc-stage > [data-part="header"] + [data-part="body"],
+  doc-stage > [data-part="summary"] + [data-part="body"] {
+    margin-block-start: 0;
+  }
+
+  doc-stage > [data-part="body"]:last-child {
+    margin-block-end: 0;
+  }
+
+  doc-stage:state(open) > [data-part="body"]:first-of-type {
+    padding-block-start: var(--doc-space-4);
+  }
+
+  doc-stage:state(open) > [data-part="body"]:last-child {
+    padding-block-end: var(--doc-space-4);
+  }
+
+  /*
+  * `hidden="until-found"` sets `content-visibility: hidden`, which hides the
+  * contents but keeps the element's own box — so a collapsed stage would show a
+  * band of empty padding. Zeroing it here is what makes closed actually look
+  * closed, without giving up find-in-page.
+  */
+  doc-stage > [data-part="body"][hidden] {
+    padding-block: 0;
+    margin-block: 0;
+  }
+
+  @media (max-width: 720px) {
+    doc-roadmap {
+      padding-inline-start: var(--doc-space-7);
+    }
+
+    doc-stage [data-part="badge"] {
+      width: var(--doc-space-6);
+      height: var(--doc-space-6);
+      font-size: var(--doc-text-xs);
+    }
+  }
+}

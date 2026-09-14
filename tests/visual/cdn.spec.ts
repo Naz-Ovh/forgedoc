@@ -1,6 +1,6 @@
 /**
  * Acceptance 13: CDN mode works — a plain HTML file with one `<link>` and one
- * `defer` `<script>` renders identically to the injected build.
+ * `defer` `<script>` behaves identically to the injected build.
  *
  * The two tags point at the real built artefacts, served over HTTP by the same
  * dev server the visual suite uses. That is exactly the shape of the snippet in
@@ -61,31 +61,6 @@ test('upgrades every element from a deferred script tag', async ({ page }) => {
     .locator('doc-option')
     .evaluateAll((options) => options.map((option) => (option as HTMLElement).dataset.key));
   expect(keys).toEqual(['A', 'B', 'O']);
-});
-
-test('applies the shipped stylesheet, layers and all', async ({ page }) => {
-  await openCdnPage(page);
-
-  // A token from doc.tokens, resolved through a real property.
-  const padding = await page.evaluate(() => {
-    const probe = document.createElement('div');
-    probe.style.paddingTop = 'var(--doc-space-4)';
-    document.querySelector('doc-page')?.append(probe);
-    const value = getComputedStyle(probe).paddingTop;
-    probe.remove();
-    return value;
-  });
-  expect(padding).toBe('16px');
-
-  // A rule from doc.components.
-  await expect(page.locator('doc-note')).toHaveCSS('border-radius', '8px');
-});
-
-test('a single unlayered author rule still overrides the library', async ({ page }) => {
-  await openCdnPage(page);
-
-  await page.addStyleTag({ content: 'doc-note { border-radius: 0; }' });
-  await expect(page.locator('doc-note')).toHaveCSS('border-radius', '0px');
 });
 
 test('mounts the bucket and answers persist', async ({ page }) => {

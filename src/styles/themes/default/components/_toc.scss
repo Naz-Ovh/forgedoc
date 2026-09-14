@@ -1,0 +1,177 @@
+/*
+ * `doc-toc` — a floating panel by default, a docked rail on request.
+ *
+ * The open panel is the design's "On this page" aside: a 2px indicator rail
+ * down the inline-start edge of each entry, quiet until current, and no fill
+ * behind the row. Collapsed, it is the same card shrunk to its own header.
+ *
+ * why fixed positioning rather than a grid column (§8.1): a grid would need the
+ * content and the TOC to share a wrapper, and creating that wrapper would mean
+ * reparenting the author's document. Docking is done by *padding* `doc-page`
+ * instead — the reading column already centres itself in whatever width is
+ * left, so pushing the padding across re-centres it with no reflow.
+ */
+
+@layer doc.theme {
+  doc-toc {
+    /* Collapsed, the panel is exactly as wide as its own header. */
+    width: max-content;
+    max-width: calc(100vw - var(--doc-space-8));
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    /*
+     * Translucent plus a blur, as the design's sticky header is: the panel
+     * floats over the reading column and a solid fill would read as a hole
+     * punched in the page.
+     */
+    background: color-mix(in oklab, var(--doc-surface-1) 78%, transparent);
+    backdrop-filter: blur(16px) saturate(1.4);
+    font-size: var(--doc-text-ui);
+  }
+
+  doc-toc [data-part="header"] {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-2);
+  }
+
+  doc-toc [data-part="toggle"] {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-1-5) var(--doc-space-3);
+    border: 0;
+    border-radius: var(--doc-radius);
+    background: none;
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+    letter-spacing: normal;
+    text-align: start;
+  }
+
+  doc-toc [data-part="toggle"]::before {
+    color: var(--doc-default-faint);
+    font-size: var(--doc-text-sm);
+  }
+
+  doc-toc [data-part="toggle"]:hover {
+    background: var(--doc-surface-2);
+  }
+
+  /*
+  * The dock control. The glyph is a panel with its side rail filled, drawn from
+  * borders rather than an icon font or an inline SVG — one less asset in a file
+  * that has to work from `file://` with no network.
+  */
+  doc-toc [data-part="dock"] {
+    width: 1.75rem;
+    height: 1.25rem;
+    padding: 0;
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-1);
+    color: var(--doc-default-faint);
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  doc-toc [data-part="dock"]::before {
+    width: 5px;
+    border-radius: 1px;
+    background: currentcolor;
+  }
+
+  doc-toc [data-part="dock"]:hover {
+    border-color: var(--doc-border-3);
+    color: var(--doc-text-1);
+  }
+
+  doc-toc [data-part="dock"][aria-pressed="true"] {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+  }
+
+  doc-toc [data-part="list"] {
+    margin: 0;
+    padding: 0 var(--doc-space-3) var(--doc-space-4);
+    list-style: none;
+  }
+
+  /* Open, floating: a full-height overlay panel at a readable fixed width. */
+  doc-page:state(toc-open) doc-toc {
+    width: var(--doc-toc-width);
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  doc-toc li {
+    margin: 0;
+  }
+
+  doc-toc li[data-depth="2"] {
+    padding-inline-start: var(--doc-space-3);
+  }
+
+  doc-toc li[data-depth="3"] {
+    padding-inline-start: var(--doc-space-6);
+  }
+
+  /*
+   * The indicator rail. Every entry carries it in the line colour so the
+   * current one *changes* colour rather than gaining a border — nothing shifts
+   * horizontally as the reader scrolls through the document.
+   */
+  doc-toc [data-part="entry"] {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-1-5) var(--doc-space-3);
+    border-inline-start: 2px solid var(--doc-border-1);
+    color: var(--doc-text-3);
+    font-weight: 450;
+    line-height: var(--doc-leading-tight);
+    text-decoration: none;
+    transition:
+      color var(--doc-transition),
+      border-color var(--doc-transition);
+  }
+
+  doc-toc [data-part="entry"]:hover {
+    border-color: var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+    text-decoration: none;
+  }
+
+  doc-toc [data-part="entry"][aria-current] {
+    border-color: var(--doc-accent-line);
+    color: var(--doc-accent-text);
+    font-weight: 600;
+  }
+
+  doc-toc [data-part="entry-number"] {
+    color: var(--doc-default-faint);
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-toc [data-part="entry"][aria-current] [data-part="entry-number"] {
+    color: inherit;
+  }
+
+  /*
+  * Docked. Only offered from the dock breakpoint up — below it the panel would
+  * eat half the reading width, which is the problem docking exists to solve.
+  */
+  @media (min-width: 1280px) {
+    doc-page:state(toc-docked) doc-toc {
+      width: var(--doc-toc-width);
+      border-width: 0 var(--doc-border-width) 0 0;
+      border-radius: 0;
+      background: var(--doc-surface-0);
+      backdrop-filter: none;
+      box-shadow: none;
+    }
+  }
+
+  @media (max-width: 1279px) {
+    doc-page:state(toc-open) doc-toc {
+      width: min(var(--doc-toc-width), calc(100vw - var(--doc-space-8)));
+    }
+  }
+}

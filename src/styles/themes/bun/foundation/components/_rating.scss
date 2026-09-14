@@ -1,0 +1,45 @@
+/* `doc-rating` — interactive rating scale. */
+
+@layer doc.theme {
+  doc-rating {
+    margin-block: var(--doc-space-5);
+    padding: var(--doc-space-4) var(--doc-space-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    gap: var(--doc-space-3);
+  }
+
+  doc-rating [data-part="question"] {
+    font-weight: 600;
+    font-size: var(--doc-text-base);
+    color: var(--doc-text-1);
+  }
+
+  doc-rating [data-part="scale"] {
+    gap: var(--doc-space-2);
+  }
+
+  doc-rating [data-part="score-btn"] {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--doc-radius);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    background: var(--doc-surface-base);
+    color: var(--doc-text-1);
+    font-weight: 600;
+    font-size: var(--doc-text-sm);
+    font-family: var(--doc-font-mono);
+  }
+
+  doc-rating [data-part="score-btn"]:hover {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-surface-2);
+  }
+
+  doc-rating [data-part="score-btn"][data-selected="true"] {
+    border-color: var(--doc-accent-solid);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+  }
+}

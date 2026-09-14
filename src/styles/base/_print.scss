@@ -12,6 +12,7 @@
     [data-part="bucket-trigger"],
     [data-part="bucket-panel"],
     [data-part="bucket-popover"],
+    [data-part="bucket-flash"],
     doc-page > [data-part="bucket"],
     doc-page > [data-part="dev-banner"] {
       display: none !important;
@@ -57,12 +58,14 @@
 
     doc-collapse [hidden],
     doc-stage [hidden],
-    doc-tabs [hidden] {
+    doc-tabs [hidden],
+    doc-carousel > [hidden] {
       display: block !important;
     }
 
     doc-collapse [data-part="chevron"],
-    doc-tabs [data-part="strip"] {
+    doc-tabs [data-part="strip"],
+    doc-carousel [data-part="controls"] {
       display: none;
     }
 

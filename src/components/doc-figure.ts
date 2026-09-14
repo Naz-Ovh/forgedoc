@@ -108,7 +108,7 @@ export class DocFigure extends DocElement {
   #renderIsolatedHtml(): void {
     if (this.findPart('content')) return;
 
-    const source = this.innerHTML;
+    const source = this.#isolatedHtmlSource();
     const frame = createPart('content', 'iframe') as HTMLIFrameElement;
     frame.setAttribute('sandbox', 'allow-same-origin');
     frame.setAttribute('title', this.attr('caption', 'Embedded preview'));
@@ -117,6 +117,18 @@ export class DocFigure extends DocElement {
     this.#removeRawSource();
     this.prepend(frame);
     frame.addEventListener('load', () => fitFrameToContent(frame));
+  }
+
+  /** Decode escaped author source while preserving deliberately nested markup. */
+  #isolatedHtmlSource(): string {
+    return Array.from(this.childNodes)
+      .filter((node) => {
+        if (!(node instanceof HTMLElement)) return true;
+        return node.tagName.toLowerCase() !== 'doc-caption' && node.dataset.docChrome === undefined;
+      })
+      .map((node) => (node instanceof HTMLElement ? node.outerHTML : (node.textContent ?? '')))
+      .join('')
+      .trim();
   }
 
   #appendCaption(): void {

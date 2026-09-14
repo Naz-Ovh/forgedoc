@@ -74,6 +74,20 @@ export interface DocState {
    * Docking implies open; see `DocPage#setToc`.
    */
   toc: { open: boolean; docked: boolean };
+  /**
+   * Whether selecting text pops the comment composer open.
+   *
+   * why this is a preference and not a constant: the composer is the right
+   * default — a reader who has never met the document will not go looking for a
+   * commenting affordance — but it fires on *every* selection, and selecting
+   * text is also how people read closely, quote into a chat, or look a phrase
+   * up. Once someone is reading rather than reviewing, the popover is in the
+   * way, and there was no way to put it away.
+   *
+   * Off does not mean silent: the block `Comment` buttons and the bucket panel
+   * keep working, so this narrows the affordance rather than removing it.
+   */
+  selectionPopup: boolean;
 }
 
 /** A fresh, empty state for `docId`. */
@@ -90,6 +104,9 @@ export function emptyState(docId: string): DocState {
     // A rail that opens itself covers the first screen of the document, which is
     // the one screen the reader actually asked for.
     toc: { open: false, docked: false },
+    // Default on: discoverability beats tidiness for a first-time reader, and
+    // one ⌘/Ctrl+K puts it away for good.
+    selectionPopup: true,
   };
 }
 

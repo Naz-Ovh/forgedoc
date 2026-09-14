@@ -45,7 +45,7 @@
 
   doc-param [data-part="badge"][data-kind="required"] {
     background: var(--doc-danger-tint);
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    color: var(--doc-danger-text);
   }
 
   doc-param [data-part="badge"][data-kind="optional"] {

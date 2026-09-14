@@ -13,18 +13,14 @@
  * but Chrome *serialises* a non-sRGB origin as `color(srgb 0.06 0.13 0.13)` —
  * which Mermaid also rejects, so every affected variable fell through to its
  * hardcoded light-mode fallback. Dark documents drew light mint node fills
- * under light body text. The first failure was loud; this one rendered a
- * perfectly valid diagram that nobody could read, which is why the assertions
- * below check the *scheme* the value came from and not only its format.
+ * under light body text.
  *
- * **This file cannot catch that second failure, and neither could its first
- * version.** jsdom resolves neither `light-dark()` nor `color-mix()` nor
- * relative colour syntax, so every token here falls through to the same
- * fallback and both schemes produce identical output — the assertions below
- * pass just as happily with the bug reintroduced. What they do guard is the
- * *shape* of the map: a key added without a parseable value. The scheme itself
- * is asserted in `tests/visual/kitchen-sink.spec.ts`, against real Chromium,
- * because that is the only place the question can be asked.
+ * What this file guards is the *shape* of the map — a key added without a value
+ * Mermaid's parser accepts — which is a functional break: Mermaid rejects the
+ * variable and the diagram silently falls back or fails to draw.
+ *
+ * It deliberately does not check which colour comes out. That is a styling
+ * question, and styling is not tested here.
  */
 
 import { describe, expect, it } from 'vitest';

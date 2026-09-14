@@ -29,6 +29,27 @@
   }
 
   /*
+   * The "selection comments are off" mark on the trigger.
+   *
+   * A ring with a bar struck through it, drawn rather than typed: the glyphs
+   * that mean this (🚫, ⃠) render at wildly different sizes and weights across
+   * platforms, and one of them sitting next to the count on a small pill is
+   * exactly where that goes wrong. Two borders always match the label.
+   */
+  [data-part="bucket-trigger-muted"] {
+    position: relative;
+    flex: none;
+  }
+
+  [data-part="bucket-trigger-muted"]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline: 1px;
+    rotate: -45deg;
+  }
+
+  /*
   * The review panel.
   *
   * `min-height` matters as much as `max-height`: with only a cap, a panel
@@ -46,14 +67,62 @@
     overflow: hidden;
   }
 
+  /*
+   * Title, then the selection switch and its keycap, then Close.
+   *
+   * `justify-content` is not used and `order` is not either: the close button
+   * is pushed to the far edge with an auto margin instead, so the row's DOM
+   * order — which is the order a screen reader reads, and the order Tab moves
+   * through — is the order on screen.
+   */
   [data-part="bucket-header"] {
     display: flex;
     align-items: center;
-    justify-content: space-between;
   }
 
   [data-part="bucket-close"] {
+    margin-inline-start: auto;
     cursor: pointer;
+  }
+
+  [data-part="bucket-selection-toggle"] {
+    display: flex;
+    align-items: center;
+    flex: none;
+    cursor: pointer;
+  }
+
+  /*
+   * The switch track. The knob is a pseudo-element translated along it, so the
+   * whole control is one element and there is nothing to keep in sync.
+   */
+  [data-part="bucket-switch"] {
+    position: relative;
+    flex: none;
+  }
+
+  [data-part="bucket-switch"]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    /*
+     * MUST: both insets. With `inset-inline-start` left at `auto` the knob
+     * resolves to its *static* position instead of the track's edge, so it
+     * landed outside the pill and sat on top of the label — a white circle on
+     * a white panel, which read as the first letter having been eaten.
+     */
+    inset-inline-start: 0;
+  }
+
+  /*
+   * Transient, and above the trigger it explains — `position: fixed` because
+   * the trigger is fixed too, so anchoring to the page would leave the message
+   * behind the moment the reader scrolled.
+   */
+  [data-part="bucket-flash"] {
+    position: fixed;
+    z-index: var(--doc-z-bucket);
+    pointer-events: none;
   }
 
   [data-part="bucket-empty"] {

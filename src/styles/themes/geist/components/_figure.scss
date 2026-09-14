@@ -65,16 +65,13 @@
     padding: var(--doc-space-3);
     border: var(--doc-border-width) solid var(--doc-danger-400);
     border-radius: var(--doc-radius-sm);
-    background: light-dark(
-    var(--doc-danger-50),
-    color-mix(in oklab, var(--doc-danger-900) 45%, var(--doc-shade-base))
-    );
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    background: var(--doc-danger-tint);
+    color: var(--doc-danger-text);
     font-size: var(--doc-text-sm);
   }
 
   doc-figure [data-part="diagram-error-title"] {
-    font-weight: 660;
+    font-weight: 600;
   }
 
   doc-figure [data-part="diagram-error-source"] {

@@ -1,0 +1,104 @@
+/*
+ * `doc-diff` — the same indigo panel as `doc-code`, with tinted rows.
+ *
+ * Added and removed lines carry a full-width tint *and* a gutter sign. Either
+ * alone is ambiguous: the tints are 13% washes so they survive a greyscale
+ * print only as "slightly darker", and a bare +/- column is easy to lose in a
+ * long hunk. Together the change reads at a glance and still prints.
+ */
+
+@layer doc.theme {
+  doc-diff {
+    margin-block: var(--doc-space-5);
+    border: 0;
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-code-surface);
+    color: var(--doc-code-text);
+    box-shadow: var(--doc-shadow-2);
+    print-color-adjust: exact;
+  }
+
+  doc-diff [data-part="header"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-2-5) var(--doc-space-3-5) var(--doc-space-2-5)
+      var(--doc-space-2-5);
+    border-block-end: var(--doc-border-width) solid var(--doc-code-border);
+    background: transparent;
+    font-size: var(--doc-text-xs);
+  }
+
+  doc-diff [data-part="filename"] {
+    padding: var(--doc-space-1-5) var(--doc-space-3-5);
+    border-radius: 7px;
+    background: color-mix(in oklab, var(--doc-code-text) 9%, transparent);
+    color: var(--doc-code-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+  }
+
+  /*
+   * The two counts use the diff's own ink colours, not the page's semantic
+   * green and red — those are tuned for a light card and neither reads on
+   * #191a26.
+   */
+  doc-diff [data-part="stat-add"] {
+    margin-inline-start: auto;
+    color: var(--doc-default-code-add-ink);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 600;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-diff [data-part="stat-remove"] {
+    color: var(--doc-default-code-del-ink);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-2xs);
+    font-weight: 600;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-diff [data-part="code"] {
+    padding-block: var(--doc-space-2-5) var(--doc-space-4);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    line-height: 1.85;
+  }
+
+  doc-diff :where([data-part="old-number"], [data-part="new-number"]) {
+    padding-inline-end: var(--doc-space-2);
+    color: var(--doc-code-gutter);
+    text-align: end;
+    font-variant-numeric: var(--doc-numeric);
+  }
+
+  doc-diff [data-part="sign"] {
+    color: var(--doc-code-gutter);
+    text-align: center;
+    font-weight: 700;
+  }
+
+  doc-diff [data-part="row"][data-kind="add"] {
+    background: var(--doc-default-code-add);
+    print-color-adjust: exact;
+  }
+
+  doc-diff [data-part="row"][data-kind="add"] [data-part="sign"] {
+    color: var(--doc-default-code-add-ink);
+  }
+
+  doc-diff [data-part="row"][data-kind="remove"] {
+    background: var(--doc-default-code-del);
+    print-color-adjust: exact;
+  }
+
+  doc-diff [data-part="row"][data-kind="remove"] [data-part="sign"] {
+    color: var(--doc-default-code-del-ink);
+  }
+
+  doc-diff [data-part="row"][data-kind="meta"] {
+    background: color-mix(in oklab, var(--doc-code-text) 7%, transparent);
+    color: var(--doc-code-comment);
+  }
+}

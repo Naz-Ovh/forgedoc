@@ -35,6 +35,7 @@ const stateOf = (docPage: Element): DocState => {
     tabs: store.get('tabs'),
     checks: store.get('checks'),
     toc: store.get('toc'),
+    selectionPopup: store.get('selectionPopup'),
   };
 };
 

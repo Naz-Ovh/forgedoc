@@ -1,0 +1,57 @@
+/*
+ * The `bun` theme.
+ *
+ * Bun's docs are deliberately terse: Archivo display type, Martian Mono code,
+ * hot-pink interaction colour and warm near-black dark mode. The shared
+ * component paint is a useful neutral base; the final two partials add Bun's
+ * identity to roomier geometry and clearly separated modern surfaces.
+ */
+
+@use "../../layers";
+@use "fonts";
+@use "tokens";
+@use "presets";
+
+@use "../../base";
+
+// Preserve Bun's foundation independently of the Geist implementation.
+@use "foundation/elements" as foundation-elements;
+@use "foundation/components/doc";
+@use "foundation/components/toc";
+@use "foundation/components/header";
+@use "foundation/components/section";
+@use "foundation/components/chips";
+@use "foundation/components/owners";
+@use "foundation/components/note";
+@use "foundation/components/blocker";
+@use "foundation/components/list";
+@use "foundation/components/badge";
+@use "foundation/components/decision";
+@use "foundation/components/endpoint";
+@use "foundation/components/params";
+@use "foundation/components/steps";
+@use "foundation/components/stats";
+@use "foundation/components/timeline";
+@use "foundation/components/matrix";
+@use "foundation/components/rating";
+@use "foundation/components/carousel";
+@use "foundation/components/compare";
+@use "foundation/components/table";
+@use "foundation/components/choice";
+@use "foundation/components/collapse";
+@use "foundation/components/roadmap";
+@use "foundation/components/tabs";
+@use "foundation/components/checklist";
+@use "foundation/components/flow";
+@use "foundation/components/code";
+@use "foundation/components/diff";
+@use "foundation/components/figure";
+@use "foundation/components/tree";
+@use "foundation/components/quote";
+@use "foundation/components/feedback";
+@use "foundation/components/bucket";
+
+@use "elements" as bun-elements;
+@use "components" as bun-components;
+@use "foundation/print" as foundation-print;
+@use "print" as bun-print;

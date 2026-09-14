@@ -1,0 +1,88 @@
+/*
+ * `doc-page` — the reading column.
+ *
+ * MUST NOT reparent (§8.1): there is no generated `<div class="column">`. The
+ * column is produced by styling `doc-page > *` directly, and the TOC and bucket
+ * are siblings of the content that opt out with `[data-doc-chrome]`.
+ */
+
+@layer doc.theme {
+  doc-page {
+    /* The design's main column: 40px of air above the title, a deep 80px run
+     * out below the last block so the page ends rather than stops. */
+    padding-block: var(--doc-space-10) var(--doc-space-20);
+    padding-inline: var(--doc-gutter);
+    min-height: 100vh;
+  }
+
+  /*
+  * A docked contents panel pushes the reading column across rather than
+  * covering it.
+  *
+  * why padding on `doc-page` rather than a margin on the column: the column is
+  * `doc-page > *` with `margin-inline: auto`, so widening the start padding
+  * both clears the rail *and* re-centres the content inside the space that is
+  * left — the "centre of the rest", not the centre of the viewport. No wrapper,
+  * no grid, nothing reparented (§2.2).
+  */
+  @media (min-width: 1280px) {
+    doc-page:state(toc-docked) {
+      padding-inline-start: calc(var(--doc-toc-width) + var(--doc-gutter));
+    }
+  }
+
+  /* The column is centred at every viewport — never left-hugging on ultrawide. */
+  doc-page > *:not([data-doc-chrome]) {
+    width: 100%;
+    max-width: var(--doc-measure);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 2560px) {
+    /* On a very large display the measure may widen, unless the author pinned
+     * it. Prose stays capped by `--doc-measure-prose` either way. */
+    doc-page:not([measure]) {
+      --doc-measure: 960px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    doc-page {
+      --doc-gutter: var(--doc-space-5);
+    }
+  }
+
+  /* Vertical rhythm between top-level blocks. */
+  doc-page > *:not([data-doc-chrome]) + *:not([data-doc-chrome]) {
+    margin-block-start: var(--doc-space-6);
+  }
+
+  /* MUST (§9.3): loud, permanent, non-dismissible. */
+  doc-page > [data-part="storage-warning"] {
+    padding: var(--doc-space-3) var(--doc-space-5);
+    border: var(--doc-border-width) solid var(--doc-warn-edge);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-warn-tint);
+    color: var(--doc-warn-text);
+    font-size: var(--doc-text-sm);
+    font-weight: 600;
+    print-color-adjust: exact;
+  }
+
+  doc-page > [data-part="dev-banner"] {
+    padding: var(--doc-space-3) var(--doc-space-5);
+    border: var(--doc-border-width) solid var(--doc-danger-edge);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-danger-tint);
+    color: var(--doc-danger-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-sm);
+    print-color-adjust: exact;
+  }
+
+  doc-page > [data-part="dev-banner"] ul {
+    margin-block-start: var(--doc-space-2);
+    padding-inline-start: var(--doc-space-5);
+    list-style: disc;
+  }
+}

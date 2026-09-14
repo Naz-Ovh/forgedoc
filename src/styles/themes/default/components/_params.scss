@@ -1,0 +1,76 @@
+/*
+ * `doc-params` / `doc-param` — the parameter list.
+ *
+ * This is the design's props reference broken out of a table: mono name, mono
+ * type in the muted tier, a required/optional marker, and the default value
+ * pushed to the far edge. Rows are divided by hairlines inside one card, which
+ * is what a table would have given and costs no horizontal scroll.
+ */
+@layer doc.theme {
+  doc-params {
+    margin-block: var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    overflow: hidden;
+  }
+
+  doc-param {
+    padding: var(--doc-space-3-5) var(--doc-space-5);
+    border-block-end: var(--doc-rule);
+  }
+
+  doc-param:last-child {
+    border-block-end: 0;
+  }
+
+  doc-param [data-part="header"] {
+    gap: var(--doc-space-2-5);
+    margin-block-end: var(--doc-space-1);
+  }
+
+  doc-param [data-part="name"] {
+    color: var(--doc-text-1);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+  }
+
+  doc-param [data-part="type"] {
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-meta);
+  }
+
+  doc-param [data-part="badge"] {
+    padding: 2px var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+    font-size: var(--doc-text-2xs);
+    font-weight: 650;
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  doc-param [data-part="badge"][data-kind="required"] {
+    background: var(--doc-danger-100);
+    color: var(--doc-danger-text);
+    print-color-adjust: exact;
+  }
+
+  doc-param [data-part="badge"][data-kind="optional"] {
+    color: var(--doc-default-faint);
+  }
+
+  doc-param [data-part="default"] {
+    margin-inline-start: auto;
+    color: var(--doc-default-faint);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-meta);
+  }
+
+  doc-param [data-part="body"] {
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    line-height: 1.6;
+  }
+}

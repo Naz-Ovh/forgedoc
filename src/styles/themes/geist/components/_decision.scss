@@ -12,14 +12,16 @@
   doc-decision [data-part="header"] {
     gap: var(--doc-space-3);
     margin-bottom: var(--doc-space-3);
-    padding-bottom: var(--doc-space-3);
-    border-bottom: var(--doc-border-width) solid var(--doc-border-1);
-  }
+
+    padding-bottom: 0;
+
+    border-bottom: 0;
+    }
 
   doc-decision [data-part="badge-id"] {
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-xs);
-    font-weight: 700;
+    font-weight: 600;
     color: var(--doc-text-3);
     background: var(--doc-surface-2);
     padding: var(--doc-space-0-5) var(--doc-space-2);
@@ -28,41 +30,43 @@
 
   doc-decision [data-part="status"] {
     font-size: var(--doc-text-xs);
-    font-weight: 700;
-    letter-spacing: var(--doc-tracking-wide);
+
+    font-weight: 500;
+
+    letter-spacing: normal;
     padding: var(--doc-space-0-5) var(--doc-space-2);
     border-radius: var(--doc-radius-pill);
     background: var(--doc-surface-2);
     color: var(--doc-text-2);
-  }
+    }
 
   doc-decision [data-part="status"][data-status="accepted"] {
     background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
+    color: var(--doc-success-text);
     border: var(--doc-border-width) solid var(--doc-success-line);
   }
 
   doc-decision [data-part="status"][data-status="proposed"] {
     background: var(--doc-info-tint);
-    color: light-dark(var(--doc-info-900), var(--doc-info-200));
+    color: var(--doc-info-text);
     border: var(--doc-border-width) solid var(--doc-info-line);
   }
 
   doc-decision [data-part="status"][data-status="rejected"],
   doc-decision [data-part="status"][data-status="deprecated"] {
     background: var(--doc-danger-tint);
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
+    color: var(--doc-danger-text);
     border: var(--doc-border-width) solid var(--doc-danger-line);
   }
 
   doc-decision [data-part="status"][data-status="superseded"] {
     background: var(--doc-warn-tint);
-    color: light-dark(var(--doc-warn-900), var(--doc-warn-200));
+    color: var(--doc-warn-text);
     border: var(--doc-border-width) solid var(--doc-warn-line);
   }
 
   doc-decision [data-part="title"] {
-    font-weight: 650;
+    font-weight: 600;
     font-size: var(--doc-text-md);
     color: var(--doc-text-1);
   }

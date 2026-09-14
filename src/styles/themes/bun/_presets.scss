@@ -1,0 +1,102 @@
+/* Preset axes translated into Bun's palette and open documentation rhythm. */
+
+@layer doc.preset {
+  doc-page[density="compact"] {
+    --doc-space-unit: 3.75px;
+    --doc-leading: 1.52;
+  }
+
+  doc-page[density="spacious"] {
+    --doc-space-unit: 5.5px;
+    --doc-leading: 1.78;
+  }
+
+  doc-page[scale="sm"] {
+    --doc-text-base: 15px;
+    --doc-text-ratio: 1.18;
+  }
+
+  doc-page[scale="lg"] {
+    --doc-text-base: 18px;
+    --doc-text-ratio: 1.21;
+  }
+
+  doc-page[measure="narrow"] {
+    --doc-measure: 720px;
+  }
+
+  doc-page[measure="wide"] {
+    --doc-measure: 1500px;
+  }
+
+  doc-page[accent="indigo"] {
+    --doc-accent-50: #f5f1ff;
+    --doc-accent-100: #ebe3ff;
+    --doc-accent-200: #d4c2ff;
+    --doc-accent-400: #a78bfa;
+    --doc-accent-600: #7c3aed;
+    --doc-accent-800: #5421a8;
+    --doc-accent-900: #36146f;
+  }
+
+  doc-page[accent="slate"] {
+    --doc-accent-50: #f6f6f6;
+    --doc-accent-100: #eeeeee;
+    --doc-accent-200: #d7d7d7;
+    --doc-accent-400: #8a8a8a;
+    --doc-accent-600: #525252;
+    --doc-accent-800: #282828;
+    --doc-accent-900: #141414;
+    --doc-accent-on-solid: #ffffff;
+  }
+
+  doc-page[accent="plum"] {
+    --doc-accent-50: #fff0f6;
+    --doc-accent-100: #ffdfec;
+    --doc-accent-200: #ffb3d0;
+    --doc-accent-400: #ff73b5;
+    --doc-accent-600: #d60066;
+    --doc-accent-800: #940046;
+    --doc-accent-900: #62002f;
+    --doc-accent-on-solid: #ffffff;
+  }
+
+  doc-page[accent="amber"] {
+    --doc-accent-50: #fff9e6;
+    --doc-accent-100: #fff0b8;
+    --doc-accent-200: #ffdf70;
+    --doc-accent-400: #fbbf24;
+    --doc-accent-600: #a86500;
+    --doc-accent-800: #704400;
+    --doc-accent-900: #4d3105;
+    --doc-accent-on-solid: #ffffff;
+  }
+
+  doc-page[code="light"] {
+    --doc-code-surface: #f6f6f6;
+    --doc-code-text: #24211d;
+    --doc-code-border: #e2e2e2;
+    --doc-code-gutter: #707070;
+    --doc-code-comment: #736c62;
+    --doc-code-keyword: #c41a68;
+    --doc-code-string: #4d7c1b;
+    --doc-code-number: #a8520a;
+    --doc-code-function: #2f5fd0;
+    --doc-code-punctuation: #68635d;
+    --doc-code-highlight-row: #fff0f7;
+  }
+
+  doc-page[code="dark"] {
+    --doc-code-surface: #0e0e0e;
+    --doc-code-text: #e9e6e1;
+    --doc-code-border: #28282b;
+    --doc-code-gutter: #92928f;
+    --doc-code-comment: #7d7a8c;
+    --doc-code-keyword: #ff7eb6;
+    --doc-code-string: #b5e48c;
+    --doc-code-number: #ffb977;
+    --doc-code-function: #8fb4ff;
+    --doc-code-punctuation: #aaa6a0;
+    --doc-code-highlight-row: #280016;
+  }
+}

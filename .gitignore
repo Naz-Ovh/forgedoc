@@ -20,12 +20,6 @@ tests/visual/.output/
 test-results/
 playwright-report/
 
-# Visual baselines are generated, so they are not stored. `npm run test:visual`
-# records them on first run and compares on every run after; they are only
-# meaningful on the machine that recorded them anyway (font rendering), which is
-# why CI runs the assertion half of the suite instead — see test:visual:ci.
-tests/**/__screenshots__/
-
 # `npm pack` / `npm publish` leave the tarball in the repo root.
 *.tgz
 
@@ -52,3 +46,7 @@ yarn-error.log*
 *~
 Thumbs.db
 desktop.ini
+
+.agents/skills/*
+.claude
+

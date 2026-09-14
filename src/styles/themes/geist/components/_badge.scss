@@ -1,44 +1,18 @@
-/* `doc-badge` — inline badge. */
-
+/* Geist's subtle Badge: 12px label, 24px pill, no competing outline. */
 @layer doc.theme {
   doc-badge {
-    font-size: 0.75em;
-    font-weight: 600;
-    line-height: var(--doc-leading-tight);
-    padding: 0.15em 0.55em;
+    padding: 3px var(--doc-space-2);
+    border: 0;
     border-radius: var(--doc-radius-pill);
-    border: var(--doc-border-width) solid var(--doc-border-2);
-    background: var(--doc-surface-2);
+    background: var(--doc-surface-3);
     color: var(--doc-text-2);
+    font-size: var(--doc-text-xs);
+    font-weight: 500;
+    line-height: 1.333333;
   }
-
-  doc-badge[variant="info"] {
-    background: var(--doc-info-tint);
-    color: light-dark(var(--doc-info-900), var(--doc-info-200));
-    border-color: var(--doc-info-line);
-  }
-
-  doc-badge[variant="success"] {
-    background: var(--doc-success-tint);
-    color: light-dark(var(--doc-success-900), var(--doc-success-200));
-    border-color: var(--doc-success-line);
-  }
-
-  doc-badge[variant="warn"] {
-    background: var(--doc-warn-tint);
-    color: light-dark(var(--doc-warn-900), var(--doc-warn-200));
-    border-color: var(--doc-warn-line);
-  }
-
-  doc-badge[variant="danger"] {
-    background: var(--doc-danger-tint);
-    color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
-    border-color: var(--doc-danger-line);
-  }
-
-  doc-badge[variant="accent"] {
-    background: var(--doc-accent-tint);
-    color: var(--doc-accent-text);
-    border-color: var(--doc-accent-edge);
-  }
+  doc-badge[variant="info"] { background: var(--doc-geist-blue-200); color: var(--doc-info-text); }
+  doc-badge[variant="success"] { background: var(--doc-geist-green-200); color: var(--doc-success-text); }
+  doc-badge[variant="warn"] { background: var(--doc-geist-amber-200); color: var(--doc-warn-text); }
+  doc-badge[variant="danger"] { background: var(--doc-geist-red-200); color: var(--doc-danger-text); }
+  doc-badge[variant="accent"] { background: var(--doc-accent-tint); color: var(--doc-accent-text); }
 }

@@ -128,37 +128,40 @@ test('keeps an answer across a reload', async ({ page }) => {
   await expect(page.locator('[data-part="bucket-count"]')).toHaveText('1');
 });
 
+/*
+ * The Copy button is the only way a reader ever produces an FB block, so that is
+ * what this drives — the click, not the serializer behind it.
+ *
+ * why the clipboard is stubbed rather than read back: `navigator.clipboard.read`
+ * needs a permission this context cannot grant on a `file://` origin, and the
+ * panel already falls back to a "Press ⌘C" label when the write is refused —
+ * which would make this pass while copying nothing.
+ */
 test('produces a valid FB v1 block from the panel', async ({ page }) => {
   await openOffline(page);
-  await page.locator('doc-option').first().click();
-  await page.waitForTimeout(400);
 
-  const block = await page.evaluate(() => {
-    const kit = window as unknown as {
-      ForgeDoc: {
-        serializeBucket: (doc: unknown) => string;
-        store: () => { get: (key: string) => unknown } | null;
-      };
-    };
-    const docPage = document.querySelector('doc-page');
-    const store = kit.ForgeDoc.store();
-    if (!docPage || !store) return '';
-
-    return kit.ForgeDoc.serializeBucket({
-      docId: store.get('docId'),
-      timestamp: '2026-07-28T10:22:31Z',
-      entries: [
-        {
-          kind: 'answer',
-          anchorId: document.querySelector('doc-choice')?.id ?? '',
-          question: document.querySelector('doc-choice')?.getAttribute('question') ?? '',
-          labels: ['Yes — bundle it'],
-        },
-      ],
+  await page.evaluate(() => {
+    const target = window as unknown as { __copied?: string };
+    target.__copied = '';
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+      configurable: true,
+      value: async (text: string) => {
+        target.__copied = text;
+      },
     });
   });
 
-  expect(block).toContain('=== FB v1 · offline-check · 2026-07-28T10:22:31Z · 1 item ===');
+  await page.locator('doc-option').first().click();
+  await page.waitForTimeout(400);
+
+  await page.locator('[data-part="bucket-trigger"]').click();
+  await page.locator('[data-part="bucket-copy"]').click();
+  await expect(page.locator('[data-part="bucket-copy"]')).toHaveText('Copied');
+
+  const block = await page.evaluate(() => (window as unknown as { __copied: string }).__copied);
+
+  // The timestamp is stamped at click time, so match its shape, not a value.
+  expect(block).toMatch(/^=== FB v1 · offline-check · \d{4}-\d{2}-\d{2}T[\d:.]+Z · 1 item ===/);
   expect(block).toContain('a: Yes — bundle it');
   expect(block.trimEnd().endsWith('=== end FB v1 ===')).toBe(true);
 });

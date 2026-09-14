@@ -1,0 +1,89 @@
+/*
+ * `doc-carousel` — the slide frame.
+ *
+ * The control bar sits on the muted surface below the slide so it reads as
+ * chrome rather than as content, and the dots are the design's roadmap dot at
+ * its smallest — filled accent for the current slide, a quiet neutral for the
+ * rest.
+ */
+@layer doc.theme {
+  doc-carousel {
+    margin-block: var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    overflow: hidden;
+  }
+
+  /*
+   * A slide is content, so the carousel is its only frame.
+   *
+   * why this rule exists: slides are almost always `doc-figure`, and a figure
+   * carries its own border, radius, padding and caption rule. Nested inside the
+   * carousel's card that produced two frames 18px apart with a band of dead
+   * surface between them, a caption divided from its own image by a second
+   * hairline, and — because the figure kept its `margin-block` — 20px of empty
+   * card above the first slide and below the last. Stripping the inner frame is
+   * what makes the carousel read as one object.
+   */
+  doc-carousel > doc-figure {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* The caption belongs to the slide, so it stays inside the slide's padding
+   * and keeps its rule — but the rule is now the only line in the frame. */
+  doc-carousel > doc-figure :where([data-part="caption"], doc-caption) {
+    margin-block-start: var(--doc-space-3-5);
+    padding-block-start: var(--doc-space-3-5);
+  }
+
+  doc-carousel [data-part="controls"] {
+    padding: var(--doc-space-2-5) var(--doc-space-4-5);
+    border-block-start: var(--doc-rule);
+    background: var(--doc-surface-2);
+  }
+
+  doc-carousel [data-part="prev-btn"],
+  doc-carousel [data-part="next-btn"] {
+    padding: var(--doc-space-1-5) var(--doc-space-3-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-ui);
+    font-weight: 600;
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  doc-carousel [data-part="prev-btn"]:hover,
+  doc-carousel [data-part="next-btn"]:hover {
+    border-color: var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+  }
+
+  doc-carousel [data-part="dots"] {
+    gap: var(--doc-space-2);
+  }
+
+  doc-carousel [data-part="dot"] {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--doc-border-3);
+    transition:
+      background-color var(--doc-transition),
+      box-shadow var(--doc-transition);
+  }
+
+  doc-carousel [data-part="dot"][data-active="true"] {
+    background: var(--doc-accent-solid);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--doc-accent-400) 18%, transparent);
+  }
+}

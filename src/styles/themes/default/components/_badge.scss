@@ -1,0 +1,43 @@
+/* `doc-badge` — the inline tag, the design's chip at one step smaller. */
+@layer doc.theme {
+  doc-badge {
+    padding: 3px var(--doc-space-2-5);
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-meta);
+    font-weight: 550;
+    line-height: 1.4;
+  }
+
+  doc-badge[variant="info"] {
+    border-color: var(--doc-info-200);
+    background: var(--doc-info-100);
+    color: var(--doc-info-text);
+  }
+
+  doc-badge[variant="success"] {
+    border-color: var(--doc-success-200);
+    background: var(--doc-success-100);
+    color: var(--doc-success-text);
+  }
+
+  doc-badge[variant="warn"] {
+    border-color: var(--doc-warn-200);
+    background: var(--doc-warn-100);
+    color: var(--doc-warn-text);
+  }
+
+  doc-badge[variant="danger"] {
+    border-color: var(--doc-danger-200);
+    background: var(--doc-danger-100);
+    color: var(--doc-danger-text);
+  }
+
+  doc-badge[variant="accent"] {
+    border-color: var(--doc-accent-200);
+    background: var(--doc-accent-100);
+    color: var(--doc-accent-text);
+  }
+}

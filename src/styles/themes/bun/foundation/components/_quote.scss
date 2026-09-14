@@ -1,0 +1,55 @@
+/*
+ * `doc-quote`, `doc-term` and `doc-ref` — the inline and quotation roles.
+ *
+ * MUST NOT (§6.5): no serif face here, or anywhere. A pull quote gets its
+ * distinct typographic role from weight, measure and a rule, not from a
+ * different family.
+ */
+
+@layer doc.theme {
+  doc-quote {
+    margin-block: var(--doc-space-6);
+    padding-inline-start: var(--doc-space-5);
+    border-inline-start: 3px solid var(--doc-accent-line);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-lg);
+    font-weight: 400;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  doc-quote [data-part="cite"] {
+    margin-block-start: var(--doc-space-2);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-sm);
+    font-weight: 560;
+  }
+
+  doc-term {
+    color: var(--doc-accent-text);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  /* First mention carries the weight; repeats read as ordinary prose. */
+  doc-term:state(first-mention) {
+    font-weight: 600;
+  }
+
+  doc-term:not(:state(first-mention)) {
+    color: inherit;
+    text-decoration-color: var(--doc-border-2);
+  }
+
+  doc-ref {
+    color: var(--doc-accent-text);
+    font-variant-numeric: var(--doc-numeric);
+    font-weight: 560;
+  }
+
+  doc-ref:hover {
+    text-decoration: underline;
+  }
+}

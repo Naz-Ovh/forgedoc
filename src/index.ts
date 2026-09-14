@@ -11,16 +11,23 @@
  */
 
 /*
- * The reference theme, so `npm run dev` and the test suite have one compiled in
+ * The default theme, so `npm run dev` and the test suite have one compiled in
  * without a build step. It is also what tsdown emits as `dist/forgedoc.css`,
- * which keeps that filename meaning what it always meant.
+ * which keeps that filename meaning what it always meant: the stylesheet a
+ * consumer gets when they ask for nothing in particular.
+ *
+ * why this is `default` and not `forgedoc`: they are different jobs. This
+ * import decides what a document *looks like* when it names no theme, and has
+ * to track `DEFAULT_THEME` in `tools/inject.ts` or the dev server and the built
+ * document disagree. `forgedoc` stays the reference theme — the token contract
+ * `check-style-layers` reads, and what the token tests import directly.
  *
  * Every *other* theme is compiled by `npm run build:styles` into
  * `dist/themes/<name>.css` and selected at build time with
  * `forgedoc build --theme <name>` — themes are not swapped at runtime, so
  * nothing else is imported here.
  */
-import './styles/themes/forgedoc/index.scss';
+import './styles/themes/default/index.scss';
 
 import { DocAction } from './components/doc-action.js';
 import { DocBadge } from './components/doc-badge.js';
