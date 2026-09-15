@@ -24,12 +24,12 @@ export type AttributeKind =
 export interface AttributeSpec {
   readonly kind: AttributeKind;
   readonly required?: boolean;
-  /** One-line description, reused verbatim by `skills/better-plan/REFERENCE.md`. */
+  /** One-line description, reused verbatim by `docs/REFERENCE.md`. */
   readonly doc: string;
 }
 
 export interface TagSpec {
-  /** One-line description, reused verbatim by `skills/better-plan/REFERENCE.md`. */
+  /** One-line description, reused verbatim by `docs/REFERENCE.md`. */
   readonly doc: string;
   readonly attributes: Readonly<Record<string, AttributeSpec>>;
   /** Created by the runtime. The validator errors if an author writes it (§8.1). */

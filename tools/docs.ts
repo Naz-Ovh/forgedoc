@@ -511,7 +511,7 @@ export function renderCheatsheet(): string {
     `${PLACEHOLDERS.js}    <!-- last line of <body> -->`,
     '```',
     '',
-    'Build `forgedoc build <file.html>` · offline `--offline` · check `forgedoc validate <file.html> --format=json` · detail `forgedoc info <element>` · find one `forgedoc search <words>`.',
+    'Build in place `forgedoc build <file.html>` — one file, rebuilt on every revision · offline `--offline` · keep versions `--history` · check `forgedoc validate <file.html> --format=json` · detail `forgedoc info <element>` · find one `forgedoc search <words>`.',
   ];
 
   for (const group of CHEATSHEET_GROUPS) {
@@ -590,7 +590,7 @@ function contentHint(tag: TagName): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Everything, in markdown. Also written to `skills/better-plan/REFERENCE.md` by
+ * Everything, in markdown. Also written to `docs/REFERENCE.md` by
  * `npm run docs:reference`, so the two are the same bytes by construction.
  */
 export function renderReference(): string {

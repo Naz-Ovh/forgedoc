@@ -28,8 +28,8 @@ about **4,000 tokens** for the same document. Everything else is derived:
 
 No `<style>`, no `<script>`, no classes, no ids, no `A`/`B` keys, no `1.2.1`
 numbers. `forgedoc build` validates the markup and swaps those two placeholders
-for the real runtime, producing **one self-contained `.html`** that opens from
-`file://` with no network. The reader answers inline; the answers persist; they
+for the real runtime, rewriting the document in place — **one `.html` for the
+document's whole life**, revised and rebuilt rather than copied. The reader answers inline; the answers persist; they
 press Copy and paste a `=== FB v1 ·` block back to the agent.
 
 The loop is: **agent writes markup → build → human answers → paste bucket back →
@@ -48,7 +48,7 @@ npm run build        # tsdown: 3 runtime variants + CLI, then tsc for .d.ts
 npm run dev          # Vite dev server, opens the kitchen-sink QA page
 npm test             # Vitest: real Chromium + node projects
 npm run check        # format, lint, typecheck, build, test — run before finishing
-npm run docs:generate    # regenerate skills/better-plan/REFERENCE.md + CHEATSHEET.md
+npm run docs:generate    # regenerate REFERENCE.md + both CHEATSHEET.md copies
 npm run test:visual      # browser e2e: offline, CDN and themed builds
 ```
 
@@ -142,5 +142,5 @@ its reason — §12 requires it, and that table is kept current.
 | --- | --- |
 | [docs/PLAN.md](docs/PLAN.md) | The build specification. What the `§` references in the source resolve to. §1–§2 and §6–§10 are current; the toolchain sections are marked as superseded. |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Flagged deviations from a MUST, the dependency register, and the bugs the acceptance criteria caught. |
-| [skills/better-plan/CHEATSHEET.md](skills/better-plan/CHEATSHEET.md) | The whole tag vocabulary on one page. |
+| [docs/CHEATSHEET.md](docs/CHEATSHEET.md) | The whole tag vocabulary on one page. |
 | [README.md](README.md) | What a user reads. |

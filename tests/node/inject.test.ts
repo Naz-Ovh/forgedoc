@@ -4,7 +4,14 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { InjectionError, injectAssets, usesMermaid } from '../../tools/inject.js';
+import {
+  InjectionError,
+  injectAssets,
+  isBuilt,
+  restorePlaceholders,
+  themeFromPlaceholder,
+  usesMermaid,
+} from '../../tools/inject.js';
 
 const SOURCE = `<doc-page doc-id="x"></doc-page>
 <style>/*@DOC_CSS@*/</style>
@@ -40,15 +47,16 @@ const LEGACY_DOCUMENT = `<!doctype html>
 </body>
 </html>`;
 
-const embed = (css: string, js: string) => ({ mode: 'embed', css, js }) as const;
-const link = (cssHref: string, jsSrc: string) => ({ mode: 'link', cssHref, jsSrc }) as const;
+const embed = (css: string, js: string) => ({ mode: 'embed', css, js, theme: 'default' }) as const;
+const link = (cssHref: string, jsSrc: string) =>
+  ({ mode: 'link', cssHref, jsSrc, theme: 'default' }) as const;
 
 describe('injectAssets', () => {
   it('replaces both placeholders', () => {
     const output = injectAssets(SOURCE, embed('doc-page{color:red}', 'console.log(1)'));
 
-    expect(output).toContain('<style>doc-page{color:red}</style>');
-    expect(output).toContain('<script>console.log(1)</script>');
+    expect(output).toContain('doc-page{color:red}</style>');
+    expect(output).toContain('console.log(1)</script>');
     expect(output).not.toContain('@DOC_CSS@');
     expect(output).not.toContain('@DOC_JS@');
   });
@@ -61,23 +69,17 @@ describe('injectAssets', () => {
   it('keeps the embedded styles in <head> and the script last', () => {
     const output = injectAssets(DOCUMENT, embed('doc-page{color:red}', 'console.log(1)'));
 
-    expect(output.indexOf('<style>doc-page{color:red}</style>')).toBeLessThan(
-      output.indexOf('</head>'),
-    );
-    expect(output.indexOf('<script>console.log(1)</script>')).toBeGreaterThan(
-      output.indexOf('<doc-page'),
-    );
+    expect(output.indexOf('doc-page{color:red}</style>')).toBeLessThan(output.indexOf('</head>'));
+    expect(output.indexOf('console.log(1)</script>')).toBeGreaterThan(output.indexOf('<doc-page'));
     // Lifted and re-emitted, not copied: exactly one stylesheet in the output.
-    expect(output.split('<style>').length - 1).toBe(1);
+    expect(output.split('<style').length - 1).toBe(1);
   });
 
   it('hoists the styles out of a body-end placeholder written the old way', () => {
     const output = injectAssets(LEGACY_DOCUMENT, embed('doc-page{color:red}', 'console.log(1)'));
 
-    expect(output.indexOf('<style>doc-page{color:red}</style>')).toBeLessThan(
-      output.indexOf('</head>'),
-    );
-    expect(output.split('<style>').length - 1).toBe(1);
+    expect(output.indexOf('doc-page{color:red}</style>')).toBeLessThan(output.indexOf('</head>'));
+    expect(output.split('<style').length - 1).toBe(1);
     expect(output).not.toContain('@DOC_CSS@');
   });
 
@@ -85,7 +87,7 @@ describe('injectAssets', () => {
     const hostile = 'doc-page{--a:"$&";--b:"$1";--c:"$\'";--d:"$$"}';
     const output = injectAssets(DOCUMENT, embed(hostile, ''));
 
-    expect(output).toContain(`<style>${hostile}</style>`);
+    expect(output).toContain(`${hostile}</style>`);
   });
 
   /*
@@ -100,7 +102,7 @@ describe('injectAssets', () => {
     const hostile = 'const a="$&";const b="$1";const c="$\'";const d="$$";';
     const output = injectAssets(SOURCE, embed('', hostile));
 
-    expect(output).toContain(`<script>${hostile}</script>`);
+    expect(output).toContain(`${hostile}</script>`);
   });
 
   it('explains what to add when a placeholder is missing', () => {
@@ -115,12 +117,64 @@ describe('injectAssets', () => {
     }
   });
 
+  /*
+   * A plan is one file for its whole life: the reader opens it, comments on it,
+   * the agent revises that same file and builds it again. If the second build
+   * could not read the first one's output, every revision would need a second
+   * file kept beside it.
+   */
+  describe('rebuilding its own output', () => {
+    it('accepts a built document and produces the same bytes', () => {
+      const once = injectAssets(DOCUMENT, link('https://cdn/x.css', 'https://cdn/x.js'));
+      const twice = injectAssets(once, link('https://cdn/x.css', 'https://cdn/x.js'));
+
+      expect(twice).toBe(once);
+    });
+
+    it('does not accumulate tags across repeated builds', () => {
+      let output = injectAssets(DOCUMENT, link('https://cdn/x.css', 'https://cdn/x.js'));
+      for (let round = 0; round < 4; round += 1) {
+        output = injectAssets(output, link('https://cdn/x.css', 'https://cdn/x.js'));
+      }
+
+      expect(output.split('<link').length - 1).toBe(1);
+      expect(output.split('<script').length - 1).toBe(1);
+    });
+
+    it('keeps the theme the document was published with', () => {
+      const themed = DOCUMENT.replace('/*@DOC_CSS@*/', '/*@DOC_CSS:geist@*/');
+      const once = injectAssets(themed, {
+        mode: 'link',
+        cssHref: 'https://cdn/geist.css',
+        jsSrc: 'https://cdn/x.js',
+        theme: 'geist',
+      });
+
+      expect(themeFromPlaceholder(restorePlaceholders(once))).toBe('geist');
+    });
+
+    it('restores an embedded build too', () => {
+      const once = injectAssets(DOCUMENT, embed('doc-page{color:red}', 'console.log(1)'));
+      const restored = restorePlaceholders(once);
+
+      expect(restored).toContain('/*@DOC_CSS@*/');
+      expect(restored).toContain('//@DOC_JS@');
+      expect(restored).not.toContain('doc-page{color:red}');
+    });
+
+    it('leaves a document that was never built alone', () => {
+      expect(restorePlaceholders(DOCUMENT)).toBe(DOCUMENT);
+      expect(isBuilt(DOCUMENT)).toBe(false);
+    });
+  });
+
   describe('link mode', () => {
     it('swaps the placeholder tags for a stylesheet link and a deferred script', () => {
       const output = injectAssets(DOCUMENT, link('https://cdn/x.css', 'https://cdn/x.js'));
 
-      expect(output).toContain('<link rel="stylesheet" href="https://cdn/x.css">');
-      expect(output).toContain('<script src="https://cdn/x.js" defer></script>');
+      expect(output).toContain('<link rel="stylesheet" href="https://cdn/x.css"');
+      expect(output).toContain('<script src="https://cdn/x.js"');
+      expect(output).toContain('defer></script>');
       expect(output).not.toContain('@DOC_CSS@');
       expect(output).not.toContain('@DOC_JS@');
       // The empty <style> shell must go too, not just its contents.
@@ -143,7 +197,7 @@ describe('injectAssets', () => {
 
     it('falls back to <body> when the document has no head', () => {
       const output = injectAssets(SOURCE, link('https://cdn/x.css', 'https://cdn/x.js'));
-      expect(output).toContain('<link rel="stylesheet" href="https://cdn/x.css">');
+      expect(output).toContain('<link rel="stylesheet" href="https://cdn/x.css"');
     });
 
     it('still refuses a document with no placeholders', () => {

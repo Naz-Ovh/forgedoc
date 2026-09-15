@@ -75,7 +75,7 @@ jobs:
           done
 
       - name: Fail if the working tree is dirty
-        # skills/better-plan/REFERENCE.md is generated; a stale commit shows up here.
+        # docs/REFERENCE.md is generated; a stale commit shows up here.
         run: git diff --exit-code
 
   browser:

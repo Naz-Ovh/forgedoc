@@ -109,7 +109,7 @@ describeBuilt('forgedoc build — the offline document', () => {
     // The real CSS, not just an empty shell: `@layer doc.reset` opens the
     // bundle. `<style>` alone would also match the runtime, which contains the
     // literal string for the styles it injects at upgrade time.
-    const styles = output.indexOf('<style>@layer doc.');
+    const styles = output.indexOf('>@layer doc.');
     expect(styles).toBeGreaterThan(-1);
     expect(styles).toBeLessThan(head);
     // …and the body no longer carries a stylesheet of its own.
@@ -173,8 +173,10 @@ describeBuilt('forgedoc build — the default CDN document', () => {
     expect(await run(['build', FIXTURE, '--out', outputPath])).toBe(0);
 
     const output = await readFile(outputPath, 'utf8');
-    expect(output).toMatch(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="https:\/\/[^"]+\.css">/);
-    expect(output).toMatch(/<script\b[^>]*\bsrc="https:\/\/[^"]+\.js"\s+defer><\/script>/);
+    expect(output).toMatch(
+      /<link\b[^>]*\brel="stylesheet"[^>]*\bhref="https:\/\/[^"]+\.css"[^>]*>/,
+    );
+    expect(output).toMatch(/<script\b[^>]*\bsrc="https:\/\/[^"]+\.js"[^>]*\bdefer><\/script>/);
     expect(output).not.toContain('@DOC_CSS@');
     expect(output).not.toContain('@DOC_JS@');
 

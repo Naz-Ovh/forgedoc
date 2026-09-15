@@ -3,7 +3,7 @@
  * a non-zero exit code on any error.
  */
 
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
@@ -55,9 +55,17 @@ describe('forgedoc new', () => {
       contents.indexOf('</doc-page>'),
     );
 
+    // The scaffold is the shell and nothing else: whatever it contains becomes
+    // the shape of every document copied from it.
+    expect(contents).not.toContain('<doc-section');
+    expect(contents).not.toContain('<doc-choice');
+    expect(contents).not.toContain('<doc-chip');
+
     stdout = '';
+    // Exit 0 with the no-choice warning: an empty page is valid, and the
+    // warning is the reminder to ask the reader something.
     expect(await run(['validate', path])).toBe(0);
-    expect(stdout).toContain(': ok');
+    expect(stdout).toContain('0 errors');
   });
 });
 
@@ -85,6 +93,15 @@ describe('forgedoc validate', () => {
 });
 
 describe('forgedoc build', () => {
+  /** A valid document, written to `workspace/<name>.html`. */
+  async function scaffold(name = 'PLAN_demo'): Promise<string> {
+    const path = join(workspace, `${name}.html`);
+    await run(['new', name, '--dir', workspace]);
+    const scaffolded = join(workspace, `DOC_${name.toLowerCase().replace(/_/g, '-')}.html`);
+    await rename(scaffolded, path);
+    return path;
+  }
+
   it('writes no output when validation fails', async () => {
     const path = join(workspace, 'bad.html');
     await writeFile(
@@ -95,7 +112,103 @@ describe('forgedoc build', () => {
 
     expect(await run(['build', path])).toBe(1);
     expect(stderr).toContain('no output written');
-    await expect(readFile(join(workspace, 'bad.built.html'), 'utf8')).rejects.toThrow();
+    // The input is the output now, so a failed build must leave it untouched.
+    expect(await readFile(path, 'utf8')).toContain('/*@DOC_CSS@*/');
+  });
+
+  /*
+   * One document, one file. The `.built.html` twin this replaced meant every
+   * plan existed twice, and a reader had to be told which copy to open.
+   */
+  it('builds in place, leaving no second file', async () => {
+    const path = await scaffold();
+
+    expect(await run(['build', path])).toBe(0);
+
+    const built = await readFile(path, 'utf8');
+    expect(built).toContain('rel="stylesheet"');
+    expect(built).not.toContain('/*@DOC_CSS@*/');
+    expect(await readdir(workspace)).toEqual(['PLAN_demo.html']);
+  });
+
+  it('rebuilds its own output without duplicating the runtime', async () => {
+    const path = await scaffold();
+
+    await run(['build', path]);
+    const once = await readFile(path, 'utf8');
+    await run(['build', path]);
+    const twice = await readFile(path, 'utf8');
+
+    expect(twice).toBe(once);
+    expect(await readdir(workspace)).toEqual(['PLAN_demo.html']);
+  });
+
+  it('still honours an explicit --out', async () => {
+    const path = await scaffold();
+    const target = join(workspace, 'elsewhere.html');
+
+    expect(await run(['build', path, '--out', target])).toBe(0);
+    expect(await readFile(target, 'utf8')).toContain('rel="stylesheet"');
+    expect(await readFile(path, 'utf8')).toContain('/*@DOC_CSS@*/');
+  });
+
+  /*
+   * History is opt-in: the default is one file that always shows the current
+   * plan. Asking for history moves the document into a folder of its own, where
+   * `index.html` is still the one thing to open.
+   */
+  describe('--history', () => {
+    it('moves the document into a folder and keeps index.html as the latest', async () => {
+      const path = await scaffold();
+
+      expect(await run(['build', path, '--history'])).toBe(0);
+
+      expect(await readdir(workspace)).toEqual(['PLAN_demo']);
+      const folder = join(workspace, 'PLAN_demo');
+      expect(await readdir(folder)).toEqual(['history', 'index.html']);
+      expect(await readFile(join(folder, 'index.html'), 'utf8')).toContain('rel="stylesheet"');
+    });
+
+    it('keeps one entry per version, in order', async () => {
+      const path = await scaffold();
+      await run(['build', path, '--history']);
+      const index = join(workspace, 'PLAN_demo', 'index.html');
+      const folder = join(workspace, 'PLAN_demo');
+
+      const revise = async (text: string) => {
+        const current = await readFile(index, 'utf8');
+        await writeFile(index, current.replace('</doc-page>', `<p>${text}</p></doc-page>`), 'utf8');
+        await run(['build', index, '--history']);
+      };
+      await revise('second');
+      await revise('third');
+
+      const kept = await readdir(join(folder, 'history'));
+      expect(kept).toHaveLength(3);
+      expect(kept[0]).toMatch(/^0001-\d{4}-\d{2}-\d{2}\.html$/);
+      expect(kept[2]).toMatch(/^0003-\d{4}-\d{2}-\d{2}\.html$/);
+
+      // The newest entry is what the reader opens.
+      expect(await readFile(join(folder, 'history', String(kept[2])), 'utf8')).toBe(
+        await readFile(index, 'utf8'),
+      );
+      // …and the version before it is still the version before it.
+      expect(await readFile(join(folder, 'history', String(kept[1])), 'utf8')).toContain('second');
+      expect(await readFile(join(folder, 'history', String(kept[1])), 'utf8')).not.toContain(
+        'third',
+      );
+    });
+
+    it('adds nothing when a rebuild changes nothing', async () => {
+      const path = await scaffold();
+      await run(['build', path, '--history']);
+      const index = join(workspace, 'PLAN_demo', 'index.html');
+
+      await run(['build', index, '--history']);
+      await run(['build', index, '--history']);
+
+      expect(await readdir(join(workspace, 'PLAN_demo', 'history'))).toHaveLength(1);
+    });
   });
 });
 

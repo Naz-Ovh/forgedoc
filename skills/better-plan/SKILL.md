@@ -1,170 +1,135 @@
 ---
 name: better-plan
-description: Write interactive planning documents or documentation as ForgeDoc markup, build them to a single self-contained HTML file, and read a pasted feedback bucket back. Use whenever you are asked to plan work, write a design doc, propose an approach, write documentation, or collect decisions from a human reviewer.
+description: Write a planning document as ForgeDoc markup — a readable HTML page the reader can answer inside — and build it to one self-contained file. Use when asked to plan work, propose an approach, write a design doc or an RFC, revise a plan, or collect decisions from a human reviewer.
 ---
 
-# ForgeDoc
+# Better plans with ForgeDoc
 
-You write **semantic markup only**. A prebuilt runtime supplies all styling,
-layout, interactivity, persistence and feedback collection.
+## What a plan is
 
-Do not write `<style>`, `<script>`, `class=`, `id=`, `role=`, `aria-*`, option
-letters (`A`/`B`/`C`), section numbers (`1.2.1`), or stage numbers. Every one of
-those is derived. Writing them by hand either fails the build or goes stale.
+A plan is writing. It explains the problem, says what you propose, and asks the
+reader what you cannot decide alone. Sentences do almost all of that.
 
-## Looking the markup up
+ForgeDoc delivers the writing as a styled HTML page the reader can answer inside.
+Its `doc-*` tags — **elements** — cover the few things sentences carry badly. The
+runtime supplies design, layout, dark mode, numbering, anchors and the feedback
+box the reader pastes back to you. You supply the meaning.
 
-The CLI carries the documentation, generated from the same contract
-`forgedoc validate` enforces — so nothing it tells you can fail the build.
+Think, write it in words, and place an element only where words fall short.
 
-- `forgedoc cheatsheet` — the whole vocabulary on one page.
-- `forgedoc elements` — one line per element; `--category=<name>` narrows it.
-- `forgedoc info doc-choice` — everything about one element.
-- `forgedoc search http endpoint` — "which element does X?"
-- `forgedoc reference` — every element in full, plus the styling and ARIA rules.
-- `forgedoc themes` — the themes this installation can build with.
+## Words first
 
-Every one accepts `--format=json`.
+Write like a memo to a colleague: what is true now, what you propose, what it
+costs, what you are unsure about. Plain HTML carries this — `<p>`, `<ul>`,
+`<li>`, `<code>`, `<a>`, `<strong>`. It is already styled, so no element exists
+for it.
 
-Start with `forgedoc cheatsheet` and keep it open; it fits on one page. Reach for
-`forgedoc info <element>` when the cheatsheet leaves a question open — it carries
-the attribute table, the `data-part` styling surface and a copy-pastable example.
-When you do not know the element's name, `forgedoc search` matches on what an
-element does, not just on what it is called.
+Reach for an element when you are about to:
 
-`CHEATSHEET.md` and `REFERENCE.md` beside this file are the same bytes, committed
-for when the CLI is not on PATH.
+- ask the reader to decide — `doc-choice`, the thing that makes a plan answerable
+- draw a shape in words, or describe how parts connect
+- lay out an order of work, dates, or steps with a state
+- compare options side by side, or show numbers
+- show code, or a change to a file
+- say something is stuck, and what unsticks it
 
-## File naming convention
+Use the element instead of building it from `<div>`s: shorter to write, far fewer
+output tokens, identical in every plan, and the reader's feedback tools know what
+it is. Hand-built markup gives up all four.
 
-- **`PLAN_<name>.html`**: Use for interactive plans, implementation roadmaps, approach proposals, and decision-gathering documents.
-- **`DOC_<name>.html`**: Use for general documentation, technical specifications, guides, and design docs.
+## Look the vocabulary up
 
-## Producing a document
+`CHEATSHEET.md` beside this file is the whole vocabulary on one page. Read it
+before writing markup. When it leaves a question open:
 
-1. `forgedoc new <name>` — or write the skeleton yourself in `PLAN_<name>.html` or `DOC_<name>.html`. It must contain these
-   two lines, byte for byte: the first in `<head>`, the second as the last line
-   of `<body>`.
-
-   ```html
-   <style>/*@DOC_CSS@*/</style>
-   <script>//@DOC_JS@</script>
-   ```
-
-   The styles go up top so the reader never sees a frame of unstyled markup;
-   the script goes last so every element upgrades with its children present.
-
-   If the user asked for a particular theme, name it in that first line —
-   `<style>/*@DOC_CSS:geist@*/</style>`. The build then compiles that theme in.
-   Leave it bare unless they asked; the default is `forgedoc`. Run
-   `forgedoc themes` for the list.
-
-2. Write the document inside a single `<doc-page doc-id="a-unique-slug">`.
-   The `doc-id` is mandatory — it namespaces the reader's stored answers, and
-   without it two plans opened from disk can overwrite each other.
-
-3. `forgedoc build <file.html> [--out <target.html>]`
-
-   The build validates first and writes nothing if validation fails. By default,
-   `forgedoc build PLAN_<name>.html` outputs `PLAN_<name>.built.html` (or `DOC_<name>.built.html`).
-   If you want a specific output filename, pass `--out <target.html>`.
-
-   The output links a version-pinned CDN and stays around 15 kB, so it is safe
-   to commit. Pass `--offline` only when the reader genuinely has no network —
-   it embeds the whole runtime, which is ~3.5 MB once a Mermaid figure is
-   present, and writes into `.temp/` because that file should never be
-   committed.
-
-## Lifecycle and revisions
-
-- **Default lifecycle (in-place override):** Maintain a single source file (`PLAN_<name>.html` or `DOC_<name>.html`). On every revision, edit the original source file directly in-place and rebuild. If a build creates a new output file or renames output, clean up any stray or obsolete files so you keep only the clean single document. Do not create unnecessary intermediate files (e.g. `PLAN_<name>.something.html` or `PLAN_<name>.v1.html`) by default.
-- **Explicit output naming:** You can explicitly provide the desired output filename using `--out <target.html>`.
-- **Numbered/versioned lifecycle:** Only create versioned files (`PLAN_<name>.v1.html`, `DOC_<name>.v1.html`, etc.) if the user explicitly asks for versioning, a numbered lifecycle, or versioned revisions.
-
-## What the runtime derives, so you never type it
-
-| You write                                | The runtime produces                                                                                                              |
-|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `<doc-section title="Data model">`       | The number `2.1`, the id `sec-data-model`, the heading element, the TOC entry                                                     |
-| `<doc-choice question="…">` with options | Letters `A`/`B`/`C`, an "Other" option with a textarea, a note field, `QUESTION 3 · SINGLE CHOICE`, the id `q-…`, radiogroup ARIA |
-| `<doc-stage title="…">`                  | The stage number, starting at 0                                                                                                   |
-| `<doc-ref to="sec-data-model">`          | The live text "Section 2.1"                                                                                                       |
-| `<doc-term href="…">`                    | First-mention styling, distinct from repeats                                                                                      |
-
-## Writing well
-
-- **Use elements only when necessary.** Do not use any element just to use it. Only use elements if they are necessary for the document.
-- **Ask real questions when needed.** Put a `doc-choice` wherever you made a judgement call or need a decision from the reader, and mark your suggestion `recommended`.
-- **Every roadblock states its resolution.** `doc-blocker` requires a
-  `doc-action`. This is enforced, not advisory — a roadblock with no way out is
-  the failure the whole library exists to prevent.
-- **Prefer `doc-figure type="mermaid"` over hand-drawn SVG.** Five lines of
-  Mermaid replaces a few hundred lines of hand-placed coordinates, renders in the
-  document's own colours, and is far more reliable to write.
-- **Use `doc-ref`, never "see Stage 5".** Numbering is automatic; a hardcoded
-  reference is a latent bug from the moment a stage is inserted above it.
-- **Use plain HTML for prose.** `<p> <ul> <ol> <li> <code> <a> <strong> <em>` are
-  all styled. There is deliberately no tag for them.
-- **Presets, not CSS.** `<doc-page density="compact" measure="wide">` is
-  validated and consistent; hand-written CSS is not.
-
-## Reading a pasted bucket back
-
-A reader sends you a block that begins `=== FB v1 ·`. It is self-contained: it
-carries the question text and the chosen option labels verbatim, so you do not
-need the original file to interpret it.
-
-```text
-=== FB v1 · vendor-orders · 2026-07-28T10:22:31Z · 2 items ===
-
-[1] ANSWER q-should-read-state-be-shared
-q: Should read state be shared across the vendor team?
-a: Yes — shared team inbox
-n: only if we can still see who marked it read
-
-[2] COMMENT sec-what-we-are-building
-at: 1 What we are building
-> Vendors get told the moment a new order lands
-c: is this the payment webhook or the order row?
-
-=== end FB v1 ===
+```sh
+npx forgedoc search <words>    # which element does X?
+npx forgedoc info doc-choice   # attributes, rules and an example for one element
 ```
 
-Fields: `q:` question, `a:` a chosen answer label (repeated for a multi answer),
-`n:` a note _about_ the answer, `>` the quoted excerpt, `c:` the reader's
-comment, `at:` where in the document. A field's continuation lines are indented
-by exactly three spaces.
+An invented tag or a guessed attribute fails the build.
 
-A comment on a diagram, an image or a code block has no selectable text to
-quote, so its `>` line is a descriptor instead — `> doc-figure · How a plan
-travels from the agent to the reader and back`. The anchor id is generated
-(`blk-figure-2`), so resolve it by the caption or filename in that descriptor,
-not by the id.
+## Elements go where the content is
 
-### Receipt rules — follow these exactly
+A question goes right after the paragraph that raises the doubt — not in a list
+at the end. A diagram goes where you would otherwise say "picture this". A
+blocker goes inside the section it blocks.
 
-1. **Resolve each item by anchor id first, quoted text second.** The anchor id is
-   the token after `ANSWER` or `COMMENT`.
-2. **The option label is authoritative over the option key.** If the label and
-   the key disagree, or the anchor no longer exists in your copy of the document,
-   **ask the reader**. Never guess which option they meant.
-3. **A malformed item invalidates only itself.** Process every other item and
-   report the broken one back to the reader.
-4. **Never attribute an answer to a question whose text does not match
-   verbatim.** If the question was reworded between the version they answered and
-   the version you are holding, that is a question to ask, not a match to make.
-5. **An `a:` line under an Other answer is the reader's own words**, not one of
-   your option labels. Treat it as a new proposal.
+No required order, no required sections, no place a question has to live. Two
+plans about two problems should not look alike. Let the shape follow the problem.
 
-### After you have read it
+```html
+<doc-section title="Where the notification comes from">
+  <p>
+    An order row is written before payment settles, so a notification sent on
+    insert can reach a vendor for an order that never completes. The payment
+    webhook is the first moment the order is real.
+  </p>
 
-Update the plan with the decisions folded in. Answered questions become
-`<doc-chip kind="confirmed">` entries rather than open `doc-choice` blocks — a
-question the reader has already settled should not be asked twice. Tooling can do
-this incrementally with `ForgeDoc.chips.add({kind: 'confirmed', text: '…'})`.
+  <doc-choice mode="single" question="Send on the payment webhook, or on order insert?">
+    <doc-option recommended>
+      On the payment webhook
+      <p slot="desc">No false alerts. Costs about two seconds of delay.</p>
+    </doc-option>
+    <doc-option>
+      On order insert
+      <p slot="desc">Instant, but vendors see orders that may never pay.</p>
+    </doc-option>
+  </doc-choice>
 
-## Budget
+  <p>Either way the send is queued, so a slow vendor cannot hold up checkout.</p>
+</doc-section>
+```
 
-A plan of the size of the reference document should cost **under 4,000 output
-tokens** of markup. If you find yourself writing layout, colours, or numbers, you
-are writing something the runtime already does.
+The question sits mid-section because that is where the doubt appears. Copy the
+habit, not the shape.
+
+## Questions
+
+Ask when the answer changes the work. Mark your suggestion `recommended`, and
+give each option its real cost in one line. Decisions already made belong in the
+prose as statements, with the reasoning behind them.
+
+You never need a question to invite feedback — the reader can select any sentence
+and comment on it. One more reason most of a plan should be prose.
+
+## The file
+
+Name it `PLAN_<name>.html`, or `DOC_<name>.html` for documentation. Two lines are
+required byte for byte: the style in `<head>`, the script last in `<body>`.
+
+```html
+<style>/*@DOC_CSS@*/</style>
+<script>//@DOC_JS@</script>
+```
+
+Everything else sits inside one `<doc-page doc-id="a-unique-slug">`. The `doc-id`
+is required — it is the key the reader's answers are stored under.
+
+```sh
+npx forgedoc build PLAN_<name>.html
+```
+
+**The build rewrites that same file.** One document, one file, for its whole
+life. To revise, edit it and build again: the build reads its own output. Never
+write a copy, a second file, or a version number into the name — the reader's
+link keeps working because the document never moves.
+
+Titles, questions and sections produce their own headings, numbers, anchors,
+option letters and contents entries, so none of those are yours to type. Themes,
+offline delivery and keeping past versions are in `BUILDING.md`.
+
+## Before you hand it over
+
+1. Read only the sentences, ignoring every element. The plan should still explain
+   itself. If not, the thinking went into furniture — put it back in the text.
+2. For each element, say in one sentence what a paragraph could not have done
+   there. No answer means delete it and write the paragraph.
+
+Spend your output tokens on sentences. The runtime owns the design; thinking is
+the expensive part.
+
+## When the reader answers
+
+They send a block starting `=== FB v1 ·`. Read `FEEDBACK.md` beside this file
+before interpreting it.

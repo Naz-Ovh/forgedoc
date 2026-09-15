@@ -15,36 +15,37 @@ import { afterAll, describe, expect, it } from 'vitest';
 
 import { TAG_NAMES, TAGS, type TagSpec } from '../../src/core/contract.js';
 
-const REFERENCE_PATH = fileURLToPath(
-  new URL('../../skills/better-plan/REFERENCE.md', import.meta.url),
-);
-const CHEATSHEET_PATH = fileURLToPath(
-  new URL('../../skills/better-plan/CHEATSHEET.md', import.meta.url),
-);
+const REFERENCE_PATH = fileURLToPath(new URL('../../docs/REFERENCE.md', import.meta.url));
 const GENERATOR = fileURLToPath(new URL('../../tools/gen-docs.mjs', import.meta.url));
 
+/** Every path the generator writes, so a new output cannot go unchecked. */
+const GENERATED = [
+  'docs/REFERENCE.md',
+  'docs/CHEATSHEET.md',
+  'skills/better-plan/CHEATSHEET.md',
+].map((path) => ({ path, file: fileURLToPath(new URL(`../../${path}`, import.meta.url)) }));
+
 const committed = readFileSync(REFERENCE_PATH, 'utf8');
-const committedCheatsheet = readFileSync(CHEATSHEET_PATH, 'utf8');
+const committedAll = GENERATED.map(({ file }) => readFileSync(file, 'utf8'));
 
 afterAll(() => {
   // The generator writes in place; restore whatever was committed so a failing
   // run never leaves the working tree dirty.
-  writeFileSync(REFERENCE_PATH, committed, 'utf8');
-  writeFileSync(CHEATSHEET_PATH, committedCheatsheet, 'utf8');
+  GENERATED.forEach(({ file }, index) => {
+    writeFileSync(file, committedAll[index] ?? '', 'utf8');
+  });
 });
 
-describe('skills/better-plan/REFERENCE.md', () => {
+describe('docs/REFERENCE.md', () => {
   it('is up to date with src/core/contract.ts', () => {
     execFileSync(process.execPath, [GENERATOR], { stdio: 'pipe' });
 
-    expect(
-      readFileSync(REFERENCE_PATH, 'utf8'),
-      'skills/better-plan/REFERENCE.md is stale — run `npm run docs:generate` and commit the result.',
-    ).toBe(committed);
-    expect(
-      readFileSync(CHEATSHEET_PATH, 'utf8'),
-      'skills/better-plan/CHEATSHEET.md is stale — run `npm run docs:generate` and commit the result.',
-    ).toBe(committedCheatsheet);
+    GENERATED.forEach(({ path, file }, index) => {
+      expect(
+        readFileSync(file, 'utf8'),
+        `${path} is stale — run \`npm run docs:generate\` and commit the result.`,
+      ).toBe(committedAll[index]);
+    });
   });
 
   it('documents every tag, including the generated and child-only ones', () => {

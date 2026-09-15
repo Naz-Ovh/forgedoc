@@ -5,7 +5,7 @@
 // thing they forbid. Everything else is on, including the table and blank-line
 // rules that an editor's fix-on-save will silently apply — those now match what
 // is checked in, so opening a file changes nothing. That matters most for
-// `skills/better-plan/REFERENCE.md`, which is generated: an editor reformatting
+// `docs/REFERENCE.md`, which is generated: an editor reformatting
 // it fails `tests/node/reference.test.ts` with nothing in the diff to explain
 // why (see the DELIMITER note in `tools/gen-reference.mjs`).
 {

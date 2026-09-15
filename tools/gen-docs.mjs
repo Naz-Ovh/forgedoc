@@ -1,5 +1,5 @@
 /**
- * Writes `skills/better-plan/REFERENCE.md` and `skills/better-plan/CHEATSHEET.md`.
+ * Writes `docs/REFERENCE.md`, `docs/CHEATSHEET.md` and the skill's own copy.
  *
  * Both files are the byte-for-byte output of `forgedoc reference` and
  * `forgedoc cheatsheet`. There is one generator so the committed markdown and the
@@ -23,9 +23,17 @@ import { rolldown } from 'rolldown';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DOCS_SOURCE = resolve(HERE, 'docs.ts');
 
-/** The generated file per renderer, relative to the repository root. */
+/**
+ * The generated file per renderer, relative to the repository root.
+ *
+ * The cheatsheet is written twice on purpose. `docs/` is the copy a person reads
+ * on GitHub; the one inside the skill is what an agent reads, and it has to be
+ * *inside* the skill folder because that folder is what `npx skills add` copies
+ * onto someone's machine. A symlink would not survive that copy.
+ */
 const OUTPUTS = [
-  { path: '../skills/better-plan/REFERENCE.md', render: 'renderReference' },
+  { path: '../docs/REFERENCE.md', render: 'renderReference' },
+  { path: '../docs/CHEATSHEET.md', render: 'renderCheatsheet' },
   { path: '../skills/better-plan/CHEATSHEET.md', render: 'renderCheatsheet' },
 ];
 

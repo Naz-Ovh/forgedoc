@@ -53,9 +53,8 @@ element is unclear and `forgedoc info <element>` before using an unfamiliar
 component. Use `forgedoc reference` for the complete contract. These commands
 accept `--format=json`.
 
-If the CLI is unavailable and this skill is still beside `better-plan`, use
-`../better-plan/CHEATSHEET.md` and `../better-plan/REFERENCE.md`. Never invent a
-`doc-*` tag or attribute.
+Run them as `npx forgedoc <command>` when the binary is not on PATH. Never
+invent a `doc-*` tag or attribute.
 
 ## Write the document
 

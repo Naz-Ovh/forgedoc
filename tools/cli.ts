@@ -10,7 +10,7 @@
  *    requirements.
  */
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -220,18 +220,25 @@ async function runBuild(parsed: ParsedArguments): Promise<number> {
   const outRaw = parsed.flags.get('out');
   const outFlag: string | true | undefined =
     typeof outRaw === 'string' ? outRaw : outRaw === true ? true : undefined;
-  const outputPath = resolveOutputPath(inputPath, outFlag, flavour);
+  const history = parsed.flags.get('history') === true;
+  const outputPath = resolveOutputPath(inputPath, outFlag, flavour, history);
 
   const built = injectAssets(source, assets);
 
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, built, 'utf8');
+  const archived = history ? await keepVersion(outputPath, built) : null;
+
+  // Moving into a history folder leaves the file it came from behind, which is
+  // the duplicate the folder exists to avoid.
+  if (history && inputPath !== outputPath) await rm(inputPath, { force: true });
 
   const kilobytes = Math.round(Buffer.byteLength(built, 'utf8') / 1024);
   const themeLabel = theme ? `, theme "${theme}"` : '';
   process.stdout.write(
     `forgedoc build: wrote ${outputPath} (${kilobytes} kB, ${flavour}${themeLabel})\n`,
   );
+  if (archived) process.stdout.write(`  kept this version as ${archived}\n`);
 
   if (flavour === 'offline') {
     warnAboutOfflineWeight(source, kilobytes, outFlag);
@@ -270,22 +277,90 @@ function warnAboutOfflineWeight(
 /** Where offline builds land unless told otherwise. Gitignored by convention. */
 const TEMP_DIRECTORY = '.temp';
 
+/** The living document inside a history folder. */
+const HISTORY_INDEX = 'index.html';
+
+/** Where superseded versions are kept. */
+const HISTORY_DIRECTORY = 'history';
+
+/**
+ * Where the build writes.
+ *
+ * why in place: a plan is one document, not a source file and an artefact. The
+ * reader opens the file, comments on it, the agent revises that same file and
+ * builds it again. Writing `<name>.built.html` beside the input produced two
+ * files that drift apart, and left the reader guessing which one to open.
+ * `injectAssets` accepts its own output, so the single file survives any number
+ * of revisions.
+ *
+ * Offline is the exception: a 3.5 MB embedded bundle is a delivery artefact, and
+ * overwriting a 15 kB committed document with one is never what someone meant.
+ */
 function resolveOutputPath(
   inputPath: string,
   outFlag: string | true | undefined,
   flavour: BundleFlavour,
+  history: boolean,
 ): string {
   if (typeof outFlag === 'string') return outFlag;
 
   const extension = extname(inputPath) || '.html';
   const stem = basename(inputPath, extension);
 
-  // why: an embedded document is a build artefact, not a source file. Defaulting
-  // it beside the input is what gets a 3.5 MB blob committed by accident.
   if (flavour === 'offline') {
     return join(dirname(inputPath), TEMP_DIRECTORY, `${stem}${extension}`);
   }
-  return join(dirname(inputPath), `${stem}.built${extension}`);
+
+  if (history) return join(historyFolder(inputPath), HISTORY_INDEX);
+
+  return inputPath;
+}
+
+/**
+ * The folder a kept-history document lives in.
+ *
+ * Building `PLAN_vendor-orders.html --history` gives `PLAN_vendor-orders/`;
+ * building the `index.html` already inside that folder keeps it, rather than
+ * nesting a folder per revision.
+ */
+function historyFolder(inputPath: string): string {
+  if (basename(inputPath) === HISTORY_INDEX) return dirname(inputPath);
+  const extension = extname(inputPath) || '.html';
+  return join(dirname(inputPath), basename(inputPath, extension));
+}
+
+/**
+ * Keep a copy of what this build published, newest number last.
+ *
+ * why a copy of the new version rather than a move of the old one: by the time
+ * the build runs, the file on disk already carries the author's latest edits —
+ * moving it would file the *new* text under the old version's name. Every build
+ * therefore appends what it just wrote, and `index.html` mirrors the newest
+ * entry. An unchanged rebuild adds nothing, so the folder stays a record of
+ * versions rather than of commands.
+ *
+ * Returns the path kept, or null when this version is already the newest one.
+ */
+async function keepVersion(outputPath: string, built: string): Promise<string | null> {
+  const folder = join(dirname(outputPath), HISTORY_DIRECTORY);
+  await mkdir(folder, { recursive: true });
+
+  const kept = (await readdir(folder).catch(() => [] as string[]))
+    .filter((entry) => /^\d{4}-/.test(entry))
+    .sort();
+
+  const newest = kept.at(-1);
+  if (newest !== undefined) {
+    const previous = await readFile(join(folder, newest), 'utf8').catch(() => null);
+    if (previous === built) return null;
+  }
+
+  const sequence = String(kept.length + 1).padStart(4, '0');
+  const day = new Date().toISOString().slice(0, 10);
+  const archived = join(folder, `${sequence}-${day}.html`);
+
+  await writeFile(archived, built, 'utf8');
+  return archived;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -343,7 +418,7 @@ async function runNew(parsed: ParsedArguments): Promise<number> {
 }
 
 /**
- * The starting document — and the placeholder contract in its canonical shape.
+ * The starting document: the shell, and nothing else.
  *
  * The two placeholders sit where their replacements belong: the styles in
  * `<head>`, so the reader never sees a frame of unstyled markup, and the script
@@ -351,6 +426,12 @@ async function runNew(parsed: ParsedArguments): Promise<number> {
  * child present (§5.2). `injectAssets` hoists a body-end `<style>` anyway — a
  * document written before this shape still builds correctly — but the skeleton
  * is what agents copy, so it should not need the rescue.
+ *
+ * `<doc-page>` is the whole body because it is what carries the feedback bucket;
+ * everything inside it is the author's. why no starting sections, chips or
+ * question: a scaffold is copied, so whatever it contains becomes the shape of
+ * every document written from it. A plan should take the shape of the problem it
+ * describes, and an empty page is the only scaffold that imposes none.
  */
 function skeleton(title: string, docId: string): string {
   return `<!doctype html>
@@ -363,37 +444,7 @@ function skeleton(title: string, docId: string): string {
 </head>
 <body>
 
-<doc-page doc-id="${docId}" density="comfortable" accent="teal">
-
-  <doc-header kicker="Plan">
-    ${escapeHtml(title)}
-    <p slot="lede">One or two sentences on what this plan is for and who reads it.</p>
-  </doc-header>
-
-  <doc-chips>
-    <doc-chip kind="action">Answer the questions inline, then send the bucket back</doc-chip>
-  </doc-chips>
-
-  <doc-section title="What we are building">
-    <p>Replace this with the shape of the work.</p>
-  </doc-section>
-
-  <doc-section title="Open questions">
-    <doc-choice mode="single" question="Replace this with a real decision you need made">
-      <doc-option recommended>
-        Option A (recommended)
-        <p slot="desc">Why this is the right default.</p>
-      </doc-option>
-      <doc-option>
-        Option B
-        <p slot="desc">The trade-off this path makes.</p>
-      </doc-option>
-      <doc-option other>
-        Something else
-        <p slot="desc">Describe an alternative.</p>
-      </doc-option>
-    </doc-choice>
-  </doc-section>
+<doc-page doc-id="${docId}">
 
 </doc-page>
 
@@ -606,13 +657,14 @@ function escapeHtml(text: string): string {
 const USAGE = `Usage: forgedoc <command> [options]
 
 Authoring:
-  forgedoc new <name>            Scaffold a valid starting document
+  forgedoc new <name>            Scaffold an empty document shell
     --dir=<path>                 Target directory (default: current directory)
 
-  forgedoc build <file.html>     Inject runtime assets into a document
+  forgedoc build <file.html>     Build the document in place — one file, rebuilt
+    --history                    Keep superseded versions in <name>/history/
     --offline                    Embed everything (Mermaid included) for file:// opening
     --theme=<name>               Theme to apply (see \`forgedoc themes\`)
-    --out=<file.html>            Output file path (default: .temp/<file>.html for offline)
+    --out=<file.html>            Write somewhere else (default: .temp/ for offline)
     --no-validate                Skip validation before building
 
   forgedoc validate <file.html>  Check a document against the markup contract

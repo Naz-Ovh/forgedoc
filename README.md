@@ -40,10 +40,13 @@ straight back to the agent.
 forgedoc build DOC_vendor-orders.html
 ```
 
-One `.html` of about 15 kB, linking a version-pinned CDN. Small enough to commit,
-review in a diff, and open anywhere.
+The build rewrites that same file: one `.html` of about 15 kB, linking a
+version-pinned CDN. Small enough to commit, review in a diff, and open anywhere.
+There is no second artefact to keep in step — revise the document and build it
+again, and the build reads its own output.
 
-Add `--offline` when the document has to survive with no network at all.
+Add `--offline` when the document has to survive with no network at all, and
+`--history` when past versions should be kept beside the current one.
 
 ---
 
@@ -116,14 +119,15 @@ npm install -g forgedoc
 
 ## Docs
 
-|                                                                        |                                                                               |
-|------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| [`skills/better-plan/SKILL.md`](skills/better-plan/SKILL.md)           | The planning skill, including the rules for reading a pasted feedback bucket. |
-| [`skills/better-docs/SKILL.md`](skills/better-docs/SKILL.md)           | The documentation skill.                                                      |
-| [`skills/better-plan/CHEATSHEET.md`](skills/better-plan/CHEATSHEET.md) | One page. The authoring agent's primary reference.                            |
-| [`skills/better-plan/REFERENCE.md`](skills/better-plan/REFERENCE.md)   | Full per-component API. Generated from the contract.                          |
-| [`docs/GEIST.md`](docs/GEIST.md)                                       | The Geist theme: what it changes and how it embeds its fonts.                 |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md)                               | Open questions, flagged deviations, dependency justifications.                |
+|                                                              |                                                                                  |
+|--------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`skills/better-plan/SKILL.md`](skills/better-plan/SKILL.md) | The planning skill. Loads FEEDBACK.md and BUILDING.md only when needed.          |
+| [`skills/better-plan/`](skills/better-plan/)                 | Its lazily-read companions: the cheatsheet, reading answers back, build options. |
+| [`skills/better-docs/SKILL.md`](skills/better-docs/SKILL.md) | The documentation skill.                                                         |
+| [`docs/CHEATSHEET.md`](docs/CHEATSHEET.md)                   | The whole vocabulary on one page. Generated; `forgedoc cheatsheet` prints it.    |
+| [`docs/REFERENCE.md`](docs/REFERENCE.md)                     | Full per-component API. Generated; `forgedoc reference` prints it.               |
+| [`docs/GEIST.md`](docs/GEIST.md)                             | The Geist theme: what it changes and how it embeds its fonts.                    |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md)                     | Open questions, flagged deviations, dependency justifications.                   |
 
 ## Themes
 
@@ -155,7 +159,7 @@ documents keep their fonts on a machine that has never seen them.
 ## CLI
 
 ```text
-forgedoc build <file.html> [--out <file>] [--offline] [--theme <name>] [--no-validate]
+forgedoc build <file.html> [--history] [--offline] [--theme <name>] [--out <file>] [--no-validate]
 forgedoc validate <file.html> [--format=json] [--built]
 forgedoc new <name> [--dir <path>]
 forgedoc themes [--format=json]
@@ -163,9 +167,15 @@ forgedoc cheatsheet | elements | info <element> | search <words> | reference
 forgedoc version
 ```
 
-`build` validates first and writes nothing if validation fails. Every finding
-carries a file, line, column, rule id and a concrete fix, so an agent can close
-its own loop: write → build → read errors → fix → rebuild.
+`build` rewrites the document in place and validates first, writing nothing if
+validation fails. Every finding carries a file, line, column, rule id and a
+concrete fix, so an agent can close its own loop: write → build → read errors →
+fix → rebuild.
+
+`--history` moves the document into a folder of its own, where `index.html` is
+the current plan and `history/` keeps each published version. `--offline` writes
+into `.temp/` instead, because a 3.5 MB embedded document is something you send,
+not something you commit.
 
 ## How it is put together
 

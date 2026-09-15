@@ -10,7 +10,7 @@
       "!node_modules",
       "!coverage",
       "!tests/visual/.output",
-      "!skills/better-plan/REFERENCE.md",
+      "!docs/REFERENCE.md",
       "!docs/PLAN.md",
       "!*.build.html",
       "!**/*.build.html",

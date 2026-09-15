@@ -424,8 +424,8 @@ class Validator {
     } else if (tagName.startsWith('doc-')) {
       const suggestion = nearestTag(tagName);
       const fix = suggestion
-        ? `Did you mean <${suggestion}>? Check skills/better-plan/CHEATSHEET.md for supported tags.`
-        : 'Check skills/better-plan/CHEATSHEET.md for the list of supported tags.';
+        ? `Did you mean <${suggestion}>? Run \`forgedoc cheatsheet\` for the supported tags.`
+        : 'Run `forgedoc cheatsheet` for the list of supported tags.';
       this.error('tag/unknown', `Unknown tag <${tagName}>.`, fix, positionOf(element));
     }
 
@@ -509,7 +509,7 @@ class Validator {
         this.error(
           'attr/unknown',
           `Unknown attribute "${attrName}" on <${tagName}>.`,
-          `Check REFERENCE.md for valid attributes on <${tagName}>.`,
+          `Run \`forgedoc info ${tagName}\` for the attributes it accepts.`,
           attr.position,
         );
         continue;

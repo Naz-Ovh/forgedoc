@@ -83,7 +83,7 @@ still resolves; there is simply no extra element. Both MUSTs are satisfied.
 the subtitle of `doc-flow-node`, the title of `doc-header` — there is no element
 to name and therefore no part. Those components carry the typography on the host
 element instead; see the comments in their stylesheets. This is noted in
-`skills/better-plan/REFERENCE.md` per component.
+`docs/REFERENCE.md` per component.
 
 ### B3. `doc-collapse` and `doc-stage` do not use `<details>`/`<summary>`
 
@@ -669,7 +669,7 @@ owning `.md`, each contributor's editor formatted on its own defaults, and the
 files drifted into two table styles at once — Prettier's width-padded delimiters
 in `README.md` and this file, tight `|---|` rows in `docs/PLAN.md` and the
 generated reference. That cost a real debugging session: opening
-`skills/better-plan/REFERENCE.md` in an editor with markdownlint's fix-on-save
+`docs/REFERENCE.md` in an editor with markdownlint's fix-on-save
 rewrote 15 delimiter rows, which failed `tests/node/reference.test.ts` — a
 staleness check on a generated file — with a diff that looked like whitespace
 noise and named no cause.

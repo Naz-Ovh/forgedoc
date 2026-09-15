@@ -78,6 +78,8 @@ export interface EmbeddedAssets {
   readonly mode: 'embed';
   readonly css: string;
   readonly js: string;
+  /** Stamped on the injected tag so a rebuild keeps the theme without being told. */
+  readonly theme: string;
 }
 
 /** Runtime referenced from a CDN. */
@@ -85,6 +87,8 @@ export interface LinkedAssets {
   readonly mode: 'link';
   readonly cssHref: string;
   readonly jsSrc: string;
+  /** Stamped on the injected tag so a rebuild keeps the theme without being told. */
+  readonly theme: string;
 }
 
 export type InjectionAssets = EmbeddedAssets | LinkedAssets;
@@ -127,7 +131,58 @@ export class InjectionError extends Error {
 }
 
 /**
+ * The attribute stamped on every tag this module injects.
+ *
+ * It is what makes a built document buildable again. Without a marker, telling
+ * the runtime's own `<link>` apart from one the author wrote means pattern-
+ * matching a CDN URL, which breaks the moment someone self-hosts or the version
+ * changes. The marker is three attributes of overhead and it is exact.
+ */
+const MARK = 'data-forgedoc';
+
+/** The injected stylesheet, in either flavour, and the script. */
+const BUILT_CSS_LINK = new RegExp(`<link\\b[^>]*\\b${MARK}="css"[^>]*>\\n?`);
+const BUILT_CSS_STYLE = new RegExp(`<style\\b[^>]*\\b${MARK}="css"[^>]*>[\\s\\S]*?<\\/style>\\n?`);
+const BUILT_JS = new RegExp(`<script\\b[^>]*\\b${MARK}="js"[^>]*>[\\s\\S]*?<\\/script>`);
+const BUILT_THEME = new RegExp(`\\b${MARK}-theme="([a-z0-9-]+)"`);
+
+/** Has this document already been built? */
+export function isBuilt(html: string): boolean {
+  return html.includes(`${MARK}="css"`) || html.includes(`${MARK}="js"`);
+}
+
+/**
+ * Turn a built document back into its source form.
+ *
+ * why this exists: a plan is one file. The reader opens it, comments on it, and
+ * the agent revises *that* file and builds it again — so the build has to accept
+ * its own output as input. Restoring the placeholders first means the rest of
+ * this module never learns the difference between a first build and a tenth.
+ *
+ * The theme rides back on the marker, so a rebuild keeps the theme the document
+ * was published with without anyone having to remember it.
+ */
+export function restorePlaceholders(html: string): string {
+  if (!isBuilt(html)) return html;
+
+  const theme = BUILT_THEME.exec(html)?.[1];
+  const placeholder =
+    theme && theme !== DEFAULT_THEME
+      ? `<style>/*@DOC_CSS:${theme}@*/</style>`
+      : `<style>${CSS_PLACEHOLDER}</style>`;
+
+  return html
+    .replace(BUILT_CSS_LINK, () => `${placeholder}\n`)
+    .replace(BUILT_CSS_STYLE, () => `${placeholder}\n`)
+    .replace(BUILT_JS, () => `<script>${JS_PLACEHOLDER}</script>`);
+}
+
+/**
  * Replace both placeholders in `html`.
+ *
+ * Accepts a source document or one this function already built: an already-built
+ * input is restored to source form first, so building is idempotent and a
+ * document can live as a single file for its whole life.
  *
  * MUST (§5.3): the replacement is a *function*, never a string. A `$&` or `$1`
  * sequence anywhere in the minified bundle — and there will be one, minifiers
@@ -135,8 +190,17 @@ export class InjectionError extends Error {
  * corrupt the output.
  */
 export function injectAssets(html: string, assets: InjectionAssets): string {
-  requirePlaceholder(html, CSS_PLACEHOLDER_THEMED, CSS_PLACEHOLDER, '<style>/*@DOC_CSS@*/</style>');
-  requirePlaceholder(html, JS_PLACEHOLDER, JS_PLACEHOLDER, '<script>//@DOC_JS@</script>');
+  const source = restorePlaceholders(html);
+
+  requirePlaceholder(
+    source,
+    CSS_PLACEHOLDER_THEMED,
+    CSS_PLACEHOLDER,
+    '<style>/*@DOC_CSS@*/</style>',
+  );
+  requirePlaceholder(source, JS_PLACEHOLDER, JS_PLACEHOLDER, '<script>//@DOC_JS@</script>');
+
+  const mark = `${MARK}="css" ${MARK}-theme="${assets.theme}"`;
 
   // The script stays where the placeholder was: end of body for the embedded
   // bundle, `defer` for the linked one. Either way elements upgrade once, after
@@ -147,16 +211,16 @@ export function injectAssets(html: string, assets: InjectionAssets): string {
   // it earns its keep on documents authored against the older end-of-body shape,
   // which are already committed in people's repositories.
   if (assets.mode === 'embed') {
-    return hoistToHead(html.replace(CSS_TAG, ''), `<style>${assets.css}</style>`).replace(
-      JS_PLACEHOLDER,
-      () => assets.js,
+    return hoistToHead(source.replace(CSS_TAG, ''), `<style ${mark}>${assets.css}</style>`).replace(
+      JS_TAG,
+      () => `<script ${MARK}="js">${assets.js}</script>`,
     );
   }
 
-  const stylesheet = `<link rel="stylesheet" href="${assets.cssHref}">`;
-  const script = `<script src="${assets.jsSrc}" defer></script>`;
+  const stylesheet = `<link rel="stylesheet" href="${assets.cssHref}" ${mark}>`;
+  const script = `<script src="${assets.jsSrc}" ${MARK}="js" defer></script>`;
 
-  return hoistToHead(html.replace(CSS_TAG, ''), stylesheet).replace(JS_TAG, () => script);
+  return hoistToHead(source.replace(CSS_TAG, ''), stylesheet).replace(JS_TAG, () => script);
 }
 
 /**
@@ -224,6 +288,7 @@ export async function resolveAssets(
       mode: 'link',
       cssHref: `${CDN_BASE}/themes/${theme}.css`,
       jsSrc: `${CDN_BASE}/forgedoc.iife.js`,
+      theme,
     };
   }
 
@@ -232,7 +297,7 @@ export async function resolveAssets(
     readBundle(resolve(from, 'forgedoc.standalone.iife.js')),
   ]);
 
-  return { mode: 'embed', css, js };
+  return { mode: 'embed', css, js, theme };
 }
 
 /**

@@ -47,7 +47,7 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@11.25.0",
+  "packageManager": "pnpm@12.4.1",
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsdown && npm run build:styles && npm run build:types",
     "build:styles": "node tools/build-styles.mjs",

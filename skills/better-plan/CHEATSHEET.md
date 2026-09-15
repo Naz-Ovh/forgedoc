@@ -11,7 +11,7 @@ Write **semantic markup only**. A prebuilt runtime supplies styling, layout, int
 <script>//@DOC_JS@</script>    <!-- last line of <body> -->
 ```
 
-Build `forgedoc build <file.html>` · offline `--offline` · check `forgedoc validate <file.html> --format=json` · detail `forgedoc info <element>` · find one `forgedoc search <words>`.
+Build in place `forgedoc build <file.html>` — one file, rebuilt on every revision · offline `--offline` · keep versions `--history` · check `forgedoc validate <file.html> --format=json` · detail `forgedoc info <element>` · find one `forgedoc search <words>`.
 
 ## Shell & meta
 
