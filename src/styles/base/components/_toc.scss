@@ -44,6 +44,48 @@
   }
 
   /*
+  * The question-list trigger, between the contents toggle and the dock control.
+  *
+  * why it lives in this panel: "which sections still want something from me" is
+  * the same question as "where am I", asked about the same outline — and the
+  * panel is already the one piece of chrome a reader opens to orient
+  * themselves. It is hidden when the document asks nothing.
+  */
+  doc-toc [data-part="questions"] {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    position: relative;
+    cursor: pointer;
+  }
+
+  doc-toc [data-part="questions-icon"] {
+    display: block;
+    flex: none;
+  }
+
+  doc-toc [data-part="questions-count"],
+  doc-toc [data-part="entry-questions"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  doc-toc [data-part="questions-count"][hidden],
+  doc-toc [data-part="entry-questions"][hidden] {
+    display: none;
+  }
+
+  /*
+  * The entry marker sits at the end of the row, so a long title truncates
+  * before the count does — the count is the part the reader is scanning for.
+  */
+  doc-toc [data-part="entry-questions"] {
+    margin-inline-start: auto;
+  }
+
+  /*
   * The dock control. The glyph is a panel with its side rail filled, drawn from
   * borders rather than an icon font or an inline SVG — one less asset in a file
   * that has to work from `file://` with no network.

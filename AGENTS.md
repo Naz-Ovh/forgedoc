@@ -80,9 +80,12 @@ Every unusual decision traces to one of these. Full rationale in
 5. **Zero generation tokens for the runtime (§2.4).** It is injected by
    replacing two placeholders, never emitted by the model.
 6. **No framework for the elements (§2.5).** Plain `HTMLElement` subclasses.
-   Svelte is used for the bucket panel *only*, because that DOM is entirely
-   runtime-created. Rule: runtime creates the DOM → Svelte fine; runtime
-   enhances author DOM → vanilla.
+   Svelte is used for the bucket panel and the question drawer *only*, because
+   both are entirely runtime-created. Rule: runtime creates the DOM → Svelte
+   fine; runtime enhances author DOM → vanilla. Neither is a custom element:
+   in Svelte's custom-element mode component styles are inlined as a JavaScript
+   string instead of emitted as CSS, which puts them outside `@layer` and out
+   of reach of both the `--doc-*` tokens and the author's escape hatch.
 
 ## Layout
 
@@ -90,7 +93,8 @@ Every unusual decision traces to one of these. Full rationale in
 src/core/          DocElement base, store, slug, numbering, registry
 src/components/    one file per tag, named exactly after it
 src/bucket/        selection, serialise, and the three .svelte files
-src/styles/        index.css imports 29 files IN ORDER; layers.css first
+src/questions/     the question drawer: model.ts scrapes, two .svelte render
+src/styles/        index.css imports 30 files IN ORDER; layers.css first
 tools/             validate.ts, inject.ts, cli.ts, gen-reference.mjs
 skills/better-plan/  the published skill — SKILL, CHEATSHEET, REFERENCE
 docs/              PLAN.md, DECISIONS.md — repo-only, never shipped
@@ -115,6 +119,10 @@ Each of these builds green and produces wrong output. They cost real time.
   cdn source.
 - **tsdown runs its configs concurrently.** No config may set `clean: true`;
   `npm run build` clears `dist/` once, up front.
+- **A Svelte prop named `state` breaks every `$state()` rune in the file.**
+  Svelte reads `$name` as a store subscription whenever `name` is declared, so
+  the rune resolves to the prop and throws `store_invalid_shape` at runtime.
+  The rune wins the name; the prop takes another.
 - **Biome corrupts `.svelte` files** — it hoists `interface Props` above its own
   doc comment and dedents the script body. They are excluded from the formatter
   and stay hand-formatted.

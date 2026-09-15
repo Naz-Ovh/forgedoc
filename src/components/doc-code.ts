@@ -29,7 +29,7 @@ export class DocCode extends DocElement {
     this.#appendLineLayers(source);
 
     // Into the header rather than the corner: the corner is already the header.
-    appendFeedbackButton(this, this.attr('title') || language, this.findPart('header'));
+    appendFeedbackButton(this, this.attr('title') || language, { into: this.findPart('header') });
   }
 
   #prependHeader(language: string): void {

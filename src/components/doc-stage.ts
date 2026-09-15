@@ -7,6 +7,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import {
   ensureContentElement,
   isContentHidden,
@@ -46,6 +47,7 @@ export class DocStage extends DocElement {
     ensureContentElement(this, 'body');
     nameAuthorContent(this, 'body');
     this.renderHeader();
+    appendFeedbackButton(this, this.attr('title'), { icon: true });
     revealOnFindInPage(this, () => this.setOpen(true));
   }
 

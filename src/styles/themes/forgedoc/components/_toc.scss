@@ -160,4 +160,61 @@
       width: min(var(--doc-toc-width), calc(100vw - var(--doc-space-8)));
     }
   }
+
+  /* ── The question-list trigger ──────────────────────────────────────────── */
+
+  /*
+   * Same box as the dock control beside it, because they are the same kind of
+   * thing: two small switches flanking the panel's own name. The badge is the
+   * number of questions still open, and it is the one part of this panel that
+   * is loud on purpose — it is the document asking for something.
+   */
+  doc-toc [data-part="questions"] {
+    gap: var(--doc-space-1);
+    height: 1.25rem;
+    padding: 0 var(--doc-space-1);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  doc-toc [data-part="questions"]:hover {
+    border-color: var(--doc-border-3);
+    color: var(--doc-text-1);
+  }
+
+  doc-toc [data-part="questions"][data-state="open"] {
+    border-color: var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+  }
+
+  doc-toc [data-part="questions-count"] {
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+    line-height: 1;
+  }
+
+  /*
+   * The per-section count. Quiet as a rule — an entry with open questions
+   * should catch the eye scanning down the rail, not shout over the title it
+   * belongs to.
+   */
+  doc-toc [data-part="entry-questions"] {
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 4px;
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+    line-height: 1;
+  }
 }

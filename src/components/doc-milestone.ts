@@ -6,6 +6,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 
 export class DocMilestone extends DocElement {
@@ -42,6 +43,7 @@ export class DocMilestone extends DocElement {
     statusEl.dataset.status = status;
     header.append(statusEl);
 
+    appendFeedbackButton(this, title || date, { icon: true });
     this.prepend(header);
   }
 }

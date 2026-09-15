@@ -38,7 +38,7 @@ export class DocDiff extends DocElement {
     this.#prependHeader(lines);
     this.#render(lines);
 
-    appendFeedbackButton(this, this.attr('filename'), this.findPart('header'));
+    appendFeedbackButton(this, this.attr('filename'), { into: this.findPart('header') });
   }
 
   #prependHeader(lines: readonly DiffLine[]): void {

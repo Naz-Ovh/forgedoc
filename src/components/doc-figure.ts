@@ -26,7 +26,7 @@ export class DocFigure extends DocElement {
     // The one place block feedback matters most: an image, an SVG or a rendered
     // diagram contains no text, so this button is the only way to say anything
     // about it at all.
-    appendFeedbackButton(this, this.attr('caption') || this.attr('alt') || type);
+    appendFeedbackButton(this, this.attr('caption') || this.attr('alt') || type, { icon: true });
   }
 
   #type(): FigureType {

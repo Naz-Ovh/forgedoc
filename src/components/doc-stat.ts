@@ -6,6 +6,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 
 export class DocStat extends DocElement {
@@ -33,6 +34,7 @@ export class DocStat extends DocElement {
       valueRow.append(diffEl);
     }
 
+    appendFeedbackButton(this, label || value, { icon: true });
     labelEl.after(valueRow);
   }
 }

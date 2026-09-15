@@ -34,7 +34,14 @@
     color: var(--doc-accent-text);
   }
 
-  /* In a block that already has a header row, the button joins it. */
+  /*
+   * In a block that already has a header row, the button joins it.
+   *
+   * No `auto` margin here, unlike most themes: `doc-diff`'s `+n/-n` counts
+   * already claim one, and two of them in a flex row split the free space
+   * between them — which parked the counts in the middle of the header
+   * instead of beside the button. The counts push the pair right together.
+   */
   doc-code [data-part="header"] [data-part="feedback"],
   doc-diff [data-part="header"] [data-part="feedback"] {
     border: 0;
@@ -51,33 +58,39 @@
   }
 
   /*
-   * No `auto` margin here, unlike most themes: `doc-diff`'s `+n/-n` counts
-   * already claim one, and two of them in a flex row split the free space
-   * between them — which parked the counts in the middle of the header
-   * instead of beside the button. The counts push the pair right together.
-   */
-  /*
-  * In a block with no header, the button floats in the corner and stays quiet
-  * until the reader looks at the block. It is always visible without a pointer,
-  * because "hover to discover" is not an interaction a touch reader has.
+  * A block or card with no header row of its own: one small icon button in the
+  * top corner, invisible until the reader looks at the card.
+  *
+  * why it hides: this affordance is on every diagram, callout, step, question
+  * and disclosure in the document. Drawn at rest that is a page of buttons
+  * competing with the content they are attached to, which is the opposite of
+  * what a reading document should look like. Hovering a card is already how a
+  * reader signals which one they are thinking about.
+  *
+  * Three exceptions, all of them readers who would otherwise never see it: a
+  * touch device has no hover to reveal it with, a keyboard reaches it by
+  * focus, and a card that already carries a comment keeps its button on screen
+  * because that button is now the way back to something the reader wrote.
   */
-  doc-figure > [data-part="feedback"],
-  doc-tree > [data-part="feedback"] {
+  [data-doc-feedback="corner"] > [data-part="feedback"] {
+    width: var(--doc-feedback-size);
+    height: var(--doc-feedback-size);
+    padding: 0;
+    border-radius: var(--doc-radius-sm);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-sm);
     opacity: 0;
   }
 
-  doc-figure:hover > [data-part="feedback"],
-  doc-figure:focus-within > [data-part="feedback"],
-  doc-tree:hover > [data-part="feedback"],
-  doc-tree:focus-within > [data-part="feedback"],
-  doc-figure > [data-part="feedback"]:focus-visible,
-  doc-tree > [data-part="feedback"]:focus-visible {
+  [data-doc-feedback="corner"]:hover > [data-part="feedback"],
+  [data-doc-feedback="corner"]:focus-within > [data-part="feedback"],
+  [data-doc-feedback="corner"] > [data-part="feedback"]:focus-visible,
+  [data-doc-commented][data-doc-feedback="corner"] > [data-part="feedback"] {
     opacity: 1;
   }
 
   @media (hover: none) {
-    doc-figure > [data-part="feedback"],
-    doc-tree > [data-part="feedback"] {
+    [data-doc-feedback="corner"] > [data-part="feedback"] {
       opacity: 1;
     }
   }

@@ -9,6 +9,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import {
   ensureContentElement,
   isContentHidden,
@@ -30,6 +31,7 @@ export class DocCollapse extends DocElement {
     this.#prependSummary();
     this.setOpen(this.#initialOpenState());
 
+    appendFeedbackButton(this, this.attr('title'), { icon: true });
     revealOnFindInPage(this, () => this.setOpen(true));
   }
 

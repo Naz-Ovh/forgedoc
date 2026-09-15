@@ -2,15 +2,27 @@
  * Block-level feedback: a stable anchor, a button, and the event it fires.
  *
  * why blocks need their own affordance (§10.2): the bucket collects comments
- * from a text selection, and a rendered Mermaid chart, an `<img>` or an `<svg>`
- * has no text to select. Without this a reader can comment on every sentence of
- * a plan and on none of its diagrams — which are usually the parts worth arguing
- * about.
+ * from a text selection, and a selection is a run of words. Two kinds of block
+ * are badly served by that:
+ *
+ *   · A rendered Mermaid chart, an `<img>` or an `<svg>` has no text to select
+ *     at all, so without a button the diagrams — usually the parts worth
+ *     arguing about — are the only parts of a plan a reader cannot argue with.
+ *   · A card *is* the unit of meaning. A question, a callout, a step, a
+ *     disclosure: a reader who disagrees with one disagrees with the whole
+ *     thing, and making them rubber-band exactly the right sentence to say so
+ *     turns one click into a fiddly drag that lands on the wrong boundary.
+ *
+ * So the same button appears on both, and a comment made from it is scoped to
+ * the element rather than to a range inside it — `scope: 'block'` in the store.
+ * Selecting text inside those cards still works and still makes a text comment;
+ * the two live side by side because they answer different questions.
  *
  * The components stay ignorant of the bucket: they append a button and dispatch
  * an event. Whether anything is listening is not their problem.
  */
 
+import { commentIcon } from './icons.js';
 import { createPart } from './parts.js';
 
 /** Bubbles from the block to `doc-page`, where the bucket picks it up. */
@@ -23,6 +35,25 @@ export interface BlockFeedbackDetail {
   readonly label: string;
   /** Viewport rectangle of the button, for positioning the composer. */
   readonly rect: DOMRect;
+}
+
+export interface FeedbackButtonOptions {
+  /**
+   * Existing chrome to put the button inside — a code block's header row. With
+   * no host of its own the button floats in the block's top corner instead, and
+   * the element is marked `data-doc-feedback="corner"` so one stylesheet rule
+   * can position and reveal every one of them.
+   */
+  readonly into?: HTMLElement | null;
+  /**
+   * Render one speech-bubble icon rather than the word "Comment".
+   *
+   * why the two differ: in a header row the button sits beside `Copy`, where a
+   * word matches its neighbour and there is room for it. Floated over the
+   * corner of a card it has to be small enough not to crowd the content it
+   * belongs to, and to stay out of the way of a title that runs long.
+   */
+  readonly icon?: boolean;
 }
 
 /**
@@ -39,18 +70,39 @@ const OPAQUE_ELEMENTS = new Set(['STYLE', 'SCRIPT', 'TEMPLATE']);
  *
  * Excluded from `blockContentText` so a comment's detail view shows the diagram
  * or the code, not the words "Copy" and "Comment".
+ *
+ * The second group is what cards added: a question's letter badges, its
+ * appended Other option and its note toggle are all runtime defaults (§8.4), so
+ * quoting a question back should read as the question and its answers rather
+ * than as `A B C ＋ Add a note Other — type your own solution`.
  */
 const FURNITURE_PARTS = [
   'feedback',
   'copy',
-  'header',
   'gutter',
   'lines',
   'scroll-hint',
   'sequence',
   'badge',
   'chevron',
+  'control',
+  'note-toggle',
+  'note',
+  'other',
+  'marker',
+  'current-marker',
 ];
+
+/**
+ * Parts that are furniture only inside a particular block.
+ *
+ * why `header` cannot go in the list above: in a code block or a diff the header
+ * row holds the filename and the language pill, which are chrome wrapped around
+ * the code. On a card it holds the card's *title* — the single most identifying
+ * thing about a step, a milestone, a decision or a roadblock. Excluding it
+ * everywhere read a step back as its body with no name on it.
+ */
+const SCOPED_FURNITURE = ['doc-code [data-part="header"]', 'doc-diff [data-part="header"]'];
 
 /**
  * Matches furniture at any depth, not just the nearest named ancestor.
@@ -62,7 +114,10 @@ const FURNITURE_PARTS = [
  * list — so the filename and the digits 1…10 were both read back as if they were
  * part of the code.
  */
-const FURNITURE_SELECTOR = FURNITURE_PARTS.map((part) => `[data-part='${part}']`).join(', ');
+const FURNITURE_SELECTOR = [
+  ...FURNITURE_PARTS.map((part) => `[data-part='${part}']`),
+  ...SCOPED_FURNITURE,
+].join(', ');
 
 /**
  * Give `element` an id that survives a reload.
@@ -88,17 +143,17 @@ export function ensureFeedbackAnchor(element: HTMLElement): string {
 /**
  * Append the "Comment" affordance to a block.
  *
- * `label` is the human name of the thing — a filename, a caption, a language.
- * `into` places the button inside existing chrome (a code block's header row);
- * without it the button floats in the block's own top corner.
+ * `label` is the human name of the thing — a filename, a caption, a question, a
+ * card's title.
  */
 export function appendFeedbackButton(
   element: HTMLElement,
   label: string,
-  into?: HTMLElement | null,
+  options: FeedbackButtonOptions = {},
 ): HTMLElement | null {
   if (!element.closest('doc-page')) return null;
   if (element.querySelector(':scope > [data-part="feedback"]')) return null;
+  if (options.into?.querySelector(':scope > [data-part="feedback"]')) return null;
 
   const anchorId = ensureFeedbackAnchor(element);
   const descriptor = label
@@ -107,11 +162,15 @@ export function appendFeedbackButton(
 
   const button = createPart('feedback', 'button');
   button.setAttribute('type', 'button');
-  button.textContent = 'Comment';
+  if (options.icon) button.append(commentIcon());
+  else button.textContent = 'Comment';
   button.setAttribute('aria-label', `Comment on ${descriptor}`);
   button.title = 'Add a comment about this block';
 
-  button.addEventListener('click', () => {
+  button.addEventListener('click', (event) => {
+    // A card's own click handler would otherwise read this as the reader
+    // choosing that option, or as a disclosure's summary being pressed.
+    event.stopPropagation();
     element.dispatchEvent(
       new CustomEvent<BlockFeedbackDetail>(BLOCK_FEEDBACK_EVENT, {
         bubbles: true,
@@ -120,7 +179,16 @@ export function appendFeedbackButton(
     );
   });
 
-  (into ?? element).append(button);
+  if (options.into) {
+    options.into.append(button);
+    return button;
+  }
+
+  // why a marker rather than a selector listing every commentable tag: the set
+  // grows, and a stylesheet that has to be edited in five themes every time is
+  // a stylesheet that will be missed in one of them.
+  element.dataset.docFeedback = 'corner';
+  element.append(button);
   return button;
 }
 

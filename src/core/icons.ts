@@ -20,6 +20,24 @@ import { createPart } from './parts.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+/**
+ * The geometry, separated from the DOM call that draws it.
+ *
+ * why exported: the bucket and the question drawer are Svelte, and a Svelte
+ * template writes its own `<svg>` markup rather than calling into here. Sharing
+ * the path data is what keeps the two from drifting into two slightly different
+ * chevrons.
+ */
+export const ICON_PATHS = {
+  chevron: 'M9 5l7 7-7 7',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  comment: 'M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z',
+  questions: 'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+  close: 'M6 6l12 12M18 6L6 18',
+  arrowRight: 'M4 12h15m-6-7l7 7-7 7',
+  arrowLeft: 'M20 12H5m6-7l-7 7 7 7',
+} as const;
+
 /** One `<svg>` carrying a part name, sized in `em` and painted in `currentColor`. */
 function icon(part: string, pathData: string): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg');
@@ -50,27 +68,43 @@ function icon(part: string, pathData: string): SVGSVGElement {
  * The rotation is CSS (`:state(open)`), so this is only ever the closed shape.
  */
 export function chevronIcon(): SVGSVGElement {
-  return icon('chevron', 'M9 5l7 7-7 7');
+  return icon('chevron', ICON_PATHS.chevron);
 }
 
 /** The table-of-contents toggle. */
 export function menuIcon(): SVGSVGElement {
-  return icon('menu-icon', 'M4 7h16M4 12h16M4 17h16');
+  return icon('menu-icon', ICON_PATHS.menu);
+}
+
+/**
+ * Comment, for the block-level feedback button.
+ *
+ * A speech bubble rather than a pencil or a plus: the button opens a composer
+ * for something the reader wants to *say* about the block, and a pencil reads
+ * as "edit this document", which is the one thing a reader cannot do.
+ */
+export function commentIcon(part = 'comment-icon'): SVGSVGElement {
+  return icon(part, ICON_PATHS.comment);
+}
+
+/** A question mark in a circle: the contents panel's question-list trigger. */
+export function questionIcon(part = 'questions-icon'): SVGSVGElement {
+  return icon(part, ICON_PATHS.questions);
 }
 
 /** Dismiss, for the endpoint drawer. */
 export function closeIcon(): SVGSVGElement {
-  return icon('close-icon', 'M6 6l12 12M18 6L6 18');
+  return icon('close-icon', ICON_PATHS.close);
 }
 
 /** Forward: flow edges, the endpoint trigger, the carousel's next control. */
 export function arrowRightIcon(part = 'arrow-icon'): SVGSVGElement {
-  return icon(part, 'M4 12h15m-6-7l7 7-7 7');
+  return icon(part, ICON_PATHS.arrowRight);
 }
 
 /** Back, for the carousel's previous control. */
 export function arrowLeftIcon(part = 'arrow-icon'): SVGSVGElement {
-  return icon(part, 'M20 12H5m6-7l-7 7 7 7');
+  return icon(part, ICON_PATHS.arrowLeft);
 }
 
 /** A button whose whole content is one icon, with an accessible name. */

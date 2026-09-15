@@ -6,6 +6,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 
 type NoteKind = 'info' | 'tip' | 'warn' | 'danger' | 'success';
@@ -37,6 +38,8 @@ export class DocNote extends DocElement {
 
     nameAuthorContent(this, 'body');
     this.#prependChrome(kind);
+    // A callout is one claim, and a reader who disputes it disputes all of it.
+    appendFeedbackButton(this, this.attr('title') || LABELS[kind], { icon: true });
   }
 
   #kind(): NoteKind {

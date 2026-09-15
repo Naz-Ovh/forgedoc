@@ -17,6 +17,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { createPart } from '../core/parts.js';
 
 type Severity = 'low' | 'medium' | 'high';
@@ -35,6 +36,7 @@ export class DocBlocker extends DocElement {
     this.internals.ariaLabel = `Roadblock, ${SEVERITY_LABELS[severity].toLowerCase()} severity: ${this.attr('title')}`;
 
     this.#prependHeader(severity);
+    appendFeedbackButton(this, this.attr('title'), { icon: true });
   }
 
   #severity(): Severity {

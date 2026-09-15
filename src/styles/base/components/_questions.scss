@@ -1,0 +1,176 @@
+/*
+ * The question drawer — every question in the document, in one side panel.
+ *
+ * Structure only; everything it looks like lives in a theme. The panel is a
+ * `<dialog>` opened with `showModal()`, so the top layer, the backdrop, the
+ * focus trap and Escape all come from the platform and none of them are
+ * reimplemented here.
+ *
+ * why a drawer rather than a longer contents list: the questions are the one
+ * part of a plan the reader is required to act on, and a contents entry can
+ * only take you to one. Rendering them whole means a reader can answer the
+ * document from a single panel and never lose their place in it.
+ */
+
+@layer doc.components {
+  [data-part="question-drawer"] {
+    position: fixed;
+    inset: 0 0 0 auto;
+    flex-direction: column;
+    max-height: none;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  [data-part="question-drawer"][open] {
+    display: flex;
+  }
+
+  /*
+  * One row: what this is, how far through it the reader is, and the two
+  * controls.
+  *
+  * why not two rows with the title on its own: this panel is a scrolling list
+  * and the header is fixed above it, so every line spent on chrome is a line
+  * taken permanently from the questions. The count is a fragment of a sentence
+  * rather than a heading, so it reads perfectly well beside the title.
+  */
+  [data-part="question-drawer-header"] {
+    display: flex;
+    align-items: center;
+    flex: none;
+    flex-wrap: wrap;
+  }
+
+  [data-part="question-drawer-progress"] {
+    margin: 0;
+  }
+
+  [data-part="question-drawer-close"],
+  [data-part="question-drawer-filter"] {
+    cursor: pointer;
+  }
+
+  /* The two controls own the end of the row, whatever the count's length. */
+  [data-part="question-drawer-filter"] {
+    margin-inline-start: auto;
+  }
+
+  [data-part="question-drawer-content"] {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /*
+  * MUST, for the same reason `doc-option` is a block (_choice.scss): an option
+  * label here is the author's own sentence, read back verbatim, and it may be
+  * any length. The row positions its key and its control instead of laying the
+  * label out in a track.
+  */
+  [data-part="question-card"] {
+    display: block;
+  }
+
+  [data-part="question-card-meta"] {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  [data-part="question-card-goto"],
+  [data-part="question-card-clear"],
+  [data-part="question-card-score"] {
+    cursor: pointer;
+  }
+
+  /* Pushed to the end of the row, whatever the location label's length. */
+  [data-part="question-card-goto"] {
+    margin-inline-start: auto;
+  }
+
+  [data-part="question-card-title"] {
+    margin: 0;
+  }
+
+  [data-part="question-card-options"] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /*
+  * The key badge is positioned into a gutter the row reserves for it, rather
+  * than taking a grid track — see `_choice.scss` for why a row holding the
+  * author's own label sentence may not lay its children out.
+  *
+  * The gutter is `inset + badge + inset`, so the space between the badge and
+  * the first word is the same as the space before the badge, whatever a theme
+  * sets either to. Hard-coding a step off the spacing scale instead left a
+  * two-pixel gap, which read as the letter being stuck to the word.
+  */
+  [data-part="question-card-option"] {
+    --doc-key-size: 1.375rem;
+    --doc-key-inset: var(--doc-space-3);
+
+    display: block;
+    position: relative;
+    padding-inline-start: calc(var(--doc-key-inset) * 2 + var(--doc-key-size));
+    cursor: pointer;
+  }
+
+  [data-part="question-card-option"] input {
+    position: absolute;
+    /* Reachable by keyboard and by assistive tech; drawn by the key badge. */
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  [data-part="question-card-option-key"] {
+    display: grid;
+    place-items: center;
+    position: absolute;
+  }
+
+  [data-part="question-card-option-label"],
+  [data-part="question-card-option-desc"] {
+    display: block;
+  }
+
+  /* On the label's first line, like the one in the document (_choice.scss). */
+  [data-part="question-card-recommended"] {
+    float: inline-end;
+  }
+
+  [data-part="question-card-other-text"],
+  [data-part="question-card-note"] {
+    display: block;
+    width: 100%;
+    resize: vertical;
+  }
+
+  [data-part="question-card-note-toggle"] {
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  [data-part="question-card-scale"] {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  [data-part="question-card-actions"] {
+    display: flex;
+  }
+
+  @media (max-width: 720px) {
+    [data-part="question-drawer"] {
+      width: 100%;
+    }
+  }
+
+  @media print {
+    [data-part="question-drawer"] {
+      display: none !important;
+    }
+  }
+}

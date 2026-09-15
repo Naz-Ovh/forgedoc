@@ -34,7 +34,7 @@ export class DocTree extends DocElement {
     this.#removeRawSource();
     this.append(list);
 
-    appendFeedbackButton(this, root);
+    appendFeedbackButton(this, root, { icon: true });
   }
 
   #createRow(row: TreeRow, hasFollowingSibling: boolean, isRoot: boolean): HTMLElement {

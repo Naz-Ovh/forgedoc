@@ -1,0 +1,354 @@
+/*
+ * The question drawer — every question in the document, in one side panel.
+ *
+ * It borrows the API drawer's geometry deliberately: same edge, same width
+ * clamp, same header band, same backdrop. A document has one drawer idiom and
+ * this is it, so a reader who has opened one already knows how to close this.
+ *
+ * Every card is a question rendered whole — the wording, the options with their
+ * descriptions, the Other field and the note — because a list of question
+ * *titles* would only be a second table of contents, and the reader would still
+ * have to leave it to answer anything.
+ */
+
+@layer doc.theme {
+  /*
+   * Wider than the API drawer beside it, on purpose.
+   *
+   * why: that one shows an endpoint — a path, a couple of pills, a short list
+   * of parameters. This one shows a *question*, and a question that is worth
+   * asking usually runs to a sentence with four options under it, each with a
+   * line of explanation. At the API drawer's width those descriptions wrapped
+   * to three lines apiece and a single question stopped fitting on screen,
+   * which defeats the point of gathering them in one place.
+   */
+  [data-part="question-drawer"] {
+    width: clamp(34rem, 60vw, 66rem);
+    height: 100dvh;
+    padding: 0;
+    border: 0;
+    border-inline-start: var(--doc-rule);
+    border-radius: 0;
+    background: var(--doc-surface-0);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-sm);
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  [data-part="question-drawer"]::backdrop {
+    background: light-dark(rgb(24 22 60 / 28%), rgb(0 0 0 / 62%));
+    backdrop-filter: blur(3px);
+  }
+
+  [data-part="question-drawer-header"] {
+    gap: var(--doc-space-2) var(--doc-space-3);
+    padding: var(--doc-space-3) var(--doc-space-5);
+    border-block-end: var(--doc-rule);
+    background: var(--doc-surface-1);
+  }
+
+  [data-part="question-drawer-eyebrow"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-lg);
+    font-weight: 700;
+    letter-spacing: var(--doc-tracking-tight);
+  }
+
+  [data-part="question-drawer-close"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-sm);
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="question-drawer-close"]:hover {
+    border-color: var(--doc-border-3);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+  }
+
+  [data-part="question-drawer-progress"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 550;
+  }
+
+  [data-part="question-drawer-filter"] {
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 550;
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="question-drawer-filter"][aria-pressed="true"] {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+  }
+
+  [data-part="question-drawer-content"] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-4) var(--doc-space-5) var(--doc-space-10);
+  }
+
+  [data-part="question-drawer-empty"] {
+    margin: 0;
+    padding: var(--doc-space-8) var(--doc-space-4);
+    color: var(--doc-text-3);
+    text-align: center;
+  }
+
+  /* ── One question ───────────────────────────────────────────────────────── */
+  [data-part="question-card"] {
+    padding: var(--doc-space-4) var(--doc-space-5) var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-1);
+  }
+
+  /*
+   * Answered is a done marker, not a focus ring — the same decision the
+   * question itself makes in the document. A full-accent border around a card
+   * is the vocabulary a browser uses for keyboard focus, and on a panel showing
+   * nine of them at once it would read as nine focused cards.
+   */
+  [data-part="question-card"][data-answered] {
+    border-color: var(--doc-border-2);
+  }
+
+  [data-part="question-card-meta"] {
+    gap: var(--doc-space-2);
+    margin-block-end: var(--doc-space-2);
+  }
+
+  [data-part="question-card-number"] {
+    padding: 1px var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+  }
+
+  [data-part="question-card-mode"],
+  [data-part="question-card-at"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    letter-spacing: var(--doc-tracking-wide);
+  }
+
+  [data-part="question-card-at"] {
+    letter-spacing: normal;
+  }
+
+  [data-part="question-card-goto"] {
+    padding: var(--doc-space-1) var(--doc-space-2);
+    border: 0;
+    border-radius: var(--doc-radius-sm);
+    background: none;
+    color: var(--doc-accent-text);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+  }
+
+  [data-part="question-card-goto"]:hover {
+    background: var(--doc-accent-tint);
+  }
+
+  [data-part="question-card-title"] {
+    margin-block-end: var(--doc-space-3);
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+    line-height: var(--doc-leading-heading);
+  }
+
+  /* ── The options ────────────────────────────────────────────────────────── */
+  [data-part="question-card-options"] {
+    gap: var(--doc-space-2);
+  }
+
+  [data-part="question-card-option"] {
+    padding: var(--doc-space-2) var(--doc-space-3);
+    /*
+     * Restated after the shorthand, and not left to `base/`: the shorthand is
+     * a theme declaration and `doc.theme` outranks `doc.components`, so setting
+     * the gutter as a longhand over there was silently overwritten and the
+     * letter badge sat on top of the first word.
+     */
+    padding-inline-start: calc(var(--doc-key-inset) * 2 + var(--doc-key-size));
+    border: var(--doc-border-width) solid var(--doc-border-1);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+    font-weight: 600;
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition);
+  }
+
+  [data-part="question-card-option"]:hover {
+    border-color: var(--doc-border-3);
+  }
+
+  [data-part="question-card-option"][data-selected] {
+    border-color: var(--doc-accent-edge);
+    background: var(--doc-accent-tint);
+  }
+
+  [data-part="question-card-option-key"] {
+    inset-inline-start: var(--doc-key-inset);
+    inset-block-start: var(--doc-space-2);
+    width: var(--doc-key-size);
+    height: var(--doc-key-size);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 650;
+  }
+
+  [data-part="question-card-option"][data-selected] [data-part="question-card-option-key"] {
+    border-color: var(--doc-accent-solid);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+  }
+
+  /* The focus ring has to be drawn by the row: the input itself is invisible. */
+  [data-part="question-card-option"]:focus-within {
+    outline: 2px solid var(--doc-accent-solid);
+    outline-offset: 2px;
+  }
+
+  [data-part="question-card-option-desc"] {
+    margin-block-start: 2px;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 400;
+    line-height: var(--doc-leading);
+  }
+
+  /*
+   * why not the solid accent with `--doc-accent-on-solid` on it: that pair is
+   * designed for a large filled control, and on a pill of 10px uppercase text
+   * it is the one place in the panel that fails contrast — bun pairs a hot
+   * pink fill with near-black ink, which is fine across a button and muddy
+   * across six letters.
+   *
+   * `--doc-accent-text` on the card's own surface is the pairing every theme
+   * already solves for readability, and the accent edge is what carries the
+   * "this one" signal. The card surface rather than the row's is deliberate:
+   * the row is `--doc-surface-2` at rest and `--doc-accent-tint` once chosen,
+   * and the pill has to stay legible against both.
+   */
+  [data-part="question-card-recommended"] {
+    margin-inline-start: var(--doc-space-2);
+    padding: 0 var(--doc-space-2);
+    border: var(--doc-border-width) solid var(--doc-accent-edge);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    color: var(--doc-accent-text);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  /* ── The rating scale ───────────────────────────────────────────────────── */
+  [data-part="question-card-scale"] {
+    gap: var(--doc-space-2);
+  }
+
+  [data-part="question-card-score"] {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-2);
+    font-family: var(--doc-font-mono);
+    font-weight: 650;
+  }
+
+  [data-part="question-card-score"][aria-pressed="true"] {
+    border-color: var(--doc-accent-solid);
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+  }
+
+  /* ── The two free-text fields ───────────────────────────────────────────── */
+  [data-part="question-card-other-text"],
+  [data-part="question-card-note"] {
+    margin-block-start: var(--doc-space-2);
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-2);
+    color: var(--doc-text-1);
+    font-family: inherit;
+    font-size: var(--doc-text-sm);
+    line-height: var(--doc-leading);
+  }
+
+  /*
+   * Quiet, and closed: the note is a comment on an answer the reader may not
+   * have given yet, and an open field reads as something being asked for.
+   */
+  [data-part="question-card-note-toggle"] {
+    margin-block-start: var(--doc-space-3);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    letter-spacing: var(--doc-tracking-wide);
+  }
+
+  [data-part="question-card-note-toggle"]:hover {
+    color: var(--doc-accent-text);
+  }
+
+  [data-part="question-card-actions"] {
+    justify-content: flex-end;
+    margin-block-start: var(--doc-space-3);
+  }
+
+  [data-part="question-card-clear"] {
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-weight: 550;
+  }
+
+  [data-part="question-card-clear"]:hover {
+    border-color: var(--doc-border-3);
+    color: var(--doc-text-1);
+  }
+}

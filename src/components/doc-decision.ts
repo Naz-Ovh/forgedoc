@@ -6,6 +6,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 
 type DecisionStatus = 'proposed' | 'accepted' | 'rejected' | 'superseded' | 'deprecated';
@@ -43,6 +44,7 @@ export class DocDecision extends DocElement {
       header.append(dateEl);
     }
 
+    appendFeedbackButton(this, title || decisionId, { icon: true });
     this.prepend(header);
   }
 }

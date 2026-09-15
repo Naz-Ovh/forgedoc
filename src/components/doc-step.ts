@@ -12,6 +12,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 
 export class DocStep extends DocElement {
@@ -25,5 +26,7 @@ export class DocStep extends DocElement {
 
     this.prepend(header);
     this.prepend(createPart('marker', 'div'));
+
+    appendFeedbackButton(this, this.attr('title'), { icon: true });
   }
 }

@@ -7,6 +7,7 @@
 
 import { type BucketHandle, mountBucket } from '../bucket/mount.js';
 import { DocElement } from '../core/base.js';
+import { type QuestionDrawerHandle, mountQuestionDrawer } from '../questions/mount.js';
 import { type EndpointDrawerHandle, mountEndpointDrawer } from './doc-endpoint.js';
 import { reportDevViolations } from '../core/dev-report.js';
 import { indexFor } from '../core/numbering.js';
@@ -20,6 +21,7 @@ const TOC_DOCK_BREAKPOINT_PX = 1280;
 export class DocPage extends DocElement {
   #bucket: BucketHandle | null = null;
   #endpointDrawer: EndpointDrawerHandle | null = null;
+  #questionDrawer: QuestionDrawerHandle | null = null;
 
   protected enhance(): void {
     // MUST (§5.4): stamp the version. When a reader pastes a bucket back into a
@@ -31,6 +33,7 @@ export class DocPage extends DocElement {
     this.#warnWhenStorageUnavailable();
     this.#appendTableOfContents();
     this.#appendEndpointDrawer();
+    this.#appendQuestionDrawer();
     this.#appendBucket();
 
     if (__FORGEDOC_DEV__) reportDevViolations(this);
@@ -39,6 +42,8 @@ export class DocPage extends DocElement {
   protected override teardown(): void {
     this.#endpointDrawer?.destroy();
     this.#endpointDrawer = null;
+    this.#questionDrawer?.destroy();
+    this.#questionDrawer = null;
     this.#bucket?.destroy();
     this.#bucket = null;
   }
@@ -198,6 +203,22 @@ export class DocPage extends DocElement {
   /** Append the single reusable API drawer as document chrome. */
   #appendEndpointDrawer(): void {
     this.#endpointDrawer = mountEndpointDrawer(this);
+  }
+
+  /**
+   * The question drawer mounts into a plain `<div>` appended here (§10.1).
+   *
+   * why it exists at all: the questions are the only part of a plan the reader
+   * has to act on, and in a document written to be read in order they are
+   * scattered through it. The panel gathers them without the document carrying
+   * a second copy of any of them — it is built from a scrape of the live DOM
+   * when the reader asks for it, so the feature costs zero generation tokens
+   * (§2.4).
+   */
+  #appendQuestionDrawer(): void {
+    const host = createPart('questions');
+    this.append(host);
+    this.#questionDrawer = mountQuestionDrawer(host, this);
   }
 
   /**

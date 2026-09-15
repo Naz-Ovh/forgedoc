@@ -14,6 +14,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { appendFeedbackButton } from '../core/feedback.js';
 import { OTHER_KEY, optionKeys } from '../core/numbering.js';
 import { authorChildren, createPart } from '../core/parts.js';
 import { questionId } from '../core/slug.js';
@@ -36,6 +37,7 @@ export class DocChoice extends DocElement {
     this.#assignLetterKeys();
     this.#appendOtherOption();
     this.#wireNoteToggle();
+    this.#appendFeedbackButton();
     this.#restoreAnswer();
   }
 
@@ -166,6 +168,20 @@ export class DocChoice extends DocElement {
     this.on(toggle, 'click', () => this.#setNoteOpen(!this.hasState('note-open')));
     this.on(note, 'input', () => this.#persistAnswer());
     this.#setNoteOpen(false);
+  }
+
+  /**
+   * A comment on the *question*, which is not the same thing as the note.
+   *
+   * The note is attached to the answer — it travels in the bucket as part of
+   * the decision the reader made, and it only makes sense once they have made
+   * one. This is a comment on the question as written: the options do not cover
+   * the real case, the premise is wrong, the wording is ambiguous. A reader with
+   * that objection has no answer to attach a note to, which is exactly why they
+   * had nothing to say with before this button existed.
+   */
+  #appendFeedbackButton(): void {
+    appendFeedbackButton(this, this.questionText, { icon: true });
   }
 
   #setNoteOpen(open: boolean): void {

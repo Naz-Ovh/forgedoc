@@ -13,6 +13,49 @@ a column, three disclosures could not close it, and a comment on more than 240
 characters highlighted the first 240 of them. Fixing that meant changing the
 shape of those components, which is why this is a major.
 
+### Added
+
+- **A question drawer, opened from the contents panel.** Every question in the
+  document in one right-hand panel, each rendered whole — the wording, every
+  option with its description, the Other field and the note — so a reader can
+  answer the document from one place and jump to any question in it. The
+  contents trigger carries the number still unanswered, and each outline entry
+  is marked with the number open in that section.
+
+  **It costs a document nothing to have.** The panel is built from a scrape of
+  the live DOM at the moment it is opened, so the agent still writes one
+  `doc-choice` per question and no more (§2.4). Every control writes back
+  through the element in the page rather than to the store, so `doc-choice`
+  remains the only thing that knows how an answer is persisted.
+
+  New parts: `questions`, `questions-icon`, `questions-count` and
+  `entry-questions` on `doc-toc`; the `question-drawer*` and `question-card*`
+  family on `doc-page`.
+
+- **A Comment button on every card, not just on the blocks with no text in
+  them.** `doc-note`, `doc-collapse`, `doc-stage`, `doc-step`, `doc-milestone`,
+  `doc-stat`, `doc-choice`, `doc-decision` and `doc-blocker` now carry the same
+  block-scoped affordance `doc-figure` and `doc-code` already had.
+
+  why a card needs one although its text _is_ selectable: the unit a reader
+  disagrees with is the whole card — a question whose options miss the real
+  case, a callout whose claim is wrong — and making them rubber-band exactly
+  the right sentence to say so turns one click into a drag that lands on the
+  wrong boundary. Selecting text inside a card still makes an ordinary text
+  comment; the two answer different questions.
+
+  On a question this is deliberately **not** the note field. A note travels in
+  the bucket as part of an answer; this is an objection to the question as
+  written, which a reader who cannot answer it has nothing to attach a note to.
+
+  The button is one speech-bubble icon in the card's top corner, and it is
+  invisible until the card is hovered or focused — always visible on a touch
+  device, and on a card that already carries a comment. Its host is marked
+  `data-doc-feedback="corner"`, which is the documented hook for positioning it.
+
+- **`commentIcon()` and `questionIcon()`**, and `ICON_PATHS` — the icon geometry
+  as plain data, so the Svelte panels draw the same shapes as the components.
+
 ### Removed
 
 - **`doc-step` no longer emits `[data-part="card"]`.** The card was a generated
@@ -122,6 +165,19 @@ shape of those components, which is why this is a major.
   phrasing content in a sentence but _are_ the body of a figure.
 
 ### Changed
+
+- **`blockContentText` no longer treats every `[data-part="header"]` as
+  furniture.** In a code block or a diff the header row holds the filename and
+  the language pill, which are chrome; on a card it holds the card's own title.
+  Excluding it everywhere read a step back as its body with no name on it, so
+  the exclusion is now scoped to `doc-code` and `doc-diff`. A question's letter
+  badges, its appended Other option and its note toggle were added to the
+  furniture list for the same reason — a quoted question should read as the
+  question and its answers, not as `A B C ＋ Add a note`.
+
+- **`appendFeedbackButton` takes an options object** — `{ into, icon }` —
+  instead of a third positional `into` argument. Internal API; no document or
+  stylesheet is affected.
 
 - **The runtime's icons are inline SVG, not text glyphs.** `▸`, `☰`, `←`, `→`
   and `×` are drawn by whatever font the reader has, and the geometric shapes

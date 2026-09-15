@@ -3,9 +3,17 @@
  * has one.
  *
  * why blocks get their own affordance (§10.2): the bucket collects comments from
- * a text selection, and there is nothing to select in an image, an `<svg>` or a
- * rendered Mermaid chart. Without a button the most arguable parts of a plan are
- * the only parts a reader cannot argue with.
+ * a text selection, and a selection is a run of words. That serves neither an
+ * image, an `<svg>` or a rendered Mermaid chart — which have no text to select —
+ * nor a card, where the unit a reader disagrees with is the whole thing and
+ * rubber-banding exactly the right sentence to say so is a fiddly drag that
+ * lands on the wrong boundary.
+ *
+ * Two placements, one part name. In a block that already has a header row the
+ * button joins it. Everywhere else the runtime marks the host
+ * `data-doc-feedback="corner"` and the rules below float the button in the top
+ * corner — so adding the affordance to another component is one argument in
+ * TypeScript and no CSS in any theme.
  */
 
 @layer doc.components {
@@ -20,22 +28,59 @@
   }
 
   /*
-  * In a block with no header, the button floats in the corner and stays quiet
-  * until the reader looks at the block. It is always visible without a pointer,
-  * because "hover to discover" is not an interaction a touch reader has.
+  * The corner button. It is the host's own positioning context, which every
+  * card either already had or did not need — none of them position themselves.
   */
-  doc-figure > [data-part="feedback"],
-  doc-tree > [data-part="feedback"] {
+  [data-doc-feedback="corner"] {
+    /*
+     * The geometry lives here so two rules can share it: the one that places
+     * the button, and the one below that reserves room for it. A theme sets the
+     * button's size by changing `--doc-feedback-size`, and the reservation
+     * follows without being told.
+     */
+    --doc-feedback-size: 1.75rem;
+    --doc-feedback-inset: var(--doc-space-2);
+
+    position: relative;
+  }
+
+  [data-doc-feedback="corner"] > [data-part="feedback"] {
     position: absolute;
-    inset-block-start: var(--doc-space-2);
-    inset-inline-end: var(--doc-space-2);
+    inset-block-start: var(--doc-feedback-inset);
+    inset-inline-end: var(--doc-feedback-inset);
     z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: opacity var(--doc-transition);
   }
 
+  /*
+  * Make room at the end of a card's top row.
+  *
+  * why only the last child, and why reserved rather than added on hover: the
+  * button is drawn *over* the card, which costs nothing on a card whose first
+  * row is a left-aligned heading. Two put something at the far end of that row
+  * instead — a decision's date and a stage's "Current" pill — and both were
+  * drawn underneath it. A gap that appeared only on hover would move the pill
+  * sideways as the pointer arrived, which is worse than the overlap.
+  */
+  [data-doc-feedback="corner"] > [data-part="header"] > :last-child {
+    margin-inline-end: calc(var(--doc-feedback-size) + var(--doc-feedback-inset));
+  }
+
+  /*
+  * The speech bubble is an inline SVG sized in `em`, so it follows the button's
+  * type rather than needing a size of its own — the same arrangement as the
+  * disclosure chevron.
+  */
+  [data-part="comment-icon"] {
+    display: block;
+    flex: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    doc-figure > [data-part="feedback"],
-    doc-tree > [data-part="feedback"] {
+    [data-doc-feedback="corner"] > [data-part="feedback"] {
       transition: none;
     }
   }
