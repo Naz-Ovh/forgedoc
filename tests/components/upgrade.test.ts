@@ -61,7 +61,7 @@ const CASES: readonly ComponentCase[] = [
   {
     tag: 'doc-steps',
     markup: `<doc-steps><doc-step title="First step" status="completed"><p>Step instructions.</p></doc-step></doc-steps>`,
-    parts: ['marker', 'card', 'header', 'title', 'body'],
+    parts: ['marker', 'header', 'title', 'body'],
   },
   {
     tag: 'doc-stats',

@@ -6,9 +6,10 @@
     flex-direction: column;
   }
 
+  /* MUST: a block, not a column flex container — see `_steps.scss` for why a
+   * host holding the author's prose may not lay its children out. */
   doc-param {
-    display: flex;
-    flex-direction: column;
+    display: block;
   }
 
   doc-param [data-part="header"] {

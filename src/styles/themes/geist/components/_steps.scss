@@ -7,17 +7,26 @@
   }
 
   doc-step {
-    grid-template-columns: var(--doc-space-8) minmax(0, 1fr);
-    gap: var(--doc-space-4);
-    align-items: start;
-    }
+    --doc-step-disc: var(--doc-space-8);
+    --doc-step-gap: var(--doc-space-4);
+    --doc-step-inset: calc(var(--doc-step-disc) + var(--doc-step-gap));
+
+    margin-inline-start: var(--doc-step-inset);
+    background: transparent;
+    border: 0;
+    border-radius: var(--doc-radius);
+    padding: var(--doc-space-1) 0 var(--doc-space-5);
+    font-size: var(--doc-text-sm);
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+  }
 
   doc-step::before {
     content: "";
     position: absolute;
-    inset-inline-start: calc(var(--doc-space-8) / 2 - 1px);
-    top: var(--doc-space-8);
-    bottom: calc(-1 * var(--doc-space-4));
+    inset-inline-start: calc(var(--doc-step-disc) / 2 - 1px - var(--doc-step-inset));
+    top: var(--doc-step-disc);
+    bottom: calc(-1 * var(--doc-step-gap));
     width: 1px;
     background: var(--doc-border-2);
     z-index: 0;
@@ -28,8 +37,10 @@
   }
 
   doc-step [data-part="marker"] {
-    width: var(--doc-space-8);
-    height: var(--doc-space-8);
+    inset-inline-start: calc(-1 * var(--doc-step-inset));
+    top: 0;
+    width: var(--doc-step-disc);
+    height: var(--doc-step-disc);
     border-radius: 50%;
     background: var(--doc-surface-0);
     border: 1px solid var(--doc-border-2);
@@ -63,15 +74,6 @@
     border-style: dashed;
     color: var(--doc-text-3);
   }
-
-  doc-step [data-part="card"] {
-    background: transparent;
-
-    border: 0;
-    border-radius: var(--doc-radius);
-
-    padding: var(--doc-space-1) 0 var(--doc-space-5);
-    }
 
   doc-step [data-part="header"] {
     margin-bottom: var(--doc-space-2);

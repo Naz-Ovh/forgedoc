@@ -31,8 +31,8 @@
       display: none;
     }
 
-    doc-toc [data-part="toggle"]::before {
-      content: none;
+    doc-toc [data-part="menu-icon"] {
+      display: none;
     }
 
     /* Force the list open regardless of the reader's on-screen preference, and

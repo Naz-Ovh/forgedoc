@@ -75,7 +75,15 @@
      */
     --doc-measure: 1100px;
     --doc-measure-prose: 42em;
-    --doc-toc-width: 15rem;
+    /*
+     * 20rem, not 15. Section titles in a plan document are sentences —
+     * "What I am deliberately not proposing" — and at 15rem every one of them
+     * wrapped to three lines, which turned the contents panel into a wall of
+     * ragged text that was harder to scan than the document itself. 20rem is
+     * the width at which a typical title takes one line and a long one takes
+     * two, and the dock breakpoint has the room for it.
+     */
+    --doc-toc-width: 20rem;
 
     /* ── Geometry ─────────────────────────────────────────────────────────── */
     /* The design's `--r` is 12px and every card uses it; controls sit at 9px
@@ -86,10 +94,35 @@
     --doc-radius-pill: 999px;
     --doc-border-width: 1px;
 
-    /* ── Raw neutrals ─────────────────────────────────────────────────────── */
-    --doc-default-bg: light-dark(#fdfdfe, #101118);
-    --doc-default-surface: light-dark(#fefeff, #171825);
-    --doc-default-surface-2: light-dark(#f3f3f8, #1e2030);
+    /*
+     * ── Raw neutrals ─────────────────────────────────────────────────────
+     *
+     * Four steps, and the order of them is the theme's depth model: the page
+     * is the floor, a card is the lightest thing on it, and anything nested
+     * *inside* a card steps back down toward the page.
+     *
+     *   bg         the page. Muted, and very slightly violet — see below.
+     *   surface    a card on the page. White in light mode, full stop.
+     *   surface-2  a card inside a card, a quiet fill, a hover state.
+     *   line       the deepest neutral fill, and the hairline everything uses.
+     *
+     * why the page is not white: it used to be #fdfdfe with cards at #fefeff —
+     * a ratio of 1.004, which is no step at all. Every card, option, note and
+     * table in the document was therefore held together by its 1px border
+     * alone, and a page of them read as one flat sheet with lines ruled on it.
+     *
+     * why it is barely grey: the steps only have to be *visible*, not stated.
+     * At 1.07 under a card and 1.03 under a nested one, the depth is something
+     * a reader notices without being able to name — which is the point. Going
+     * further (1.14 under a card) turned the page itself into a grey panel and
+     * made the document look like an application window rather than a page.
+     * The faintest ink still clears 5.1:1 on this ground.
+     *
+     * Dark mode already had this shape and keeps its values.
+     */
+    --doc-default-bg: light-dark(#f6f7fb, #101118);
+    --doc-default-surface: light-dark(#ffffff, #171825);
+    --doc-default-surface-2: light-dark(#fafbfd, #1e2030);
     --doc-default-line: light-dark(#e9e9f1, #282a3d);
     --doc-default-line-strong: light-dark(#dadbe8, #373a52);
     --doc-default-line-stronger: light-dark(#c6c8da, #474c69);

@@ -5,6 +5,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { arrowLeftIcon, arrowRightIcon } from '../core/icons.js';
 import { authorChildren, createPart } from '../core/parts.js';
 
 export class DocCarousel extends DocElement {
@@ -29,13 +30,15 @@ export class DocCarousel extends DocElement {
 
     const controls = createPart('controls', 'div');
 
-    const prevBtn = createPart('prev-btn', 'button', { text: '←' }) as HTMLButtonElement;
+    const prevBtn = createPart('prev-btn', 'button') as HTMLButtonElement;
     prevBtn.type = 'button';
+    prevBtn.append(arrowLeftIcon('prev-icon'));
     prevBtn.setAttribute('aria-label', 'Previous slide');
     this.on(prevBtn, 'click', () => this.#showSlide(this.#currentIndex - 1));
 
-    const nextBtn = createPart('next-btn', 'button', { text: '→' }) as HTMLButtonElement;
+    const nextBtn = createPart('next-btn', 'button') as HTMLButtonElement;
     nextBtn.type = 'button';
+    nextBtn.append(arrowRightIcon('next-icon'));
     nextBtn.setAttribute('aria-label', 'Next slide');
     this.on(nextBtn, 'click', () => this.#showSlide(this.#currentIndex + 1));
 

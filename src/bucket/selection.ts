@@ -20,8 +20,25 @@ const HIGHLIGHT_NAME = 'doc-feedback';
 /** Highlight group for the comment the reader is currently looking at. */
 const ACTIVE_HIGHLIGHT_NAME = 'doc-feedback-active';
 
-/** Longest excerpt kept as the fallback locator. */
-const MAX_QUOTE_LENGTH = 240;
+/**
+ * The cap the quote *used* to be stored at, kept only to read old documents.
+ *
+ * why the cap is gone: the quote does two jobs, and 240 characters was only
+ * ever enough for one of them. As a fallback locator a prefix is plenty — it is
+ * fed to `indexOf`. But it is also the *record* of what the reader commented on:
+ * it is the heading in the bucket panel, the title of the detail window, and the
+ * excerpt in the payload an agent reads back. Truncating the record meant a
+ * reader who selected two paragraphs saw their own comment attributed to the
+ * first 240 characters of it, cut mid-word, in every one of those places.
+ *
+ * A comment is one selection, not a copy of the document, and the reader chose
+ * its length deliberately. Storing it whole is the honest thing and costs a few
+ * hundred bytes.
+ *
+ * Quotes written by an older version are still exactly this long, so
+ * `quoteMatches` treats one of exactly this length as a possible prefix.
+ */
+const LEGACY_QUOTE_CAP = 240;
 
 /**
  * Marks the bucket's own chrome.
@@ -90,12 +107,7 @@ export function serializeSelection(docPage: Element): SerializedRange | null {
   const end = offsetWithin(anchor, range.endContainer, range.endOffset);
   if (start < 0 || end < 0) return null;
 
-  return {
-    anchorId: anchor.id,
-    start,
-    end,
-    quote: quote.slice(0, MAX_QUOTE_LENGTH),
-  };
+  return { anchorId: anchor.id, start, end, quote };
 }
 
 /** Nearest ancestor-or-self `doc-*` element carrying an id. */
@@ -206,14 +218,38 @@ export function resolveRange(docPage: Element, stored: SerializedRange): Range |
   const anchor = docPage.querySelector(`#${CSS.escape(stored.anchorId)}`) ?? docPage;
 
   const byOffset = rangeFromOffsets(anchor, stored.start, stored.end);
-  if (byOffset && normalise(byOffset.toString()) === normalise(stored.quote)) return byOffset;
+  if (byOffset && quoteMatches(byOffset.toString(), stored.quote)) return byOffset;
 
   // why not fall back to `byOffset` when the quote is nowhere to be found: a
   // stale offset still *resolves*, it just resolves onto whatever text now
   // occupies those characters. Painting a reader's comment over an unrelated
   // sentence is worse than telling them the anchor is gone, so this returns null
   // and the panel flags the item as orphaned.
-  return rangeFromQuote(anchor, stored.quote) ?? rangeFromQuote(docPage, stored.quote);
+  const length = stored.end - stored.start;
+  return (
+    rangeFromQuote(anchor, stored.quote, length) ?? rangeFromQuote(docPage, stored.quote, length)
+  );
+}
+
+/**
+ * Does `text` match the stored quote?
+ *
+ * why this is not a bare `===` (the bug it fixes): a reader who selected more
+ * than 240 characters used to store an excerpt of the first 240 and correct
+ * offsets for all of it. An equality test failed against those correct offsets,
+ * resolution fell through to searching for the excerpt, and the excerpt is what
+ * got painted — so a long comment highlighted its own first 240 characters and
+ * stopped mid-word. New quotes are whole, but a document saved by an older
+ * version still has the capped kind, and it has to keep resolving.
+ */
+function quoteMatches(text: string, quote: string): boolean {
+  const found = normalise(text);
+  const expected = normalise(quote);
+  if (found === expected) return true;
+
+  // A quote sitting exactly on the old cap was written by an older version and
+  // may be a prefix of the selection rather than all of it.
+  return quote.length === LEGACY_QUOTE_CAP && found.startsWith(expected);
 }
 
 /** Collapse whitespace so a reflowed paragraph still matches its stored quote. */
@@ -243,8 +279,16 @@ function pointAt(root: Element, target: number): { node: Text; offset: number } 
   return null;
 }
 
-/** Locate `quote` by scanning the concatenated text of `root`. */
-function rangeFromQuote(root: Element, quote: string): Range | null {
+/**
+ * Locate `quote` by scanning the concatenated text of `root`.
+ *
+ * `length` is how much text the reader actually selected. It matters when the
+ * quote was capped: the excerpt finds the *start*, and without the length the
+ * range would stop at 240 characters rather than where the reader let go. It is
+ * clamped to the text that is actually there, because this path only runs when
+ * the offsets are already known to be stale.
+ */
+function rangeFromQuote(root: Element, quote: string, length = 0): Range | null {
   const needle = quote.trim();
   if (needle === '') return null;
 
@@ -254,7 +298,8 @@ function rangeFromQuote(root: Element, quote: string): Range | null {
   const index = haystack.indexOf(needle);
   if (index < 0) return null;
 
-  return rangeFromOffsets(root, index, index + needle.length);
+  const end = Math.min(index + Math.max(needle.length, length), haystack.length);
+  return rangeFromOffsets(root, index, end);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -440,29 +485,82 @@ export function contextAround(
   const missing: AnchoredContext = { before: '', quote: stored.quote, after: '', resolved: false };
 
   const anchor = docPage.querySelector(`#${CSS.escape(stored.anchorId)}`);
-  const text = anchor?.textContent ?? '';
-  if (text === '') return missing;
+  if (!anchor) return missing;
 
-  const bounds = locateQuote(text, stored);
-  if (!bounds) return missing;
+  const found = readable(anchor, stored) ?? byOffsets(anchor, stored);
+  if (!found) return missing;
 
+  const { text, start, end } = found;
   return {
-    before: ellipsise(tidy(text.slice(Math.max(0, bounds.start - radius), bounds.start)), 'start'),
-    quote: tidy(text.slice(bounds.start, bounds.end)),
-    after: ellipsise(tidy(text.slice(bounds.end, bounds.end + radius)), 'end'),
+    before: ellipsise(tidy(text.slice(Math.max(0, start - radius), start)), 'start'),
+    quote: tidy(text.slice(start, end)),
+    after: ellipsise(tidy(text.slice(end, end + radius)), 'end'),
     resolved: true,
   };
 }
 
-/** Stored offsets first, then the quote itself — the same order as `resolveRange`. */
+interface Located {
+  readonly text: string;
+  readonly start: number;
+  readonly end: number;
+}
+
+/**
+ * Find the quote in the anchor's *prose*, with the runtime's chrome left out.
+ *
+ * why this is the preferred path: the anchor is usually a whole `doc-section`,
+ * and `textContent` on one of those returns the reader's paragraphs run together
+ * with every label the runtime drew — a code block's title, its language pill
+ * and its Copy and Comment buttons all land mid-sentence with no space between
+ * them, so the excerpt opened with `electionsqlCopyCommentUPDATE`. None of that
+ * is anything the reader can select, so none of it belongs in a quotation of
+ * what they selected.
+ *
+ * It works by searching for the quote rather than by using the stored offsets,
+ * because those offsets count the chrome this deliberately drops. That only
+ * works when the quote is the whole selection: a capped one written by an older
+ * version would be *found* here and then shown at its capped length, so those
+ * go to `byOffsets`, which knows how to restore the length from the offsets.
+ */
+function readable(anchor: Element, stored: SerializedRange): Located | null {
+  if (stored.quote.length === LEGACY_QUOTE_CAP) return null;
+
+  const text = textNodesOf(anchor)
+    .filter((node) => !node.parentElement?.closest('[data-doc-chrome]'))
+    .map((node) => node.data)
+    .join('');
+
+  const index = text.indexOf(stored.quote);
+  if (index < 0) return null;
+  return { text, start: index, end: index + stored.quote.length };
+}
+
+/** The stored offsets, against the same text they were measured in. */
+function byOffsets(anchor: Element, stored: SerializedRange): Located | null {
+  const text = anchor.textContent ?? '';
+  if (text === '') return null;
+
+  const bounds = locateQuote(text, stored);
+  return bounds ? { text, start: bounds.start, end: bounds.end } : null;
+}
+
+/**
+ * Stored offsets first, then the quote itself — the same order as `resolveRange`,
+ * and the same prefix rule, so the excerpt the panel shows and the highlight the
+ * document paints can never disagree about where a comment ends.
+ */
 function locateQuote(text: string, stored: SerializedRange): { start: number; end: number } | null {
-  if (normalise(text.slice(stored.start, stored.end)) === normalise(stored.quote)) {
+  if (quoteMatches(text.slice(stored.start, stored.end), stored.quote)) {
     return { start: stored.start, end: stored.end };
   }
 
   const index = text.indexOf(stored.quote);
   if (index < 0) return null;
-  return { start: index, end: index + stored.quote.length };
+
+  // The offsets are stale, but they still say how much the reader selected —
+  // which is what a quote written under the old cap cannot say for itself.
+  const length = Math.max(stored.quote.length, stored.end - stored.start);
+  return { start: index, end: Math.min(index + length, text.length) };
 }
 
 /** The visible text of a whole block, for a block comment's detail view. */

@@ -7,9 +7,10 @@
     position: relative;
   }
 
+  /* MUST: a block, not a column flex container — see `_steps.scss` for why a
+   * host holding the author's prose may not lay its children out. */
   doc-milestone {
-    display: flex;
-    flex-direction: column;
+    display: block;
     position: relative;
   }
 

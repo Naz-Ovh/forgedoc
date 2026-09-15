@@ -692,6 +692,89 @@ export const TAGS = {
   },
 } as const satisfies Record<string, TagSpec>;
 
+/**
+ * HTML phrasing content — the tags that belong *inside* a sentence.
+ *
+ * why a static list rather than a computed `display`: this table is read by the
+ * Node validator, which has no DOM at all, and by `nameAuthorContent`, which
+ * runs before first paint and must not force a layout to name a child. It is
+ * also the more honest test — `<code>` is phrasing content whatever a
+ * stylesheet later does to it.
+ */
+export const PHRASING_TAGS: ReadonlySet<string> = new Set([
+  'a',
+  'abbr',
+  'b',
+  'bdi',
+  'bdo',
+  'br',
+  'button',
+  'cite',
+  'code',
+  'data',
+  'dfn',
+  'em',
+  'i',
+  'input',
+  'kbd',
+  'label',
+  'mark',
+  'output',
+  'q',
+  'ruby',
+  's',
+  'samp',
+  'select',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'sup',
+  'textarea',
+  'time',
+  'u',
+  'var',
+  'wbr',
+]);
+
+/**
+ * Embedded content — phrasing content that is nonetheless a *thing*, not a word.
+ *
+ * why it is listed apart: an `<img>` in the middle of a step's sentence is part
+ * of that sentence, but the `<svg>` inside a `doc-figure` is the whole point of
+ * the figure. Both readings are correct, and only the component knows which one
+ * applies, so `nameAuthorContent` takes `includeEmbedded` rather than guessing.
+ */
+export const EMBEDDED_TAGS: ReadonlySet<string> = new Set([
+  'audio',
+  'canvas',
+  'embed',
+  'iframe',
+  'img',
+  'object',
+  'picture',
+  'svg',
+  'video',
+]);
+
+/** Phrasing `doc-*` tags, from the contract's own `inline` flag (§7.5). */
+export const INLINE_DOC_TAGS: ReadonlySet<string> = new Set(
+  Object.entries(TAGS)
+    .filter(([, spec]) => (spec as TagSpec).inline === true)
+    .map(([tag]) => tag),
+);
+
+/** True for an element name that belongs inside a sentence rather than around one. */
+export function isPhrasingTag(tagName: string): boolean {
+  const tag = tagName.toLowerCase();
+  return PHRASING_TAGS.has(tag) || EMBEDDED_TAGS.has(tag) || INLINE_DOC_TAGS.has(tag);
+}
+
+/** True for an element name that embeds an object rather than a run of words. */
+export function isEmbeddedTag(tagName: string): boolean {
+  return EMBEDDED_TAGS.has(tagName.toLowerCase());
+}
+
 export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-page': [
     'canvas',
@@ -718,7 +801,7 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   ],
   'doc-header': ['title', 'lede', 'kicker', 'rule'],
   'doc-section': ['heading', 'title', 'number', 'anchor', 'body'],
-  'doc-toc': ['title', 'list', 'item', 'link', 'number', 'label'],
+  'doc-toc': ['title', 'list', 'item', 'link', 'number', 'label', 'menu-icon', 'toggle-text'],
   'doc-note': ['icon', 'title', 'body'],
   'doc-blocker': ['badge', 'title', 'blocks', 'why', 'action'],
   'doc-blocks': ['label', 'content'],
@@ -741,6 +824,8 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
     'summary',
     'status',
     'open-icon',
+    'open-arrow',
+    'endpoint-drawer-close',
     'body',
     'endpoint-drawer',
     'endpoint-drawer-header',
@@ -754,7 +839,7 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-params': [],
   'doc-param': ['header', 'name', 'type', 'badge', 'default', 'body'],
   'doc-steps': [],
-  'doc-step': ['marker', 'card', 'header', 'title', 'body'],
+  'doc-step': ['marker', 'header', 'title', 'body'],
   'doc-stats': [],
   'doc-stat': ['label', 'value-row', 'value', 'diff', 'body'],
   'doc-timeline': [],
@@ -775,8 +860,8 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-tabs': ['strip', 'tab'],
   'doc-tab': ['body'],
   'doc-checklist': ['item', 'check'],
-  'doc-carousel': ['controls', 'prev-btn', 'next-btn', 'dots', 'dot'],
-  'doc-flow': ['arrow'],
+  'doc-carousel': ['controls', 'prev-btn', 'next-btn', 'prev-icon', 'next-icon', 'dots', 'dot'],
+  'doc-flow': ['arrow', 'arrow-icon'],
   'doc-flow-node': ['title', 'subtitle*'],
   'doc-roadmap': [],
   'doc-stage': ['header', 'badge', 'heading', 'title', 'subtitle', 'current-marker', 'body'],

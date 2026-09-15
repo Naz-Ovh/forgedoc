@@ -166,10 +166,12 @@
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
-    border: var(--doc-rule);
+    /* `border-2`, not the card hairline: this is the only way out of a modal
+     * drawer, so it has to read as a control rather than as a ruled box. */
+    border: var(--doc-border-width) solid var(--doc-border-2);
     border-radius: var(--doc-radius);
     background: var(--doc-surface-1);
-    color: var(--doc-text-3);
+    color: var(--doc-text-2);
     font-size: var(--doc-text-lg);
     line-height: 1;
     transition:
@@ -178,7 +180,8 @@
   }
 
   [data-part="endpoint-drawer-close"]:hover {
-    border-color: var(--doc-border-2);
+    border-color: var(--doc-border-3);
+    background: var(--doc-surface-2);
     color: var(--doc-text-1);
   }
 

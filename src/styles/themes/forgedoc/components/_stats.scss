@@ -11,7 +11,6 @@
     border: var(--doc-border-width) solid var(--doc-border-1);
     border-radius: var(--doc-radius);
     background: var(--doc-surface-1);
-    gap: var(--doc-space-2);
   }
 
   doc-stat [data-part="label"] {
@@ -54,7 +53,27 @@
     color: light-dark(var(--doc-danger-900), var(--doc-danger-200));
   }
 
-  doc-stat [data-part="body"] {
+  /*
+   * The row spacing `gap` used to give this tile. A block box has no gap, so it
+   * lives on the value row — the one part that always sits between the label
+   * and the caption.
+   */
+  doc-stat [data-part="value-row"] {
+    margin-block: var(--doc-space-2);
+  }
+
+  doc-stat [data-part="value-row"]:last-child {
+    margin-block-end: 0;
+  }
+
+  /*
+   * The same paint for a body the author wrote as prose rather than as a
+   * paragraph. `nameAuthorContent` has no element to name in that case and
+   * marks the host instead, so the two selectors are the same body — one of
+   * them just has no box of its own.
+   */
+  doc-stat [data-part="body"],
+  doc-stat[data-doc-flow] {
     font-size: var(--doc-text-xs);
     color: var(--doc-text-3);
     margin-top: var(--doc-space-1);

@@ -10,6 +10,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { arrowRightIcon, closeIcon } from '../core/icons.js';
 import { authorChildren, createPart, nameAuthorContent } from '../core/parts.js';
 
 const ENDPOINT_OPEN_EVENT = 'forgedoc:endpoint-open';
@@ -129,7 +130,8 @@ function createTrigger(endpoint: EndpointDetails): HTMLButtonElement {
   const status = createPart('status', 'span', { text: endpoint.status });
   status.dataset.status = statusTone(endpoint.status);
 
-  const openIcon = createPart('open-icon', 'span', { text: '→' });
+  const openIcon = createPart('open-icon', 'span');
+  openIcon.append(arrowRightIcon('open-arrow'));
   openIcon.setAttribute('aria-hidden', 'true');
   trigger.append(method, path, summary, status, openIcon);
   return trigger;
@@ -236,7 +238,8 @@ function renderDrawer(dialog: HTMLDialogElement, endpoint: EndpointDetails): voi
 function createDrawerHeader(dialog: HTMLDialogElement, endpoint: EndpointDetails): HTMLElement {
   const header = createPart('endpoint-drawer-header', 'header');
   const eyebrow = createPart('endpoint-drawer-eyebrow', 'span', { text: 'API reference' });
-  const close = createPart('endpoint-drawer-close', 'button', { text: '×' }) as HTMLButtonElement;
+  const close = createPart('endpoint-drawer-close', 'button') as HTMLButtonElement;
+  close.append(closeIcon());
   close.type = 'button';
   close.setAttribute('aria-label', 'Close API details');
   close.addEventListener('click', () => dialog.close());

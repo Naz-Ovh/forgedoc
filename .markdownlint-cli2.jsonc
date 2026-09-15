@@ -21,6 +21,12 @@
     // They are read as statements of the contract, not as labels.
     "MD026": false,
 
+    // MD024 no-duplicate-heading: Keep a Changelog gives every release its own
+    // `### Added` / `### Changed` / `### Fixed`, so the same heading text
+    // repeats once per version by design. Scoped to siblings it still catches
+    // the real mistake — the same heading twice inside one release.
+    "MD024": { "siblings_only": true },
+
     // MD036 no-emphasis-as-heading: `**Attributes**` and `**Parts:**` label the
     // block that follows them. They must not be headings — headings feed the
     // section numbering that the document's own § references depend on.

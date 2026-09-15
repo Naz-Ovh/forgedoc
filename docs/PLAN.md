@@ -84,6 +84,15 @@ Why: moving a text node invalidates every live `Range`. Highlight restoration ru
 
 This constraint is why no component framework is used — see §2.5.
 
+**The one exception: a disclosure's content region.** `doc-collapse`, `doc-stage` and `doc-tab` close by setting `hidden="until-found"` on their content. That is an attribute, and a text node has none — so a panel written as a bare sentence had nothing to set it on and stayed on screen when closed. `ensureContentElement()` in `core/disclosure.ts` builds one `<div data-part="body">` and moves the author's content into it.
+
+That is allowed here, and *only* here, because the reason above does not apply:
+
+- It runs inside `enhance()`, before any `Range` exists to invalidate.
+- A highlight is anchored by character offset into the anchor's `textContent` (`SerializedRange`, §10.2), never by node identity — and a container does not change `textContent` by one character.
+
+The alternative was hiding loose prose with `visibility` or a clip, which takes it away from Ctrl+F with nothing to put it back. A container the reader can never observe is the better trade. Do not read this as licence to wrap anywhere else: every other component handles loose prose by *not being a layout container*, which needs no wrapper at all.
+
 ### 2.3 MUST: work from `file://` with no network.
 
 The primary delivery mode is a single self-contained `.html` file opened with `xdg-open`. That means:

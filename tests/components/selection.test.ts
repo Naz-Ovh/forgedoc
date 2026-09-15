@@ -10,6 +10,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  contextAround,
   highlightApi,
   locationLabel,
   paintHighlights,
@@ -170,5 +171,175 @@ describe('painting highlights', () => {
 
     const result = paintHighlights(docPage, [itemFor(gone, 'fb-gone')]);
     expect(result.orphaned).toEqual(['fb-gone']);
+  });
+});
+
+/**
+ * A reader selecting several paragraphs is the ordinary case, not an edge one,
+ * and the stored quote is capped at 240 characters to keep a document full of
+ * comments from carrying a second copy of itself in `localStorage`.
+ *
+ * The bug this pins: resolution compared the range's text to that capped quote
+ * with `===`. For any selection past the cap the comparison failed against
+ * offsets that were perfectly correct, resolution fell through to searching for
+ * the excerpt, and the excerpt is what got painted — so a long comment
+ * highlighted its own first 240 characters and stopped mid-word.
+ */
+describe('a selection longer than the stored quote', () => {
+  /** Six sentences, ~450 characters — comfortably past the 240-char cap. */
+  const LONG = [
+    'Driven by the same NOTIFY the hub gets, so it is immediate, and swept',
+    'periodically for rows whose NOTIFY was dropped, which closes the one hole in',
+    'the current pipeline, where a notification raised while nothing was listening',
+    'reaches a closed app never. The column also answers whether this customer was',
+    'actually pinged, straight from the database, which the mail side has always',
+    'listed as a known gap in the delivery record it keeps for every message.',
+  ].join(' ');
+
+  const LONG_DOCUMENT = `<doc-section title="Sweep"><p id="p-long">${LONG}</p></doc-section>`;
+
+  it('stores offsets and a quote that both cover all of it', () => {
+    const docPage = mountPlan(LONG_DOCUMENT);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-long') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    // The quote is the record of what the reader commented on, so it is whole:
+    // the bucket panel, the detail window and the copied payload all read it.
+    expect(stored.end - stored.start).toBe(LONG.length);
+    expect(stored.quote).toBe(LONG);
+
+    docPage.remove();
+  });
+
+  it('resolves back to everything the reader selected', () => {
+    const docPage = mountPlan(LONG_DOCUMENT);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-long') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    expect(resolveRange(docPage, stored)?.toString()).toBe(LONG);
+
+    docPage.remove();
+  });
+
+  it('paints one highlight rather than reporting the item as orphaned', () => {
+    const docPage = mountPlan(LONG_DOCUMENT);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-long') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    const item: FeedbackItem = {
+      id: 'fb-long',
+      createdAt: '2026-01-01T00:00:00Z',
+      range: stored,
+      comment: 'does the sweep cover a dropped NOTIFY?',
+      at: '1 Sweep',
+    };
+
+    expect(paintHighlights(docPage, [item]).orphaned).toEqual([]);
+
+    docPage.remove();
+  });
+
+  it('keeps the selected length when the offsets have gone stale', () => {
+    const docPage = mountPlan(LONG_DOCUMENT);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-long') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    // A paragraph added above shifts every offset; the quote still finds the
+    // start, and the stored length is what says where the selection ended.
+    const shifted: SerializedRange = { ...stored, start: 0, end: LONG.length };
+    const section = docPage.querySelector('doc-section') as HTMLElement;
+    section.prepend(Object.assign(document.createElement('p'), { textContent: 'Inserted.' }));
+
+    expect(resolveRange(docPage, shifted)?.toString()).toBe(LONG);
+
+    docPage.remove();
+  });
+
+  it('shows the whole selection in the bucket, not the first 240 characters', () => {
+    const docPage = mountPlan(LONG_DOCUMENT);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-long') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    // The excerpt the detail window highlights has to agree with the highlight
+    // the document paints — they resolve the same anchor by the same rules.
+    const context = contextAround(docPage, stored);
+    expect(context.resolved).toBe(true);
+    expect(context.quote).toBe(LONG);
+
+    docPage.remove();
+  });
+
+  it('reads a quote saved by an older version, capped at 240', () => {
+    const docPage = mountPlan(LONG_DOCUMENT);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-long') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    // What 1.1.0 wrote: correct offsets, an excerpt cut at the old cap.
+    const legacy: SerializedRange = { ...stored, quote: LONG.slice(0, 240) };
+    expect(legacy.quote).toHaveLength(240);
+
+    expect(resolveRange(docPage, legacy)?.toString()).toBe(LONG);
+    expect(contextAround(docPage, legacy).quote).toBe(LONG);
+
+    docPage.remove();
+  });
+
+  it('keeps the runtime\u2019s own chrome out of the excerpt', () => {
+    const docPage = mountPlan(`
+      <doc-section title="Sweep">
+        <doc-code lang="sql" title="One winner">UPDATE notifications SET pushed_at = now();</doc-code>
+        <p id="p-after">${LONG}</p>
+      </doc-section>
+    `);
+    const stored = selectText(
+      docPage,
+      docPage.querySelector('#p-after') as HTMLElement,
+      LONG,
+    ) as SerializedRange;
+
+    const context = contextAround(docPage, stored);
+
+    // The anchor is the whole section, and `textContent` on one of those runs
+    // the code block's title, its language pill and its Copy and Comment
+    // buttons straight into the prose. None of it is selectable, so none of it
+    // belongs in a quotation of what the reader selected.
+    expect(context.quote).toBe(LONG);
+    expect(`${context.before}${context.after}`).not.toMatch(/Copy|Comment|sql/i);
+
+    docPage.remove();
+  });
+
+  it('still requires an exact match when the quote was not capped', () => {
+    const docPage = mountPlan(DOCUMENT);
+    const wrong: SerializedRange = {
+      anchorId: 'sec-what-we-are-building',
+      start: 0,
+      end: 5,
+      quote: 'text that was deleted from the document',
+    };
+
+    // A short quote is the whole selection, so a prefix test would be a way for
+    // a stale anchor to resolve onto unrelated text.
+    expect(resolveRange(docPage, wrong)).toBeNull();
+
+    docPage.remove();
   });
 });

@@ -4,6 +4,17 @@
  * MUST (§8.4): every free-text field shares one visual style — same border,
  * padding, radius and background. `--doc-field-*` below is that one style, used
  * by the Other textarea, the note textarea and the bucket's comment composer.
+ *
+ * MUST: `doc-option` is a **block**, never a grid or a flex container.
+ *
+ * why: the option's label is the author's own text node, and §8.4 keeps it a
+ * direct child so the bucket can serialise it verbatim. An agent writing
+ * `Add the <code>language</code> column now` therefore hands the option three
+ * children — text, `<code>`, text — and in a grid each becomes its own item
+ * with the runs between them landing in anonymous items no rule can reach, so
+ * the sentence broke across three columns with the `<code>` chip flung into the
+ * trailing track. As a block the label is one line of text, which is what it
+ * is. The radio and its letter are positioned into the gutter instead.
  */
 
 @layer doc.components {
@@ -12,8 +23,8 @@
   }
 
   doc-option {
-    display: grid;
-    grid-template-columns: auto 1fr;
+    display: block;
+    position: relative;
     cursor: pointer;
     transition:
     border-color var(--doc-transition),
@@ -23,7 +34,7 @@
   doc-option [data-part="control"] {
     display: inline-flex;
     align-items: center;
-    grid-row: 1;
+    position: absolute;
   }
 
   doc-option [data-part="key"] {
@@ -32,27 +43,31 @@
   }
 
   doc-option [data-part="desc"] {
-    grid-column: 2;
+    display: block;
   }
 
+  /*
+   * The trailing chips float rather than take a track.
+   *
+   * why a float: they belong on the label's first line, and a float is the one
+   * layout mode that puts a box beside running text without making that text a
+   * layout item of its own. Both are inserted directly after the control, ahead
+   * of the author's label, because a float is placed on the line it is
+   * encountered in — appended after the description it would drop to the
+   * bottom of the option.
+   */
   doc-option [data-part="recommended"] {
-    grid-column: 2;
-    justify-self: start;
+    float: inline-end;
   }
 
   /* ── The appended Other option ──────────────────────────────────────────── */
   doc-option[data-part="other"] [data-part="other-label"] {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: center;
+    display: inline;
   }
 
   /* MUST (§8.4): the hint is smaller and on the same line as the label. */
   doc-option[data-part="other"] [data-part="other-hint"] {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    align-self: center;
+    float: inline-end;
   }
 
   /*
@@ -61,7 +76,7 @@
   */
   doc-option[data-part="other"] [data-part="other-text"] {
     display: none;
-    grid-column: 2;
+    clear: both;
   }
 
   doc-choice:state(other-open) doc-option[data-part="other"] [data-part="other-text"] {

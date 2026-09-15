@@ -38,8 +38,9 @@
     cursor: pointer;
   }
 
-  doc-toc [data-part="toggle"]::before {
-    content: "☰";
+  doc-toc [data-part="menu-icon"] {
+    display: block;
+    flex: none;
   }
 
   /*

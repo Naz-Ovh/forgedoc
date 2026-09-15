@@ -5,6 +5,10 @@
  * hairline connector, a mono numeral in a ringed disc, and the design's card
  * for the content. Status is carried by the disc alone, so a completed step
  * does not restate itself in three places.
+ *
+ * The card is the host element itself, and the disc is positioned into the
+ * gutter beside it — see `base/components/_steps.scss` for why a step may not
+ * be a grid.
  */
 
 @layer doc.theme {
@@ -14,23 +18,37 @@
   }
 
   doc-step {
-    /* `minmax(0, 1fr)`, not `1fr`: the shorthand floors at min-content, and a
-     * card holding an inline `<code>` chip — which is `nowrap` — then refuses
-     * to shrink and widens the document instead of wrapping. */
-    grid-template-columns: var(--doc-space-8) minmax(0, 1fr);
-    gap: var(--doc-space-4);
-    align-items: start;
+    /* The disc, the space beside it, and the two added together — the inset the
+     * card is pushed over by, and the negative offset the gutter chrome is
+     * pulled back out by. Named once so the three stay in step. */
+    --doc-step-disc: var(--doc-space-8);
+    --doc-step-gap: var(--doc-space-4);
+    --doc-step-inset: calc(var(--doc-step-disc) + var(--doc-step-gap));
+
+    margin-inline-start: var(--doc-step-inset);
+    padding: var(--doc-space-4-5) var(--doc-space-5);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
   }
 
   doc-step::before {
     content: "";
     position: absolute;
-    inset-inline-start: calc(var(--doc-space-8) / 2 - 1px);
-    top: var(--doc-space-8);
-    bottom: calc(-1 * var(--doc-space-4));
+    inset-inline-start: calc(var(--doc-step-disc) / 2 - 1px - var(--doc-step-inset));
+    top: var(--doc-step-disc);
+    bottom: calc(-1 * var(--doc-step-gap));
     width: 2px;
     border-radius: 2px;
-    background: var(--doc-border-1);
+    /*
+     * `border-2`, not the card hairline. The rail and the discs are the one
+     * piece of structure in a walkthrough that carries meaning on its own —
+     * they are what says "these are in order" — so they sit a step above the
+     * edge of a card, which only has to say "this is a box".
+     */
+    background: var(--doc-border-2);
     z-index: 0;
   }
 
@@ -39,11 +57,21 @@
   }
 
   doc-step [data-part="marker"] {
-    width: var(--doc-space-8);
-    height: var(--doc-space-8);
-    border: 2px solid var(--doc-border-2);
+    inset-inline-start: calc(-1 * var(--doc-step-inset));
+    top: 0;
+    width: var(--doc-step-disc);
+    height: var(--doc-step-disc);
+    border: 2px solid var(--doc-border-3);
     border-radius: 50%;
-    background: var(--doc-surface-0);
+    /*
+     * The card's white, not the page's.
+     *
+     * The disc has to be opaque — it is what breaks the rail running behind it
+     * — and painting it in the page ground made it read as a hole punched in
+     * the page rather than as a numeral sitting on it. `surface-1` is the same
+     * ground the card beside it uses, so the two read as one object.
+     */
+    background: var(--doc-surface-1);
     color: var(--doc-text-3);
     font-family: var(--doc-font-mono);
     font-size: var(--doc-text-ui);
@@ -73,13 +101,6 @@
   doc-step[status="optional"] [data-part="marker"] {
     border-style: dashed;
     color: var(--doc-default-faint);
-  }
-
-  doc-step [data-part="card"] {
-    padding: var(--doc-space-4-5) var(--doc-space-5);
-    border: var(--doc-rule);
-    border-radius: var(--doc-radius-lg);
-    background: var(--doc-surface-1);
   }
 
   doc-step [data-part="header"] {

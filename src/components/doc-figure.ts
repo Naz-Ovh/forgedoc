@@ -47,7 +47,9 @@ export class DocFigure extends DocElement {
         this.#renderIsolatedHtml();
         return;
       case 'svg':
-        nameAuthorContent(this, 'content');
+        // The author's `<svg>` *is* the figure. Embedded tags are phrasing
+        // content everywhere else, which is why this has to say so.
+        nameAuthorContent(this, 'content', { includeEmbedded: true });
         return;
     }
   }

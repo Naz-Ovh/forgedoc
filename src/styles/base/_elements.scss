@@ -23,6 +23,26 @@
     display: block;
   }
 
+  /*
+   * A control whose whole content is one of the runtime's icons centres it.
+   *
+   * why: the icons used to be text glyphs (`×`, `←`, `→`), so their buttons
+   * centred them with `line-height` and a fixed box. An inline SVG is replaced
+   * content sitting on the text baseline instead, which left every one of them
+   * a couple of pixels high inside its box. Flex centring is the only version
+   * that is right for both, and it costs the themes nothing to inherit.
+   */
+  doc-page :where(button, a):has(> svg[data-doc-chrome]:only-child) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Icons never stretch or get squeezed by the label beside them. */
+  doc-page svg[data-doc-chrome] {
+    flex: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     doc-page *,
     doc-page *::before,

@@ -67,7 +67,7 @@ export function setupOption(option: HTMLElement, setup: OptionSetup): HTMLInputE
 
   option.dataset.key = setup.key;
   markDescription(option, input);
-  appendRecommendedBadge(option);
+  insertRecommendedBadge(option, control);
 
   input.addEventListener('change', () => setup.onChange());
 
@@ -126,11 +126,20 @@ function markDescription(option: HTMLElement, input: HTMLInputElement): void {
   input.setAttribute('aria-describedby', description.id);
 }
 
-function appendRecommendedBadge(option: HTMLElement): void {
+/**
+ * Put the "Recommended" pill on the label's first line.
+ *
+ * why after the control rather than appended at the end (§2.2): the pill is a
+ * float, and a float is placed on whichever line box it is encountered in —
+ * appended after the description it would sink to the bottom of the option.
+ * Inserting chrome *between* two of the author's nodes shifts nothing and
+ * reparents nothing, so the constraint is untouched.
+ */
+function insertRecommendedBadge(option: HTMLElement, control: HTMLElement): void {
   if (!option.hasAttribute('recommended')) return;
   if (option.querySelector(':scope > [data-part="recommended"]')) return;
 
-  option.append(createPart('recommended', 'span', { text: 'Recommended' }));
+  control.after(createPart('recommended', 'span', { text: 'Recommended' }));
 }
 
 /**

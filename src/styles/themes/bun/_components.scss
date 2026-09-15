@@ -55,7 +55,7 @@
     color: var(--doc-accent-line);
   }
 
-  :is(doc-stat, doc-decision, doc-step [data-part="card"], doc-compare > [data-part="column"],
+  :is(doc-stat, doc-decision, doc-step, doc-compare > [data-part="column"],
       doc-stage, doc-option, doc-choice, doc-tabs, doc-table, doc-matrix, doc-figure,
       doc-collapse) {
     border-color: var(--doc-border-1);
@@ -64,7 +64,7 @@
     box-shadow: var(--doc-shadow-1);
   }
 
-  :is(doc-stat, doc-decision, doc-step [data-part="card"], doc-compare > [data-part="column"],
+  :is(doc-stat, doc-decision, doc-step, doc-compare > [data-part="column"],
       doc-stage, doc-option, doc-collapse) {
     transition:
       border-color var(--doc-transition),
@@ -73,7 +73,7 @@
       transform var(--doc-transition);
   }
 
-  :is(doc-stat, doc-decision, doc-step [data-part="card"], doc-option, doc-collapse):hover {
+  :is(doc-stat, doc-decision, doc-step, doc-option, doc-collapse):hover {
     border-color: var(--doc-border-2);
     background: var(--doc-surface-1);
     box-shadow: var(--doc-shadow-2);
@@ -86,10 +86,21 @@
     padding: var(--doc-space-7);
   }
 
+  /*
+   * Answered is a *done* marker, not a focus ring.
+   *
+   * why it is neutral: a full-accent border around a card is the vocabulary a
+   * browser uses for keyboard focus, so a question the reader had simply
+   * finished looked like the one they were currently in — and with several
+   * questions on a page, several of them looked focused at once. The state
+   * only has to say "you have answered this", which a neutral edge one step
+   * up from the card's own hairline says perfectly well. The accent still
+   * marks the chosen option, which is the part that carries the meaning.
+   */
   doc-choice:state(answered) {
-    border-color: var(--doc-accent-line);
+    border-color: var(--doc-border-2);
     box-shadow:
-      inset 3px 0 0 var(--doc-accent-line),
+      inset 3px 0 0 var(--doc-border-3),
       var(--doc-shadow-1);
   }
 
@@ -99,10 +110,6 @@
   }
 
   doc-step {
-    grid-template-columns: var(--doc-space-8) minmax(0, 1fr);
-  }
-
-  doc-step [data-part="card"] {
     min-width: 0;
     padding: var(--doc-space-5);
   }
@@ -270,7 +277,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :is(doc-stat, doc-decision, doc-step [data-part="card"], doc-option, doc-collapse):hover {
+    :is(doc-stat, doc-decision, doc-step, doc-option, doc-collapse):hover {
       transform: none;
     }
   }

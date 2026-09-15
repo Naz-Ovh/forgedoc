@@ -69,12 +69,17 @@ Every unusual decision traces to one of these. Full rationale in
    the feedback bucket depends on them.
 2. **Enhance in place (§2.2).** Read the author's DOM, append chrome *around*
    it, never move a node. Moving a text node invalidates every live `Range`, and
-   highlight restore runs right after mount.
-3. **Works from `file://` with no network (§2.3).** The offline bundle is IIFE
+   highlight restore runs right after mount. One documented exception exists —
+   a disclosure's content region, `ensureContentElement()` — and §2.2 says why.
+3. **A host that holds author prose is a block.** Never a grid or a flex
+   container. Loose text between two element children becomes an anonymous
+   layout item on a row of its own, and no selector can reach it to put it
+   back — so the sentence shreds down a column. Position the chrome instead.
+4. **Works from `file://` with no network (§2.3).** The offline bundle is IIFE
    (ESM is CORS-blocked on `file://`) and reaches for nothing.
-4. **Zero generation tokens for the runtime (§2.4).** It is injected by
+5. **Zero generation tokens for the runtime (§2.4).** It is injected by
    replacing two placeholders, never emitted by the model.
-5. **No framework for the elements (§2.5).** Plain `HTMLElement` subclasses.
+6. **No framework for the elements (§2.5).** Plain `HTMLElement` subclasses.
    Svelte is used for the bucket panel *only*, because that DOM is entirely
    runtime-created. Rule: runtime creates the DOM → Svelte fine; runtime
    enhances author DOM → vanilla.

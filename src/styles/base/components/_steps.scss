@@ -1,4 +1,17 @@
-/* `doc-steps` / `doc-step` — step-by-step walkthrough guides. */
+/*
+ * `doc-steps` / `doc-step` — step-by-step walkthrough guides.
+ *
+ * MUST: `doc-step` is a **block**, never a grid or a flex container.
+ *
+ * why: the author's body is loose flow content — text nodes and inline markup
+ * the component is forbidden to wrap (§2.2). Every child of a grid container
+ * becomes a grid item, and each contiguous run of text between two of them
+ * becomes an *anonymous* grid item that no selector can reach. `The <code>id</code>
+ * column` is three children, so a two-column grid laid it out as three rows and
+ * shredded the sentence down the gutter. As a block it is simply a paragraph,
+ * which is what the author wrote. The marker is positioned into the gutter
+ * instead of occupying a column.
+ */
 
 @layer doc.components {
   doc-steps {
@@ -9,7 +22,7 @@
   }
 
   doc-step {
-    display: grid;
+    display: block;
     position: relative;
     counter-increment: doc-step;
   }
@@ -19,12 +32,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    position: relative;
-  }
-
-  doc-step [data-part="card"] {
-    display: flex;
-    flex-direction: column;
+    position: absolute;
   }
 
   doc-step [data-part="header"] {

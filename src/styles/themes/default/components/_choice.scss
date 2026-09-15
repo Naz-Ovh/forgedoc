@@ -13,6 +13,25 @@
 @layer doc.theme {
   doc-choice {
     margin-block: var(--doc-space-6);
+    --doc-option-pad-block: var(--doc-space-3);
+    --doc-option-pad-inline: var(--doc-space-3-5);
+    --doc-option-gutter: calc(1rem + var(--doc-space-2) + 1.25rem + var(--doc-space-3));
+
+    /*
+     * The question is sized by the reading measure, not by the document column.
+     *
+     * why: an option's label is a bare text node and its description is a `<p>`,
+     * set two steps apart — and `--doc-measure-prose` is in `em`, so the same
+     * token resolved to 672px on one and 567px on the other. The two halves of
+     * one option wrapped at two different right edges, with a third of the card
+     * left empty beside the description. Sizing the *card* from the measure
+     * gives them one edge and no empty column, and keeps an option's text
+     * wrapping at the same width as the prose above it.
+     */
+    max-width: calc(
+      var(--doc-measure-prose) + var(--doc-option-gutter) +
+        2 * var(--doc-option-pad-inline) + 2 * var(--doc-space-5)
+    );
     padding: var(--doc-space-4-5) var(--doc-space-5);
     border: var(--doc-rule);
     border-radius: var(--doc-radius-lg);
@@ -39,26 +58,38 @@
   }
 
   /*
-   * Three columns, not two.
+   * The control sits in a reserved gutter, not a grid track.
    *
-   * why: `base/` gives the option `auto 1fr` and drops `[data-part="desc"]`
-   * and `[data-part="recommended"]` into column 2, which auto-places them onto
-   * rows 2 and 3 — so a recommended option costs three rows and a full row-gap
-   * for a pill holding one word. A third track lets the pill share row 1 with
-   * the label it belongs to, which is where the design puts a chip anyway, and
-   * the option loses a whole row of height.
+   * `--doc-option-gutter` is the radio, the space beside it and the letter
+   * badge: the inline padding the label is pushed over by, and the offset the
+   * control is pulled back out to. Named once so the two cannot drift.
    */
   doc-option {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    /* 2px of row gap: the label and its description are one thought, and the
-     * description already carries its own line-height. */
-    gap: 2px var(--doc-space-3);
     margin-block: var(--doc-space-2);
-    padding: var(--doc-space-3) var(--doc-space-3-5);
+    padding: var(--doc-option-pad-block) var(--doc-option-pad-inline);
+    padding-inline-start: calc(var(--doc-option-pad-inline) + var(--doc-option-gutter));
     border: var(--doc-rule);
     border-radius: var(--doc-radius);
-    background: var(--doc-surface-1);
-    color: var(--doc-text-2);
+    /*
+     * One step back from the card, not the same white.
+     *
+     * An option is nested *inside* `doc-choice`, and painting both `surface-1`
+     * left a row of white boxes on a white box held apart by a hairline. The
+     * step down is what makes the list read as rows of a card rather than as
+     * more card; hovering lifts a row back up to the card's own white, which
+     * is why the hover reads as "this one is live" without any colour at all.
+     */
+    background: var(--doc-surface-2);
+    /*
+     * The label is the reader's heading for the option and has to read as one.
+     *
+     * It is a bare author text node (§8.4), so there is no element to weight —
+     * the host carries it, and `[data-part="desc"]` below hands the weight and
+     * the colour back so the description does not inherit them. Without this
+     * the two ran together as one block of grey at two sizes.
+     */
+    color: var(--doc-text-1);
+    font-weight: 600;
     line-height: var(--doc-leading-tight);
   }
 
@@ -75,6 +106,11 @@
   }
 
   doc-option [data-part="control"] {
+    inset-inline-start: var(--doc-option-pad-inline);
+    /* Centred on the label's first line rather than on the option's top edge,
+     * so a two-line label does not leave the radio riding high. */
+    top: var(--doc-option-pad-block);
+    height: calc(1em * var(--doc-leading-tight));
     gap: var(--doc-space-2);
   }
 
@@ -98,9 +134,18 @@
     color: var(--doc-accent-text);
   }
 
+  /*
+   * No measure of its own: `doc-choice` above is sized so that this wraps at
+   * the reading measure, and a second cap here — resolved against the smaller
+   * type this is set in — is what pulled it to two thirds of the option.
+   */
   doc-option [data-part="desc"] {
-    grid-column: 2 / -1;
+    max-width: none;
+    /* 2px, not a row gap: the label and its description are one thought, and
+     * the description already carries its own line-height. */
+    margin-block: 2px 0;
     color: var(--doc-text-3);
+    font-weight: 400;
     font-size: var(--doc-text-ui);
   }
 
@@ -109,10 +154,7 @@
   }
 
   doc-option [data-part="recommended"] {
-    grid-column: 3;
-    grid-row: 1;
-    align-self: center;
-    justify-self: end;
+    margin-inline-start: var(--doc-space-3);
     padding: 3px var(--doc-space-2-5);
     border: var(--doc-border-width) solid var(--doc-accent-200);
     border-radius: var(--doc-radius-pill);
@@ -129,15 +171,12 @@
   }
 
   doc-option[data-part="other"] [data-part="other-hint"] {
-    grid-column: 3;
-    grid-row: 1;
-    align-self: center;
+    margin-inline-start: var(--doc-space-3);
     color: var(--doc-default-faint);
     font-size: var(--doc-text-meta);
   }
 
   doc-option[data-part="other"] [data-part="other-text"] {
-    grid-column: 2 / -1;
     margin-block-start: var(--doc-space-2-5);
   }
 
@@ -194,19 +233,31 @@
     }
 
     doc-option {
+      --doc-option-pad-inline: var(--doc-space-3);
+
       padding: var(--doc-space-3);
+      padding-inline-start: calc(var(--doc-space-3) + var(--doc-option-gutter));
     }
 
     /*
-     * Too narrow for a third track: both trailing chips drop under the label.
-     * Left in row 1 they are `auto` columns with a min-content floor, so the
-     * option would widen the page rather than wrap.
+     * Too narrow to share the line: both trailing chips get one of their own,
+     * each next to the label it qualifies. Left floating they would squeeze
+     * that label to a word or two per line instead.
      */
     doc-option[data-part="other"] [data-part="other-hint"],
     doc-option [data-part="recommended"] {
-      grid-column: 2 / -1;
-      grid-row: auto;
-      justify-self: start;
+      float: none;
+      display: block;
+      width: fit-content;
+      margin-inline-start: 0;
+    }
+
+    doc-option [data-part="recommended"] {
+      margin-block-end: var(--doc-space-2);
+    }
+
+    doc-option[data-part="other"] [data-part="other-hint"] {
+      margin-block-start: var(--doc-space-1);
     }
   }
 }

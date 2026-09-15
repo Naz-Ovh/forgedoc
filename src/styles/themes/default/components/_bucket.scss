@@ -484,6 +484,7 @@
   }
 
   [data-part="detail-title"] {
+    -webkit-line-clamp: 3;
     margin: var(--doc-space-2-5) 0 var(--doc-space-4);
     color: var(--doc-text-1);
     font-size: var(--doc-text-lg);

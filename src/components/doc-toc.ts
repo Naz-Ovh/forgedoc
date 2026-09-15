@@ -8,6 +8,7 @@
 
 import { DocElement } from '../core/base.js';
 import { indexFor, type OutlineEntry } from '../core/numbering.js';
+import { menuIcon } from '../core/icons.js';
 import { createPart } from '../core/parts.js';
 import type { DocPage } from './doc-page.js';
 
@@ -48,7 +49,7 @@ export class DocToc extends DocElement {
 
     const toggle = createPart('toggle', 'button');
     toggle.setAttribute('type', 'button');
-    toggle.textContent = 'Contents';
+    toggle.append(menuIcon(), createPart('toggle-text', 'span', { text: 'Contents' }));
     this.on(toggle, 'click', () => {
       docPage.toggleToc();
       this.#reflect(docPage);

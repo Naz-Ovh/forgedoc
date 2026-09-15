@@ -7,7 +7,12 @@
  */
 
 import { DocElement } from '../core/base.js';
-import { isContentHidden, revealOnFindInPage, setContentHidden } from '../core/disclosure.js';
+import {
+  ensureContentElement,
+  isContentHidden,
+  revealOnFindInPage,
+  setContentHidden,
+} from '../core/disclosure.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 import { stageId } from '../core/slug.js';
 
@@ -37,6 +42,8 @@ export function setupStage(stage: HTMLElement, setup: StageSetup): void {
 export class DocStage extends DocElement {
   protected enhance(): void {
     this.internals.role = 'listitem';
+    // A stage closes by hiding its body, which needs to be an element to hide.
+    ensureContentElement(this, 'body');
     nameAuthorContent(this, 'body');
     this.renderHeader();
     revealOnFindInPage(this, () => this.setOpen(true));

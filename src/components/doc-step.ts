@@ -1,7 +1,14 @@
 /**
  * `<doc-step title="..." status="...">` — one step in a step-by-step walkthrough.
  *
- * Parts: `marker`, `card`, `header`, `title`, `body`.
+ * Parts: `marker`, `header`, `title`, `body`.
+ *
+ * why no `card` element (§2.2): the card used to be a generated `<div>` that the
+ * body was moved into, which is the one thing `enhance()` may never do — and it
+ * only ever moved the *first* child, so a step written as a sentence had its
+ * `<code>` chips left behind outside the box. The card is paint, not structure:
+ * the host carries the border, the background and the inset, and the marker is
+ * positioned into the gutter beside it. Nothing moves.
  */
 
 import { DocElement } from '../core/base.js';
@@ -11,24 +18,12 @@ export class DocStep extends DocElement {
   protected enhance(): void {
     this.internals.role = 'listitem';
 
-    const title = this.attr('title');
-
     nameAuthorContent(this, 'body');
 
-    const marker = createPart('marker', 'div');
-
-    const card = createPart('card', 'div');
     const header = createPart('header', 'div');
-    const titleEl = createPart('title', 'h4', { text: title });
-    header.append(titleEl);
-    card.append(header);
+    header.append(createPart('title', 'h4', { text: this.attr('title') }));
 
-    const bodyEl = this.querySelector('[data-part="body"]');
-    if (bodyEl) {
-      card.append(bodyEl);
-    }
-
-    this.prepend(card);
-    this.prepend(marker);
+    this.prepend(header);
+    this.prepend(createPart('marker', 'div'));
   }
 }

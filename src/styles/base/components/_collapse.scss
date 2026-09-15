@@ -1,10 +1,9 @@
 /*
- * `doc-collapse`.
+ * `doc-collapse`, and the hidden-body rule the other two disclosures share.
  *
- * The content is hidden by `hidden="until-found"` on the author's own children
- * rather than by a `display: none` on a generated wrapper — see
- * `core/disclosure.ts` for why, and note that this keeps Ctrl+F working into
- * collapsed content (acceptance 4).
+ * The content is hidden by `hidden="until-found"` rather than by `display:
+ * none`, which is what keeps Ctrl+F working into collapsed content
+ * (acceptance 4). See `core/disclosure.ts` for the rest of the mechanism.
  */
 
 @layer doc.components {
@@ -18,12 +17,37 @@
     cursor: pointer;
   }
 
+  /*
+   * The chevron is an inline SVG sized in `em`, so it follows the summary's
+   * type rather than needing a size of its own. `flex: none` keeps it from
+   * being squeezed by a long title, and `display: block` drops the inline
+   * baseline gap that would otherwise push it off the row's centre.
+   */
   doc-collapse [data-part="chevron"] {
-    display: inline-block;
+    display: block;
+    flex: none;
     transition: transform var(--doc-transition);
   }
 
   doc-collapse:state(open) [data-part="chevron"] {
     transform: rotate(90deg);
+  }
+
+  /*
+   * A closed body takes no space.
+   *
+   * `hidden="until-found"` is `content-visibility: hidden`, which hides the
+   * contents but keeps the element's own box — and with the default
+   * `contain-intrinsic-size: auto none` the box keeps the size it had when it
+   * was last rendered. So a panel the reader had opened once left a band of
+   * empty card behind when they closed it again, while one they had never
+   * opened closed cleanly. Pinning the intrinsic size to zero is what makes
+   * closed mean closed, and it costs nothing: find-in-page still reaches the
+   * text and `beforematch` still reopens the panel around it.
+   */
+  doc-collapse > [data-part="body"][hidden],
+  doc-stage > [data-part="body"][hidden],
+  doc-tab[hidden] {
+    contain-intrinsic-size: 0;
   }
 }

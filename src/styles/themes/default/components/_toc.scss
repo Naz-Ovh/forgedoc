@@ -47,7 +47,7 @@
     text-align: start;
   }
 
-  doc-toc [data-part="toggle"]::before {
+  doc-toc [data-part="menu-icon"] {
     color: var(--doc-default-faint);
     font-size: var(--doc-text-sm);
   }

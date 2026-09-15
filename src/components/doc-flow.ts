@@ -12,6 +12,7 @@
  */
 
 import { DocElement } from '../core/base.js';
+import { arrowRightIcon } from '../core/icons.js';
 import { createPart } from '../core/parts.js';
 
 export class DocFlow extends DocElement {
@@ -23,7 +24,8 @@ export class DocFlow extends DocElement {
       if (index === 0) return;
       // The arrow belongs *before* the node it points at, and it is generated
       // chrome inserted between two author elements — nothing is moved (§2.2).
-      const arrow = createPart('arrow', 'span', { text: '→' });
+      const arrow = createPart('arrow', 'span');
+      arrow.append(arrowRightIcon('arrow-icon'));
       arrow.setAttribute('aria-hidden', 'true');
       node.before(arrow);
     });

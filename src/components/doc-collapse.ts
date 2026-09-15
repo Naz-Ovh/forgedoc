@@ -9,7 +9,13 @@
  */
 
 import { DocElement } from '../core/base.js';
-import { isContentHidden, revealOnFindInPage, setContentHidden } from '../core/disclosure.js';
+import {
+  ensureContentElement,
+  isContentHidden,
+  revealOnFindInPage,
+  setContentHidden,
+} from '../core/disclosure.js';
+import { chevronIcon } from '../core/icons.js';
 import { createPart, nameAuthorContent } from '../core/parts.js';
 import { collapseId } from '../core/slug.js';
 
@@ -17,6 +23,9 @@ export class DocCollapse extends DocElement {
   protected enhance(): void {
     if (!this.id) this.id = collapseId(this.attr('title'));
 
+    // Before naming: a body written as a bare sentence has no element to hide,
+    // so this gives it one. Content already in blocks is untouched.
+    ensureContentElement(this, 'body');
     nameAuthorContent(this, 'body');
     this.#prependSummary();
     this.setOpen(this.#initialOpenState());
@@ -38,9 +47,7 @@ export class DocCollapse extends DocElement {
     const summary = createPart('summary', 'button');
     summary.setAttribute('type', 'button');
 
-    const chevron = createPart('chevron', 'span', { text: '▸' });
-    chevron.setAttribute('aria-hidden', 'true');
-    summary.append(chevron, createPart('summary-text', 'span', { text: this.attr('title') }));
+    summary.append(chevronIcon(), createPart('summary-text', 'span', { text: this.attr('title') }));
 
     this.on(summary, 'click', () => this.setOpen(!this.isOpen));
     this.prepend(summary);

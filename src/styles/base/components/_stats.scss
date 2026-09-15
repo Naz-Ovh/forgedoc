@@ -6,9 +6,10 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 
+  /* MUST: a block, not a column flex container — see `_steps.scss` for why a
+   * host holding the author's prose may not lay its children out. */
   doc-stat {
-    display: flex;
-    flex-direction: column;
+    display: block;
   }
 
   doc-stat [data-part="label"] {

@@ -59,7 +59,14 @@
     margin-inline-start: auto;
   }
 
-  doc-param [data-part="body"] {
+  /*
+   * The same paint for a body the author wrote as prose rather than as a
+   * paragraph. `nameAuthorContent` has no element to name in that case and
+   * marks the host instead, so the two selectors are the same body — one of
+   * them just has no box of its own.
+   */
+  doc-param [data-part="body"],
+  doc-param[data-doc-flow] {
     font-size: var(--doc-text-sm);
     color: var(--doc-text-2);
   }

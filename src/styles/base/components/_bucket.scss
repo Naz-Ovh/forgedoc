@@ -161,6 +161,18 @@
     -webkit-box-orient: vertical;
   }
 
+  /*
+   * The detail window's heading is the reader's whole selection, which can run
+   * to several paragraphs. It is clamped rather than shortened: the full text
+   * is directly below it in the document pane, under its own highlight, so the
+   * heading only has to say which comment this is.
+   */
+  [data-part="detail-title"] {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+
   [data-part="bucket-item"][data-kind="comment"] [data-part="bucket-item-heading"]::before {
     content: "“";
   }

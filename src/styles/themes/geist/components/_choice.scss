@@ -3,6 +3,25 @@
 @layer doc.theme {
   doc-choice {
     margin-block: var(--doc-space-8);
+    --doc-option-pad-block: var(--doc-space-4);
+    --doc-option-pad-inline: var(--doc-space-4);
+    --doc-option-gutter: calc(1.75rem + var(--doc-space-3));
+
+    /*
+     * The question is sized by the reading measure, not by the document column.
+     *
+     * why: an option's label is a bare text node and its description is a `<p>`,
+     * set two steps apart — and `--doc-measure-prose` is in `em`, so the same
+     * token resolved to 672px on one and 567px on the other. The two halves of
+     * one option wrapped at two different right edges, with a third of the card
+     * left empty beside the description. Sizing the *card* from the measure
+     * gives them one edge and no empty column, and keeps an option's text
+     * wrapping at the same width as the prose above it.
+     */
+    max-width: calc(
+      var(--doc-measure-prose) + var(--doc-option-gutter) +
+        2 * var(--doc-option-pad-inline) + 2 * var(--doc-space-6)
+    );
     padding: var(--doc-space-6);
     border: var(--doc-rule);
     border-radius: var(--doc-radius-lg);
@@ -22,12 +41,15 @@
     line-height: 1.4;
     letter-spacing: -0.02em;
   }
+  /*
+   * `--doc-option-gutter` is the letter tile plus the space beside it: the
+   * inline padding the label is pushed over by, and the offset the control is
+   * pulled back out to. Named once so the two cannot drift.
+   */
   doc-option {
-    gap: var(--doc-space-1) var(--doc-space-3);
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: start;
     margin-block: var(--doc-space-3);
-    padding: var(--doc-space-4);
+    padding: var(--doc-option-pad-block) var(--doc-option-pad-inline);
+    padding-inline-start: calc(var(--doc-option-pad-inline) + var(--doc-option-gutter));
     border: var(--doc-rule);
     border-radius: var(--doc-radius);
     background: var(--doc-surface-1);
@@ -44,9 +66,11 @@
     color: var(--doc-accent-text);
   }
   doc-option [data-part="control"] {
-    position: relative;
-    grid-column: 1;
-    grid-row: 1;
+    inset-inline-start: var(--doc-option-pad-inline);
+    /* The tile is taller than a line box, so it is nudged up by the difference
+     * rather than pinned to the padding edge — that keeps it optically centred
+     * on the label's first line. */
+    top: calc(var(--doc-option-pad-block) - (1.75rem - 1em * 1.5) / 2);
     width: 1.75rem;
     height: 1.75rem;
   }
@@ -83,20 +107,22 @@
     color: var(--doc-accent-on-solid);
   }
   doc-option[data-selected] [data-part="desc"] { color: var(--doc-accent-text); }
+  /*
+   * No measure of its own: `doc-choice` above is sized so that this wraps at
+   * the reading measure, and a second cap here — resolved against the smaller
+   * type this is set in — is what pulled it to two thirds of the option.
+   */
   doc-option [data-part="desc"] {
-    grid-column: 2 / -1;
-    margin: 0;
+    max-width: none;
+    margin: var(--doc-space-1) 0 0;
     color: var(--doc-text-2);
     font-size: var(--doc-text-sm);
     font-weight: 400;
     line-height: 1.5;
   }
   doc-option [data-part="recommended"] {
-    grid-column: 3;
-    grid-row: 1;
-    align-self: start;
-    justify-self: end;
     margin-block-start: 2px;
+    margin-inline-start: var(--doc-space-3);
     white-space: nowrap;
     padding: 2px var(--doc-space-2);
     border-radius: var(--doc-radius-pill);
@@ -106,9 +132,10 @@
     font-weight: 500;
     line-height: 1.333333;
   }
-  doc-option[data-part="other"] [data-part="other-label"] { grid-column: 2 / -1; font-weight: 600; }
-  doc-option[data-part="other"] [data-part="other-hint"] { grid-column: 2 / -1; grid-row: 2; justify-self: start; color: var(--doc-text-2); font-size: var(--doc-text-sm); font-weight: 400; }
-  doc-option[data-part="other"] [data-part="other-text"] { grid-column: 2 / -1; margin-block-start: var(--doc-space-2); }
+  doc-option[data-part="other"] [data-part="other-label"] { font-weight: 600; }
+  /* This theme gives the hint its own line rather than the label's. */
+  doc-option[data-part="other"] [data-part="other-hint"] { float: none; display: block; color: var(--doc-text-2); font-size: var(--doc-text-sm); font-weight: 400; }
+  doc-option[data-part="other"] [data-part="other-text"] { margin-block-start: var(--doc-space-2); }
   doc-choice [data-part="note-toggle"] {
     margin-block-start: var(--doc-space-2);
     padding: var(--doc-space-2);
@@ -124,10 +151,21 @@
   doc-choice textarea { width: 100%; }
   @media (max-width: 720px) {
     doc-choice { padding: var(--doc-space-4); }
-    doc-option { padding: var(--doc-space-3); }
-    doc-option[data-part="other"] [data-part="other-hint"] {
-      grid-row: 2;
-      justify-self: start;
+    doc-option {
+      --doc-option-pad-block: var(--doc-space-3);
+      --doc-option-pad-inline: var(--doc-space-3);
+    }
+
+    /*
+     * Too narrow to share the label's line: the pill takes one of its own.
+     * Left floating it would squeeze that label to a word or two per line.
+     */
+    doc-option [data-part="recommended"] {
+      float: none;
+      display: block;
+      width: fit-content;
+      margin-inline-start: 0;
+      margin-block-end: var(--doc-space-2);
     }
   }
 }
