@@ -822,7 +822,6 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
     'question-card-other-text',
     'question-card-note',
     'question-card-note-toggle',
-    'question-card-actions',
     'question-card-clear',
   ],
   'doc-header': ['title', 'lede', 'kicker', 'rule'],

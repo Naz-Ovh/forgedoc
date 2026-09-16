@@ -114,6 +114,24 @@
     {#if view.at}
       <span data-part="question-card-at">{view.at}</span>
     {/if}
+    <!--
+      Clear sits in the meta row rather than on a row of its own at the foot of
+      the card. why: it applies to exactly one question, it is only ever shown
+      once that question has an answer, and a row spent on one small button
+      pushed the next question further down a panel whose whole job is to get
+      several of them on screen at once.
+    -->
+    {#if answered}
+      <button
+        data-part="question-card-clear"
+        type="button"
+        title="Unanswer this question"
+        onclick={reset}
+      >
+        Clear answer
+      </button>
+    {/if}
+
     <button
       data-part="question-card-goto"
       type="button"
@@ -202,11 +220,5 @@
         setNote(docPage, view.id, noteDraft);
       }}
     ></textarea>
-  {/if}
-
-  {#if answered}
-    <div data-part="question-card-actions">
-      <button data-part="question-card-clear" type="button" onclick={reset}>Clear answer</button>
-    </div>
   {/if}
 </article>

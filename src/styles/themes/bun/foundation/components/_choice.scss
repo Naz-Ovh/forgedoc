@@ -14,19 +14,35 @@
     --doc-option-gutter: calc(1rem + var(--doc-space-2) + 1.5rem + var(--doc-space-3));
 
     /*
-     * The question is sized by the reading measure, not by the document column.
+     * The card is sized as a whole, never the label and the description
+     * separately.
      *
      * why: an option's label is a bare text node and its description is a `<p>`,
      * set two steps apart — and `--doc-measure-prose` is in `em`, so the same
      * token resolved to 672px on one and 567px on the other. The two halves of
      * one option wrapped at two different right edges, with a third of the card
-     * left empty beside the description. Sizing the *card* from the measure
-     * gives them one edge and no empty column, and keeps an option's text
-     * wrapping at the same width as the prose above it.
+     * left empty beside the description. One width on the card gives them one
+     * edge and no empty column.
+     *
+     * The measure is the *floor*, not the width. A question is not prose: its
+     * options carry a line of explanation each, and at the reading measure a
+     * question with real detail in it is read through a slot with a third of
+     * the column empty beside it. So the card takes most of the column and
+     * keeps a margin at the end, which is what still makes it read as a card
+     * rather than as the page — and falls back to the measure-derived width
+     * wherever the column is too narrow for that to mean anything.
      */
-    max-width: calc(
-      var(--doc-measure-prose) + var(--doc-option-gutter) +
-        2 * var(--doc-option-pad-inline) + 2 * var(--doc-space-5)
+    --doc-question-width: 88%;
+
+    max-width: min(
+      100%,
+      max(
+        calc(
+          var(--doc-measure-prose) + var(--doc-option-gutter) +
+            2 * var(--doc-option-pad-inline) + 2 * var(--doc-space-5)
+        ),
+        var(--doc-question-width)
+      )
     );
     padding: var(--doc-space-5) var(--doc-space-5) var(--doc-space-4);
     border: var(--doc-rule);

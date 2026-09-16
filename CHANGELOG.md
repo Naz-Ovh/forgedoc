@@ -28,6 +28,11 @@ shape of those components, which is why this is a major.
   through the element in the page rather than to the store, so `doc-choice`
   remains the only thing that knows how an answer is persisted.
 
+  `Clear answer` sits in each card's meta row beside `Go to it`, in the danger
+  ramp — it applies to one question, it only appears once that question has an
+  answer, and a row of its own at the foot of every card pushed the next
+  question off a panel whose whole job is to get several on screen at once.
+
   New parts: `questions`, `questions-icon`, `questions-count` and
   `entry-questions` on `doc-toc`; the `question-drawer*` and `question-card*`
   family on `doc-page`.
@@ -52,6 +57,17 @@ shape of those components, which is why this is a major.
   invisible until the card is hovered or focused — always visible on a touch
   device, and on a card that already carries a comment. Its host is marked
   `data-doc-feedback="corner"`, which is the documented hook for positioning it.
+
+- **A question card takes most of the reading column, not the reading
+  measure.** `doc-choice` is now `min(100%, max(<measure-derived>, 88%))`.
+
+  why the measure was the wrong width: it is the floor, not the answer. A
+  question is not prose — its options carry a line of explanation each — and at
+  the reading measure a question with real detail in it was read through a slot
+  with a third of the column empty beside it. The card still keeps a margin at
+  the end, which is what makes it read as a card rather than as the page, and
+  still falls back to the measure-derived width wherever the column is too
+  narrow for a percentage to mean anything.
 
 - **A card's Comment button reopens the comment already on it.** Pressing it
   again loads what the reader wrote into the composer, with `Save changes` and

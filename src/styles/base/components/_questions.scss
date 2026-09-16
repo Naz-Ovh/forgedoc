@@ -84,9 +84,18 @@
     cursor: pointer;
   }
 
-  /* Pushed to the end of the row, whatever the location label's length. */
+  /*
+  * Both controls are pushed to the end of the row, whatever the location
+  * label's length. The auto margin belongs to whichever of the two comes
+  * first, so a card with no answer yet still has `Go to it` in the corner.
+  */
+  [data-part="question-card-clear"],
   [data-part="question-card-goto"] {
     margin-inline-start: auto;
+  }
+
+  [data-part="question-card-clear"] + [data-part="question-card-goto"] {
+    margin-inline-start: 0;
   }
 
   [data-part="question-card-title"] {
@@ -156,10 +165,6 @@
   [data-part="question-card-scale"] {
     display: flex;
     flex-wrap: wrap;
-  }
-
-  [data-part="question-card-actions"] {
-    display: flex;
   }
 
   @media (max-width: 720px) {
