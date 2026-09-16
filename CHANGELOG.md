@@ -4,14 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2026-09-16
+## [2.1.0] - 2026-09-16
 
-Everything in this release comes out of one question: what happens when an agent
-writes a component body the way it writes a sentence, rather than the way the
-examples wrap one in `<p>`? The answer was that five components shredded it down
-a column, three disclosures could not close it, and a comment on more than 240
-characters highlighted the first 240 of them. Fixing that meant changing the
-shape of those components, which is why this is a major.
+Everything here is about a reader coming back to a document rather than meeting
+it for the first time. The questions are the only part of a plan a reader is
+_required_ to act on, and in a document written to be read in order they are
+scattered through it — so this adds a panel that gathers them, and extends the
+Comment button from the blocks with no selectable text to the cards a reader
+disagrees with whole. Neither costs a document a single generation token: the
+panel is derived from the live DOM when it is opened, and the button is runtime
+chrome.
 
 ### Added
 
@@ -58,17 +60,6 @@ shape of those components, which is why this is a major.
   device, and on a card that already carries a comment. Its host is marked
   `data-doc-feedback="corner"`, which is the documented hook for positioning it.
 
-- **A question card takes most of the reading column, not the reading
-  measure.** `doc-choice` is now `min(100%, max(<measure-derived>, 88%))`.
-
-  why the measure was the wrong width: it is the floor, not the answer. A
-  question is not prose — its options carry a line of explanation each — and at
-  the reading measure a question with real detail in it was read through a slot
-  with a third of the column empty beside it. The card still keeps a margin at
-  the end, which is what makes it read as a card rather than as the page, and
-  still falls back to the measure-derived width wherever the column is too
-  narrow for a percentage to mean anything.
-
 - **A card's Comment button reopens the comment already on it.** Pressing it
   again loads what the reader wrote into the composer, with `Save changes` and
   a `Delete` beside it, and rewrites that comment in place rather than filing a
@@ -81,6 +72,57 @@ shape of those components, which is why this is a major.
 
 - **`commentIcon()` and `questionIcon()`**, and `ICON_PATHS` — the icon geometry
   as plain data, so the Svelte panels draw the same shapes as the components.
+
+### Changed
+
+- **A question card takes most of the reading column, not the reading
+  measure.** `doc-choice` is now `min(100%, max(<measure-derived>, 88%))`.
+
+  why the measure was the wrong width: it is the floor, not the answer. A
+  question is not prose — its options carry a line of explanation each — and at
+  the reading measure a question with real detail in it was read through a slot
+  with a third of the column empty beside it. The card still keeps a margin at
+  the end, which is what makes it read as a card rather than as the page, and
+  still falls back to the measure-derived width wherever the column is too
+  narrow for a percentage to mean anything.
+
+- **`doc-endpoint` restacks from its own width rather than the viewport's.**
+  The narrow layout — path on one row, summary on the next — is now a
+  `@container` query on the trigger instead of `@media (max-width: 720px)`.
+
+  why it had to change: an endpoint is embedded content. Written inside a
+  `doc-note`, a `doc-collapse` or a `doc-step` it gets a fraction of the reading
+  column while the _window_ is still 1400px wide, so the narrow layout never
+  fired and the row stayed in five columns it had no room for. The drawer keeps
+  its viewport breakpoint, because the drawer is fixed to the viewport.
+
+- **An endpoint path may wrap.** `elements.scss` gives every inline `<code>`
+  `white-space: nowrap` so an identifier is never broken across a line, and
+  that beat the `overflow-wrap: anywhere` the path already carried — so a long
+  path simply painted across the summary beside it instead of overflowing
+  visibly. Paths are now `white-space: normal`.
+
+- **`blockContentText` no longer treats every `[data-part="header"]` as
+  furniture.** In a code block or a diff the header row holds the filename and
+  the language pill, which are chrome; on a card it holds the card's own title.
+  Excluding it everywhere read a step back as its body with no name on it, so
+  the exclusion is now scoped to `doc-code` and `doc-diff`. A question's letter
+  badges, its appended Other option and its note toggle were added to the
+  furniture list for the same reason — a quoted question should read as the
+  question and its answers, not as `A B C ＋ Add a note`.
+
+- **`appendFeedbackButton` takes an options object** — `{ into, icon }` —
+  instead of a third positional `into` argument. Internal API; no document or
+  stylesheet is affected.
+
+## [2.0.0] - 2026-09-16
+
+Everything in this release comes out of one question: what happens when an agent
+writes a component body the way it writes a sentence, rather than the way the
+examples wrap one in `<p>`? The answer was that five components shredded it down
+a column, three disclosures could not close it, and a comment on more than 240
+characters highlighted the first 240 of them. Fixing that meant changing the
+shape of those components, which is why this is a major.
 
 ### Removed
 
@@ -191,35 +233,6 @@ shape of those components, which is why this is a major.
   phrasing content in a sentence but _are_ the body of a figure.
 
 ### Changed
-
-- **`doc-endpoint` restacks from its own width rather than the viewport's.**
-  The narrow layout — path on one row, summary on the next — is now a
-  `@container` query on the trigger instead of `@media (max-width: 720px)`.
-
-  why it had to change: an endpoint is embedded content. Written inside a
-  `doc-note`, a `doc-collapse` or a `doc-step` it gets a fraction of the reading
-  column while the _window_ is still 1400px wide, so the narrow layout never
-  fired and the row stayed in five columns it had no room for. The drawer keeps
-  its viewport breakpoint, because the drawer is fixed to the viewport.
-
-- **An endpoint path may wrap.** `elements.scss` gives every inline `<code>`
-  `white-space: nowrap` so an identifier is never broken across a line, and
-  that beat the `overflow-wrap: anywhere` the path already carried — so a long
-  path simply painted across the summary beside it instead of overflowing
-  visibly. Paths are now `white-space: normal`.
-
-- **`blockContentText` no longer treats every `[data-part="header"]` as
-  furniture.** In a code block or a diff the header row holds the filename and
-  the language pill, which are chrome; on a card it holds the card's own title.
-  Excluding it everywhere read a step back as its body with no name on it, so
-  the exclusion is now scoped to `doc-code` and `doc-diff`. A question's letter
-  badges, its appended Other option and its note toggle were added to the
-  furniture list for the same reason — a quoted question should read as the
-  question and its answers, not as `A B C ＋ Add a note`.
-
-- **`appendFeedbackButton` takes an options object** — `{ into, icon }` —
-  instead of a third positional `into` argument. Internal API; no document or
-  stylesheet is affected.
 
 - **The runtime's icons are inline SVG, not text glyphs.** `▸`, `☰`, `←`, `→`
   and `×` are drawn by whatever font the reader has, and the geometric shapes

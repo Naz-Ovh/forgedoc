@@ -74,8 +74,8 @@ than commit a multi-megabyte HTML file.
 ### Direct from a CDN
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@2.0.0/dist/forgedoc.css" />
-<script defer src="https://cdn.jsdelivr.net/npm/forgedoc@2.0.0/dist/forgedoc.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@2.1.0/dist/forgedoc.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/forgedoc@2.1.0/dist/forgedoc.iife.js"></script>
 ```
 
 Pin the exact version, never `@1` or `@latest`. A pinned path is served
