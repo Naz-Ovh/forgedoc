@@ -240,8 +240,19 @@
     cursor: pointer;
   }
 
-  [data-part="bucket-cancel"] {
+  [data-part="bucket-cancel"],
+  [data-part="bucket-delete"] {
     cursor: pointer;
+  }
+
+  /*
+  * Delete sits at the far end of the row, away from Save.
+  *
+  * why: this is the destructive action in a composer whose primary action is
+  * one keystroke away, and the two should never be adjacent targets.
+  */
+  [data-part="bucket-delete"] {
+    margin-inline-start: auto;
   }
 
   /* ── The detail window ──────────────────────────────────────────────────── */

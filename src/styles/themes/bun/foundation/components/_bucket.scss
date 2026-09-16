@@ -340,6 +340,21 @@
     font-size: var(--doc-text-sm);
   }
 
+  /* The same quiet button as Cancel, in the ramp that says what it does. */
+  [data-part="bucket-delete"] {
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border: 0;
+    border-radius: var(--doc-radius-sm);
+    background: none;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-sm);
+  }
+
+  [data-part="bucket-delete"]:hover {
+    background: var(--doc-danger-tint);
+    color: var(--doc-danger-600);
+  }
+
   /* ── The detail window ──────────────────────────────────────────────────── */
   [data-part="detail-backdrop"] {
     background: light-dark(rgb(15 23 30 / 34%), rgb(0 0 0 / 58%));

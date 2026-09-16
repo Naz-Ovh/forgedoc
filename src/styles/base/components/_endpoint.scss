@@ -1,7 +1,18 @@
 /* `doc-endpoint` — compact API trigger and shared detail drawer structure. */
 
 @layer doc.components {
+  /*
+  * A query container, so the row below reacts to the space it actually has.
+  *
+  * why not the viewport (§8.3): this component is embedded content. An agent
+  * puts one inside a `doc-note`, a `doc-collapse` or a `doc-step`, and there
+  * the trigger gets a fraction of the reading column while the *window* is
+  * still 1400px wide — so a `@media` query for the narrow layout never fires
+  * and the row stays in five columns it has no room for. The question was
+  * never how wide the screen is; it is how wide this row is.
+  */
   doc-endpoint {
+    container: doc-endpoint / inline-size;
     display: block;
   }
 
@@ -24,6 +35,14 @@
   doc-endpoint [data-part="path"],
   [data-part="endpoint-drawer-path"] {
     min-width: 0;
+    /*
+    * `elements.scss` gives every inline `<code>` `white-space: nowrap`, so an
+    * identifier is never broken across a line. A path is the one `<code>` that
+    * has to break: it is long, it is the widest thing in the row, and with
+    * `nowrap` winning over `overflow-wrap` it simply painted across the summary
+    * beside it — visible the moment an endpoint was nested inside a callout.
+    */
+    white-space: normal;
     overflow-wrap: anywhere;
   }
 
@@ -127,7 +146,12 @@
     overflow-wrap: anywhere;
   }
 
-  @media (max-width: 720px) {
+  /*
+  * Not enough room for a path and a summary side by side: the summary takes a
+  * row of its own. The threshold is the row's own width, so this is what fires
+  * inside a callout as well as on a phone.
+  */
+  @container doc-endpoint (max-width: 48rem) {
     doc-endpoint [data-part="trigger"] {
       grid-template-columns: auto minmax(0, 1fr) auto auto;
     }
@@ -135,8 +159,15 @@
     doc-endpoint [data-part="summary"] {
       grid-column: 2 / -1;
       grid-row: 2;
+      white-space: normal;
     }
+  }
 
+  /*
+  * The drawer is fixed to the viewport rather than laid out inside anything,
+  * so its own breakpoint stays a viewport query.
+  */
+  @media (max-width: 720px) {
     [data-part="endpoint-drawer"] {
       width: 100%;
     }

@@ -390,7 +390,16 @@
     font-size: inherit;
   }
 
-  @media (max-width: 720px) {
+  /*
+   * The restacked row, keyed to the row's own width rather than the window's —
+   * see `base/components/_endpoint.scss` for why. This fires inside a callout
+   * as well as on a phone.
+   *
+   * The status pill goes rather than the summary: a reader who has opened a
+   * document to find out what an endpoint *does* is reading the sentence, and
+   * `200 OK` is the same on almost every row.
+   */
+  @container doc-endpoint (max-width: 48rem) {
     doc-endpoint [data-part="trigger"] {
       gap: var(--doc-space-2);
     }
@@ -402,7 +411,10 @@
     doc-endpoint [data-part="status"] {
       display: none;
     }
+  }
 
+  /* The drawer is fixed to the viewport, so its breakpoint stays a viewport one. */
+  @media (max-width: 720px) {
     [data-part="endpoint-drawer"] {
       max-width: none;
     }

@@ -40,6 +40,16 @@ import BucketDetail from './BucketDetail.svelte';
   /** Id of the item whose detail window is open, or null. */
   let openDetailId = $state<string | null>(null);
   let composer = $state<HTMLTextAreaElement | null>(null);
+  /**
+   * Id of the comment the composer is editing, or null when writing a new one.
+   *
+   * why a block comment reopens instead of stacking a second one: the button on
+   * a card is the only handle that comment has. Pressing it again is a reader
+   * going back to what they wrote — and a composer that opened blank told them
+   * nothing, then quietly filed a duplicate against the same card. The button
+   * stays visible on a commented card precisely so it can be used this way.
+   */
+  let editingId = $state<string | null>(null);
   /** Transient confirmation, so the keyboard shortcut is not a silent change. */
   let flashMessage = $state('');
   let flashTimer: ReturnType<typeof setTimeout> | undefined;
@@ -95,11 +105,21 @@ import BucketDetail from './BucketDetail.svelte';
       const block = (event as CustomEvent<BlockFeedbackDetail>).detail;
       const element = docPage.querySelector(`#${CSS.escape(block.anchorId)}`);
 
-      draftComment = '';
+      const existing = docState.feedback.find(
+        (item) => item.scope === 'block' && item.range.anchorId === block.anchorId,
+      );
+
+      draftComment = existing?.comment ?? '';
+      editingId = existing?.id ?? null;
       pendingSelection = {
-        range: { anchorId: block.anchorId, start: 0, end: 0, quote: block.label },
+        range: existing?.range ?? {
+          anchorId: block.anchorId,
+          start: 0,
+          end: 0,
+          quote: block.label,
+        },
         rect: block.rect,
-        at: locationLabel(element ?? docPage),
+        at: existing?.at || locationLabel(element ?? docPage),
         scope: 'block',
       };
     };
@@ -111,7 +131,9 @@ import BucketDetail from './BucketDetail.svelte';
   // Repaint whenever the feedback list, the open detail or the draft changes.
   $effect(() => {
     paintHighlights(docPage, docState.feedback, {
-      activeId: openDetailId,
+      // While the composer is editing one, that is the item the reader is
+      // looking at — the card should carry the active mark, not the resting one.
+      activeId: openDetailId ?? editingId,
       pending: pendingSelection
         ? { range: pendingSelection.range, scope: pendingSelection.scope }
         : null,
@@ -150,6 +172,19 @@ import BucketDetail from './BucketDetail.svelte';
     const text = draftComment.trim();
     if (!selection || text === '') return;
 
+    if (editingId !== null) {
+      // Rewritten in place, keeping `createdAt` and the anchor: this is the
+      // same objection, said better, not a new one.
+      store.set(
+        'feedback',
+        docState.feedback.map((item) =>
+          item.id === editingId ? { ...item, comment: text } : item,
+        ),
+      );
+      cancelComment();
+      return;
+    }
+
     const item: FeedbackItem = {
       id: `fb-${selection.range.anchorId}-${selection.range.start}-${docState.feedback.length}`,
       createdAt: timestampNow(),
@@ -165,8 +200,16 @@ import BucketDetail from './BucketDetail.svelte';
 
   function cancelComment(): void {
     draftComment = '';
+    editingId = null;
     pendingSelection = null;
     window.getSelection()?.removeAllRanges();
+  }
+
+  /** Discard the comment the composer is editing, from the composer itself. */
+  function deleteEditing(): void {
+    if (editingId === null) return;
+    removeComment(editingId);
+    cancelComment();
   }
 
   function flash(message: string): void {
@@ -445,7 +488,7 @@ import BucketDetail from './BucketDetail.svelte';
            --doc-popover-left: {pendingSelection.rect.left + window.scrollX}px"
   >
     <p data-part="bucket-popover-target">
-      Commenting on
+      {editingId === null ? 'Commenting on' : 'Your comment on'}
       <span data-part="bucket-popover-quote">{pendingSelection.range.quote}</span>
     </p>
 
@@ -460,8 +503,21 @@ import BucketDetail from './BucketDetail.svelte';
     ></textarea>
 
     <div data-part="bucket-popover-actions">
-      <button data-part="bucket-save" type="button" onclick={saveComment}>Add comment</button>
+      <button data-part="bucket-save" type="button" onclick={saveComment}>
+        {editingId === null ? 'Add comment' : 'Save changes'}
+      </button>
       <button data-part="bucket-cancel" type="button" onclick={cancelComment}>Cancel</button>
+
+      <!--
+        why delete belongs here and not only in the panel: this composer is
+        where the reader is looking at the comment. Sending them to open the
+        feedback panel and find the same item again to throw it away is a trip
+        for something they have already decided.
+      -->
+      {#if editingId !== null}
+        <button data-part="bucket-delete" type="button" onclick={deleteEditing}>Delete</button>
+      {/if}
+
       <span data-part="bucket-popover-hint">⌘↵ to save</span>
     </div>
   </div>

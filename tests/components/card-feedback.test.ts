@@ -299,3 +299,105 @@ describe('a comment made from a card', () => {
     docPage.remove();
   });
 });
+
+/**
+ * The button on a card is the only handle that card's comment has, so pressing
+ * it again is a reader going back to what they wrote. Before this it opened a
+ * blank composer and quietly filed a second comment against the same card.
+ */
+describe('reopening a card that already has a comment', () => {
+  const composer = (docPage: Element) =>
+    docPage.querySelector('[data-part="bucket-draft"]') as HTMLTextAreaElement | null;
+
+  async function comment(docPage: HTMLElement, tag: string, text: string): Promise<void> {
+    buttonIn(docPage, tag)?.click();
+    await settle(50);
+
+    const draft = composer(docPage) as HTMLTextAreaElement;
+    draft.value = text;
+    draft.dispatchEvent(new Event('input', { bubbles: true }));
+    (docPage.querySelector('[data-part="bucket-save"]') as HTMLElement).click();
+    await settle(50);
+  }
+
+  it('opens the composer holding what the reader wrote', async () => {
+    const docPage = mountPlan(DOCUMENT);
+    await settle(50);
+    await comment(docPage, 'doc-note', 'Pruning happens where?');
+
+    buttonIn(docPage, 'doc-note')?.click();
+    await settle(50);
+
+    expect(composer(docPage)?.value).toBe('Pruning happens where?');
+    expect(docPage.querySelector('[data-part="bucket-save"]')?.textContent?.trim()).toBe(
+      'Save changes',
+    );
+
+    docPage.remove();
+  });
+
+  it('rewrites that comment rather than filing a second one', async () => {
+    const docPage = mountPlan(DOCUMENT);
+    await settle(50);
+    await comment(docPage, 'doc-note', 'Pruning happens where?');
+
+    const store = storeFor(docPage);
+    const createdAt = store.get('feedback')[0]?.createdAt;
+
+    buttonIn(docPage, 'doc-note')?.click();
+    await settle(50);
+    const draft = composer(docPage) as HTMLTextAreaElement;
+    draft.value = 'Where does pruning happen — the sweep or the sender?';
+    draft.dispatchEvent(new Event('input', { bubbles: true }));
+    (docPage.querySelector('[data-part="bucket-save"]') as HTMLElement).click();
+    await settle(50);
+
+    const stored = store.get('feedback');
+    expect(stored).toHaveLength(1);
+    expect(stored[0]?.comment).toBe('Where does pruning happen — the sweep or the sender?');
+    // The same objection said better, so the anchor and the timestamp stand.
+    expect(stored[0]?.createdAt).toBe(createdAt);
+    expect(stored[0]?.range.anchorId).toBe((docPage.querySelector('doc-note') as HTMLElement).id);
+
+    docPage.remove();
+  });
+
+  it('offers a delete, where the reader is already looking at the comment', async () => {
+    const docPage = mountPlan(DOCUMENT);
+    await settle(50);
+    await comment(docPage, 'doc-collapse', 'This belongs in section 2.');
+
+    // Not offered while writing a new one — there is nothing to delete yet.
+    buttonIn(docPage, 'doc-note')?.click();
+    await settle(50);
+    expect(docPage.querySelector('[data-part="bucket-delete"]')).toBeNull();
+    (docPage.querySelector('[data-part="bucket-cancel"]') as HTMLElement).click();
+    await settle(50);
+
+    buttonIn(docPage, 'doc-collapse')?.click();
+    await settle(50);
+    (docPage.querySelector('[data-part="bucket-delete"]') as HTMLElement).click();
+    await settle(50);
+
+    expect(storeFor(docPage).get('feedback')).toEqual([]);
+    expect(composer(docPage)).toBeNull();
+
+    docPage.remove();
+  });
+
+  it('starts blank again on a card with no comment of its own', async () => {
+    const docPage = mountPlan(DOCUMENT);
+    await settle(50);
+    await comment(docPage, 'doc-note', 'Pruning happens where?');
+
+    buttonIn(docPage, 'doc-choice')?.click();
+    await settle(50);
+
+    expect(composer(docPage)?.value).toBe('');
+    expect(docPage.querySelector('[data-part="bucket-save"]')?.textContent?.trim()).toBe(
+      'Add comment',
+    );
+
+    docPage.remove();
+  });
+});

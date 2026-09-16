@@ -53,6 +53,16 @@ shape of those components, which is why this is a major.
   device, and on a card that already carries a comment. Its host is marked
   `data-doc-feedback="corner"`, which is the documented hook for positioning it.
 
+- **A card's Comment button reopens the comment already on it.** Pressing it
+  again loads what the reader wrote into the composer, with `Save changes` and
+  a `Delete` beside it, and rewrites that comment in place rather than filing a
+  second one against the same card. The anchor and the timestamp are kept: this
+  is the same objection said better, not a new one.
+
+  why it matters: that button is the only handle a block comment has. A
+  composer that opened blank told the reader nothing about what they had
+  already said, and then quietly duplicated it.
+
 - **`commentIcon()` and `questionIcon()`**, and `ICON_PATHS` — the icon geometry
   as plain data, so the Svelte panels draw the same shapes as the components.
 
@@ -165,6 +175,22 @@ shape of those components, which is why this is a major.
   phrasing content in a sentence but _are_ the body of a figure.
 
 ### Changed
+
+- **`doc-endpoint` restacks from its own width rather than the viewport's.**
+  The narrow layout — path on one row, summary on the next — is now a
+  `@container` query on the trigger instead of `@media (max-width: 720px)`.
+
+  why it had to change: an endpoint is embedded content. Written inside a
+  `doc-note`, a `doc-collapse` or a `doc-step` it gets a fraction of the reading
+  column while the _window_ is still 1400px wide, so the narrow layout never
+  fired and the row stayed in five columns it had no room for. The drawer keeps
+  its viewport breakpoint, because the drawer is fixed to the viewport.
+
+- **An endpoint path may wrap.** `elements.scss` gives every inline `<code>`
+  `white-space: nowrap` so an identifier is never broken across a line, and
+  that beat the `overflow-wrap: anywhere` the path already carried — so a long
+  path simply painted across the summary beside it instead of overflowing
+  visibly. Paths are now `white-space: normal`.
 
 - **`blockContentText` no longer treats every `[data-part="header"]` as
   furniture.** In a code block or a diff the header row holds the filename and
