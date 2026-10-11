@@ -1,0 +1,27 @@
+{
+  "title": "ForgeDoc",
+  "pages": [
+    "---ForgeDoc---",
+    "index",
+    "installation",
+    "quick-start",
+    "---Components---",
+    "...reference",
+    "---Themes---",
+    "themes",
+    "---Feedback---",
+    "feedback",
+    "feedback-format",
+    "---Guides---",
+    "authoring",
+    "...guides",
+    "---Development---",
+    "cli",
+    "runtime-api",
+    "architecture",
+    "contributing",
+    "troubleshooting",
+    "---AI agents---",
+    "...agents"
+  ]
+}

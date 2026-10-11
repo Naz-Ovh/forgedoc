@@ -28,6 +28,15 @@ playwright-report/
 .vite/
 .cache/
 
+# The documentation website has its own build and generated reference pages.
+website/.next/
+website/.source/
+website/.wrangler/
+website/out/
+website/next-env.d.ts
+website/content/docs/reference/
+website/lib/version.ts
+
 # Secrets. `*.local` above already covers .env.local; this covers the rest.
 .env
 .env.*

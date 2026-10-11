@@ -34,10 +34,14 @@
   },
   "ignores": [
     "node_modules",
+    "**/node_modules",
     "dist",
     "coverage",
     "test-results",
     "playwright-report",
+    "website/.next",
+    "website/.source",
+    "website/out",
     // Playwright writes `error-context.md` here on a failing visual run. It is
     // gitignored generated output, and linting it fails `npm run check` for a
     // reason that has nothing to do with the change under review.

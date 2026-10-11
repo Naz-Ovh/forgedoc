@@ -15,6 +15,11 @@
       "!*.build.html",
       "!**/*.build.html",
       "!**/*.svelte",
+      "!website/.next",
+      "!website/.source",
+      "!website/out",
+      "!website/package-lock.json",
+      "!website/next-env.d.ts",
 
       // Design canvases. A `.dc.html` is a generated artboard — inline styles,
       // template placeholders, decorative SVG with no title — so every a11y and
@@ -95,6 +100,14 @@
   },
 
   "overrides": [
+    {
+      "includes": ["website/app/**", "website/*.config.mjs", "website/source.config.ts"],
+      "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
+    },
+    {
+      "includes": ["website/**/*.css"],
+      "css": { "parser": { "tailwindDirectives": true } }
+    },
     {
       "includes": [
         "*.config.ts",

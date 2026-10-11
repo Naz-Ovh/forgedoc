@@ -98,6 +98,7 @@ src/styles/        index.css imports 30 files IN ORDER; layers.css first
 tools/             validate.ts, inject.ts, cli.ts, gen-reference.mjs
 skills/better-plan/  the published skill — SKILL, CHEATSHEET, REFERENCE
 docs/              PLAN.md, DECISIONS.md — repo-only, never shipped
+website/           separate Fumadocs/Next.js handbook; does not ship in the runtime
 ```
 
 Adding a component touches six places; `tools/gen-reference.mjs` and the
@@ -148,6 +149,14 @@ before the third occurrence.
 
 **Record every new dependency in [docs/DECISIONS.md](docs/DECISIONS.md)** with
 its reason — §12 requires it, and that table is kept current.
+
+The documentation app has its own package, lockfile, and TypeScript project.
+Run `npm run docs:site:build` and `npm run docs:site:check` when changing it.
+Next.js route modules require default exports; those framework entry points
+are the exception to the named-export convention. Component reference pages
+under `website/content/docs/reference/` are generated from the committed
+`docs/REFERENCE.md`; edit the contract and documentation source, then run
+`npm run docs:generate` instead of editing the generated website pages.
 
 ## Going deeper
 

@@ -1,0 +1,33 @@
+{
+  "name": "forgedoc-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/prepare.mjs && next dev --port 3000",
+    "build": "node scripts/prepare.mjs && node scripts/check-content.mjs && next build --webpack && node scripts/check-export.mjs",
+    "typecheck": "node scripts/prepare.mjs && node scripts/check-content.mjs && fumadocs-mdx && next typegen && tsc --noEmit",
+    "deploy": "npm run build && wrangler deploy",
+    "postinstall": "fumadocs-mdx"
+  },
+  "dependencies": {
+    "@fontsource-variable/google-sans-flex": "5.3.2",
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "fumadocs-core": "16.17.1",
+    "fumadocs-mdx": "15.4.7",
+    "fumadocs-ui": "16.17.1",
+    "lucide-react": "1.55.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwindcss": "4.3.3"
+  },
+  "devDependencies": {
+    "@types/mdx": "2.0.14",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "5.9.3",
+    "wrangler": "4.149.0"
+  }
+}

@@ -600,6 +600,45 @@ Worth recording because the next theme with generous type will hit them again.
 
 ## E. Dependencies
 
+### Documentation website (separate application)
+
+The `website/` package is a Fumadocs handbook, statically exported for public
+hosting. Its dependencies remain separate from the library's package and
+runtime bundles. React and Next.js here do not change the vanilla custom-element
+constraint in §2.5. Default exports are permitted only for framework-required
+route and configuration entry points.
+
+| Dependency | Reason |
+| --- | --- |
+| `next` | Static HTML generation, routing, and page metadata for the handbook. |
+| `react`, `react-dom` | Fumadocs UI and interactive website controls. |
+| `fumadocs-core` | Documentation source loading, page-tree generation, and static search. |
+| `fumadocs-ui` | Accessible responsive navigation, documentation layout, code rendering, and theme controls. |
+| `fumadocs-mdx` | Compile Markdown content and expose processed text for agent-readable exports. |
+| `tailwindcss`, `@tailwindcss/postcss` | Required styling pipeline for Fumadocs UI. |
+| `lucide-react` | Consistent interface icons in the website. |
+| `@fontsource-variable/google-sans-flex` | Self-host the requested Google Sans Flex interface and reading font. |
+| `@fontsource-variable/jetbrains-mono` | Self-host JetBrains Mono for code and technical labels. |
+| `@types/mdx`, `@types/react`, `@types/react-dom` | Type-check the website's content and React integration. |
+| `@types/node`, `typescript` | Type-check the separate website application without coupling it to the runtime's compiler project. |
+| `wrangler` | Development-only CLI for publishing the static handbook to Cloudflare Workers and configuring its custom domain. |
+
+Component reference content is derived from the committed generated Markdown,
+not independently maintained. Every page is statically exported in HTML and
+Markdown; Fumadocs' `llms()` utility automatically generates `llms.txt` and
+`llms-full.txt` (also available as `llm.txt` and `llm-full.txt`) for retrieval without promising model
+training inclusion. The owner selected `https://forgedoc.naz.ovh` as the canonical
+host; `DOCS_SITE_URL` can override it for another deployment. A small linked author
+credit and structured data identify H. Nazmul Hasan using the same Person ID as
+his personal website, `https://naz.ovh/#person`.
+
+Cloudflare Workers serves the static export directly, without a server runtime.
+`website/wrangler.jsonc` targets the account owning `naz.ovh` and the
+`forgedoc.naz.ovh` custom domain. Directory-index routing preserves the exported
+trailing-slash canonical URLs, and unknown paths return the exported 404 page.
+The asset headers declare JSON for extensionless search data, Markdown for page
+exports, and immutable caching only for Next.js' hashed static assets.
+
 §12 requires a recorded reason for every dependency. Sanctioned by the
 specification: Svelte (panel only), Prism (highlighting), Mermaid (diagrams).
 

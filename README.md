@@ -86,12 +86,15 @@ against.
 `defer` matters. Elements are defined after the document is parsed, so every
 element upgrades once, synchronously, with all of its children present.
 
-### npm, for tooling
+### npm, for browser tooling
 
 ```js
-import { parseBucket, TAGS } from 'forgedoc';
+import { store, vocabulary } from 'forgedoc';
 import 'forgedoc/style.css';
 ```
+
+Import the runtime after the document markup exists. It requires browser DOM
+APIs; use the CLI for validation and builds in Node.js.
 
 ## The agent skills
 
@@ -118,6 +121,19 @@ npm install -g forgedoc
 ```
 
 ## Docs
+
+The [documentation website](https://forgedoc.naz.ovh) is a Fumadocs handbook with
+light and dark themes, tutorials, coding-agent guidance, the runtime API,
+and a generated component reference. Run `npm run docs:site:dev` after
+`npm install --prefix website` to read it locally; see the
+[website setup and deployment guide](website/README.md). Every page is also available
+as Markdown, with `llms.txt` and `llms-full.txt` for agent retrieval.
+
+Start with [Installation](https://forgedoc.naz.ovh/docs/installation/),
+[Quick Start](https://forgedoc.naz.ovh/docs/quick-start/),
+[the feedback collector](https://forgedoc.naz.ovh/docs/feedback/),
+[the FB v1 format](https://forgedoc.naz.ovh/docs/feedback-format/), or
+[the four document themes](https://forgedoc.naz.ovh/docs/themes/).
 
 |                                                              |                                                                                  |
 |--------------------------------------------------------------|----------------------------------------------------------------------------------|
@@ -195,8 +211,8 @@ short version:
 4. **Zero generation tokens for the runtime.** It is injected post-generation by
    replacing two placeholders.
 5. **No component framework for the elements.** Plain `HTMLElement` subclasses.
-   Svelte is used for exactly one thing — the feedback panel — because all of its
-   DOM is runtime-created and none of it is author content.
+   Svelte is used for the feedback panel and question drawer, because all of
+   their DOM is runtime-created and none of it is author content.
 
 ## Development
 
