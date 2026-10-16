@@ -4,6 +4,71 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Plans that explain by showing. A reader stuck on "what actually happens here?"
+can now press Play and watch it, and an agent with an idea no element fits can
+build its own block without breaking out of the runtime.
+
+### Added
+
+- **`doc-walkthrough`, an animated scene player.** The author writes actors
+  (`doc-actor`) and scenes (`doc-scene`); each scene moves a token between two
+  actors (`doc-move`, with an optional `accept` / `reject` outcome) or changes
+  one (`doc-change`: add or strike a row, set a status, drop the actor). The
+  runtime draws the stage, flies the tokens along curved arrows, accumulates
+  changes scene by scene, and adds Play / Prev / Next, a dot per scene, arrow
+  keys and a plain-text transcript. Under `prefers-reduced-motion` every scene
+  appears complete with nothing travelling. Each scene takes block comments.
+- **`doc-custom`, a sanctioned escape hatch.** Inside it the author may write
+  their own HTML, a `<style>` — scoped to the block with `@scope`, by the build
+  in the file and by the runtime for anything unbuilt — and a
+  `<script type="forgedoc">`, run once after upgrade in its own scope with
+  `block` and `reducedMotion`. The `--doc-*` tokens keep it on theme; it takes
+  block comments like a figure.
+- **`doc-files` › `doc-file-group` › `doc-file`, collapsible file groups.** Each
+  group's header shows a title, an optional path chip, a muted count (defaults to
+  the number of entries) and a +/− toggle; each entry is a path chip and an
+  optional note with inline HTML. Closed groups stay findable with Ctrl+F.
+- **Paths that open in the reader's editor.** With `files-root` on `doc-page`
+  (absolute, or relative to the plan file), plus `files-wsl` for a WSL project,
+  `doc-file` paths and the new inline `<doc-path path="…" line="…">` become
+  links to VS Code, VS Code Insiders, Cursor, Windsurf, Zed or a JetBrains IDE.
+  A click opens the file at once; a small picker in the corner of the files
+  block (or of the page, when it has only inline paths) changes the editor for
+  every path, remembered in this browser. `files-editor` sets the default,
+  otherwise VS Code. For a WSL project Zed for Windows gets the
+  `\\wsl.localhost` share path, since a `zed://` URL cannot ask for a WSL
+  remote; "Zed inside WSL / Linux" keeps the Linux path. Without a root, paths
+  stay plain chips.
+- Validator: `walkthrough/unknown-actor` and `walkthrough/duplicate-actor`
+  (errors); `tag/self-closing` (an error for the new tags, a warning for the
+  older ones so existing documents keep building); `custom/plain-script` and
+  `custom/orphan-script` (warnings); `figure/large-mermaid`, a soft hint past 15
+  statements.
+
+### Fixed
+
+- **Uneven top and bottom spacing inside cards.** Every commentable block
+  appends its comment button after its content, so `:last-child` rules for a
+  stage's or a disclosure's body never matched and their bottom inset was 0.
+  Those rules now select the last child that is not the button, last-body
+  padding matches the header's in every theme, and a new rule in
+  `doc.utilities` drops the outer margin of the first and last block in every
+  padded container.
+- The `doc-roadmap` reference said `start` defaults to 1; it defaults to 0, as
+  §8.5 specifies.
+
+### Changed
+
+- **The `better-plan` skill no longer tells the agent to write prose first.**
+  It asks for whatever form clears the reader's confusion — a sentence, a
+  table, a walkthrough or a custom block — with a "when this helps" menu in
+  place of rules, and a new example built around a walkthrough.
+- The cheatsheet folds grandchild tags into their family's row, and its
+  one-page budget rose from 78 to 82 lines (4,800 to 5,400 characters) for the
+  ten new tags and the `files-*` attributes.
+
 ## [2.1.0] - 2026-09-16
 
 Everything here is about a reader coming back to a document rather than meeting
