@@ -1099,7 +1099,7 @@ Delivery phases with numbers, subtitles, and expandable content.
 
 | Attribute | Values | Required | Notes |
 | --- | --- | --- | --- |
-| `start` | integer | no | Number assigned to the first stage (0 or 1). Default 1. |
+| `start` | integer | no | Number assigned to the first stage. Defaults to `0`, so write `start="1"` to count from one. |
 
 - Delivery phases with bodies. Dated events are `doc-timeline`.
 

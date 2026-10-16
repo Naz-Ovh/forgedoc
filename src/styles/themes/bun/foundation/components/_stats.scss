@@ -62,7 +62,7 @@
     margin-block: var(--doc-space-2);
   }
 
-  doc-stat [data-part="value-row"]:last-child {
+  doc-stat [data-part="value-row"]:nth-last-child(1 of :not([data-part="feedback"])) {
     margin-block-end: 0;
   }
 

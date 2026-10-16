@@ -25,6 +25,6 @@
   doc-collapse > [data-part="summary"]:hover { color: var(--doc-text-2); }
   doc-collapse [data-part="chevron"] { order: 1; margin-inline-start: auto; color: var(--doc-text-1); font-size: var(--doc-text-sm); }
   doc-collapse > [data-part="body"] { padding-inline: 0; color: var(--doc-text-2); }
-  doc-collapse > [data-part="body"]:last-child { padding-block-end: var(--doc-space-5); }
+  doc-collapse > [data-part="body"]:not([hidden]):nth-last-child(1 of :not([data-part="feedback"])) { padding-block-end: var(--doc-space-5); }
   doc-collapse > [data-part="body"][hidden] { padding-block: 0; margin-block: 0; }
 }

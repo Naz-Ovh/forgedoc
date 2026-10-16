@@ -690,7 +690,7 @@ export const TAGS = {
     attributes: {
       start: {
         kind: { type: 'integer' },
-        doc: 'Number assigned to the first stage (0 or 1). Default 1.',
+        doc: 'Number assigned to the first stage. Defaults to `0`, so write `start="1"` to count from one.',
       },
     },
   },

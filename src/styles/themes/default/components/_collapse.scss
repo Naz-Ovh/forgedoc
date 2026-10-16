@@ -98,7 +98,7 @@
     margin-block-start: 0;
   }
 
-  doc-collapse > [data-part="body"]:last-child {
+  doc-collapse > [data-part="body"]:not([hidden]):nth-last-child(1 of :not([data-part="feedback"])) {
     margin-block-end: 0;
   }
 
@@ -106,8 +106,8 @@
     padding-block-start: var(--doc-space-4);
   }
 
-  doc-collapse > [data-part="body"]:last-child {
-    padding-block-end: var(--doc-space-4-5);
+  doc-collapse > [data-part="body"]:not([hidden]):nth-last-child(1 of :not([data-part="feedback"])) {
+    padding-block-end: var(--doc-space-4);
   }
 
   /*

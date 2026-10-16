@@ -110,8 +110,8 @@
     padding-block-start: var(--doc-space-4);
   }
 
-  doc-stage:state(open) > [data-part="body"]:last-child {
-    padding-block-end: var(--doc-space-4);
+  doc-stage:state(open) > [data-part="body"]:not([hidden]):nth-last-child(1 of :not([data-part="feedback"])) {
+    padding-block-end: var(--doc-space-3);
   }
 
   /*
