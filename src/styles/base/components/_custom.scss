@@ -1,0 +1,13 @@
+/*
+ * `doc-custom` — the escape hatch. Structure only.
+ *
+ * A block, and the positioning context for its comment button. Everything
+ * inside is the author's own markup and the author's own scoped CSS.
+ */
+
+@layer doc.components {
+  doc-custom {
+    display: block;
+    position: relative;
+  }
+}

@@ -44,6 +44,7 @@ import { DocChoice } from './components/doc-choice.js';
 import { DocCode } from './components/doc-code.js';
 import { DocCollapse } from './components/doc-collapse.js';
 import { DocCompare } from './components/doc-compare.js';
+import { DocCustom } from './components/doc-custom.js';
 import { DocDecision } from './components/doc-decision.js';
 import { DocDiff } from './components/doc-diff.js';
 import { DocEndpoint } from './components/doc-endpoint.js';
@@ -110,6 +111,7 @@ const ELEMENTS = {
   'doc-code': DocCode,
   'doc-collapse': DocCollapse,
   'doc-compare': DocCompare,
+  'doc-custom': DocCustom,
   'doc-decision': DocDecision,
   'doc-diff': DocDiff,
   'doc-endpoint': DocEndpoint,

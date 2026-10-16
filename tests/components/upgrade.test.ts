@@ -166,6 +166,11 @@ const CASES: readonly ComponentCase[] = [
     ],
   },
   {
+    tag: 'doc-custom',
+    markup: `<doc-custom title="Mine"><style>.x { gap: 2px; }</style><div class="x">Own markup.</div></doc-custom>`,
+    parts: [],
+  },
+  {
     tag: 'doc-roadmap',
     markup: `<doc-roadmap start="0"><doc-stage title="Zero" subtitle="next" current><p>Body.</p></doc-stage><doc-stage title="One"><p>Body.</p></doc-stage></doc-roadmap>`,
     parts: ['header', 'badge', 'heading', 'title'],

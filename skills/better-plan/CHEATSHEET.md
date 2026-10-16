@@ -67,10 +67,11 @@ Build in place `forgedoc build <file.html>` — one file, rebuilt on every revis
 | `doc-table` | `size` sm/md · `stack` auto/never |
 | `doc-tree` | `root` |
 | `doc-compare` | `columns` 2/3/4 |
+| `doc-custom` | `title` |
 
 ## Rules
 
-- Never write `<style>`, `<script>`, `class=`, `role=` or `aria-*` — the runtime owns all of them.
+- Never write `<style>`, `<script>`, `class=`, `role=` or `aria-*` outside `doc-custom` — the runtime owns them.
 - Never write section numbers (`1.2.1`), stage numbers, or option letters (`A`/`B`/`C`) — every one is derived, and a typed one goes stale.
 - Never write `id=` — ids come from `title` and `question`. Override only for an anchor that must survive a reworded heading.
 - Never write `doc-toc` — generated from your sections. Steer it with `<doc-page toc="docked">`.

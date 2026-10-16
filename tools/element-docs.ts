@@ -107,6 +107,7 @@ export const CATEGORIES: readonly Category[] = [
       'doc-table',
       'doc-tree',
       'doc-compare',
+      'doc-custom',
     ],
   },
 ];
@@ -691,6 +692,27 @@ flowchart LR
     ],
     related: ['doc-list', 'doc-tabs'],
   },
+
+  'doc-custom': {
+    example: `<doc-custom title="Which cookie each surface reads">
+  <style>
+    .jar { display: flex; flex-wrap: wrap; gap: var(--doc-space-2); }
+    .jar b { padding: var(--doc-space-1) var(--doc-space-3); border-radius: var(--doc-radius-pill);
+             background: var(--doc-accent-tint); color: var(--doc-accent-text); }
+  </style>
+  <div class="jar"><b>ub_customer_session</b><b>ub_vendor_session</b><b>ub_admin_session</b></div>
+  <script type="forgedoc">
+    block.querySelector('.jar').addEventListener('click', () => block.classList.toggle('open'));
+  </script>
+</doc-custom>`,
+    notes: [
+      'For the one idea no built-in element explains well. Inside it, `<style>`, `<script>` and `class=` are yours.',
+      'Styles are scoped to the block — the build wraps them in `@scope` — so nothing leaks into the page. Use the `--doc-*` tokens to follow the theme and dark mode.',
+      'Scripts need `type="forgedoc"`. They run once, after the page is ready, in their own scope, with `block` (this element) and `reducedMotion` in hand. A plain `<script>` runs too early and shares the global scope.',
+      'Commentable like any block. Keep it small; if you are rebuilding a table, a flow or a walkthrough, use that element instead.',
+    ],
+    related: ['doc-figure', 'doc-walkthrough'],
+  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -704,7 +726,7 @@ flowchart LR
  * itself rather than repeating the instruction.
  */
 export const NEVER_WRITE = [
-  '`<style>`, `<script>`, `class=`, `role=` or `aria-*` — the runtime owns all of them.',
+  '`<style>`, `<script>`, `class=`, `role=` or `aria-*` outside `doc-custom` — the runtime owns them.',
   'section numbers (`1.2.1`), stage numbers, or option letters (`A`/`B`/`C`) — every one is derived, and a typed one goes stale.',
   '`id=` — ids come from `title` and `question`. Override only for an anchor that must survive a reworded heading.',
   '`doc-toc` — generated from your sections. Steer it with `<doc-page toc="docked">`.',

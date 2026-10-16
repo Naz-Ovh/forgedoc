@@ -1,0 +1,23 @@
+/*
+ * `doc-custom` — the escape hatch.
+ *
+ * Only the frame: the block's rhythm on the page and the notice shown when its
+ * script throws. What is inside is the author's, styled by the author's own
+ * scoped CSS against the same `--doc-*` tokens. Other themes `@use` this file.
+ */
+
+@layer doc.theme {
+  doc-custom {
+    margin-block: var(--doc-space-6);
+  }
+
+  doc-custom [data-part="script-error"] {
+    margin-block-start: var(--doc-space-3);
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-danger-tint);
+    color: light-dark(var(--doc-danger-600), var(--doc-danger-400));
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+  }
+}

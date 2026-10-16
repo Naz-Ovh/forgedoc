@@ -1283,6 +1283,40 @@ Side-by-side or column comparison container for options, pros/cons, before/after
 
 - **See also:** `<doc-list>`, `<doc-tabs>`
 
+### `<doc-custom>`
+
+Escape hatch for a one-off visual: your own HTML, a scoped `<style>` and a `<script type="forgedoc">`, themed by `--doc-*` tokens and commentable like any block.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | no | Names the block for screen readers and in the feedback bucket. |
+
+- For the one idea no built-in element explains well. Inside it, `<style>`, `<script>` and `class=` are yours.
+
+- Styles are scoped to the block — the build wraps them in `@scope` — so nothing leaks into the page. Use the `--doc-*` tokens to follow the theme and dark mode.
+
+- Scripts need `type="forgedoc"`. They run once, after the page is ready, in their own scope, with `block` (this element) and `reducedMotion` in hand. A plain `<script>` runs too early and shares the global scope.
+
+- Commentable like any block. Keep it small; if you are rebuilding a table, a flow or a walkthrough, use that element instead.
+
+```html
+<doc-custom title="Which cookie each surface reads">
+  <style>
+    .jar { display: flex; flex-wrap: wrap; gap: var(--doc-space-2); }
+    .jar b { padding: var(--doc-space-1) var(--doc-space-3); border-radius: var(--doc-radius-pill);
+             background: var(--doc-accent-tint); color: var(--doc-accent-text); }
+  </style>
+  <div class="jar"><b>ub_customer_session</b><b>ub_vendor_session</b><b>ub_admin_session</b></div>
+  <script type="forgedoc">
+    block.querySelector('.jar').addEventListener('click', () => block.classList.toggle('open'));
+  </script>
+</doc-custom>
+```
+
+- **Parts:** `script-error`, `feedback`, `comment-icon`
+
+- **See also:** `<doc-figure>`, `<doc-walkthrough>`
+
 ## Code language allowlist
 
 A `lang` outside this list is a build **error**, never a silent fallback to

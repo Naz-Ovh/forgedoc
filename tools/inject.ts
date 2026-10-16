@@ -17,6 +17,8 @@ import { readdir, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { scopeCss } from '../src/core/scope-css.js';
+
 export const CSS_PLACEHOLDER = '/*@DOC_CSS@*/';
 export const JS_PLACEHOLDER = '//@DOC_JS@';
 
@@ -190,7 +192,7 @@ export function restorePlaceholders(html: string): string {
  * corrupt the output.
  */
 export function injectAssets(html: string, assets: InjectionAssets): string {
-  const source = restorePlaceholders(html);
+  const source = scopeCustomStyles(restorePlaceholders(html));
 
   requirePlaceholder(
     source,
@@ -255,6 +257,27 @@ function requirePlaceholder(
   throw new InjectionError(
     `The file has no \`${label}\` placeholder, so there is nothing to inject.`,
     `End the document body with exactly:\n      ${expectedTag}`,
+  );
+}
+
+const CUSTOM_BLOCK = /<doc-custom\b[^>]*>[\s\S]*?<\/doc-custom>/gi;
+const STYLE_ELEMENT = /(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi;
+
+/**
+ * Scope every `<style>` written inside a `<doc-custom>` block to that block.
+ *
+ * why at build time as well as in the runtime: the runtime arrives last — at
+ * the end of the body, or deferred from a CDN — and until it runs, an unscoped
+ * `<style>` in the body restyles the whole page. Rewriting the file means the
+ * browser scopes it as it parses, before any script. `scopeCss` is idempotent,
+ * so rebuilding a built document leaves the CSS byte for byte as it was.
+ */
+export function scopeCustomStyles(html: string): string {
+  return html.replace(CUSTOM_BLOCK, (block) =>
+    block.replace(
+      STYLE_ELEMENT,
+      (_match, open: string, css: string, close: string) => `${open}${scopeCss(css)}${close}`,
+    ),
   );
 }
 

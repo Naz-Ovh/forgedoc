@@ -784,6 +784,16 @@ export const TAGS = {
       },
     },
   },
+
+  'doc-custom': {
+    doc: 'Escape hatch for a one-off visual: your own HTML, a scoped `<style>` and a `<script type="forgedoc">`, themed by `--doc-*` tokens and commentable like any block.',
+    attributes: {
+      title: {
+        kind: { type: 'string' },
+        doc: 'Names the block for screen readers and in the feedback bucket.',
+      },
+    },
+  },
 } as const satisfies Record<string, TagSpec>;
 
 /**
@@ -1100,6 +1110,7 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-scene': ['scene-title', 'feedback', 'comment-icon'],
   'doc-move': [],
   'doc-change': [],
+  'doc-custom': ['script-error', 'feedback', 'comment-icon'],
 };
 
 export const STATES: Readonly<Record<string, readonly string[]>> = {
