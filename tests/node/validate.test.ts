@@ -165,3 +165,151 @@ describe('validator — output formats', () => {
     );
   });
 });
+
+describe('validator — walkthroughs and custom blocks', () => {
+  const page = (body: string): string => `<doc-page doc-id="w">
+${body}
+  <doc-choice question="Q?"><doc-option>A</doc-option><doc-option>B</doc-option></doc-choice>
+</doc-page>`;
+
+  const WALKTHROUGH = `  <doc-walkthrough title="Login">
+    <doc-actor name="vendor" label="Vendor panel"></doc-actor>
+    <doc-actor name="admin" label="Admin route"></doc-actor>
+    <doc-scene title="Wrong door" focus="vendor admin">
+      <doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+      <doc-change actor="admin" set="401" tone="bad"></doc-change>
+      <p>Rejected.</p>
+    </doc-scene>
+  </doc-walkthrough>`;
+
+  it('accepts a well-formed walkthrough with nothing to report', () => {
+    const result = validateHtml(page(WALKTHROUGH), { file: 'w.html' });
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it('reports a move to an actor that was never declared, on the line of the move', () => {
+    const broken = WALKTHROUGH.replace('to="admin"', 'to="amdin"');
+    const result = validateHtml(page(broken), { file: 'w.html' });
+    const unknown = result.diagnostics.find((d) => d.ruleId === 'walkthrough/unknown-actor');
+
+    expect(unknown?.severity).toBe('error');
+    expect(unknown?.line).toBe(6);
+    expect(unknown?.message).toContain('"amdin"');
+    expect(unknown?.fix).toContain('vendor, admin');
+    expect(result.ok).toBe(false);
+  });
+
+  it('checks change targets and focus lists too', () => {
+    const broken = WALKTHROUGH.replace('actor="admin"', 'actor="ghost"').replace(
+      'focus="vendor admin"',
+      'focus="vendor nobody"',
+    );
+    const result = validateHtml(page(broken), { file: 'w.html' });
+    const messages = result.diagnostics
+      .filter((d) => d.ruleId === 'walkthrough/unknown-actor')
+      .map((d) => d.message);
+
+    expect(messages).toHaveLength(2);
+    expect(messages.join(' ')).toContain('"ghost"');
+    expect(messages.join(' ')).toContain('"nobody"');
+  });
+
+  it('rejects two actors with the same name', () => {
+    const broken = WALKTHROUGH.replace('name="admin"', 'name="vendor"');
+    const result = validateHtml(page(broken), { file: 'w.html' });
+    expect(ruleIds(result.diagnostics)).toContain('walkthrough/duplicate-actor');
+    expect(result.ok).toBe(false);
+  });
+
+  it('rejects a self-closed walkthrough tag, which the browser would nest', () => {
+    const broken = WALKTHROUGH.replace(
+      '<doc-actor name="admin" label="Admin route"></doc-actor>',
+      '<doc-actor name="admin" label="Admin route"/>',
+    );
+    const result = validateHtml(page(broken), { file: 'w.html' });
+    const selfClosing = result.diagnostics.find((d) => d.ruleId === 'tag/self-closing');
+
+    expect(selfClosing?.severity).toBe('error');
+    expect(selfClosing?.line).toBe(4);
+    expect(selfClosing?.fix).toContain('</doc-actor>');
+  });
+
+  it('only warns for a self-closed older tag, so existing documents keep building', () => {
+    const result = validateHtml(page('  <doc-owners><doc-owner name="A"/></doc-owners>'), {
+      file: 'w.html',
+    });
+    const selfClosing = result.diagnostics.find((d) => d.ruleId === 'tag/self-closing');
+    expect(selfClosing?.severity).toBe('warning');
+    expect(result.ok).toBe(true);
+  });
+
+  it('warns about a plain script inside a custom block and a forgedoc one outside', () => {
+    const body = `  <doc-custom title="c"><div></div><script>window.x = 1;</script></doc-custom>
+  <script type="forgedoc">block.remove();</script>`;
+    const result = validateHtml(page(body), { file: 'w.html' });
+
+    expect(ruleIds(result.diagnostics)).toEqual(
+      expect.arrayContaining(['custom/plain-script', 'custom/orphan-script']),
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it('accepts a custom block with its own style, classes and forgedoc script', () => {
+    const body = `  <doc-custom title="c">
+    <style>.jar { gap: 4px; }</style>
+    <div class="jar"><b>one</b></div>
+    <script type="forgedoc">block.querySelector('.jar').dataset.ready = 'yes';</script>
+  </doc-custom>`;
+    expect(validateHtml(page(body), { file: 'w.html' }).diagnostics).toEqual([]);
+  });
+
+  it('hints, without failing, at a very large Mermaid diagram', () => {
+    const edges = Array.from({ length: 20 }, (_, index) => `    N${index} --> N${index + 1}`);
+    const body = `  <doc-figure type="mermaid" caption="Big">
+    flowchart LR
+${edges.join('\n')}
+  </doc-figure>`;
+    const result = validateHtml(page(body), { file: 'w.html' });
+    const hint = result.diagnostics.find((d) => d.ruleId === 'figure/large-mermaid');
+
+    expect(hint?.severity).toBe('warning');
+    expect(result.ok).toBe(true);
+  });
+
+  it('says nothing about a small Mermaid diagram', () => {
+    const body = `  <doc-figure type="mermaid" caption="Small">
+    flowchart LR
+      A --> B --> C
+  </doc-figure>`;
+    expect(validateHtml(page(body), { file: 'w.html' }).diagnostics).toEqual([]);
+  });
+});
+
+describe('validator — file groups', () => {
+  const page = (body: string): string => `<doc-page doc-id="f">
+${body}
+  <doc-choice question="Q?"><doc-option>A</doc-option><doc-option>B</doc-option></doc-choice>
+</doc-page>`;
+
+  it('accepts a file stack with nothing to report', () => {
+    const body = `  <doc-files title="Files to change">
+    <doc-file-group title="Database" path="packages/db" count="~9 files" open>
+      <doc-file path="schema/user.ts">split into <code>customer.ts</code></doc-file>
+    </doc-file-group>
+  </doc-files>`;
+    expect(validateHtml(page(body), { file: 'f.html' }).diagnostics).toEqual([]);
+  });
+
+  it('rejects a file outside a group and a group without a title', () => {
+    const body = `  <doc-files>
+    <doc-file path="loose.ts"></doc-file>
+    <doc-file-group><doc-file path="a.ts"></doc-file></doc-file-group>
+  </doc-files>`;
+    const result = validateHtml(page(body), { file: 'f.html' });
+    const misplaced = result.diagnostics.find((d) => d.ruleId === 'child/misplaced');
+
+    expect(misplaced?.line).toBe(3);
+    expect(ruleIds(result.diagnostics)).toContain('attr/missing-required');
+    expect(result.ok).toBe(false);
+  });
+});

@@ -1206,7 +1206,7 @@ Diagram or illustration container with Mermaid rendering and caption.
 | `src` | URL | no | Image URL for `type="image"`. |
 | `alt` | string | no | Accessible description for screen readers. |
 
-- Prefer `type="mermaid"` over hand-drawn SVG: five lines replaces hundreds of hand-placed coordinates, and it renders in the document’s own colours.
+- Mermaid suits a small static picture — a handful of boxes. A dense graph is hard to read; split it, or play it as a `doc-walkthrough` if it describes something that happens.
 
 - `type="html"` renders inside a sandboxed `<iframe srcdoc>`, never inline.
 
@@ -1221,7 +1221,7 @@ flowchart LR
 
 - **Parts:** `content`, `caption`, `diagram-error`, `feedback`, `comment-icon`
 
-- **See also:** `<doc-caption>`, `<doc-flow>`
+- **See also:** `<doc-caption>`, `<doc-flow>`, `<doc-walkthrough>`
 
 ### `<doc-caption>`
 

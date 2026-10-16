@@ -655,11 +655,11 @@ flowchart LR
   A[Agent] --> B[Document] --> C[Reader] --> D[Bucket] --> A
 </doc-figure>`,
     notes: [
-      'Prefer `type="mermaid"` over hand-drawn SVG: five lines replaces hundreds of hand-placed coordinates, and it renders in the document’s own colours.',
+      'Mermaid suits a small static picture — a handful of boxes. A dense graph is hard to read; split it, or play it as a `doc-walkthrough` if it describes something that happens.',
       '`type="html"` renders inside a sandboxed `<iframe srcdoc>`, never inline.',
       'Mermaid is only embedded by `--offline` builds, and it is most of their weight.',
     ],
-    related: ['doc-caption', 'doc-flow'],
+    related: ['doc-caption', 'doc-flow', 'doc-walkthrough'],
   },
 
   'doc-caption': {

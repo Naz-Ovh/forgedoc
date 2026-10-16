@@ -1,6 +1,6 @@
 # ForgeDoc cheatsheet
 
-Write **semantic markup only**. A prebuilt runtime supplies styling, layout, interactivity, persistence and feedback collection. Use an element only where the document needs it. Name the file `PLAN_<name>.html` for a plan, `DOC_<name>.html` for a document.
+Write **semantic markup only**. A prebuilt runtime supplies styling, layout, interactivity, persistence and feedback collection. Use whichever form makes an idea clearest — text, an element, or your own `doc-custom` block. Name the file `PLAN_<name>.html` for a plan, `DOC_<name>.html` for a document.
 
 ```html
 <style>/*@DOC_CSS@*/</style>   <!-- in <head> -->

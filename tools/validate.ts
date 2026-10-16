@@ -419,6 +419,9 @@ class Validator {
   #walk(element: Element, ancestors: Element[]): void {
     const tagName = element.tagName;
 
+    if (tagName === 'script') this.#validateScript(element, ancestors);
+    if (element.isSelfClosing && tagName.startsWith('doc-')) this.#reportSelfClosing(element);
+
     if (isKnownTag(tagName)) {
       this.#validateDocElement(element, tagName, ancestors);
     } else if (tagName.startsWith('doc-')) {
@@ -587,6 +590,9 @@ class Validator {
       }
     }
 
+    if (tagName === 'doc-walkthrough') this.#validateWalkthrough(element);
+    if (tagName === 'doc-figure') this.#validateMermaidSize(element);
+
     if (tagName === 'doc-figure') {
       const hasCaptionAttr = attributeOf(element, 'caption') !== null;
       const hasCaptionChild = element.children.some(
@@ -600,6 +606,115 @@ class Validator {
           positionOf(element),
         );
       }
+    }
+  }
+
+  /**
+   * HTML has no self-closing custom elements: the parser reads `<doc-actor/>`
+   * as an *open* tag, so every sibling after it becomes its child. This
+   * validator's own parser honours the slash, which is exactly why the browser
+   * and the build would disagree about the document without this rule.
+   *
+   * An error for the tags whose children carry meaning by position — a scene
+   * swallowed by an actor never plays — and a warning for the older tags, so a
+   * document that built before keeps building.
+   */
+  #reportSelfClosing(element: Element): void {
+    const tag = element.tagName;
+    const message = `<${tag} … /> is not self-closing in HTML: the browser nests everything after it inside it.`;
+    const fix = `Write an explicit end tag: <${tag} …></${tag}>.`;
+    if (STRICT_CLOSING_TAGS.has(tag)) {
+      this.error('tag/self-closing', message, fix, positionOf(element));
+    } else {
+      this.warning('tag/self-closing', message, fix, positionOf(element));
+    }
+  }
+
+  /** Every actor key a walkthrough's moves, changes and focus lists name must exist. */
+  #validateWalkthrough(walkthrough: Element): void {
+    const actors = childElements(walkthrough, 'doc-actor');
+    const names = new Set<string>();
+    for (const actor of actors) {
+      const name = attributeOf(actor, 'name');
+      if (name === null) continue;
+      if (names.has(name)) {
+        this.error(
+          'walkthrough/duplicate-actor',
+          `Two actors in this walkthrough are named "${name}".`,
+          'Give every <doc-actor> in a walkthrough its own `name`.',
+          positionOf(actor),
+        );
+      }
+      names.add(name);
+    }
+
+    const known = [...names].join(', ') || 'none';
+    for (const scene of childElements(walkthrough, 'doc-scene')) {
+      for (const [element, attribute] of actorReferences(scene)) {
+        const value = attributeOf(element, attribute) ?? '';
+        const keys = attribute === 'focus' ? value.split(/\s+/).filter(Boolean) : [value];
+        for (const key of keys) {
+          if (key === '' || names.has(key)) continue;
+          this.error(
+            'walkthrough/unknown-actor',
+            `<${element.tagName} ${attribute}="${value}"> names an actor this walkthrough does not declare: "${key}".`,
+            `Use one of the declared actor names (${known}), or add <doc-actor name="${key}"></doc-actor>.`,
+            positionOf(element),
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * A soft hint, never an error: a Mermaid graph past a dozen or so statements
+   * is usually hard to read at page width. It says so once, and the author
+   * decides.
+   */
+  #validateMermaidSize(figure: Element): void {
+    if (attributeOf(figure, 'type') !== 'mermaid') return;
+    const source = figure.children
+      .filter((child): child is TextNode => 'type' in child)
+      .map((child) => child.text)
+      .join('\n');
+    const statements = source
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== '' && !line.startsWith('%%')).length;
+    if (statements <= MERMAID_HINT_STATEMENTS) return;
+
+    this.warning(
+      'figure/large-mermaid',
+      `This Mermaid diagram has ${statements} statements; a dense graph is hard to read at page width.`,
+      'Optional: split it, show only the part the reader needs, or use <doc-walkthrough> if it describes something that happens step by step.',
+      positionOf(figure),
+    );
+  }
+
+  /**
+   * Scripts in a document belong in a `doc-custom` block, typed so the runtime
+   * runs them: a plain `<script>` there runs before the page is ready and in
+   * the shared global scope, and a `forgedoc` one anywhere else never runs.
+   */
+  #validateScript(script: Element, ancestors: Element[]): void {
+    const type = (attributeOf(script, 'type') ?? '').trim().toLowerCase();
+    const inCustom = ancestors.some((ancestor) => ancestor.tagName === 'doc-custom');
+
+    if (inCustom && type !== 'forgedoc') {
+      this.warning(
+        'custom/plain-script',
+        'A plain <script> inside <doc-custom> runs before the page is ready and shares the global scope.',
+        'Write <script type="forgedoc">; it runs once the page is ready, with `block` set to this element.',
+        positionOf(script),
+      );
+    }
+    if (!inCustom && type === 'forgedoc') {
+      this.warning(
+        'custom/orphan-script',
+        '<script type="forgedoc"> only runs inside a <doc-custom> block.',
+        'Move it inside the <doc-custom> it belongs to.',
+        positionOf(script),
+      );
     }
   }
 
@@ -691,6 +806,36 @@ class Validator {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Tags whose self-closed form is an error rather than a warning (see `#reportSelfClosing`). */
+const STRICT_CLOSING_TAGS: ReadonlySet<string> = new Set([
+  'doc-walkthrough',
+  'doc-actor',
+  'doc-scene',
+  'doc-move',
+  'doc-change',
+  'doc-custom',
+]);
+
+/** Above this many statements a Mermaid figure gets the `figure/large-mermaid` hint. */
+const MERMAID_HINT_STATEMENTS = 15;
+
+function childElements(element: Element, tagName: string): Element[] {
+  return element.children.filter(
+    (child): child is Element => 'tagName' in child && child.tagName === tagName,
+  );
+}
+
+/** Each (element, attribute) pair in a scene that names an actor. */
+function actorReferences(scene: Element): [Element, string][] {
+  const references: [Element, string][] = [];
+  if (attributeOf(scene, 'focus') !== null) references.push([scene, 'focus']);
+  for (const move of childElements(scene, 'doc-move')) {
+    references.push([move, 'from'], [move, 'to']);
+  }
+  for (const change of childElements(scene, 'doc-change')) references.push([change, 'actor']);
+  return references;
+}
 
 function positionOf(element: Element): Position {
   return element.position;
