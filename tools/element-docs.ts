@@ -84,7 +84,7 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     title: 'Structure',
-    blurb: 'Sequences, phases, and walkthroughs that play a process step by step.',
+    blurb: 'Sequences, phases, mind maps, and walkthroughs that play a process step by step.',
     tags: [
       'doc-flow',
       'doc-flow-node',
@@ -93,6 +93,8 @@ export const CATEGORIES: readonly Category[] = [
       'doc-scene',
       'doc-move',
       'doc-change',
+      'doc-mindmap',
+      'doc-node',
       'doc-roadmap',
       'doc-stage',
     ],
@@ -603,6 +605,40 @@ export const ELEMENT_DOCS: Readonly<Record<TagName, ElementDoc>> = {
       '`set` replaces the actor’s status pill; `remove` strikes a row by its text; `drop` retires the whole actor.',
     ],
     related: ['doc-scene', 'doc-actor'],
+  },
+
+  'doc-mindmap': {
+    example: `<doc-mindmap title="Account split" expand="1">
+  <doc-node title="Database" icon="database" tone="green" open>
+    <p>Three account tables, <strong>one per surface</strong>.</p>
+    <doc-node title="customers"></doc-node>
+    <doc-node title="vendor_users" tone="cyan"></doc-node>
+  </doc-node>
+  <doc-node title="Server" icon="server" tone="blue">
+    <doc-node title="One guard per surface"></doc-node>
+  </doc-node>
+</doc-mindmap>`,
+    notes: [
+      'Suits an overview: the areas a change reaches and what sits under each, for the reader to open where they care.',
+      'You write the cards. The title card, branch lines, Expand all / Collapse all / Fit, drag to pan, Ctrl+wheel and pinch to zoom, arrow-key navigation and the phone outline come from the runtime.',
+      '`expand` sets how many levels start open (`1` by default); `open` or `closed` on a card overrides it. Closed branches stay findable with Ctrl+F, and the map prints fully expanded.',
+      '`layout="radial"` rings the title with its branches, which reads well for a handful of cards.',
+      'Each card takes an end tag: `<doc-node …></doc-node>`.',
+    ],
+    related: ['doc-node', 'doc-tree', 'doc-walkthrough'],
+  },
+
+  'doc-node': {
+    example: `<doc-node title="vendor_users" icon="table" tone="cyan">
+  <p>Vendor staff, with <code>vendor_id</code> on every row.</p>
+  <doc-node title="vendor_sessions"></doc-node>
+</doc-node>`,
+    notes: [
+      'Content is ordinary HTML — paragraphs, lists, `<code>`, `<strong>`, links and an `<img>`, which is sized to the card.',
+      '`tone` colours the title, icon and branch line, and a card without one takes its parent’s.',
+      'A closed card with branches shows how many it holds. Every card takes comments.',
+    ],
+    related: ['doc-mindmap'],
   },
 
   'doc-roadmap': {

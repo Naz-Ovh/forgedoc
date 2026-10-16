@@ -1,0 +1,260 @@
+/*
+ * `doc-mindmap` — the mind map.
+ *
+ * Written against the shared token contract only, like the walkthrough, so
+ * the other themes `@use` this file: a theme that wants its own map replaces
+ * its `components/_mindmap.scss` and nothing else moves.
+ *
+ * A card's colour comes from two custom properties set on the card and
+ * inherited by its branches: `--doc-mm-tone` (edge, icon, line, toggle) and
+ * `--doc-mm-title` (the heading, which stays full-contrast on a neutral card).
+ * Inheritance is what makes a card without a `tone` take its parent's.
+ */
+
+/*
+ * Tones are named by hue and must be that hue in every theme: the same list
+ * and the same values as the walkthrough's actors. A branch line carries its
+ * card's tone as `data-tone`, since it is drawn outside the card.
+ */
+$tones: (
+  "accent" var(--doc-accent-line) var(--doc-accent-text),
+  "blue" light-dark(var(--doc-info-600), var(--doc-info-400)) var(--doc-mm-tone),
+  "green" light-dark(var(--doc-success-600), var(--doc-success-400)) var(--doc-mm-tone),
+  "amber" light-dark(var(--doc-warn-600), var(--doc-warn-400)) var(--doc-mm-tone),
+  "red" light-dark(var(--doc-danger-600), var(--doc-danger-400)) var(--doc-mm-tone),
+  "violet" light-dark(oklch(52% 0.19 295), oklch(76% 0.13 295)) var(--doc-mm-tone),
+  "cyan" light-dark(oklch(55% 0.11 215), oklch(78% 0.11 210)) var(--doc-mm-tone),
+  "rose" light-dark(oklch(56% 0.19 5), oklch(77% 0.13 5)) var(--doc-mm-tone),
+  "neutral" var(--doc-border-3) var(--doc-text-1)
+);
+
+@mixin card-outline {
+  & > [data-part="toolbar"] {
+    padding: var(--doc-space-3) var(--doc-space-3) 0;
+  }
+
+  & > [data-part="root"] {
+    margin: var(--doc-space-3);
+  }
+
+  & > doc-node {
+    margin: 0 var(--doc-space-3) var(--doc-space-2);
+  }
+
+  & doc-node {
+    border-block-start-width: var(--doc-border-width);
+    border-block-start-color: var(--doc-border-2);
+    border-inline-start: 3px solid var(--doc-mm-tone);
+    box-shadow: none;
+  }
+
+  & doc-node doc-node {
+    margin-block-start: var(--doc-space-2);
+    padding: var(--doc-space-2) var(--doc-space-3);
+  }
+
+  & > :last-child {
+    margin-block-end: var(--doc-space-3);
+  }
+}
+
+@layer doc.theme {
+  doc-mindmap {
+    --doc-mm-tone: var(--doc-border-3);
+    --doc-mm-title: var(--doc-text-1);
+
+    margin-block: var(--doc-space-8);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background:
+      radial-gradient(circle at 1px 1px, var(--doc-border-1) 1px, transparent 0) 0 0 / 18px 18px,
+      var(--doc-surface-2);
+  }
+
+  @each $name, $tone, $title in $tones {
+    doc-mindmap :is([tone="#{$name}"], [data-part="link"][data-tone="#{$name}"]) {
+      --doc-mm-tone: #{$tone};
+      --doc-mm-title: #{$title};
+    }
+  }
+
+  // ── Toolbar ──────────────────────────────────────────────────────────────
+
+  doc-mindmap [data-part="toolbar"] {
+    gap: var(--doc-space-2);
+    padding: var(--doc-space-3);
+  }
+
+  doc-mindmap [data-part="toolbar"] button {
+    min-height: 2rem;
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-1);
+    color: var(--doc-text-1);
+    font: inherit;
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    transition: border-color var(--doc-transition);
+  }
+
+  doc-mindmap [data-part="toolbar"] button:hover {
+    border-color: var(--doc-accent-edge);
+  }
+
+  doc-mindmap [data-part="toolbar"] button:focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  doc-mindmap [data-part="hint"] {
+    margin-inline-start: auto;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+  }
+
+  // ── Cards ────────────────────────────────────────────────────────────────
+
+  doc-mindmap :is(doc-node, [data-part="root"]) {
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-block-start: 3px solid var(--doc-mm-tone);
+    border-radius: var(--doc-radius);
+    background: color-mix(in oklab, var(--doc-mm-tone) 5%, var(--doc-surface-1));
+    box-shadow: var(--doc-shadow-1);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-sm);
+    line-height: var(--doc-leading-tight);
+    text-align: start;
+  }
+
+  doc-mindmap > [data-part="root"] {
+    --doc-mm-tone: var(--doc-accent-line);
+
+    display: flex;
+    gap: var(--doc-space-2);
+    align-items: center;
+
+    padding: var(--doc-space-3) var(--doc-space-5);
+    background: color-mix(in oklab, var(--doc-accent-solid) 10%, var(--doc-surface-1));
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  doc-mindmap [data-part="root-title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 700;
+  }
+
+  doc-mindmap [data-part="header"] {
+    gap: var(--doc-space-2);
+  }
+
+  /* A card with content: a step between its heading and the content. */
+  doc-mindmap doc-node:is([data-doc-flow], :has(> :not([data-doc-chrome], doc-node))) > [data-part="header"] {
+    margin-block-end: var(--doc-space-2);
+  }
+
+  doc-mindmap [data-part="icon"] {
+    color: var(--doc-mm-tone);
+    font-size: var(--doc-text-md);
+  }
+
+  doc-mindmap doc-node [data-part="title"] {
+    color: var(--doc-mm-title);
+    font-weight: 650;
+    overflow-wrap: break-word;
+  }
+
+  doc-mindmap doc-node :is(p, ul, ol) {
+    margin-block: var(--doc-space-2);
+  }
+
+  doc-mindmap doc-node :is(ul, ol) {
+    padding-inline-start: var(--doc-space-5);
+  }
+
+  doc-mindmap doc-node img {
+    margin-block: var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+  }
+
+  doc-mindmap doc-node a {
+    color: var(--doc-accent-text);
+  }
+
+  doc-mindmap [data-part="toggle"] {
+    min-width: 1.6em;
+    padding: 0 var(--doc-space-1);
+    border: var(--doc-border-width) solid var(--doc-mm-tone);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    color: var(--doc-mm-title);
+    font-size: var(--doc-text-xs);
+    font-variant-numeric: var(--doc-numeric);
+    font-weight: 650;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  doc-mindmap :is(doc-node, [data-part="root"]):focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  /*
+  * A card holds its branches, so hovering or focusing a branch also hovers
+  * every card it sits in. Only the innermost card shows its Comment button.
+  */
+  doc-mindmap doc-node:has(doc-node:is(:hover, :focus-within)):not([data-doc-commented])
+    > [data-part="feedback"]:not(:focus-visible) {
+    opacity: 0;
+  }
+
+  // ── Branch lines ─────────────────────────────────────────────────────────
+
+  doc-mindmap [data-part="link"] {
+    stroke: var(--doc-border-3);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+  }
+
+  doc-mindmap [data-part="link"][data-tone] {
+    stroke: color-mix(in oklab, var(--doc-mm-tone) 70%, var(--doc-border-3));
+  }
+
+  // ── The map ──────────────────────────────────────────────────────────────
+
+  @media screen {
+    doc-mindmap:state(map) [data-part="toolbar"] {
+      background: linear-gradient(var(--doc-surface-2) 55%, transparent);
+    }
+
+    doc-mindmap:state(map) [data-part="toggle"] {
+      box-shadow: var(--doc-shadow-1);
+    }
+
+    doc-mindmap:state(outline) {
+      @include card-outline;
+    }
+
+    doc-mindmap:state(outline) [data-part="toggle"] {
+      flex: none;
+    }
+  }
+
+  @media screen and (prefers-reduced-motion: no-preference) {
+    doc-mindmap:state(map) {
+      transition: height 300ms ease;
+    }
+  }
+
+  @media print {
+    doc-mindmap {
+      @include card-outline;
+
+      background: none;
+    }
+  }
+}

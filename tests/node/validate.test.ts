@@ -313,3 +313,83 @@ ${body}
     expect(result.ok).toBe(false);
   });
 });
+
+describe('validator — mind maps', () => {
+  const page = (body: string): string => `<doc-page doc-id="m">
+${body}
+  <doc-choice question="Q?"><doc-option>A</doc-option><doc-option>B</doc-option></doc-choice>
+</doc-page>`;
+
+  const MAP = `  <doc-mindmap title="Account split" expand="1">
+    <doc-node title="Database" icon="database" tone="green" open>
+      <p>Three tables.</p>
+      <doc-node title="customers"></doc-node>
+    </doc-node>
+  </doc-mindmap>`;
+
+  it('accepts a well-formed map with nothing to report', () => {
+    expect(validateHtml(page(MAP), { file: 'm.html' }).diagnostics).toEqual([]);
+  });
+
+  it('accepts none, all and a number for expand, and the radial layout', () => {
+    for (const expand of ['none', 'all', '2']) {
+      const body = MAP.replace('expand="1"', `expand="${expand}" layout="radial"`);
+      expect(validateHtml(page(body), { file: 'm.html' }).diagnostics).toEqual([]);
+    }
+  });
+
+  it('rejects a doc-node outside a doc-mindmap', () => {
+    const result = validateHtml(page('  <doc-node title="Loose"></doc-node>'), { file: 'm.html' });
+    const misplaced = result.diagnostics.find((d) => d.ruleId === 'child/misplaced');
+    expect(misplaced?.message).toContain('<doc-mindmap>');
+    expect(result.ok).toBe(false);
+  });
+
+  it('rejects an expand value it cannot read, on the line of the map', () => {
+    const result = validateHtml(page(MAP.replace('expand="1"', 'expand="lots"')), {
+      file: 'm.html',
+    });
+    const invalid = result.diagnostics.find((d) => d.ruleId === 'attr/invalid-value');
+    expect(invalid?.message).toContain('expand="lots"');
+    expect(invalid?.line).toBe(2);
+    expect(result.ok).toBe(false);
+  });
+
+  it('rejects an unknown tone or icon', () => {
+    const body = MAP.replace('tone="green"', 'tone="teal"').replace(
+      'icon="database"',
+      'icon="rocket"',
+    );
+    const result = validateHtml(page(body), { file: 'm.html' });
+    const invalid = result.diagnostics.filter((d) => d.ruleId === 'attr/invalid-value');
+    expect(invalid.map((d) => d.message).join(' ')).toMatch(
+      /tone="teal".*icon="rocket"|icon="rocket".*tone="teal"/,
+    );
+  });
+
+  it('rejects a self-closed doc-node, which the browser would nest', () => {
+    const body = MAP.replace(
+      '<doc-node title="customers"></doc-node>',
+      '<doc-node title="customers"/>',
+    );
+    const selfClosing = validateHtml(page(body), { file: 'm.html' }).diagnostics.find(
+      (d) => d.ruleId === 'tag/self-closing',
+    );
+    expect(selfClosing?.severity).toBe('error');
+    expect(selfClosing?.line).toBe(5);
+  });
+
+  it('warns when a card is both open and closed', () => {
+    const result = validateHtml(page(MAP.replace(' open>', ' open closed>')), { file: 'm.html' });
+    expect(ruleIds(result.diagnostics)).toContain('mindmap/open-and-closed');
+    expect(result.ok).toBe(true);
+  });
+
+  it('requires a title on the map and on every card', () => {
+    const body = MAP.replace(' title="Account split"', '').replace(' title="customers"', '');
+    const missing = validateHtml(page(body), { file: 'm.html' }).diagnostics.filter(
+      (d) => d.ruleId === 'attr/missing-required',
+    );
+    expect(missing).toHaveLength(2);
+  });
+});

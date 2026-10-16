@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind map check</title>
+<style>/*@DOC_CSS@*/</style>
+</head>
+<body>
+
+<doc-page doc-id="mindmap-check">
+
+  <doc-header kicker="Plan · Mind map">
+    One map, three readers
+    <p slot="lede">This fixture drives a mind map as delivered: built offline, opened from disk.</p>
+  </doc-header>
+
+  <doc-section title="Overview">
+    <doc-mindmap title="Account split" expand="1">
+      <doc-node title="Database" icon="database" tone="green" open>
+        <p>Three account tables, <strong>one per surface</strong>.</p>
+        <doc-node title="customers" icon="table"></doc-node>
+        <doc-node title="vendor_users" icon="table" tone="cyan"></doc-node>
+      </doc-node>
+      <doc-node title="Server" icon="server" tone="blue">
+        <p>One guard per surface.</p>
+        <doc-node title="Guards"><doc-node title="authenticateVendor">Reads only <code>ub_vendor_session</code>.</doc-node></doc-node>
+        <doc-node title="Sessions"></doc-node>
+      </doc-node>
+      <doc-node title="Apps" icon="app" tone="violet">
+        <doc-node title="Shop"></doc-node>
+        <doc-node title="Vendor panel"></doc-node>
+      </doc-node>
+    </doc-mindmap>
+
+    <doc-choice mode="single" question="Is the split worth it?">
+      <doc-option recommended>Yes</doc-option>
+      <doc-option>No</doc-option>
+    </doc-choice>
+  </doc-section>
+
+</doc-page>
+
+<script>//@DOC_JS@</script>
+</body>
+</html>

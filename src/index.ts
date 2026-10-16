@@ -58,7 +58,9 @@ import { DocHeader } from './components/doc-header.js';
 import { DocList } from './components/doc-list.js';
 import { DocMatrix } from './components/doc-matrix.js';
 import { DocMilestone } from './components/doc-milestone.js';
+import { DocMindmap } from './components/doc-mindmap.js';
 import { DocMove } from './components/doc-move.js';
+import { DocNode } from './components/doc-node.js';
 import { DocNote } from './components/doc-note.js';
 import { DocOption } from './components/doc-option.js';
 import { DocOwner } from './components/doc-owner.js';
@@ -129,7 +131,9 @@ const ELEMENTS = {
   'doc-list': DocList,
   'doc-matrix': DocMatrix,
   'doc-milestone': DocMilestone,
+  'doc-mindmap': DocMindmap,
   'doc-move': DocMove,
+  'doc-node': DocNode,
   'doc-note': DocNote,
   'doc-option': DocOption,
   'doc-owner': DocOwner,

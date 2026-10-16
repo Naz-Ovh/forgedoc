@@ -101,6 +101,40 @@ export const PRESET_AXES = {
 } as const;
 
 /**
+ * Named colours for cards that need telling apart: walkthrough actors and
+ * mind-map branches share one list, so a tone means the same hue in both.
+ */
+export const TONES = [
+  'accent',
+  'blue',
+  'green',
+  'amber',
+  'red',
+  'violet',
+  'cyan',
+  'rose',
+  'neutral',
+] as const;
+
+/**
+ * Icons a mind-map card can carry, all drawn from the runtime's own set
+ * (`core/icons.ts`). `database` and `server` are the everyday names for the
+ * walkthrough's `store` and `service` glyphs.
+ */
+export const NODE_ICONS = [
+  'person',
+  'app',
+  'service',
+  'server',
+  'table',
+  'store',
+  'database',
+  'check',
+  'comment',
+  'question',
+] as const;
+
+/**
  * The master tag dictionary. Every component in `src/components/` must correspond
  * to an entry here, and the test suite verifies that bidirectional invariant.
  */
@@ -613,10 +647,7 @@ export const TAGS = {
         doc: 'Icon on the card: a person, an app or screen, a service, a table, a store or cookie jar.',
       },
       tone: {
-        kind: {
-          type: 'enum',
-          values: ['accent', 'blue', 'green', 'amber', 'red', 'violet', 'cyan', 'rose', 'neutral'],
-        },
+        kind: { type: 'enum', values: TONES },
         doc: 'Card colour, to tell groups of actors apart. Defaults to `neutral`.',
       },
       absent: {
@@ -680,6 +711,50 @@ export const TAGS = {
       drop: {
         kind: { type: 'boolean' },
         doc: 'The actor is retired: struck through and faded from here on.',
+      },
+    },
+  },
+
+  'doc-mindmap': {
+    doc: 'Interactive mind map: a title card with `doc-node` branches growing from it. Cards expand and collapse, the map pans and zooms, and it reads as an indented outline on a phone.',
+    requiresChild: ['doc-node'],
+    attributes: {
+      title: {
+        kind: { type: 'string' },
+        required: true,
+        doc: 'The centre card, and the accessible name of the tree.',
+      },
+      expand: {
+        kind: { type: 'string' },
+        doc: 'How many levels below the title start open: `none`, a number such as `1` or `2`, or `all`. Defaults to `1`.',
+      },
+      layout: {
+        kind: { type: 'enum', values: ['tree', 'radial'] },
+        doc: '`tree` (default) grows left to right; `radial` rings the title and suits a small map.',
+      },
+    },
+  },
+
+  'doc-node': {
+    doc: 'One card in a `doc-mindmap`. Its content is ordinary HTML — text, lists, code, links, an image — and nested `doc-node` elements are its branches.',
+    onlyInside: ['doc-mindmap', 'doc-node'],
+    attributes: {
+      title: { kind: { type: 'string' }, required: true, doc: 'Card heading, coloured by `tone`.' },
+      icon: {
+        kind: { type: 'enum', values: NODE_ICONS },
+        doc: 'Icon before the title, from the runtime’s own set.',
+      },
+      tone: {
+        kind: { type: 'enum', values: TONES },
+        doc: 'Colour of the title, icon and branch line. Defaults to the parent’s tone, or `neutral`.',
+      },
+      open: {
+        kind: { type: 'boolean' },
+        doc: 'Starts expanded, whatever the map’s `expand` says.',
+      },
+      closed: {
+        kind: { type: 'boolean' },
+        doc: 'Starts collapsed, whatever the map’s `expand` says.',
       },
     },
   },
@@ -1193,6 +1268,19 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-file-group': ['summary', 'summary-title', 'summary-path', 'count', 'toggle'],
   'doc-file': ['link', 'path', 'note*'],
   'doc-path': ['link', 'path'],
+  'doc-mindmap': [
+    'toolbar',
+    'expand-all',
+    'collapse-all',
+    'fit',
+    'hint',
+    'links',
+    'link',
+    'root',
+    'root-title',
+    'toggle',
+  ],
+  'doc-node': ['header', 'icon', 'title', 'toggle', 'feedback', 'comment-icon'],
 };
 
 export const STATES: Readonly<Record<string, readonly string[]>> = {
@@ -1204,6 +1292,8 @@ export const STATES: Readonly<Record<string, readonly string[]>> = {
   'doc-collapse': ['open'],
   'doc-walkthrough': ['playing'],
   'doc-file-group': ['open'],
+  'doc-mindmap': ['map', 'outline', 'panning'],
+  'doc-node': ['open', 'branch'],
 };
 
 export type TagName = keyof typeof TAGS;

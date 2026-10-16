@@ -19,6 +19,7 @@ import {
   type TagName,
   type TagSpec,
 } from '../src/core/contract.js';
+import { isValidExpand } from '../src/core/mindmap.js';
 import { type IdCandidate, resolveIds, slugify } from '../src/core/slug.js';
 
 export interface Diagnostic {
@@ -591,6 +592,8 @@ class Validator {
     }
 
     if (tagName === 'doc-walkthrough') this.#validateWalkthrough(element);
+    if (tagName === 'doc-mindmap') this.#validateMindmapExpand(element);
+    if (tagName === 'doc-node') this.#validateNodeState(element);
     if (tagName === 'doc-figure') this.#validateMermaidSize(element);
 
     if (tagName === 'doc-figure') {
@@ -664,6 +667,32 @@ class Validator {
         }
       }
     }
+  }
+
+  /**
+   * `expand` is a string in the contract because it takes words and numbers;
+   * this is the check an enum would otherwise have given it.
+   */
+  #validateMindmapExpand(map: Element): void {
+    const expand = attributeOf(map, 'expand');
+    if (expand === null || isValidExpand(expand)) return;
+    this.error(
+      'attr/invalid-value',
+      `Invalid attribute value expand="${expand}" on <doc-mindmap>.`,
+      'Valid values are: none | all | a whole number of levels, e.g. 1 or 2',
+      map.attributes.find((attribute) => attribute.name === 'expand')?.position ?? positionOf(map),
+    );
+  }
+
+  /** A card cannot start both open and closed; the runtime would pick one silently. */
+  #validateNodeState(node: Element): void {
+    if (attributeOf(node, 'open') === null || attributeOf(node, 'closed') === null) return;
+    this.warning(
+      'mindmap/open-and-closed',
+      '<doc-node> has both `open` and `closed`; `closed` wins.',
+      'Keep the one you mean.',
+      positionOf(node),
+    );
   }
 
   /**
@@ -815,6 +844,8 @@ const STRICT_CLOSING_TAGS: ReadonlySet<string> = new Set([
   'doc-move',
   'doc-change',
   'doc-custom',
+  'doc-mindmap',
+  'doc-node',
 ]);
 
 /** Above this many statements a Mermaid figure gets the `figure/large-mermaid` hint. */

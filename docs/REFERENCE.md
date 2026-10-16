@@ -903,7 +903,7 @@ Interactive slide viewer / gallery container with non-destructive slide toggling
 
 ## Structure
 
-_Sequences, phases, and walkthroughs that play a process step by step._
+_Sequences, phases, mind maps, and walkthroughs that play a process step by step._
 
 ### `<doc-flow>`
 
@@ -1092,6 +1092,80 @@ A change to one actor during a scene: a row added or removed, a status set, or t
 - **Only valid inside:** `<doc-scene>`
 
 - **See also:** `<doc-scene>`, `<doc-actor>`
+
+### `<doc-mindmap>`
+
+Interactive mind map: a title card with `doc-node` branches growing from it. Cards expand and collapse, the map pans and zooms, and it reads as an indented outline on a phone.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | **yes** | The centre card, and the accessible name of the tree. |
+| `expand` | string | no | How many levels below the title start open: `none`, a number such as `1` or `2`, or `all`. Defaults to `1`. |
+| `layout` | `tree` \| `radial` | no | `tree` (default) grows left to right; `radial` rings the title and suits a small map. |
+
+- Suits an overview: the areas a change reaches and what sits under each, for the reader to open where they care.
+
+- You write the cards. The title card, branch lines, Expand all / Collapse all / Fit, drag to pan, Ctrl+wheel and pinch to zoom, arrow-key navigation and the phone outline come from the runtime.
+
+- `expand` sets how many levels start open (`1` by default); `open` or `closed` on a card overrides it. Closed branches stay findable with Ctrl+F, and the map prints fully expanded.
+
+- `layout="radial"` rings the title with its branches, which reads well for a handful of cards.
+
+- Each card takes an end tag: `<doc-node …></doc-node>`.
+
+```html
+<doc-mindmap title="Account split" expand="1">
+  <doc-node title="Database" icon="database" tone="green" open>
+    <p>Three account tables, <strong>one per surface</strong>.</p>
+    <doc-node title="customers"></doc-node>
+    <doc-node title="vendor_users" tone="cyan"></doc-node>
+  </doc-node>
+  <doc-node title="Server" icon="server" tone="blue">
+    <doc-node title="One guard per surface"></doc-node>
+  </doc-node>
+</doc-mindmap>
+```
+
+- **Parts:** `toolbar`, `expand-all`, `collapse-all`, `fit`, `hint`, `links`, `link`, `root`, `root-title`, `toggle`
+
+- **States:** `:map`, `:outline`, `:panning`
+
+- **Requires child:** `<doc-node>`
+
+- **See also:** `<doc-node>`, `<doc-tree>`, `<doc-walkthrough>`
+
+### `<doc-node>`
+
+One card in a `doc-mindmap`. Its content is ordinary HTML — text, lists, code, links, an image — and nested `doc-node` elements are its branches.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | **yes** | Card heading, coloured by `tone`. |
+| `icon` | `person` \| `app` \| `service` \| `server` \| `table` \| `store` \| `database` \| `check` \| `comment` \| `question` | no | Icon before the title, from the runtime’s own set. |
+| `tone` | `accent` \| `blue` \| `green` \| `amber` \| `red` \| `violet` \| `cyan` \| `rose` \| `neutral` | no | Colour of the title, icon and branch line. Defaults to the parent’s tone, or `neutral`. |
+| `open` | boolean | no | Starts expanded, whatever the map’s `expand` says. |
+| `closed` | boolean | no | Starts collapsed, whatever the map’s `expand` says. |
+
+- Content is ordinary HTML — paragraphs, lists, `<code>`, `<strong>`, links and an `<img>`, which is sized to the card.
+
+- `tone` colours the title, icon and branch line, and a card without one takes its parent’s.
+
+- A closed card with branches shows how many it holds. Every card takes comments.
+
+```html
+<doc-node title="vendor_users" icon="table" tone="cyan">
+  <p>Vendor staff, with <code>vendor_id</code> on every row.</p>
+  <doc-node title="vendor_sessions"></doc-node>
+</doc-node>
+```
+
+- **Parts:** `header`, `icon`, `title`, `toggle`, `feedback`, `comment-icon`
+
+- **States:** `:open`, `:branch`
+
+- **Only valid inside:** `<doc-mindmap>`, `<doc-node>`
+
+- **See also:** `<doc-mindmap>`
 
 ### `<doc-roadmap>`
 

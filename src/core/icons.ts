@@ -16,6 +16,7 @@
  * `font-size` of the chrome that holds it and needs no rule of its own.
  */
 
+import type { NODE_ICONS } from './contract.js';
 import { createPart } from './parts.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -132,6 +133,29 @@ export type ActorKind = 'person' | 'app' | 'service' | 'table' | 'store';
 /** The glyph on a walkthrough actor's card. */
 export function actorIcon(kind: ActorKind): SVGSVGElement {
   return icon('card-icon', ICON_PATHS[kind]);
+}
+
+/** An icon name a mind-map card accepts (`doc-node icon="…"`). */
+export type NodeIcon = (typeof NODE_ICONS)[number];
+
+/** Which drawing each mind-map icon name uses: two are everyday aliases. */
+const NODE_ICON_PATHS: Readonly<Record<NodeIcon, string>> = {
+  person: ICON_PATHS.person,
+  app: ICON_PATHS.app,
+  service: ICON_PATHS.service,
+  server: ICON_PATHS.service,
+  table: ICON_PATHS.table,
+  store: ICON_PATHS.store,
+  database: ICON_PATHS.store,
+  check: ICON_PATHS.check,
+  comment: ICON_PATHS.comment,
+  question: ICON_PATHS.questions,
+};
+
+/** The glyph before a mind-map card's title, or null for a name it does not know. */
+export function nodeIcon(name: string): SVGSVGElement | null {
+  const path = (NODE_ICON_PATHS as Readonly<Record<string, string>>)[name];
+  return path ? icon('icon', path) : null;
 }
 
 /** A button whose whole content is one icon, with an accessible name. */

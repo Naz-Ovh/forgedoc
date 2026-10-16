@@ -34,6 +34,19 @@ $containers: "doc-note, doc-blocker, doc-blocks, doc-why, doc-action, doc-decisi
   }
 
   /*
+  * A mind-map card: the header is chrome in the flow, so the first block after
+  * it is the card's first; its branches are positioned out of flow and its
+  * toggle and Comment button are chrome, so none of them is the last block.
+  */
+  doc-page doc-node > [data-part="header"] + :not([data-doc-chrome]) {
+    margin-block-start: 0;
+  }
+
+  doc-page doc-node > :nth-last-child(1 of :not([data-doc-chrome], doc-node, [hidden])) {
+    margin-block-end: 0;
+  }
+
+  /*
   * A blocker's rows each carry their own vertical padding so the rule between
   * two rows sits midway. The last row has no rule below it, so its bottom
   * padding only stacked on the card's — the same fat-bottom edge as above.

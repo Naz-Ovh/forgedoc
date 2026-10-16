@@ -61,6 +61,7 @@ Build in place `forgedoc build <file.html>` — one file, rebuilt on every revis
 | --- | --- |
 | `doc-flow` › `doc-flow-node` | flow-node: **`title`** · `active` |
 | `doc-walkthrough` › `doc-actor` + `doc-scene` › `doc-move` + `doc-change` | `title` — actor: **`name`** slug · `label` · `kind` person/app/service/table/store · `tone` accent/blue/green/amber/red/violet/cyan/rose/neutral · `absent` — scene: **`title`** · `focus` — move: **`from`** slug · **`to`** slug · `token` · `result` accept/reject — change: **`actor`** slug · `add` · `remove` · `set` · `tone` good/bad/neutral · `drop` |
+| `doc-mindmap` › `doc-node` | **`title`** · `expand` · `layout` tree/radial — node: **`title`** · `icon` person/app/service/server/table/store/database/check/comment/question · `tone` accent/blue/green/amber/red/violet/cyan/rose/neutral · `open` · `closed` |
 | `doc-roadmap` › `doc-stage` | `start` integer — stage: **`title`** · `subtitle` · `current` · `open` |
 | `doc-code` | **`lang`** see allowlist · `title` · `highlight` · `wrap` |
 | `doc-diff` | `lang` see allowlist · `filename` |

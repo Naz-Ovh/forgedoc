@@ -41,6 +41,20 @@ build its own block without breaking out of the runtime.
   `\\wsl.localhost` share path, since a `zed://` URL cannot ask for a WSL
   remote; "Zed inside WSL / Linux" keeps the Linux path. Without a root, paths
   stay plain chips.
+- **`doc-mindmap` › `doc-node`, an interactive mind map.** A title card with
+  branches of `doc-node` cards, each holding ordinary HTML — text, lists, code,
+  links, an image — with an optional `icon` and a `tone` shared with the
+  walkthrough. Clicking a card opens or closes its branch; `expand` sets the
+  starting depth (`none`, a number of levels or `all`), and `open` / `closed`
+  on a card override it. Expand all, Collapse all and Fit sit in a toolbar;
+  the map pans with a drag and zooms with Ctrl+wheel or a pinch, and
+  `layout="radial"` rings a small map round its title. It is a tree for
+  assistive technology, with arrow keys, Home / End and Enter / Space; closed
+  branches stay findable with Ctrl+F; below 640px it is an indented outline,
+  and it prints fully expanded. Every card takes block comments. The validator
+  rejects a `doc-node` outside a map, an `expand` it cannot read and a
+  self-closed `doc-mindmap` or `doc-node`, and warns on a card both `open` and
+  `closed`.
 - Validator: `walkthrough/unknown-actor` and `walkthrough/duplicate-actor`
   (errors); `tag/self-closing` (an error for the new tags, a warning for the
   older ones so existing documents keep building); `custom/plain-script` and
@@ -66,8 +80,8 @@ build its own block without breaking out of the runtime.
   table, a walkthrough or a custom block — with a "when this helps" menu in
   place of rules, and a new example built around a walkthrough.
 - The cheatsheet folds grandchild tags into their family's row, and its
-  one-page budget rose from 78 to 82 lines (4,800 to 5,400 characters) for the
-  ten new tags and the `files-*` attributes.
+  one-page budget rose from 78 to 82 lines and from 4,800 to 5,700 characters
+  for the twelve new tags and the `files-*` attributes.
 
 ## [2.1.0] - 2026-09-16
 

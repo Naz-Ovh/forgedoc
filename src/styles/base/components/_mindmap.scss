@@ -1,0 +1,198 @@
+/*
+ * `doc-mindmap` — structure only.
+ *
+ * One DOM, two layouts, chosen by the runtime from the map's own width:
+ *
+ *   · `:state(map)` — every card is taken out of flow and translated to the
+ *     place `core/mindmap.ts` computed (`--doc-mm-x/y`). The title card, the
+ *     branch lines and the top-level cards also carry the reader's pan and
+ *     zoom; a nested card is positioned inside its parent card, so it inherits
+ *     both without being told.
+ *   · `:state(outline)` — the cards stay in flow, nested as the author wrote
+ *     them, so the map reads as an indented list on a phone.
+ *
+ * Every card stays a block (constraint 3): the cards around it are positioned,
+ * never laid out by a flex or grid parent.
+ *
+ * Print uses the outline with every branch open, whatever the screen showed.
+ */
+
+@mixin chrome-for-outline {
+  & > [data-part="links"],
+  & [data-part="hint"],
+  & [data-part="fit"] {
+    display: none;
+  }
+
+  & > [data-part="root"],
+  & doc-node {
+    position: relative;
+  }
+}
+
+@layer doc.components {
+  doc-mindmap {
+    display: block;
+    position: relative;
+  }
+
+  doc-node {
+    display: block;
+  }
+
+  doc-mindmap [data-part="toolbar"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  doc-mindmap [data-part="toolbar"] button {
+    cursor: pointer;
+  }
+
+  doc-mindmap > [data-part="links"] {
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  doc-mindmap [data-part="link"] {
+    fill: none;
+  }
+
+  doc-mindmap [data-part="header"] {
+    display: flex;
+    align-items: center;
+  }
+
+  doc-mindmap [data-part="header"] > [data-part="icon"] {
+    display: block;
+    flex: none;
+  }
+
+  doc-mindmap [data-part="toggle"]:empty {
+    display: none;
+  }
+
+  doc-mindmap :is(doc-node:state(branch), [data-part="root"]) {
+    cursor: pointer;
+  }
+
+  /* Images sit inside the card: as wide as it, never taller than a glance. */
+  doc-mindmap doc-node img {
+    display: block;
+    max-width: 100%;
+    max-height: 12rem;
+    height: auto;
+    object-fit: contain;
+  }
+
+  @media screen {
+    doc-mindmap:state(map) {
+      height: var(--doc-mm-height, 24rem);
+      overflow: clip;
+      // Horizontal drags pan the map; a vertical swipe still scrolls the page,
+      // so a map can never trap a reader on a touch screen.
+      touch-action: pan-y;
+      cursor: grab;
+    }
+
+    doc-mindmap:state(panning) {
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    doc-mindmap:state(map) > [data-part="toolbar"] {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    doc-mindmap:state(map) > [data-part="toolbar"] > * {
+      pointer-events: auto;
+    }
+
+    doc-mindmap:state(map) > :is([data-part="root"], [data-part="links"], doc-node) {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      transform-origin: 0 0;
+      transform: translate(var(--doc-mm-pan-x, 0px), var(--doc-mm-pan-y, 0px))
+        scale(var(--doc-mm-zoom, 1)) translate(var(--doc-mm-x, 0px), var(--doc-mm-y, 0px));
+    }
+
+    doc-mindmap:state(map) > [data-part="links"] {
+      width: 1px;
+      height: 1px;
+    }
+
+    doc-mindmap:state(map) doc-node doc-node {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      transform: translate(var(--doc-mm-x, 0px), var(--doc-mm-y, 0px));
+    }
+
+    doc-mindmap:state(map) :is(doc-node, [data-part="root"]) {
+      width: max-content;
+      max-width: var(--doc-mm-card-width, 17rem);
+      opacity: var(--doc-mm-opacity, 1);
+    }
+
+    /* An image has no width of its own inside a shrink-to-fit card, so a card
+       holding one takes the full card width rather than collapsing round it. */
+    doc-mindmap:state(map) doc-node:has(> img, > :not(doc-node) img):not([data-part]) {
+      width: var(--doc-mm-card-width, 17rem);
+    }
+
+    /* The +N / − toggle sits on the card's edge, where its branches leave. */
+    doc-mindmap:state(map) [data-part="toggle"] {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-end: 0;
+      z-index: 1;
+      translate: 50% -50%;
+    }
+
+    doc-mindmap:state(outline) {
+      @include chrome-for-outline;
+    }
+  }
+
+  @media print {
+    doc-mindmap {
+      @include chrome-for-outline;
+    }
+
+    doc-mindmap [data-part="toolbar"],
+    doc-mindmap [data-part="toggle"] {
+      display: none;
+    }
+
+    doc-mindmap doc-node[hidden] {
+      content-visibility: visible;
+    }
+  }
+}
+
+@layer doc.utilities {
+  /*
+   * A closed branch is `hidden="until-found"`: findable, so it keeps a box,
+   * with its contents skipped. Strip that box to nothing, after every theme
+   * has given cards their padding and border, so a closed branch takes no room
+   * in the outline and draws nothing in the map.
+   */
+  @media screen {
+    doc-mindmap doc-node[hidden] {
+      width: 0;
+      min-width: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      box-shadow: none;
+    }
+  }
+}

@@ -34,11 +34,12 @@ const COMMITTED = readFileSync(
  *
  * Raised from 78 lines / 4,800 characters when the walkthrough family,
  * `doc-custom`, the `doc-files` family and `doc-path` landed: ten tags, folded
- * into four rows, plus the three `files-*` attributes on `doc-page`. Raise it
- * again only for a tag that earns it.
+ * into four rows, plus the three `files-*` attributes on `doc-page`. The
+ * characters rose again, to 5,700, for the mind map's one row. Raise it again
+ * only for a tag that earns it.
  */
 const MAX_LINES = 82;
-const MAX_CHARACTERS = 5400;
+const MAX_CHARACTERS = 5700;
 
 /**
  * Length as rendered, not as stored.

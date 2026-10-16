@@ -1,5 +1,6 @@
 /**
- * Geometry for a walkthrough move: a gentle curve from one card to another.
+ * Geometry for a walkthrough move — a gentle curve from one card to another —
+ * and for the branches of a mind map.
  *
  * why a curve and not a straight line: cards sit in a wrapping grid, so a move
  * between the first and third card in a row would run straight through the
@@ -98,6 +99,18 @@ export function arrowheadPath(arc: Arc, size = 7): string {
   const left = { x: baseX - uy * half, y: baseY + ux * half };
   const right = { x: baseX + uy * half, y: baseY - ux * half };
   return `M${round(tip.x)} ${round(tip.y)}L${round(left.x)} ${round(left.y)}L${round(right.x)} ${round(right.y)}Z`;
+}
+
+/**
+ * A mind-map branch in the tree layout: out of the parent's right edge, into
+ * the child's left edge, as a horizontal S-curve. Both control points sit
+ * halfway across, so siblings fan out from one point and arrive level.
+ */
+export function branchPath(from: Box, to: Box): string {
+  const start = { x: from.left + from.width, y: from.top + from.height / 2 };
+  const end = { x: to.left, y: to.top + to.height / 2 };
+  const middle = start.x + (end.x - start.x) / 2;
+  return `M${round(start.x)} ${round(start.y)}C${round(middle)} ${round(start.y)} ${round(middle)} ${round(end.y)} ${round(end.x)} ${round(end.y)}`;
 }
 
 /**

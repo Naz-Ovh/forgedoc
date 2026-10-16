@@ -41,6 +41,7 @@ A menu, not a mapping. Reach for one when it fits; ignore the rest.
 | follow an argument, a reason, a caveat | plain sentences, `<ul>` |
 | see something **happen** — a request accepted or refused, data moving between tables, state changing over steps | `doc-walkthrough` |
 | follow a short, straight sequence | `doc-flow` |
+| see the whole shape of a change at once, then open the parts they care about | `doc-mindmap` |
 | weigh two or three shapes side by side | `doc-compare` |
 | look up exact values — columns, cookies, mappings | `<table>` in `doc-table` |
 | see the order of delivery | `doc-roadmap` (or `doc-timeline` for dates) |
@@ -58,6 +59,13 @@ _moves, branches, fails or changes state_ — the exact things a paragraph makes
 the reader simulate in their head. Keep captions to a sentence or two; the
 motion carries the meaning. For a sequence that is just "A, then B, then C",
 `doc-flow` or a sentence is clearer.
+
+**Mind maps.** A `doc-mindmap` is an overview the reader can open up: a
+title card, and `doc-node` cards branching from it, each with a little rich
+text, an icon or an image. `expand` sets how many levels start open, and the
+reader opens the rest with a click or the arrow keys, pans and zooms, and gets
+an indented outline on a phone. It suits a picture of where a change reaches —
+the database, the server, the apps, and what moves in each.
 
 **Custom blocks.** When no element explains the idea well, design one inside
 `<doc-custom>`: your own HTML, a `<style>` and a `<script type="forgedoc">`.
