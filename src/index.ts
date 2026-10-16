@@ -30,11 +30,13 @@
 import './styles/themes/default/index.scss';
 
 import { DocAction } from './components/doc-action.js';
+import { DocActor } from './components/doc-actor.js';
 import { DocBadge } from './components/doc-badge.js';
 import { DocBlocker } from './components/doc-blocker.js';
 import { DocBlocks } from './components/doc-blocks.js';
 import { DocCaption } from './components/doc-caption.js';
 import { DocCarousel } from './components/doc-carousel.js';
+import { DocChange } from './components/doc-change.js';
 import { DocChecklist } from './components/doc-checklist.js';
 import { DocChip } from './components/doc-chip.js';
 import { DocChips } from './components/doc-chips.js';
@@ -52,6 +54,7 @@ import { DocHeader } from './components/doc-header.js';
 import { DocList } from './components/doc-list.js';
 import { DocMatrix } from './components/doc-matrix.js';
 import { DocMilestone } from './components/doc-milestone.js';
+import { DocMove } from './components/doc-move.js';
 import { DocNote } from './components/doc-note.js';
 import { DocOption } from './components/doc-option.js';
 import { DocOwner } from './components/doc-owner.js';
@@ -63,6 +66,7 @@ import { DocQuote } from './components/doc-quote.js';
 import { DocRating } from './components/doc-rating.js';
 import { DocRef } from './components/doc-ref.js';
 import { DocRoadmap } from './components/doc-roadmap.js';
+import { DocScene } from './components/doc-scene.js';
 import { DocSection } from './components/doc-section.js';
 import { DocStage } from './components/doc-stage.js';
 import { DocStat } from './components/doc-stat.js';
@@ -76,6 +80,7 @@ import { DocTerm } from './components/doc-term.js';
 import { DocTimeline } from './components/doc-timeline.js';
 import { DocToc } from './components/doc-toc.js';
 import { DocTree } from './components/doc-tree.js';
+import { DocWalkthrough } from './components/doc-walkthrough.js';
 import { DocWhy } from './components/doc-why.js';
 import { TAG_NAMES } from './core/contract.js';
 import { define } from './core/registry.js';
@@ -91,11 +96,13 @@ import type { DocStore } from './core/types.js';
  */
 const ELEMENTS = {
   'doc-action': DocAction,
+  'doc-actor': DocActor,
   'doc-badge': DocBadge,
   'doc-blocker': DocBlocker,
   'doc-blocks': DocBlocks,
   'doc-caption': DocCaption,
   'doc-carousel': DocCarousel,
+  'doc-change': DocChange,
   'doc-checklist': DocChecklist,
   'doc-chip': DocChip,
   'doc-chips': DocChips,
@@ -113,6 +120,7 @@ const ELEMENTS = {
   'doc-list': DocList,
   'doc-matrix': DocMatrix,
   'doc-milestone': DocMilestone,
+  'doc-move': DocMove,
   'doc-note': DocNote,
   'doc-option': DocOption,
   'doc-owner': DocOwner,
@@ -124,6 +132,7 @@ const ELEMENTS = {
   'doc-rating': DocRating,
   'doc-ref': DocRef,
   'doc-roadmap': DocRoadmap,
+  'doc-scene': DocScene,
   'doc-section': DocSection,
   'doc-stage': DocStage,
   'doc-stat': DocStat,
@@ -137,6 +146,7 @@ const ELEMENTS = {
   'doc-timeline': DocTimeline,
   'doc-toc': DocToc,
   'doc-tree': DocTree,
+  'doc-walkthrough': DocWalkthrough,
   'doc-why': DocWhy,
 } as const;
 

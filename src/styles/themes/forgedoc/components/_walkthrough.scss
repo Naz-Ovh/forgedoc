@@ -1,0 +1,533 @@
+/*
+ * `doc-walkthrough` — the scene player.
+ *
+ * Written against the shared token contract only (every theme declares these
+ * tokens — `npm run lint:styles` enforces it), which is why the other themes
+ * `@use` this file rather than keeping a copy: a theme that wants a different
+ * stage replaces its own `components/_walkthrough.scss` and nothing else moves.
+ *
+ * Motion lives in `@media (prefers-reduced-motion: no-preference)` blocks. The
+ * runtime also skips the travelling tokens under reduced motion, so a reader
+ * who asked for stillness gets each scene as a finished picture.
+ */
+
+@layer doc.theme {
+  doc-walkthrough {
+    --doc-wt-tone: var(--doc-text-3);
+    --doc-wt-good: light-dark(var(--doc-success-600), var(--doc-success-400));
+    --doc-wt-bad: light-dark(var(--doc-danger-600), var(--doc-danger-400));
+    --doc-wt-line: var(--doc-border-3);
+
+    margin-block: var(--doc-space-8);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-1);
+    overflow: hidden;
+  }
+
+  doc-walkthrough [data-part="header"] {
+    gap: var(--doc-space-1) var(--doc-space-4);
+    padding: var(--doc-space-4) var(--doc-space-5) 0;
+  }
+
+  doc-walkthrough [data-part="title"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-walkthrough [data-part="counter"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    font-variant-numeric: var(--doc-numeric);
+    letter-spacing: var(--doc-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  // ── Stage ────────────────────────────────────────────────────────────────
+
+  doc-walkthrough [data-part="stage"] {
+    gap: var(--doc-space-12) clamp(var(--doc-space-6), 4vw, var(--doc-space-12));
+    margin: var(--doc-space-4) var(--doc-space-4) 0;
+    padding: var(--doc-space-16) var(--doc-space-3);
+    border-radius: var(--doc-radius);
+    background:
+      radial-gradient(circle at 1px 1px, var(--doc-border-1) 1px, transparent 0) 0 0 / 18px 18px,
+      var(--doc-surface-2);
+  }
+
+  doc-walkthrough [data-part="stage"]:focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  // ── Cards ────────────────────────────────────────────────────────────────
+
+  doc-walkthrough [data-part="card"] {
+    gap: var(--doc-space-1);
+    padding: var(--doc-space-3) var(--doc-space-4) var(--doc-space-4);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-block-start: 3px solid var(--doc-wt-tone);
+    border-radius: var(--doc-radius);
+    background: color-mix(in oklab, var(--doc-wt-tone) 6%, var(--doc-surface-1));
+    box-shadow: var(--doc-shadow-1);
+    color: var(--doc-text-2);
+    transition:
+      opacity 260ms ease,
+      filter 260ms ease,
+      border-color 260ms ease,
+      box-shadow 260ms ease,
+      transform 260ms ease;
+  }
+
+  /*
+  * Tones are named by hue, so they must *be* that hue in every theme. The
+  * semantic ramps are (info is blue, success green, …); the numbered chart
+  * series are not — a theme reorders them freely — so the three hues with no
+  * semantic ramp are fixed here, in OKLCH, light and dark.
+  */
+  doc-walkthrough [data-part="card"][data-tone="accent"] { --doc-wt-tone: var(--doc-accent-line); }
+  doc-walkthrough [data-part="card"][data-tone="blue"] { --doc-wt-tone: light-dark(var(--doc-info-600), var(--doc-info-400)); }
+  doc-walkthrough [data-part="card"][data-tone="green"] { --doc-wt-tone: light-dark(var(--doc-success-600), var(--doc-success-400)); }
+  doc-walkthrough [data-part="card"][data-tone="amber"] { --doc-wt-tone: light-dark(var(--doc-warn-600), var(--doc-warn-400)); }
+  doc-walkthrough [data-part="card"][data-tone="red"] { --doc-wt-tone: light-dark(var(--doc-danger-600), var(--doc-danger-400)); }
+  doc-walkthrough [data-part="card"][data-tone="violet"] { --doc-wt-tone: light-dark(oklch(52% 0.19 295), oklch(76% 0.13 295)); }
+  doc-walkthrough [data-part="card"][data-tone="cyan"] { --doc-wt-tone: light-dark(oklch(55% 0.11 215), oklch(78% 0.11 210)); }
+  doc-walkthrough [data-part="card"][data-tone="rose"] { --doc-wt-tone: light-dark(oklch(56% 0.19 5), oklch(77% 0.13 5)); }
+
+  doc-walkthrough [data-part="card-icon"] {
+    margin-block-end: var(--doc-space-1);
+    color: var(--doc-wt-tone);
+    font-size: var(--doc-text-xl);
+  }
+
+  doc-walkthrough [data-part="card-label"] {
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-sm);
+    font-weight: 650;
+    line-height: var(--doc-leading-tight);
+    overflow-wrap: break-word;
+  }
+
+  doc-walkthrough [data-part="card-note"] {
+    overflow-wrap: break-word;
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-xs);
+    line-height: var(--doc-leading-tight);
+  }
+
+  doc-walkthrough [data-part="card-rows"] {
+    gap: 3px;
+    margin: var(--doc-space-2) 0 0;
+    padding: 0;
+  }
+
+  doc-walkthrough [data-part="card-row"] {
+    padding: 2px var(--doc-space-2);
+    border-radius: var(--doc-radius-sm);
+    background: var(--doc-surface-1);
+    box-shadow: inset 0 0 0 1px var(--doc-border-1);
+    color: var(--doc-text-2);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  doc-walkthrough [data-part="card-row"][data-fresh] {
+    background: var(--doc-accent-tint);
+    box-shadow: inset 0 0 0 1px var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+  }
+
+  doc-walkthrough [data-part="card-row"][data-fresh][data-tone="good"] {
+    background: var(--doc-success-tint);
+    box-shadow: inset 0 0 0 1px var(--doc-wt-good);
+    color: var(--doc-text-1);
+  }
+
+  doc-walkthrough [data-part="card-row"][data-fresh][data-tone="bad"] {
+    background: var(--doc-danger-tint);
+    box-shadow: inset 0 0 0 1px var(--doc-wt-bad);
+    color: var(--doc-text-1);
+  }
+
+  doc-walkthrough [data-part="card-row"][data-removed] {
+    color: var(--doc-text-3);
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  doc-walkthrough [data-part="card-status"] {
+    align-self: flex-start;
+    margin-block-start: var(--doc-space-2);
+    padding: 1px var(--doc-space-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-3);
+    color: var(--doc-text-2);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  doc-walkthrough [data-part="card-status"][data-tone="good"] {
+    background: var(--doc-success-tint);
+    color: var(--doc-wt-good);
+  }
+
+  doc-walkthrough [data-part="card-status"][data-tone="bad"] {
+    background: var(--doc-danger-tint);
+    color: var(--doc-wt-bad);
+  }
+
+  /* Focus: the scene's actors stay lit, the rest step back. */
+  doc-walkthrough [data-part="card"][data-focus="off"] {
+    opacity: 0.42;
+    filter: saturate(0.4);
+  }
+
+  doc-walkthrough [data-part="card"][data-focus="on"] {
+    border-color: color-mix(in oklab, var(--doc-wt-tone) 45%, var(--doc-border-2));
+    box-shadow: var(--doc-shadow-2);
+  }
+
+  /* Not built yet: a dashed outline holding the place it will take. */
+  doc-walkthrough [data-part="card"][data-presence="absent"] {
+    border-style: dashed;
+    border-block-start-style: dashed;
+    background: transparent;
+    box-shadow: none;
+    opacity: 0.55;
+  }
+
+  doc-walkthrough [data-part="card"][data-presence="absent"] > :not([data-part="card-label"], [data-part="card-icon"]) {
+    visibility: hidden;
+  }
+
+  /* Retired: struck through in red and drained of colour, still on stage so
+     the reader sees it go. */
+  doc-walkthrough [data-part="card"][data-presence="dropped"] {
+    border-style: dashed;
+    border-color: var(--doc-wt-bad);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-3);
+  }
+
+  doc-walkthrough [data-part="card"][data-presence="dropped"] :is([data-part="card-icon"], [data-part="card-rows"]) {
+    opacity: 0.45;
+    filter: grayscale(1);
+  }
+
+  doc-walkthrough [data-part="card"][data-presence="dropped"] [data-part="card-label"] {
+    color: var(--doc-text-3);
+    text-decoration: line-through 2px var(--doc-wt-bad);
+  }
+
+  doc-walkthrough [data-part="card"][data-presence="dropped"][data-focus="off"] {
+    opacity: 0.3;
+  }
+
+  /* A move's outcome, on the card it arrived at. */
+  doc-walkthrough [data-part="card"][data-result="accept"] {
+    box-shadow:
+      0 0 0 2px var(--doc-wt-good),
+      var(--doc-shadow-2);
+  }
+
+  doc-walkthrough [data-part="card"][data-result="reject"] {
+    box-shadow:
+      0 0 0 2px var(--doc-wt-bad),
+      var(--doc-shadow-2);
+  }
+
+  doc-walkthrough [data-part="card-result"] {
+    inset-block-start: calc(var(--doc-space-3) * -1);
+    inset-inline-end: calc(var(--doc-space-3) * -1);
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    color: var(--doc-ink-on-solid);
+    font-size: var(--doc-text-sm);
+    box-shadow: var(--doc-shadow-1);
+  }
+
+  doc-walkthrough [data-part="card"][data-result="accept"] [data-part="card-result"] {
+    background: var(--doc-wt-good);
+  }
+
+  doc-walkthrough [data-part="card"][data-result="reject"] [data-part="card-result"] {
+    background: var(--doc-wt-bad);
+  }
+
+  /* Phone width: two narrow columns, so the cards tighten rather than stack. */
+  @media (max-width: 40rem) {
+    doc-walkthrough [data-part="stage"] {
+      gap: var(--doc-space-10) var(--doc-space-4);
+      margin-inline: var(--doc-space-2);
+      padding-inline: var(--doc-space-2);
+    }
+
+    doc-walkthrough [data-part="card"] {
+      padding: var(--doc-space-2) var(--doc-space-3) var(--doc-space-3);
+    }
+
+    doc-walkthrough [data-part="card-label"] {
+      font-size: var(--doc-text-xs);
+      letter-spacing: -0.01em;
+    }
+
+    doc-walkthrough [data-part="card-note"],
+    doc-walkthrough [data-part="card-row"] {
+      font-size: 0.7rem;
+    }
+
+    doc-walkthrough [data-part="header"],
+    doc-walkthrough doc-scene {
+      padding-inline: var(--doc-space-4);
+    }
+
+    doc-walkthrough [data-part="log"] {
+      margin-inline: var(--doc-space-4);
+    }
+  }
+
+  // ── Arrows and tokens ────────────────────────────────────────────────────
+
+  doc-walkthrough [data-part="arrow"] {
+    color: var(--doc-accent-line);
+  }
+
+  doc-walkthrough [data-part="arrow"][data-result="accept"] {
+    color: var(--doc-wt-good);
+  }
+
+  doc-walkthrough [data-part="arrow"][data-result="reject"] {
+    color: var(--doc-wt-bad);
+  }
+
+  doc-walkthrough [data-part="arrow"] path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  doc-walkthrough [data-part="arrow"][data-result="reject"] > path:first-child {
+    stroke-dasharray: 5 5;
+  }
+
+  doc-walkthrough [data-part="arrow"] [data-part="arrow-head"] {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  doc-walkthrough [data-part="token"] {
+    padding: 3px var(--doc-space-3);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-accent-solid);
+    box-shadow:
+      0 0 0 3px color-mix(in oklab, var(--doc-accent-solid) 25%, transparent),
+      var(--doc-shadow-2);
+    color: var(--doc-accent-on-solid);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    font-weight: 600;
+  }
+
+  doc-walkthrough [data-part="token"][data-result="reject"] {
+    background: var(--doc-wt-bad);
+    box-shadow:
+      0 0 0 3px color-mix(in oklab, var(--doc-wt-bad) 25%, transparent),
+      var(--doc-shadow-2);
+    color: var(--doc-ink-on-solid);
+  }
+
+  // ── Caption, transcript, controls ────────────────────────────────────────
+
+  doc-walkthrough doc-scene {
+    padding: var(--doc-space-4) var(--doc-space-5) 0;
+    color: var(--doc-text-1);
+    font-size: var(--doc-text-md);
+    line-height: var(--doc-leading);
+  }
+
+  doc-walkthrough doc-scene > p {
+    margin: 0;
+    max-width: var(--doc-measure-prose);
+  }
+
+  doc-walkthrough doc-scene > p + p {
+    margin-block-start: var(--doc-space-2);
+  }
+
+  doc-scene [data-part="scene-title"] {
+    display: block;
+    margin-block-end: var(--doc-space-1);
+    color: var(--doc-accent-text);
+    font-size: var(--doc-text-sm);
+    font-weight: 650;
+  }
+
+  doc-walkthrough [data-part="log"] {
+    margin: var(--doc-space-2) var(--doc-space-5) 0;
+    padding: 0;
+    color: var(--doc-text-3);
+    font-family: var(--doc-font-mono);
+    font-size: var(--doc-text-xs);
+    line-height: 1.6;
+  }
+
+  doc-walkthrough [data-part="log-row"][data-result="accept"] {
+    color: var(--doc-wt-good);
+  }
+
+  doc-walkthrough [data-part="log-row"][data-result="reject"] {
+    color: var(--doc-wt-bad);
+  }
+
+  doc-walkthrough [data-part="controls"] {
+    gap: var(--doc-space-3);
+    margin-block-start: var(--doc-space-4);
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border-block-start: var(--doc-rule);
+    background: var(--doc-surface-2);
+  }
+
+  doc-walkthrough :is([data-part="play-btn"], [data-part="prev-btn"], [data-part="next-btn"]) {
+    gap: var(--doc-space-2);
+    min-height: 2.25rem;
+    padding: var(--doc-space-1) var(--doc-space-3);
+    border: var(--doc-border-width) solid var(--doc-border-2);
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-1);
+    font: inherit;
+    font-size: var(--doc-text-sm);
+    font-weight: 600;
+    transition:
+      border-color var(--doc-transition),
+      background-color var(--doc-transition),
+      transform var(--doc-transition);
+  }
+
+  doc-walkthrough [data-part="play-btn"] {
+    padding-inline: var(--doc-space-4);
+    border-color: transparent;
+    background: var(--doc-accent-solid);
+    color: var(--doc-accent-on-solid);
+  }
+
+  doc-walkthrough :is([data-part="prev-btn"], [data-part="next-btn"]):hover:not(:disabled) {
+    border-color: var(--doc-accent-edge);
+  }
+
+  doc-walkthrough [data-part="play-btn"]:hover {
+    background: color-mix(in oklab, var(--doc-accent-solid) 85%, var(--doc-text-1));
+  }
+
+  doc-walkthrough :is([data-part="prev-btn"], [data-part="next-btn"]):disabled {
+    opacity: 0.4;
+  }
+
+  doc-walkthrough :is([data-part="play-btn"], [data-part="prev-btn"], [data-part="next-btn"]):focus-visible,
+  doc-walkthrough [data-part="dot"]:focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  doc-walkthrough [data-part="dots"] {
+    gap: var(--doc-space-2);
+    justify-content: center;
+  }
+
+  doc-walkthrough [data-part="dot"] {
+    width: 0.6rem;
+    height: 0.6rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--doc-radius-pill);
+    background: var(--doc-border-3);
+    transition:
+      width 220ms ease,
+      background-color 220ms ease;
+  }
+
+  doc-walkthrough [data-part="dot"][data-active="true"] {
+    width: 1.6rem;
+    background: var(--doc-accent-solid);
+  }
+
+  // ── Motion ───────────────────────────────────────────────────────────────
+
+  @media (prefers-reduced-motion: no-preference) {
+    doc-walkthrough [data-part="card-row"][data-fresh] {
+      animation: doc-wt-row-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
+    }
+
+    doc-walkthrough [data-part="card-status"][data-fresh] {
+      animation: doc-wt-pop 420ms cubic-bezier(0.2, 0.8, 0.2, 1.4);
+    }
+
+    doc-walkthrough [data-part="card"][data-result] {
+      animation: doc-wt-pulse 520ms ease-out;
+    }
+
+    doc-walkthrough [data-part="card"][data-result="reject"] {
+      animation: doc-wt-shake 420ms ease-in-out;
+    }
+
+    doc-walkthrough [data-part="card-result"]:not(:empty) {
+      animation: doc-wt-pop 360ms cubic-bezier(0.2, 0.8, 0.2, 1.5);
+    }
+
+    doc-walkthrough doc-scene:not([hidden]) {
+      animation: doc-wt-caption 320ms ease-out;
+    }
+
+    doc-walkthrough [data-part="play-btn"]:active,
+    doc-walkthrough :is([data-part="prev-btn"], [data-part="next-btn"]):active:not(:disabled) {
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes doc-wt-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.96);
+    }
+  }
+
+  @keyframes doc-wt-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+
+  @keyframes doc-wt-pulse {
+    40% {
+      transform: scale(1.035);
+    }
+  }
+
+  @keyframes doc-wt-shake {
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  @keyframes doc-wt-caption {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+}

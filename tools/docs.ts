@@ -553,14 +553,20 @@ function cheatsheetRows(tags: readonly TagName[]): string[] {
     const children = tags.filter((candidate) => spec(candidate).onlyInside?.[0] === tag);
     for (const child of children) folded.add(child);
 
-    // `doc-blocker › doc-blocks + doc-why + doc-action`: one `›` for the nesting,
-    // `+` between the children, because all three are siblings inside the parent
-    // and a chain of `›` would claim they nest inside each other.
-    const label =
-      children.length > 0
-        ? `\`${tag}\` › ${children.map((name) => `\`${name}\``).join(' + ')}`
-        : `\`${tag}\``;
-    const cells = [attributeLine(tag), ...children.map((child) => childCell(child))]
+    // One level further down, too: `doc-walkthrough › doc-actor + doc-scene ›
+    // doc-move + doc-change`. A grandchild is no more reachable without its
+    // parent than a child is, and its own row would spend two lines saying so.
+    const grandchildren = tags.filter((candidate) =>
+      children.includes(spec(candidate).onlyInside?.[0] as TagName),
+    );
+    for (const grandchild of grandchildren) folded.add(grandchild);
+
+    const label = familyLabel(tag, children, grandchildren);
+    const cells = [
+      attributeLine(tag),
+      ...children.map((child) => childCell(child)),
+      ...grandchildren.map((grandchild) => childCell(grandchild)),
+    ]
       .filter((cell) => cell.length > 0)
       .join(' — ');
 
@@ -568,6 +574,24 @@ function cheatsheetRows(tags: readonly TagName[]): string[] {
   }
 
   return rows;
+}
+
+/**
+ * `doc-blocker › doc-blocks + doc-why + doc-action`: one `›` per level of
+ * nesting, `+` between siblings, because a chain of `›` would claim siblings
+ * nest inside each other.
+ */
+function familyLabel(
+  tag: TagName,
+  children: readonly TagName[],
+  grandchildren: readonly TagName[],
+): string {
+  const quote = (names: readonly TagName[]): string =>
+    names.map((name) => `\`${name}\``).join(' + ');
+  return [[tag], children, grandchildren]
+    .filter((level) => level.length > 0)
+    .map(quote)
+    .join(' › ');
 }
 
 function childCell(child: TagName): string {

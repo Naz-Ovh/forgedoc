@@ -36,6 +36,15 @@ export const ICON_PATHS = {
   close: 'M6 6l12 12M18 6L6 18',
   arrowRight: 'M4 12h15m-6-7l7 7-7 7',
   arrowLeft: 'M20 12H5m6-7l-7 7 7 7',
+  play: 'M7 4.5v15l12.5-7.5z',
+  pause: 'M8.5 5v14M15.5 5v14',
+  check: 'M5 12.5l4.5 4.5L19 7.5',
+  person: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5a7.5 7.5 0 0 1 15 0',
+  app: 'M3.5 5h17v14h-17zM3.5 9h17M6.5 7h.01',
+  service: 'M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01',
+  table: 'M3.5 5h17v14h-17zM3.5 10h17M3.5 14.5h17M9.5 5v14',
+  store:
+    'M4.5 6.5c0-1.7 3.4-3 7.5-3s7.5 1.3 7.5 3-3.4 3-7.5 3-7.5-1.3-7.5-3zM4.5 6.5v11c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-11M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3',
 } as const;
 
 /** One `<svg>` carrying a part name, sized in `em` and painted in `currentColor`. */
@@ -105,6 +114,24 @@ export function arrowRightIcon(part = 'arrow-icon'): SVGSVGElement {
 /** Back, for the carousel's previous control. */
 export function arrowLeftIcon(part = 'arrow-icon'): SVGSVGElement {
   return icon(part, ICON_PATHS.arrowLeft);
+}
+
+/** Play and pause, for the walkthrough's transport control. */
+export function playIcon(playing: boolean): SVGSVGElement {
+  return icon('play-icon', playing ? ICON_PATHS.pause : ICON_PATHS.play);
+}
+
+/** Accept and reject marks, for a walkthrough move's outcome. */
+export function resultIcon(result: 'accept' | 'reject'): SVGSVGElement {
+  return icon('result-icon', result === 'accept' ? ICON_PATHS.check : ICON_PATHS.close);
+}
+
+/** The actor kinds a walkthrough card can carry an icon for. */
+export type ActorKind = 'person' | 'app' | 'service' | 'table' | 'store';
+
+/** The glyph on a walkthrough actor's card. */
+export function actorIcon(kind: ActorKind): SVGSVGElement {
+  return icon('card-icon', ICON_PATHS[kind]);
 }
 
 /** A button whose whole content is one icon, with an accessible name. */

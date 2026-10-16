@@ -83,8 +83,18 @@ export const CATEGORIES: readonly Category[] = [
   },
   {
     title: 'Structure',
-    blurb: 'Sequences and phases.',
-    tags: ['doc-flow', 'doc-flow-node', 'doc-roadmap', 'doc-stage'],
+    blurb: 'Sequences, phases, and walkthroughs that play a process step by step.',
+    tags: [
+      'doc-flow',
+      'doc-flow-node',
+      'doc-walkthrough',
+      'doc-actor',
+      'doc-scene',
+      'doc-move',
+      'doc-change',
+      'doc-roadmap',
+      'doc-stage',
+    ],
   },
   {
     title: 'Content',
@@ -502,15 +512,82 @@ export const ELEMENT_DOCS: Readonly<Record<TagName, ElementDoc>> = {
 </doc-flow>`,
     notes: [
       'A short linear pipeline, laid out in the document’s own type. Arrows and wrapping are automatic.',
-      'Anything that branches or loops wants `doc-figure type="mermaid"`.',
+      'When the interesting part is what happens along the way — a request rejected, a row copied, a state that changes — `doc-walkthrough` plays it scene by scene.',
     ],
-    related: ['doc-flow-node', 'doc-figure'],
+    related: ['doc-flow-node', 'doc-walkthrough'],
   },
 
   'doc-flow-node': {
     example: '<doc-flow-node title="Outbox" active>durable</doc-flow-node>',
     notes: ['The child text is the subtitle. `active` marks the current or recommended path.'],
     related: ['doc-flow'],
+  },
+
+  'doc-walkthrough': {
+    example: `<doc-walkthrough title="One login, one surface">
+  <doc-actor name="vendor" label="Vendor panel" kind="app" tone="cyan"></doc-actor>
+  <doc-actor name="guard" label="authenticateVendor" kind="service"></doc-actor>
+  <doc-actor name="admin" label="Admin route" kind="service" tone="violet"></doc-actor>
+  <doc-scene title="Vendor signs in">
+    <doc-move from="vendor" to="guard" token="ub_vendor_session" result="accept"></doc-move>
+    <p>The vendor panel sends only its own cookie.</p>
+  </doc-scene>
+  <doc-scene title="Wrong door">
+    <doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+    <p>An admin route never reads the vendor cookie, so the answer is 401.</p>
+  </doc-scene>
+</doc-walkthrough>`,
+    notes: [
+      'Use it when motion explains something words make hard: a request that is accepted or refused, data copied between tables, a state that changes over steps. A plain sequence is `doc-flow`.',
+      'You write only actors and scenes. The stage, the animation, Play / Prev / Next, the dots, arrow keys, reduced-motion handling and a text transcript are generated.',
+      'Keep each caption to a sentence or two — the motion carries the meaning. Every scene takes comments.',
+      'Close every tag: `<doc-actor …></doc-actor>`. HTML has no self-closing custom elements, so `<doc-actor/>` swallows everything after it, and the build rejects it.',
+    ],
+    related: ['doc-actor', 'doc-scene', 'doc-move', 'doc-change', 'doc-flow'],
+  },
+
+  'doc-actor': {
+    example: `<doc-actor name="users" label="users" kind="table" tone="amber">
+  shared today
+  <ul><li>1 · ana · customer</li><li>2 · bo · vendor</li></ul>
+</doc-actor>`,
+    notes: [
+      '`name` is the key scenes use; `label` is what the card says.',
+      'Loose text is a short note under the label. A child `<ul>` gives the starting rows.',
+      '`absent` draws a dashed placeholder until a `doc-change` first touches the actor — a table that does not exist yet.',
+    ],
+    related: ['doc-walkthrough', 'doc-change'],
+  },
+
+  'doc-scene': {
+    example: `<doc-scene title="Wrong door" focus="vendor admin">
+  <doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+  <p>An admin route never reads the vendor cookie.</p>
+</doc-scene>`,
+    notes: [
+      'Steps play in the order written. Everything that is not a `doc-move` or `doc-change` is the caption.',
+      'The actors a scene touches are highlighted and the rest dim; `focus` overrides that.',
+    ],
+    related: ['doc-walkthrough', 'doc-move', 'doc-change'],
+  },
+
+  'doc-move': {
+    example:
+      '<doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>',
+    notes: [
+      '`result="accept"` lands with a green tick, `reject` bounces off with a red cross; leave it out for a plain hand-off.',
+      'A reply is just another move in the other direction. It arcs the other way, so the pair reads as request and response.',
+    ],
+    related: ['doc-scene', 'doc-change'],
+  },
+
+  'doc-change': {
+    example: '<doc-change actor="vendor_accounts" add="7 · bo@shop.eu" tone="good"></doc-change>',
+    notes: [
+      'Changes accumulate: a row added in scene two is still there in scene five. Jumping between scenes rebuilds that state exactly.',
+      '`set` replaces the actor’s status pill; `remove` strikes a row by its text; `drop` retires the whole actor.',
+    ],
+    related: ['doc-scene', 'doc-actor'],
   },
 
   'doc-roadmap': {

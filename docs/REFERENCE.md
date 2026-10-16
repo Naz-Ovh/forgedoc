@@ -877,7 +877,7 @@ Interactive slide viewer / gallery container with non-destructive slide toggling
 
 ## Structure
 
-_Sequences and phases._
+_Sequences, phases, and walkthroughs that play a process step by step._
 
 ### `<doc-flow>`
 
@@ -885,7 +885,7 @@ Horizontal sequence flow. Nodes connect with arrows; wrap automatically.
 
 - A short linear pipeline, laid out in the document’s own type. Arrows and wrapping are automatic.
 
-- Anything that branches or loops wants `doc-figure type="mermaid"`.
+- When the interesting part is what happens along the way — a request rejected, a row copied, a state that changes — `doc-walkthrough` plays it scene by scene.
 
 ```html
 <doc-flow>
@@ -899,7 +899,7 @@ Horizontal sequence flow. Nodes connect with arrows; wrap automatically.
 
 - **Requires child:** `<doc-flow-node>`
 
-- **See also:** `<doc-flow-node>`, `<doc-figure>`
+- **See also:** `<doc-flow-node>`, `<doc-walkthrough>`
 
 ### `<doc-flow-node>`
 
@@ -923,6 +923,149 @@ One step in a `<doc-flow>`.
 - **Only valid inside:** `<doc-flow>`
 
 - **See also:** `<doc-flow>`
+
+### `<doc-walkthrough>`
+
+Animated, step-through scene player. Actors on a stage; each scene moves a token between them or changes one, with a short caption.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | no | Heading above the stage, and its accessible name. |
+
+- Use it when motion explains something words make hard: a request that is accepted or refused, data copied between tables, a state that changes over steps. A plain sequence is `doc-flow`.
+
+- You write only actors and scenes. The stage, the animation, Play / Prev / Next, the dots, arrow keys, reduced-motion handling and a text transcript are generated.
+
+- Keep each caption to a sentence or two — the motion carries the meaning. Every scene takes comments.
+
+- Close every tag: `<doc-actor …></doc-actor>`. HTML has no self-closing custom elements, so `<doc-actor/>` swallows everything after it, and the build rejects it.
+
+```html
+<doc-walkthrough title="One login, one surface">
+  <doc-actor name="vendor" label="Vendor panel" kind="app" tone="cyan"></doc-actor>
+  <doc-actor name="guard" label="authenticateVendor" kind="service"></doc-actor>
+  <doc-actor name="admin" label="Admin route" kind="service" tone="violet"></doc-actor>
+  <doc-scene title="Vendor signs in">
+    <doc-move from="vendor" to="guard" token="ub_vendor_session" result="accept"></doc-move>
+    <p>The vendor panel sends only its own cookie.</p>
+  </doc-scene>
+  <doc-scene title="Wrong door">
+    <doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+    <p>An admin route never reads the vendor cookie, so the answer is 401.</p>
+  </doc-scene>
+</doc-walkthrough>
+```
+
+- **Parts:** `header`, `title`, `counter`, `stage`, `card`, `card-icon`, `card-label`, `card-note`, `card-rows`, `card-row`, `card-status`, `card-result`, `arrows`, `arrow`, `arrow-head`, `token`, `result-icon`, `log`, `log-row`, `controls`, `prev-btn`, `prev-icon`, `play-btn`, `play-icon`, `next-btn`, `next-icon`, `dots`, `dot`
+
+- **States:** `:playing`
+
+- **Requires child:** `<doc-actor>`, `<doc-scene>`
+
+- **See also:** `<doc-actor>`, `<doc-scene>`, `<doc-move>`, `<doc-change>`, `<doc-flow>`
+
+### `<doc-actor>`
+
+One participant on a walkthrough stage. Child text is a short note; a child `<ul>` gives its starting rows.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `name` | slug (`[a-z0-9-]+`) | **yes** | Key that `from`, `to`, `actor` and `focus` refer to. Unique within its walkthrough. |
+| `label` | string | no | Text on the card. Defaults to `name`. |
+| `kind` | `person` \| `app` \| `service` \| `table` \| `store` | no | Icon on the card: a person, an app or screen, a service, a table, a store or cookie jar. |
+| `tone` | `accent` \| `blue` \| `green` \| `amber` \| `red` \| `violet` \| `cyan` \| `rose` \| `neutral` | no | Card colour, to tell groups of actors apart. Defaults to `neutral`. |
+| `absent` | boolean | no | Starts as a dashed outline — not built yet — and appears at the first `doc-change` that touches it. |
+
+- `name` is the key scenes use; `label` is what the card says.
+
+- Loose text is a short note under the label. A child `<ul>` gives the starting rows.
+
+- `absent` draws a dashed placeholder until a `doc-change` first touches the actor — a table that does not exist yet.
+
+```html
+<doc-actor name="users" label="users" kind="table" tone="amber">
+  shared today
+  <ul><li>1 · ana · customer</li><li>2 · bo · vendor</li></ul>
+</doc-actor>
+```
+
+- **Only valid inside:** `<doc-walkthrough>`
+
+- **See also:** `<doc-walkthrough>`, `<doc-change>`
+
+### `<doc-scene>`
+
+One step of a walkthrough: its moves and changes, plus a one- or two-line caption as ordinary content.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | **yes** | Scene name, shown above the caption and on its dot. |
+| `focus` | string | no | Space-separated actor names to highlight. Defaults to every actor the scene moves or changes. |
+
+- Steps play in the order written. Everything that is not a `doc-move` or `doc-change` is the caption.
+
+- The actors a scene touches are highlighted and the rest dim; `focus` overrides that.
+
+```html
+<doc-scene title="Wrong door" focus="vendor admin">
+  <doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+  <p>An admin route never reads the vendor cookie.</p>
+</doc-scene>
+```
+
+- **Parts:** `scene-title`, `feedback`, `comment-icon`
+
+- **Only valid inside:** `<doc-walkthrough>`
+
+- **See also:** `<doc-walkthrough>`, `<doc-move>`, `<doc-change>`
+
+### `<doc-move>`
+
+A token travelling from one actor to another during a scene.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `from` | slug (`[a-z0-9-]+`) | **yes** | Actor `name` the token leaves. |
+| `to` | slug (`[a-z0-9-]+`) | **yes** | Actor `name` the token arrives at. |
+| `token` | string | no | What travels: a cookie, a row, a request. Defaults to a dot. |
+| `result` | `accept` \| `reject` | no | Outcome on arrival: a green tick, or a red cross and a bounce. Omit for a plain hand-off. |
+
+- `result="accept"` lands with a green tick, `reject` bounces off with a red cross; leave it out for a plain hand-off.
+
+- A reply is just another move in the other direction. It arcs the other way, so the pair reads as request and response.
+
+```html
+<doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+```
+
+- **Only valid inside:** `<doc-scene>`
+
+- **See also:** `<doc-scene>`, `<doc-change>`
+
+### `<doc-change>`
+
+A change to one actor during a scene: a row added or removed, a status set, or the actor dropped. Changes accumulate scene by scene.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `actor` | slug (`[a-z0-9-]+`) | **yes** | Actor `name` that changes. |
+| `add` | string | no | Row to append to the actor. |
+| `remove` | string | no | Row to strike from the actor, matched by its text. |
+| `set` | string | no | Status line to show on the actor, replacing the previous one. |
+| `tone` | `good` \| `bad` \| `neutral` | no | Colour of the added row or status. Defaults to `neutral`. |
+| `drop` | boolean | no | The actor is retired: struck through and faded from here on. |
+
+- Changes accumulate: a row added in scene two is still there in scene five. Jumping between scenes rebuilds that state exactly.
+
+- `set` replaces the actor’s status pill; `remove` strikes a row by its text; `drop` retires the whole actor.
+
+```html
+<doc-change actor="vendor_accounts" add="7 · bo@shop.eu" tone="good"></doc-change>
+```
+
+- **Only valid inside:** `<doc-scene>`
+
+- **See also:** `<doc-scene>`, `<doc-actor>`
 
 ### `<doc-roadmap>`
 

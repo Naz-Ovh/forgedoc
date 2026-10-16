@@ -566,6 +566,100 @@ export const TAGS = {
     },
   },
 
+  'doc-walkthrough': {
+    doc: 'Animated, step-through scene player. Actors on a stage; each scene moves a token between them or changes one, with a short caption.',
+    requiresChild: ['doc-actor', 'doc-scene'],
+    attributes: {
+      title: { kind: { type: 'string' }, doc: 'Heading above the stage, and its accessible name.' },
+    },
+  },
+
+  'doc-actor': {
+    doc: 'One participant on a walkthrough stage. Child text is a short note; a child `<ul>` gives its starting rows.',
+    onlyInside: ['doc-walkthrough'],
+    attributes: {
+      name: {
+        kind: { type: 'slug' },
+        required: true,
+        doc: 'Key that `from`, `to`, `actor` and `focus` refer to. Unique within its walkthrough.',
+      },
+      label: { kind: { type: 'string' }, doc: 'Text on the card. Defaults to `name`.' },
+      kind: {
+        kind: { type: 'enum', values: ['person', 'app', 'service', 'table', 'store'] },
+        doc: 'Icon on the card: a person, an app or screen, a service, a table, a store or cookie jar.',
+      },
+      tone: {
+        kind: {
+          type: 'enum',
+          values: ['accent', 'blue', 'green', 'amber', 'red', 'violet', 'cyan', 'rose', 'neutral'],
+        },
+        doc: 'Card colour, to tell groups of actors apart. Defaults to `neutral`.',
+      },
+      absent: {
+        kind: { type: 'boolean' },
+        doc: 'Starts as a dashed outline — not built yet — and appears at the first `doc-change` that touches it.',
+      },
+    },
+  },
+
+  'doc-scene': {
+    doc: 'One step of a walkthrough: its moves and changes, plus a one- or two-line caption as ordinary content.',
+    onlyInside: ['doc-walkthrough'],
+    attributes: {
+      title: {
+        kind: { type: 'string' },
+        required: true,
+        doc: 'Scene name, shown above the caption and on its dot.',
+      },
+      focus: {
+        kind: { type: 'string' },
+        doc: 'Space-separated actor names to highlight. Defaults to every actor the scene moves or changes.',
+      },
+    },
+  },
+
+  'doc-move': {
+    doc: 'A token travelling from one actor to another during a scene.',
+    onlyInside: ['doc-scene'],
+    attributes: {
+      from: { kind: { type: 'slug' }, required: true, doc: 'Actor `name` the token leaves.' },
+      to: { kind: { type: 'slug' }, required: true, doc: 'Actor `name` the token arrives at.' },
+      token: {
+        kind: { type: 'string' },
+        doc: 'What travels: a cookie, a row, a request. Defaults to a dot.',
+      },
+      result: {
+        kind: { type: 'enum', values: ['accept', 'reject'] },
+        doc: 'Outcome on arrival: a green tick, or a red cross and a bounce. Omit for a plain hand-off.',
+      },
+    },
+  },
+
+  'doc-change': {
+    doc: 'A change to one actor during a scene: a row added or removed, a status set, or the actor dropped. Changes accumulate scene by scene.',
+    onlyInside: ['doc-scene'],
+    attributes: {
+      actor: { kind: { type: 'slug' }, required: true, doc: 'Actor `name` that changes.' },
+      add: { kind: { type: 'string' }, doc: 'Row to append to the actor.' },
+      remove: {
+        kind: { type: 'string' },
+        doc: 'Row to strike from the actor, matched by its text.',
+      },
+      set: {
+        kind: { type: 'string' },
+        doc: 'Status line to show on the actor, replacing the previous one.',
+      },
+      tone: {
+        kind: { type: 'enum', values: ['good', 'bad', 'neutral'] },
+        doc: 'Colour of the added row or status. Defaults to `neutral`.',
+      },
+      drop: {
+        kind: { type: 'boolean' },
+        doc: 'The actor is retired: struck through and faded from here on.',
+      },
+    },
+  },
+
   'doc-roadmap': {
     doc: 'Delivery phases with numbers, subtitles, and expandable content.',
     requiresChild: ['doc-stage'],
@@ -972,6 +1066,40 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-table': ['table', 'scroll-hint'],
   'doc-quote': ['body*', 'cite'],
   'doc-collapse': ['summary', 'chevron', 'summary-text', 'body*', 'feedback', 'comment-icon'],
+  'doc-walkthrough': [
+    'header',
+    'title',
+    'counter',
+    'stage',
+    'card',
+    'card-icon',
+    'card-label',
+    'card-note',
+    'card-rows',
+    'card-row',
+    'card-status',
+    'card-result',
+    'arrows',
+    'arrow',
+    'arrow-head',
+    'token',
+    'result-icon',
+    'log',
+    'log-row',
+    'controls',
+    'prev-btn',
+    'prev-icon',
+    'play-btn',
+    'play-icon',
+    'next-btn',
+    'next-icon',
+    'dots',
+    'dot',
+  ],
+  'doc-actor': [],
+  'doc-scene': ['scene-title', 'feedback', 'comment-icon'],
+  'doc-move': [],
+  'doc-change': [],
 };
 
 export const STATES: Readonly<Record<string, readonly string[]>> = {
@@ -981,6 +1109,7 @@ export const STATES: Readonly<Record<string, readonly string[]>> = {
   'doc-flow-node': ['active'],
   'doc-term': ['first-mention'],
   'doc-collapse': ['open'],
+  'doc-walkthrough': ['playing'],
 };
 
 export type TagName = keyof typeof TAGS;

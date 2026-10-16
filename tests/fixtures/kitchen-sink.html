@@ -481,6 +481,48 @@
     </doc-roadmap>
   </doc-section>
 
+  <doc-section title="Walkthroughs and custom blocks">
+    <doc-walkthrough title="One login, one surface">
+      <doc-actor name="vendor" label="Vendor panel" kind="app" tone="cyan">browser</doc-actor>
+      <doc-actor name="guard" label="authenticateVendor" kind="service"></doc-actor>
+      <doc-actor name="sessions" label="vendor_sessions" kind="table" tone="amber">
+        <ul><li>s1 · vendor 7</li></ul>
+      </doc-actor>
+      <doc-actor name="admin" label="Admin route" kind="service" tone="violet" absent></doc-actor>
+      <doc-scene title="Vendor signs in">
+        <doc-move from="vendor" to="guard" token="ub_vendor_session" result="accept"></doc-move>
+        <doc-change actor="sessions" add="s2 · vendor 9" tone="good"></doc-change>
+        <p>The vendor panel sends only its own cookie, and the guard finds a live session.</p>
+      </doc-scene>
+      <doc-scene title="Wrong door" focus="vendor admin">
+        <doc-change actor="admin" set="reads ub_admin_session"></doc-change>
+        <doc-move from="vendor" to="admin" token="ub_vendor_session" result="reject"></doc-move>
+        <p>An admin route never reads the vendor cookie, so the answer is <code>401</code>.</p>
+      </doc-scene>
+      <doc-scene title="Sign out">
+        <doc-change actor="sessions" remove="s1 · vendor 7"></doc-change>
+        <doc-change actor="guard" set="401 for s1" tone="bad"></doc-change>
+        <p>Signing out deletes the session row.</p>
+      </doc-scene>
+    </doc-walkthrough>
+
+    <doc-walkthrough title="Every actor tone and kind">
+      <doc-actor name="reader" label="Reader" kind="person" tone="accent"></doc-actor>
+      <doc-actor name="jar" label="Cookie jar" kind="store" tone="blue"></doc-actor>
+      <doc-actor name="shop" label="Shop" kind="app" tone="green"></doc-actor>
+      <doc-actor name="ledger" label="Ledger" kind="table" tone="red"></doc-actor>
+      <doc-actor name="mailer" label="Mailer" kind="service" tone="rose"></doc-actor>
+      <doc-actor name="plain" label="Plain" tone="neutral"></doc-actor>
+      <doc-scene title="Hand-off">
+        <doc-move from="reader" to="shop" token="order"></doc-move>
+        <doc-move from="shop" to="mailer"></doc-move>
+        <doc-change actor="plain" drop></doc-change>
+        <p>A plain hand-off with no outcome, and an actor retired.</p>
+      </doc-scene>
+    </doc-walkthrough>
+
+  </doc-section>
+
   <doc-section title="Feedback &amp; Ratings">
     <doc-rating question="Confidence level in delivering the unified docs toolkit:" scale="5"></doc-rating>
     <doc-rating question="Overall visual appeal:" scale="10"></doc-rating>

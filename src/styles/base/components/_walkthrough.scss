@@ -1,0 +1,156 @@
+/*
+ * `doc-walkthrough` — the scene player. Structure only.
+ *
+ * The host is a block (constraint 3): it holds the author's actors (data, not
+ * shown), the author's scenes (one visible at a time — the caption) and the
+ * runtime's chrome around them. The stage is chrome, so it can be a grid.
+ */
+
+@layer doc.components {
+  doc-walkthrough {
+    display: block;
+  }
+
+  /* Actors are data; the stage draws a card for each. */
+  doc-walkthrough > doc-actor,
+  doc-scene > doc-move,
+  doc-scene > doc-change {
+    display: none;
+  }
+
+  doc-scene {
+    display: block;
+  }
+
+  doc-scene[hidden] {
+    display: none;
+  }
+
+  doc-walkthrough [data-part="header"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  /*
+  * The stage: the cards' positioning context, with the arrow layer under the
+  * cards and the travelling tokens over them. A card is opaque, so an arrow is
+  * only ever seen in the gaps between cards — never across someone's label.
+  */
+  doc-walkthrough [data-part="stage"] {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    cursor: pointer;
+    isolation: isolate;
+  }
+
+  doc-walkthrough [data-part="arrows"] {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  doc-walkthrough [data-part="card"] {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 1 1 7.5rem;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 13.5rem;
+  }
+
+  doc-walkthrough [data-part="card"] > [data-part="card-icon"] {
+    display: block;
+    flex: none;
+  }
+
+  doc-walkthrough [data-part="card-rows"] {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+  }
+
+  doc-walkthrough [data-part="card-rows"]:empty {
+    display: none;
+  }
+
+  doc-walkthrough [data-part="card-status"][hidden],
+  doc-walkthrough [data-part="card-result"]:empty {
+    display: none;
+  }
+
+  doc-walkthrough [data-part="card-result"] {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  doc-walkthrough [data-part="token"] {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: 2;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  doc-walkthrough [data-part="controls"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  doc-walkthrough [data-part="dots"] {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  doc-walkthrough :is([data-part="play-btn"], [data-part="prev-btn"], [data-part="next-btn"]) {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  doc-walkthrough [data-part="dot"] {
+    cursor: pointer;
+  }
+
+  doc-walkthrough :is([data-part="prev-btn"], [data-part="next-btn"]):disabled {
+    cursor: default;
+  }
+
+  doc-walkthrough [data-part="log"] {
+    list-style: none;
+  }
+
+  doc-walkthrough [data-part="log"]:empty {
+    display: none;
+  }
+
+  /*
+  * On paper there is no Play button: every caption prints, in order, under the
+  * stage as it stood when the page was printed.
+  */
+  @media print {
+    doc-scene[hidden] {
+      display: block;
+    }
+
+    doc-walkthrough :is([data-part="controls"], [data-part="token"]) {
+      display: none;
+    }
+  }
+}
