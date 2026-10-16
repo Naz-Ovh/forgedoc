@@ -521,6 +521,17 @@
       </doc-scene>
     </doc-walkthrough>
 
+    <doc-files title="Files to change">
+      <doc-file-group title="Database" path="packages/db" count="~9 files + 1 migration" open>
+        <doc-file path="schema/user.ts">→ split into <code>customer.ts</code>, <code>vendor-user.ts</code></doc-file>
+        <doc-file path="drizzle/&lt;new&gt;_separate_accounts/migration.sql"></doc-file>
+      </doc-file-group>
+      <doc-file-group title="Server modules">
+        <doc-file><strong>Removed:</strong> admin product create and edit</doc-file>
+        <doc-file path="apps/server/src/app.ts" line="12">see <doc-path path="apps/server/src/auth/guards.ts" line="42"></doc-path></doc-file>
+      </doc-file-group>
+    </doc-files>
+
     <doc-custom title="The three cookies">
       <style>
         .jar { display: flex; flex-wrap: wrap; gap: var(--doc-space-2); }

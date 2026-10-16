@@ -32,8 +32,10 @@ const COMMITTED = readFileSync(
  * table rows wrap, so the budget is expressed in both lines and characters and
  * the tighter of the two applies.
  *
- * Raised from 78 lines / 4,800 characters when the walkthrough family landed:
- * five tags, folded into one row. Raise it again only for a tag that earns it.
+ * Raised from 78 lines / 4,800 characters when the walkthrough family,
+ * `doc-custom`, the `doc-files` family and `doc-path` landed: ten tags, folded
+ * into four rows, plus the three `files-*` attributes on `doc-page`. Raise it
+ * again only for a tag that earns it.
  */
 const MAX_LINES = 82;
 const MAX_CHARACTERS = 5400;

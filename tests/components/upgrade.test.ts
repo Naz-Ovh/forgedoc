@@ -171,6 +171,16 @@ const CASES: readonly ComponentCase[] = [
     parts: [],
   },
   {
+    tag: 'doc-files',
+    markup: `<doc-files title="Files"><doc-file-group title="Database" path="packages/db" open><doc-file path="schema/user.ts">split</doc-file></doc-file-group></doc-files>`,
+    parts: ['summary', 'summary-title', 'summary-path', 'count', 'toggle', 'path'],
+  },
+  {
+    tag: 'doc-path',
+    markup: `<p>In <doc-path path="src/app.ts" line="3"></doc-path>.</p>`,
+    parts: ['path'],
+  },
+  {
     tag: 'doc-roadmap',
     markup: `<doc-roadmap start="0"><doc-stage title="Zero" subtitle="next" current><p>Body.</p></doc-stage><doc-stage title="One"><p>Body.</p></doc-stage></doc-roadmap>`,
     parts: ['header', 'badge', 'heading', 'title'],

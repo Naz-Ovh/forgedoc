@@ -49,6 +49,9 @@ import { DocDecision } from './components/doc-decision.js';
 import { DocDiff } from './components/doc-diff.js';
 import { DocEndpoint } from './components/doc-endpoint.js';
 import { DocFigure } from './components/doc-figure.js';
+import { DocFile } from './components/doc-file.js';
+import { DocFileGroup } from './components/doc-file-group.js';
+import { DocFiles } from './components/doc-files.js';
 import { DocFlow } from './components/doc-flow.js';
 import { DocFlowNode } from './components/doc-flow-node.js';
 import { DocHeader } from './components/doc-header.js';
@@ -63,6 +66,7 @@ import { DocOwners } from './components/doc-owners.js';
 import { DocPage } from './components/doc-page.js';
 import { DocParam } from './components/doc-param.js';
 import { DocParams } from './components/doc-params.js';
+import { DocPath } from './components/doc-path.js';
 import { DocQuote } from './components/doc-quote.js';
 import { DocRating } from './components/doc-rating.js';
 import { DocRef } from './components/doc-ref.js';
@@ -116,6 +120,9 @@ const ELEMENTS = {
   'doc-diff': DocDiff,
   'doc-endpoint': DocEndpoint,
   'doc-figure': DocFigure,
+  'doc-file': DocFile,
+  'doc-file-group': DocFileGroup,
+  'doc-files': DocFiles,
   'doc-flow': DocFlow,
   'doc-flow-node': DocFlowNode,
   'doc-header': DocHeader,
@@ -130,6 +137,7 @@ const ELEMENTS = {
   'doc-page': DocPage,
   'doc-param': DocParam,
   'doc-params': DocParams,
+  'doc-path': DocPath,
   'doc-quote': DocQuote,
   'doc-rating': DocRating,
   'doc-ref': DocRef,

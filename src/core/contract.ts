@@ -142,6 +142,30 @@ export const TAGS = {
         kind: { type: 'enum', values: ['counter', 'text'] },
         doc: 'Section numbers as CSS counters (default, cheap) or real selectable text nodes.',
       },
+      'files-root': {
+        kind: { type: 'string' },
+        doc: 'Project folder that `doc-file` and `doc-path` paths are relative to. Absolute, or relative to this file (`..`). Makes path chips open in the reader’s editor.',
+      },
+      'files-wsl': {
+        kind: { type: 'string' },
+        doc: 'WSL distro the project lives in, e.g. `Ubuntu`. Detected when the file is opened from a `file://wsl.localhost/…` URL.',
+      },
+      'files-editor': {
+        kind: {
+          type: 'enum',
+          values: [
+            'vscode',
+            'vscode-insiders',
+            'cursor',
+            'windsurf',
+            'zed',
+            'zed-linux',
+            'idea',
+            'none',
+          ],
+        },
+        doc: 'Editor paths open in until the reader picks their own from the picker. Defaults to `vscode`.',
+      },
     },
   },
 
@@ -742,6 +766,54 @@ export const TAGS = {
     },
   },
 
+  'doc-files': {
+    doc: 'A stack of collapsible file groups — the files a change touches, grouped by area — on a surface of its own. Prose may sit before or between the groups.',
+    requiresChild: ['doc-file-group'],
+    attributes: {
+      title: { kind: { type: 'string' }, doc: 'Accessible name for the stack.' },
+    },
+  },
+
+  'doc-file-group': {
+    doc: 'One collapsible area in `doc-files`: a title, an optional path chip and a count in its header.',
+    onlyInside: ['doc-files'],
+    requiresChild: ['doc-file'],
+    attributes: {
+      title: { kind: { type: 'string' }, required: true, doc: 'Area name, e.g. `Database`.' },
+      path: { kind: { type: 'string' }, doc: 'Path chip after the title, e.g. `packages/db`.' },
+      count: {
+        kind: { type: 'string' },
+        doc: 'Muted text on the right, e.g. `~9 files + 1 migration`. Defaults to the number of `doc-file` entries.',
+      },
+      open: { kind: { type: 'boolean' }, doc: 'Starts expanded.' },
+    },
+  },
+
+  'doc-file': {
+    doc: 'One entry in a `doc-file-group`: a path chip and an optional note. The note may hold inline HTML.',
+    onlyInside: ['doc-file-group'],
+    attributes: {
+      path: {
+        kind: { type: 'string' },
+        doc: 'File path shown as a code chip before the note, relative to the group’s `path` when it has one.',
+      },
+      line: { kind: { type: 'integer' }, doc: 'Line the editor opens at.' },
+    },
+  },
+
+  'doc-path': {
+    doc: 'A file path inside a sentence, as a code chip that opens in the reader’s editor when `files-root` is set.',
+    inline: true,
+    attributes: {
+      path: {
+        kind: { type: 'string' },
+        required: true,
+        doc: 'Path, relative to `files-root` or absolute.',
+      },
+      line: { kind: { type: 'integer' }, doc: 'Line the editor opens at.' },
+    },
+  },
+
   'doc-table': {
     doc: 'Wraps a plain `<table>`. Adds a scroll port and, below 1050px, stacks rows into label/value cards.',
     attributes: {
@@ -927,6 +999,12 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
     'question-card-note',
     'question-card-note-toggle',
     'question-card-clear',
+    'editor-picker',
+    'editor-button',
+    'editor-menu',
+    'editor-option',
+    'editor-option-label',
+    'editor-icon',
   ],
   'doc-header': ['title', 'lede', 'kicker', 'rule'],
   'doc-section': ['heading', 'title', 'number', 'anchor', 'body'],
@@ -1111,6 +1189,10 @@ export const PARTS: Readonly<Record<string, readonly string[]>> = {
   'doc-move': [],
   'doc-change': [],
   'doc-custom': ['script-error', 'feedback', 'comment-icon'],
+  'doc-files': ['editor-picker', 'editor-button', 'editor-menu', 'editor-option', 'editor-icon'],
+  'doc-file-group': ['summary', 'summary-title', 'summary-path', 'count', 'toggle'],
+  'doc-file': ['link', 'path', 'note*'],
+  'doc-path': ['link', 'path'],
 };
 
 export const STATES: Readonly<Record<string, readonly string[]>> = {
@@ -1121,6 +1203,7 @@ export const STATES: Readonly<Record<string, readonly string[]>> = {
   'doc-term': ['first-mention'],
   'doc-collapse': ['open'],
   'doc-walkthrough': ['playing'],
+  'doc-file-group': ['open'],
 };
 
 export type TagName = keyof typeof TAGS;

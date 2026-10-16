@@ -1,0 +1,114 @@
+/*
+ * `doc-files` — collapsible file groups: a bordered card per area, the header
+ * a title, path chip, muted count and +/− toggle, the body a bulleted list of
+ * paths with short notes. Written against the shared token contract; the
+ * other themes `@use` this file.
+ */
+
+@layer doc.theme {
+  /*
+  * Two layers, like a card holding accordions: the stack sits on a surface one
+  * step above the page, and every group one step deeper inside it. Surface
+  * tokens, not colours, so the same layering holds in dark mode and in every
+  * theme.
+  */
+  doc-files {
+    margin-block: var(--doc-space-5);
+    padding: var(--doc-space-4);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: var(--doc-surface-1);
+  }
+
+  /* One step deeper than the stack, derived from it rather than read from
+     `--doc-surface-2`: themes disagree on whether that step is darker or
+     lighter than the page, and the nesting has to read the same in all of them. */
+  doc-file-group {
+    margin-block: var(--doc-space-3) 0;
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius-lg);
+    background: color-mix(in oklab, var(--doc-surface-1) 95%, var(--doc-text-1));
+    overflow: hidden;
+  }
+
+  doc-file-group:first-child {
+    margin-block-start: 0;
+  }
+
+  doc-file-group:state(open) {
+    padding-block-end: var(--doc-space-3);
+  }
+
+  doc-file-group > [data-part="summary"] {
+    align-items: center;
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-3) var(--doc-space-4);
+    border: 0;
+    background: transparent;
+    color: var(--doc-text-1);
+    font: inherit;
+    font-weight: 600;
+    text-align: start;
+  }
+
+  doc-file-group:state(open) > [data-part="summary"] {
+    margin-block-end: var(--doc-space-2);
+    border-block-end: var(--doc-rule);
+  }
+
+  doc-file-group > [data-part="summary"]:focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: -2px;
+  }
+
+  doc-file-group [data-part="count"] {
+    color: var(--doc-text-3);
+    font-size: var(--doc-text-sm);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  doc-file-group [data-part="toggle"] {
+    width: 1em;
+    color: var(--doc-accent-line);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  doc-file {
+    margin: var(--doc-space-1) var(--doc-space-5);
+    padding-inline-start: var(--doc-space-5);
+    color: var(--doc-text-2);
+    line-height: var(--doc-leading);
+  }
+
+  /* A closed group's entries keep their box at zero size; drop the spacing too. */
+  doc-file[hidden] {
+    margin-block: 0;
+  }
+
+  doc-file::before {
+    inset-block-start: 0.7em;
+    inset-inline-start: var(--doc-space-1);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--doc-text-3);
+  }
+
+  @media (max-width: 40rem) {
+    doc-files {
+      padding: var(--doc-space-2);
+    }
+
+    doc-file-group > [data-part="summary"] {
+      flex-wrap: wrap;
+      row-gap: var(--doc-space-1);
+    }
+
+    doc-file {
+      margin-inline: var(--doc-space-3);
+      overflow-wrap: anywhere;
+    }
+  }
+}

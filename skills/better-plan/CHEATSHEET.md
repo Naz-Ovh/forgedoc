@@ -17,7 +17,7 @@ Build in place `forgedoc build <file.html>` — one file, rebuilt on every revis
 
 | Tag | Attributes |
 | --- | --- |
-| `doc-page` | **`doc-id`** slug · `density` compact/comfortable/spacious · `scale` sm/md/lg · `accent` teal/indigo/slate/plum/amber · `measure` narrow/default/wide · `code` auto/light/dark · `toc` open/closed/docked/off · `numbering` counter/text |
+| `doc-page` | **`doc-id`** slug · `density` compact/comfortable/spacious · `scale` sm/md/lg · `accent` teal/indigo/slate/plum/amber · `measure` narrow/default/wide · `code` auto/light/dark · `toc` open/closed/docked/off · `numbering` counter/text · `files-root` · `files-wsl` · `files-editor` vscode/vscode-insiders/cursor/windsurf/zed/zed-linux/idea/none |
 | `doc-header` | `kicker` |
 | `doc-section` | **`title`** |
 | `doc-toc` | generated — never write it |
@@ -39,6 +39,7 @@ Build in place `forgedoc build <file.html>` — one file, rebuilt on every revis
 | `doc-quote` | `cite` |
 | `doc-term` | **`href`** url |
 | `doc-ref` | **`to`** |
+| `doc-path` | **`path`** · `line` integer |
 
 ## Metrics, planning & interactive
 
@@ -66,6 +67,7 @@ Build in place `forgedoc build <file.html>` — one file, rebuilt on every revis
 | `doc-figure` › `doc-caption` | `type` svg/image/mermaid/html · `caption` · `src` url · `alt` |
 | `doc-table` | `size` sm/md · `stack` auto/never |
 | `doc-tree` | `root` |
+| `doc-files` › `doc-file-group` › `doc-file` | `title` — file-group: **`title`** · `path` · `count` · `open` — file: `path` · `line` integer |
 | `doc-compare` | `columns` 2/3/4 |
 | `doc-custom` | `title` |
 

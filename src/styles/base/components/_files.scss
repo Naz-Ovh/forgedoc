@@ -1,0 +1,45 @@
+/*
+ * `doc-files` › `doc-file-group` › `doc-file` — collapsible file groups.
+ * Structure only.
+ *
+ * A closed group hides each `doc-file` with `hidden="until-found"`, like every
+ * other disclosure (see `core/disclosure.ts`), so the bullet is a `::before`
+ * rather than a list marker: a pseudo-element is skipped with the hidden
+ * contents, a `::marker` is not.
+ */
+
+@layer doc.components {
+  doc-files,
+  doc-file-group {
+    display: block;
+  }
+
+  doc-file-group > [data-part="summary"] {
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  doc-file-group [data-part="count"] {
+    margin-inline-start: auto;
+  }
+
+  doc-file-group [data-part="toggle"] {
+    flex: none;
+  }
+
+  doc-file {
+    display: block;
+    position: relative;
+  }
+
+  doc-file::before {
+    content: "";
+    position: absolute;
+  }
+
+  doc-file[hidden] {
+    contain-intrinsic-size: 0;
+  }
+}

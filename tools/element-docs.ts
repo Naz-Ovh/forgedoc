@@ -65,6 +65,7 @@ export const CATEGORIES: readonly Category[] = [
       'doc-quote',
       'doc-term',
       'doc-ref',
+      'doc-path',
     ],
   },
   {
@@ -106,6 +107,9 @@ export const CATEGORIES: readonly Category[] = [
       'doc-caption',
       'doc-table',
       'doc-tree',
+      'doc-files',
+      'doc-file-group',
+      'doc-file',
       'doc-compare',
       'doc-custom',
     ],
@@ -157,6 +161,7 @@ export const ELEMENT_DOCS: Readonly<Record<TagName, ElementDoc>> = {
       'The only root you author, and there is exactly one per document.',
       '`doc-id` is mandatory: it namespaces the reader’s stored answers. Two `file://` documents without distinct ids overwrite each other.',
       'Owns the store, the reading column, the contents panel and the feedback bucket. None of those are tags you write.',
+      '`files-root` (with `files-wsl` for a WSL project) lets `doc-file` and `doc-path` chips open in the reader’s editor.',
     ],
     related: ['doc-header', 'doc-section'],
   },
@@ -405,6 +410,15 @@ export const ELEMENT_DOCS: Readonly<Record<TagName, ElementDoc>> = {
       'The first mention is styled differently from repeats. The runtime tracks which is which.',
     ],
     related: ['doc-ref'],
+  },
+
+  'doc-path': {
+    example:
+      '<p>The guard lives in <doc-path path="apps/server/src/auth/guards.ts" line="42"></doc-path>.</p>',
+    notes: [
+      'With `files-root` on `doc-page`, the chip opens the file in the reader’s editor — VS Code, Cursor, Windsurf, Zed or a JetBrains IDE — chosen from a small picker. Without it, the chip is plain.',
+    ],
+    related: ['doc-file', 'doc-page'],
   },
 
   'doc-ref': {
@@ -680,6 +694,39 @@ flowchart LR
   <li>index.ts</li>
 </doc-tree>`,
     notes: ['Connector lines and folder icons are generated from nested `<ul>`/`<li>`.'],
+  },
+
+  'doc-files': {
+    example: `<doc-files title="Files to change">
+  <doc-file-group title="Database" path="packages/db" count="~9 files + 1 migration" open>
+    <doc-file path="schema/user.ts">→ split into <code>customer.ts</code>, <code>vendor-user.ts</code></doc-file>
+    <doc-file path="drizzle/&lt;new&gt;_separate_accounts/migration.sql"></doc-file>
+  </doc-file-group>
+  <doc-file-group title="Permissions" path="packages/access">
+    <doc-file path="src/can.ts">split <code>AccessContext</code> per surface</doc-file>
+  </doc-file-group>
+</doc-files>`,
+    notes: [
+      'Each group is a collapsible header — title, path chip, count and a +/− toggle — over a list of `doc-file` entries.',
+      'Prose such as an intro line may sit inside, before or between the groups. With `files-root` set, the editor picker sits in the corner.',
+    ],
+    related: ['doc-file-group', 'doc-file', 'doc-tree'],
+  },
+
+  'doc-file-group': {
+    example: `<doc-file-group title="Server auth" path="apps/server/src" count="~20 files">
+  <doc-file path="shared/auth/guards.ts"></doc-file>
+</doc-file-group>`,
+    notes: ['Without `count`, the header shows the number of `doc-file` entries.'],
+    related: ['doc-files', 'doc-file'],
+  },
+
+  'doc-file': {
+    example: '<doc-file path="schema/enums.ts">(drop <code>session_realm</code>)</doc-file>',
+    notes: [
+      'The content is a note after the path chip and may hold inline HTML. Without `path`, it is the whole entry.',
+    ],
+    related: ['doc-file-group'],
   },
 
   'doc-compare': {

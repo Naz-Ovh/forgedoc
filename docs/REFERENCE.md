@@ -82,12 +82,17 @@ The root, and the only authored root. Owns the store, the layout column, the TOC
 | `code` | `auto` \| `light` \| `dark` | no | Prism theme: follow the document, or force light/dark. Defaults to `auto`. |
 | `toc` | `open` \| `closed` \| `docked` \| `off` | no | Contents panel: floating open, collapsed, docked beside the content, or absent. Defaults to floating and collapsed; the reader can change it and the choice is remembered. |
 | `numbering` | `counter` \| `text` | no | Section numbers as CSS counters (default, cheap) or real selectable text nodes. |
+| `files-root` | string | no | Project folder that `doc-file` and `doc-path` paths are relative to. Absolute, or relative to this file (`..`). Makes path chips open in the reader’s editor. |
+| `files-wsl` | string | no | WSL distro the project lives in, e.g. `Ubuntu`. Detected when the file is opened from a `file://wsl.localhost/…` URL. |
+| `files-editor` | `vscode` \| `vscode-insiders` \| `cursor` \| `windsurf` \| `zed` \| `zed-linux` \| `idea` \| `none` | no | Editor paths open in until the reader picks their own from the picker. Defaults to `vscode`. |
 
 - The only root you author, and there is exactly one per document.
 
 - `doc-id` is mandatory: it namespaces the reader’s stored answers. Two `file://` documents without distinct ids overwrite each other.
 
 - Owns the store, the reading column, the contents panel and the feedback bucket. None of those are tags you write.
+
+- `files-root` (with `files-wsl` for a WSL project) lets `doc-file` and `doc-path` chips open in the reader’s editor.
 
 ```html
 <doc-page doc-id="vendor-orders" density="comfortable" accent="teal">
@@ -96,7 +101,7 @@ The root, and the only authored root. Owns the store, the layout column, the TOC
 </doc-page>
 ```
 
-- **Parts:** `canvas`, `rail`, `prose`, `aside`, `toc`, `toc-backdrop`, `bucket`, `bucket-fab`, `bucket-panel`, `bucket-header`, `bucket-body`, `bucket-empty`, `bucket-item`, `bucket-item-remove`, `bucket-copy`, `bucket-copied`, `bucket-badge`, `bucket-note`, `settings-toggle`, `theme-toggle`, `density-toggle`, `questions`, `question-drawer`, `question-drawer-header`, `question-drawer-eyebrow`, `question-drawer-progress`, `question-drawer-close`, `question-drawer-filter`, `question-drawer-content`, `question-drawer-empty`, `question-card`, `question-card-meta`, `question-card-number`, `question-card-at`, `question-card-goto`, `question-card-title`, `question-card-options`, `question-card-option`, `question-card-option-key`, `question-card-option-label`, `question-card-option-desc`, `question-card-recommended`, `question-card-other-text`, `question-card-note`, `question-card-note-toggle`, `question-card-clear`
+- **Parts:** `canvas`, `rail`, `prose`, `aside`, `toc`, `toc-backdrop`, `bucket`, `bucket-fab`, `bucket-panel`, `bucket-header`, `bucket-body`, `bucket-empty`, `bucket-item`, `bucket-item-remove`, `bucket-copy`, `bucket-copied`, `bucket-badge`, `bucket-note`, `settings-toggle`, `theme-toggle`, `density-toggle`, `questions`, `question-drawer`, `question-drawer-header`, `question-drawer-eyebrow`, `question-drawer-progress`, `question-drawer-close`, `question-drawer-filter`, `question-drawer-content`, `question-drawer-empty`, `question-card`, `question-card-meta`, `question-card-number`, `question-card-at`, `question-card-goto`, `question-card-title`, `question-card-options`, `question-card-option`, `question-card-option-key`, `question-card-option-label`, `question-card-option-desc`, `question-card-recommended`, `question-card-other-text`, `question-card-note`, `question-card-note-toggle`, `question-card-clear`, `editor-picker`, `editor-button`, `editor-menu`, `editor-option`, `editor-option-label`, `editor-icon`
 
 - **States:** `:toc-open`, `:toc-docked`
 
@@ -676,6 +681,27 @@ Inline cross-reference. Resolves to the live number at mount, so nothing goes st
 - **Inline element.**
 
 - **See also:** `<doc-section>`
+
+### `<doc-path>`
+
+A file path inside a sentence, as a code chip that opens in the reader’s editor when `files-root` is set.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `path` | string | **yes** | Path, relative to `files-root` or absolute. |
+| `line` | integer | no | Line the editor opens at. |
+
+- With `files-root` on `doc-page`, the chip opens the file in the reader’s editor — VS Code, Cursor, Windsurf, Zed or a JetBrains IDE — chosen from a small picker. Without it, the chip is plain.
+
+```html
+<p>The guard lives in <doc-path path="apps/server/src/auth/guards.ts" line="42"></doc-path>.</p>
+```
+
+- **Parts:** `link`, `path`
+
+- **Inline element.**
+
+- **See also:** `<doc-file>`, `<doc-page>`
 
 ## Interactive
 
@@ -1261,6 +1287,86 @@ Directory tree viewer with ASCII connector lines and folder icons.
 ```
 
 - **Parts:** `list`, `node`, `connector`, `label`, `feedback`, `comment-icon`
+
+### `<doc-files>`
+
+A stack of collapsible file groups — the files a change touches, grouped by area — on a surface of its own. Prose may sit before or between the groups.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | no | Accessible name for the stack. |
+
+- Each group is a collapsible header — title, path chip, count and a +/− toggle — over a list of `doc-file` entries.
+
+- Prose such as an intro line may sit inside, before or between the groups. With `files-root` set, the editor picker sits in the corner.
+
+```html
+<doc-files title="Files to change">
+  <doc-file-group title="Database" path="packages/db" count="~9 files + 1 migration" open>
+    <doc-file path="schema/user.ts">→ split into <code>customer.ts</code>, <code>vendor-user.ts</code></doc-file>
+    <doc-file path="drizzle/&lt;new&gt;_separate_accounts/migration.sql"></doc-file>
+  </doc-file-group>
+  <doc-file-group title="Permissions" path="packages/access">
+    <doc-file path="src/can.ts">split <code>AccessContext</code> per surface</doc-file>
+  </doc-file-group>
+</doc-files>
+```
+
+- **Parts:** `editor-picker`, `editor-button`, `editor-menu`, `editor-option`, `editor-icon`
+
+- **Requires child:** `<doc-file-group>`
+
+- **See also:** `<doc-file-group>`, `<doc-file>`, `<doc-tree>`
+
+### `<doc-file-group>`
+
+One collapsible area in `doc-files`: a title, an optional path chip and a count in its header.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `title` | string | **yes** | Area name, e.g. `Database`. |
+| `path` | string | no | Path chip after the title, e.g. `packages/db`. |
+| `count` | string | no | Muted text on the right, e.g. `~9 files + 1 migration`. Defaults to the number of `doc-file` entries. |
+| `open` | boolean | no | Starts expanded. |
+
+- Without `count`, the header shows the number of `doc-file` entries.
+
+```html
+<doc-file-group title="Server auth" path="apps/server/src" count="~20 files">
+  <doc-file path="shared/auth/guards.ts"></doc-file>
+</doc-file-group>
+```
+
+- **Parts:** `summary`, `summary-title`, `summary-path`, `count`, `toggle`
+
+- **States:** `:open`
+
+- **Only valid inside:** `<doc-files>`
+
+- **Requires child:** `<doc-file>`
+
+- **See also:** `<doc-files>`, `<doc-file>`
+
+### `<doc-file>`
+
+One entry in a `doc-file-group`: a path chip and an optional note. The note may hold inline HTML.
+
+| Attribute | Values | Required | Notes |
+| --- | --- | --- | --- |
+| `path` | string | no | File path shown as a code chip before the note, relative to the group’s `path` when it has one. |
+| `line` | integer | no | Line the editor opens at. |
+
+- The content is a note after the path chip and may hold inline HTML. Without `path`, it is the whole entry.
+
+```html
+<doc-file path="schema/enums.ts">(drop <code>session_realm</code>)</doc-file>
+```
+
+- **Parts:** `link`, `path`, `note*`
+
+- **Only valid inside:** `<doc-file-group>`
+
+- **See also:** `<doc-file-group>`
 
 ### `<doc-compare>`
 

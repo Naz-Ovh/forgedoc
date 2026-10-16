@@ -57,6 +57,7 @@
     }
 
     doc-collapse [hidden],
+    doc-file-group > [hidden],
     doc-stage [hidden],
     doc-tabs [hidden],
     doc-carousel > [hidden] {
@@ -64,6 +65,7 @@
     }
 
     doc-collapse [data-part="chevron"],
+    doc-file-group [data-part="toggle"],
     doc-tabs [data-part="strip"],
     doc-carousel [data-part="controls"] {
       display: none;

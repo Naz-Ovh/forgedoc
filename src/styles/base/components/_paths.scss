@@ -1,0 +1,71 @@
+/*
+ * Path chips (`doc-path`, `doc-file`) and the editor picker. Structure only.
+ *
+ * The picker floats in the top corner of a `doc-files` surface, so an intro
+ * sentence wraps beside it while the groups clear below; on a page with only
+ * inline paths it is fixed in the top corner of the viewport instead.
+ */
+
+@layer doc.components {
+  doc-path {
+    display: inline;
+  }
+
+  :is(doc-path, doc-file) > [data-part="link"] {
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  [data-part="editor-picker"] {
+    position: relative;
+  }
+
+  doc-files > [data-part="editor-picker"] {
+    float: inline-end;
+    z-index: 2;
+  }
+
+  doc-files > doc-file-group {
+    clear: both;
+  }
+
+  [data-part="editor-picker"][data-placement="page"] {
+    position: fixed;
+    inset-block-start: var(--doc-space-4);
+    inset-inline-end: var(--doc-space-4);
+    z-index: var(--doc-z-toc);
+  }
+
+  [data-part="editor-button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  [data-part="editor-menu"] {
+    position: absolute;
+    inset-block-start: calc(100% + 4px);
+    inset-inline-end: 0;
+    z-index: var(--doc-z-popover);
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100vw - 2rem);
+  }
+
+  [data-part="editor-menu"][hidden] {
+    display: none;
+  }
+
+  [data-part="editor-option"] {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    text-align: start;
+  }
+
+  [data-part="editor-icon"] {
+    display: block;
+    flex: none;
+  }
+}

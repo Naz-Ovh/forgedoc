@@ -1,0 +1,117 @@
+/*
+ * Path chips and the editor picker. A linked chip keeps the code look and
+ * gains the accent on hover; a copied one flashes "copied". Written against
+ * the shared token contract; the other themes `@use` this file.
+ */
+
+@layer doc.theme {
+  :is(doc-path, doc-file) > [data-part="link"] {
+    color: inherit;
+    border-radius: var(--doc-radius-sm);
+  }
+
+  :is(doc-path, doc-file) > [data-part="link"] > code {
+    transition:
+      color var(--doc-transition),
+      box-shadow var(--doc-transition);
+  }
+
+  :is(doc-path, doc-file) > [data-part="link"]:hover > code {
+    color: var(--doc-accent-text);
+    box-shadow: inset 0 -1px 0 var(--doc-accent-line);
+  }
+
+  :is(doc-path, doc-file) > [data-part="link"]:focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  :is(doc-path, doc-file) > [data-part="link"][data-copied] > code::after {
+    content: " · copied";
+    color: var(--doc-text-3);
+  }
+
+  doc-files > [data-part="editor-picker"] {
+    margin: 0 0 var(--doc-space-2) var(--doc-space-3);
+  }
+
+  [data-part="editor-button"] {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    color: var(--doc-text-2);
+    font-size: 1rem;
+    transition:
+      border-color var(--doc-transition),
+      color var(--doc-transition);
+  }
+
+  [data-part="editor-picker"][data-placement="page"] [data-part="editor-button"] {
+    box-shadow: var(--doc-shadow-1);
+  }
+
+  [data-part="editor-button"]:hover,
+  [data-part="editor-button"][aria-expanded="true"] {
+    border-color: var(--doc-accent-edge);
+    color: var(--doc-accent-text);
+  }
+
+  [data-part="editor-button"]:focus-visible,
+  [data-part="editor-option"]:focus-visible {
+    outline: 2px solid var(--doc-accent-line);
+    outline-offset: 2px;
+  }
+
+  [data-part="editor-menu"] {
+    gap: 2px;
+    min-width: 15rem;
+    padding: var(--doc-space-2);
+    border: var(--doc-rule);
+    border-radius: var(--doc-radius);
+    background: var(--doc-surface-1);
+    box-shadow: var(--doc-shadow-2);
+    font-family: var(--doc-font-sans);
+    font-size: var(--doc-text-sm);
+  }
+
+  [data-part="editor-option"] {
+    gap: var(--doc-space-3);
+    padding: var(--doc-space-2) var(--doc-space-3);
+    border: 0;
+    border-radius: var(--doc-radius-sm);
+    background: transparent;
+    color: var(--doc-text-1);
+    font: inherit;
+  }
+
+  [data-part="editor-option"] [data-part="editor-icon"] {
+    color: var(--doc-text-2);
+    font-size: 1.05rem;
+  }
+
+  [data-part="editor-option"]:hover,
+  [data-part="editor-option"]:focus-visible {
+    background: var(--doc-accent-tint);
+    color: var(--doc-accent-text);
+  }
+
+  [data-part="editor-option"][aria-checked="true"] {
+    font-weight: 650;
+  }
+
+  [data-part="editor-option"][aria-checked="true"]::after {
+    content: "✓";
+    margin-inline-start: auto;
+    color: var(--doc-accent-text);
+  }
+
+  [data-part="editor-option"][data-editor="none"] {
+    margin-block-start: var(--doc-space-1);
+    border-block-start: var(--doc-rule);
+    border-radius: 0;
+    color: var(--doc-text-2);
+  }
+}
