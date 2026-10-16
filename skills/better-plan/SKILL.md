@@ -5,37 +5,76 @@ description: Write a planning document as ForgeDoc markup — a readable HTML pa
 
 # Better plans with ForgeDoc
 
-## What a plan is
+## What a plan is for
 
-A plan is writing. It explains the problem, says what you propose, and asks the
-reader what you cannot decide alone. Sentences do almost all of that.
+A plan gets an idea out of your head and into the reader's, then asks them what
+you cannot decide alone. Everything in it serves one question the reader keeps
+asking: **"I don't understand this yet — what is going on here?"**
 
-ForgeDoc delivers the writing as a styled HTML page the reader can answer inside.
-Its `doc-*` tags — **elements** — cover the few things sentences carry badly. The
-runtime supplies design, layout, dark mode, numbering, anchors and the feedback
-box the reader pastes back to you. You supply the meaning.
+ForgeDoc delivers the plan as an HTML page the reader can answer inside. Its
+`doc-*` tags — **elements** — are a toolkit: each one is a ready-made way to
+show something, cheap to write, styled and themed by the runtime, and wired
+into the feedback box the reader pastes back to you. Use them to save tokens,
+not as a cage. The runtime supplies design, layout, dark mode, numbering,
+anchors and motion. You supply the meaning.
 
-Think, write it in words, and place an element only where words fall short.
+## Pick the form that clears the confusion
 
-## Words first
+For each idea, ask what would make it click for this reader, then use that.
+Sometimes it is one plain sentence. Sometimes a table, a picture, a short
+animation, something they can click, or a block you design yourself.
 
-Write like a memo to a colleague: what is true now, what you propose, what it
-costs, what you are unsure about. Plain HTML carries this — `<p>`, `<ul>`,
-`<li>`, `<code>`, `<a>`, `<strong>`. It is already styled, so no element exists
-for it.
+- Do not default to one format, and do not aim for a "balance" of formats.
+  A plan that is all prose and a plan that is all widgets fail the same way.
+- Short text is fine when text is the clearest. Many points need nothing more.
+- Avoid long walls of text. If a paragraph keeps growing, the idea probably
+  wants a different shape — or a `doc-collapse` for the detail few will read.
+- Each element earns its place by explaining something. Remove the ones that
+  only decorate.
 
-Reach for an element when you are about to:
+### When each form helps
 
-- ask the reader to decide — `doc-choice`, the thing that makes a plan answerable
-- draw a shape in words, or describe how parts connect
-- lay out an order of work, dates, or steps with a state
-- compare options side by side, or show numbers
-- show code, or a change to a file
-- say something is stuck, and what unsticks it
+A menu, not a mapping. Reach for one when it fits; ignore the rest.
 
-Use the element instead of building it from `<div>`s: shorter to write, far fewer
-output tokens, identical in every plan, and the reader's feedback tools know what
-it is. Hand-built markup gives up all four.
+| When the reader needs to… | This often helps |
+| --- | --- |
+| follow an argument, a reason, a caveat | plain sentences, `<ul>` |
+| see something **happen** — a request accepted or refused, data moving between tables, state changing over steps | `doc-walkthrough` |
+| follow a short, straight sequence | `doc-flow` |
+| weigh two or three shapes side by side | `doc-compare` |
+| look up exact values — columns, cookies, mappings | `<table>` in `doc-table` |
+| see the order of delivery | `doc-roadmap` (or `doc-timeline` for dates) |
+| see which files move | `doc-tree`, or `doc-files` for collapsible groups by area |
+| read numbers that matter | `doc-stats` |
+| judge risks or ownership on a grid | `doc-matrix` |
+| read exact code or a change to it | `doc-code`, `doc-diff` |
+| try something, or see an idea no element shows well | `doc-custom` |
+| be told something is stuck, and what unsticks it | `doc-blocker` |
+
+**Walkthroughs.** A `doc-walkthrough` is a small animated stage: actors as
+cards, and scenes that move a token between them or change one. The reader
+presses Play, or steps with arrows and dots. It helps most when something
+_moves, branches, fails or changes state_ — the exact things a paragraph makes
+the reader simulate in their head. Keep captions to a sentence or two; the
+motion carries the meaning. For a sequence that is just "A, then B, then C",
+`doc-flow` or a sentence is clearer.
+
+**Custom blocks.** When no element explains the idea well, design one inside
+`<doc-custom>`: your own HTML, a `<style>` and a `<script type="forgedoc">`.
+Styles stay inside the block, the `--doc-*` tokens keep it on theme and in
+dark mode, and it takes comments like any other block. Keep it small and
+specific — a toggle that shows a constraint passing or failing, a slider, a
+little diagram. If you notice you are rebuilding a table or a flow, use the
+element instead.
+
+**File paths** can open in the reader's editor: set `files-root` on `doc-page`
+(add `files-wsl` for a WSL project) and write paths relative to it in
+`doc-file` or the inline `doc-path`. The reader picks their editor in a small
+picker.
+
+**Mermaid** (`doc-figure type="mermaid"`) suits a small static picture. Dense
+graphs are hard to read at page width; split them, or play them as a
+walkthrough when they describe something that happens.
 
 ## Look the vocabulary up
 
@@ -43,55 +82,68 @@ it is. Hand-built markup gives up all four.
 before writing markup. When it leaves a question open:
 
 ```sh
-npx forgedoc search <words>    # which element does X?
-npx forgedoc info doc-choice   # attributes, rules and an example for one element
+npx forgedoc search <words>          # which element does X?
+npx forgedoc info doc-walkthrough    # attributes, rules and an example
 ```
 
 An invented tag or a guessed attribute fails the build.
 
 ## Elements go where the content is
 
-A question goes right after the paragraph that raises the doubt — not in a list
-at the end. A diagram goes where you would otherwise say "picture this". A
-blocker goes inside the section it blocks.
-
-No required order, no required sections, no place a question has to live. Two
-plans about two problems should not look alike. Let the shape follow the problem.
+A question goes right after the thing that raises the doubt — not in a list at
+the end. A walkthrough goes where you would otherwise say "picture this". A
+blocker goes inside the section it blocks. No required order, no required
+sections. Two plans about two problems should not look alike.
 
 ```html
-<doc-section title="Where the notification comes from">
-  <p>
-    An order row is written before payment settles, so a notification sent on
-    insert can reach a vendor for an order that never completes. The payment
-    webhook is the first moment the order is real.
-  </p>
+<doc-section title="How a request finds its account">
+  <p>The vendor below is also staff — the case the old role check got wrong.</p>
 
-  <doc-choice mode="single" question="Send on the payment webhook, or on order insert?">
+  <doc-walkthrough title="One cookie, one surface">
+    <doc-actor name="panel" label="Vendor panel" kind="app" tone="cyan"></doc-actor>
+    <doc-actor name="vendor-guard" label="authenticateVendor" kind="service"></doc-actor>
+    <doc-actor name="admin-guard" label="authenticateAdmin" kind="service" tone="violet"></doc-actor>
+    <doc-scene title="A vendor route">
+      <doc-move from="panel" to="vendor-guard" token="ub_vendor_session" result="accept"></doc-move>
+      <p>The vendor guard reads only the vendor cookie, and finds vendor 42.</p>
+    </doc-scene>
+    <doc-scene title="Wrong door">
+      <doc-move from="panel" to="admin-guard" token="ub_vendor_session" result="reject"></doc-move>
+      <doc-change actor="admin-guard" set="401" tone="bad"></doc-change>
+      <p>The admin guard never reads it, so it sees no session: 401.</p>
+    </doc-scene>
+  </doc-walkthrough>
+
+  <doc-choice mode="single" question="Someone who is vendor and admin: one login or two?">
     <doc-option recommended>
-      On the payment webhook
-      <p slot="desc">No false alerts. Costs about two seconds of delay.</p>
+      Two logins, one per surface
+      <p slot="desc">Matches the tables. Staff sign in twice.</p>
     </doc-option>
     <doc-option>
-      On order insert
-      <p slot="desc">Instant, but vendors see orders that may never pay.</p>
+      One login, linked accounts
+      <p slot="desc">Friendlier, but brings back a shared identity.</p>
     </doc-option>
   </doc-choice>
-
-  <p>Either way the send is queued, so a slow vendor cannot hold up checkout.</p>
 </doc-section>
 ```
 
-The question sits mid-section because that is where the doubt appears. Copy the
-habit, not the shape.
+One sentence sets the scene, the walkthrough shows the part that is hard to
+picture, and the question sits where the doubt appears. The next section might
+be a single table, or two sentences. Copy the judgement, not the shape.
+
+Close every tag explicitly — `<doc-actor …></doc-actor>`, never `<doc-actor/>`.
+HTML has no self-closing custom elements, and the build rejects them in a
+walkthrough.
 
 ## Questions
 
 Ask when the answer changes the work. Mark your suggestion `recommended`, and
-give each option its real cost in one line. Decisions already made belong in the
-prose as statements, with the reasoning behind them.
+give each option its real cost in one line. Decisions already made belong in
+the plan as statements, with the reasoning behind them — a `doc-chips` row
+under the header is a good home for the settled ones.
 
-You never need a question to invite feedback — the reader can select any sentence
-and comment on it. One more reason most of a plan should be prose.
+You never need a question to invite feedback — the reader can select any
+sentence, or press Comment on any card, scene or block.
 
 ## The file
 
@@ -104,7 +156,9 @@ required byte for byte: the style in `<head>`, the script last in `<body>`.
 ```
 
 Everything else sits inside one `<doc-page doc-id="a-unique-slug">`. The `doc-id`
-is required — it is the key the reader's answers are stored under.
+is required — it is the key the reader's answers are stored under. Outside a
+`doc-custom` block, write no `<style>`, `<script>`, `class=`, `role=` or
+`aria-*`: the runtime owns those.
 
 ```sh
 npx forgedoc build PLAN_<name>.html
@@ -115,19 +169,23 @@ life. To revise, edit it and build again: the build reads its own output. Never
 write a copy, a second file, or a version number into the name — the reader's
 link keeps working because the document never moves.
 
-Titles, questions and sections produce their own headings, numbers, anchors,
-option letters and contents entries, so none of those are yours to type. Themes,
-offline delivery and keeping past versions are in `BUILDING.md`.
+Titles, questions, sections and scenes produce their own headings, numbers,
+anchors, option letters, controls and contents entries, so none of those are
+yours to type. Themes, offline delivery and keeping past versions are in
+`BUILDING.md`.
 
 ## Before you hand it over
 
-1. Read only the sentences, ignoring every element. The plan should still explain
-   itself. If not, the thinking went into furniture — put it back in the text.
-2. For each element, say in one sentence what a paragraph could not have done
-   there. No answer means delete it and write the paragraph.
+Read it as the reviewer, top to bottom, and find where they would stall:
 
-Spend your output tokens on sentences. The runtime owns the design; thinking is
-the expensive part.
+1. **Where would they reread?** That spot needs a different form — fewer words,
+   a table, a walkthrough, a custom block — whichever clears it.
+2. **What is there only to look busy?** An element that explains nothing, or a
+   paragraph that repeats a picture, comes out.
+3. **Is every open decision a `doc-choice`,** placed where its doubt arises,
+   with your recommendation marked?
+
+Spend your effort on understanding. The runtime owns the design.
 
 ## When the reader answers
 
