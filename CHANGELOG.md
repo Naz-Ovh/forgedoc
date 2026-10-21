@@ -6,12 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-21
+
 Plans that explain by showing. A reader stuck on "what actually happens here?"
 can now press Play and watch it, and an agent with an idea no element fits can
 build its own block without breaking out of the runtime.
 
 ### Added
 
+- **A documentation handbook** at [forgedoc.naz.ovh](https://forgedoc.naz.ovh),
+  with installation, tutorials, runtime API, component references and Markdown
+  pages for coding agents.
 - **`doc-walkthrough`, an animated scene player.** The author writes actors
   (`doc-actor`) and scenes (`doc-scene`); each scene moves a token between two
   actors (`doc-move`, with an optional `accept` / `reject` outcome) or changes

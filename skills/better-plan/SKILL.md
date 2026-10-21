@@ -1,6 +1,6 @@
 ---
 name: better-plan
-description: Write a planning document as ForgeDoc markup — a readable HTML page the reader can answer inside — and build it to one self-contained file. Use when asked to plan work, propose an approach, write a design doc or an RFC, revise a plan, or collect decisions from a human reviewer.
+description: Write a planning document as ForgeDoc markup — a readable HTML page the reader can answer inside — and build it to one HTML file, with an offline option for self-contained delivery. Use when asked to plan work, propose an approach, write a design doc or an RFC, revise a plan, or collect decisions from a human reviewer.
 ---
 
 # Better plans with ForgeDoc

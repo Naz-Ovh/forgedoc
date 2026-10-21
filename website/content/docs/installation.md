@@ -56,7 +56,7 @@ for modern Yarn; project-local installation works for both modern and Classic Ya
 For a repeatable one-off invocation, pin the package version:
 
 ```sh
-npx forgedoc@2.1.0 build DOC_vendor-orders.html
+npx forgedoc@2.2.0 build DOC_vendor-orders.html
 ```
 
 See the package-manager documentation for [pnpm dlx](https://pnpm.io/cli/dlx),
@@ -68,19 +68,19 @@ Use this when ForgeDoc is a build tool in an existing project. Choose one pair:
 
 ```sh
 # npm
-npm install --save-dev --save-exact forgedoc@2.1.0
+npm install --save-dev --save-exact forgedoc@2.2.0
 npx forgedoc version
 
 # pnpm
-pnpm add --save-dev --save-exact forgedoc@2.1.0
+pnpm add --save-dev --save-exact forgedoc@2.2.0
 pnpm exec forgedoc version
 
 # Yarn
-yarn add --dev --exact forgedoc@2.1.0
+yarn add --dev --exact forgedoc@2.2.0
 yarn forgedoc version
 
 # Bun
-bun add --dev --exact forgedoc@2.1.0
+bun add --dev --exact forgedoc@2.2.0
 bunx forgedoc version
 ```
 
@@ -116,8 +116,8 @@ using package exports.
 For hand-maintained browser HTML, add these resources to the head:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@2.1.0/dist/forgedoc.css" />
-<script defer src="https://cdn.jsdelivr.net/npm/forgedoc@2.1.0/dist/forgedoc.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/forgedoc@2.2.0/dist/forgedoc.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/forgedoc@2.2.0/dist/forgedoc.iife.js"></script>
 ```
 
 Use an exact published version. `defer` ensures the runtime registers elements

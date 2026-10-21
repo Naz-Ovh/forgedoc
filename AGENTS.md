@@ -38,7 +38,7 @@ agent regenerates.** Every design decision below serves that loop.
 ## Identity
 
 - npm package **`forgedoc`** · CLI binary `forgedoc` · IIFE global `ForgeDoc`
-- Skill **`better-plan`**, installed with `npx skills add MrBns/plankit`
+- Skills **`better-plan`** and **`better-docs`**, installed with `npx skills add naz-ovh/forgedoc`
 - The binary, global and `forgedoc.*` filenames are documented API — do not rename
 
 ## Commands
@@ -94,14 +94,15 @@ src/core/          DocElement base, store, slug, numbering, registry
 src/components/    one file per tag, named exactly after it
 src/bucket/        selection, serialise, and the three .svelte files
 src/questions/     the question drawer: model.ts scrapes, two .svelte render
-src/styles/        index.css imports 30 files IN ORDER; layers.css first
-tools/             validate.ts, inject.ts, cli.ts, gen-reference.mjs
-skills/better-plan/  the published skill — SKILL, CHEATSHEET, REFERENCE
+src/styles/        shared base/ structure, themes/, and layers.scss
+tools/             validate.ts, inject.ts, cli.ts, gen-docs.mjs
+skills/better-plan/  planning skill — SKILL, CHEATSHEET, BUILDING, FEEDBACK
+skills/better-docs/  documentation skill — SKILL
 docs/              PLAN.md, DECISIONS.md — repo-only, never shipped
 website/           separate Fumadocs/Next.js handbook; does not ship in the runtime
 ```
 
-Adding a component touches six places; `tools/gen-reference.mjs` and the
+Adding a component touches six places; `tools/gen-docs.mjs` and the
 kitchen-sink fixture both fail `npm test` if you skip them. See PLAN.md §14.
 
 ## Sharp edges
