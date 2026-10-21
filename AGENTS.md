@@ -50,7 +50,10 @@ npm test             # Vitest: real Chromium + node projects
 npm run check        # format, lint, typecheck, build, test — run before finishing
 npm run docs:generate    # regenerate REFERENCE.md + both CHEATSHEET.md copies
 npm run test:visual      # browser e2e: offline, CDN and themed builds
+git push origin vX.Y.Z   # release: CI gate, npm publish, GitHub release
 ```
+
+A release is a pushed tag; `.github/workflows/release.yml` holds the steps.
 
 **Appearance is not tested.** No screenshots, no computed-style assertions, no
 geometry. Styling is expected to change, so breaking it is not a test failure —

@@ -1,0 +1,96 @@
+name: Release
+
+# Pushing a version tag publishes that version. To cut one:
+#
+#   1. Bump "version" in package.json, give it a `## [x.y.z] - date` section in
+#      CHANGELOG.md, and move the pinned versions in README.md and
+#      website/content/docs/installation.md.
+#   2. Merge to main.
+#   3. git tag vX.Y.Z && git push origin vX.Y.Z
+#
+# The tag must equal package.json's version and the changelog must have a
+# section for it; both are checked before anything is published.
+#
+# npm authenticates by trusted publishing (OIDC), so there is no NPM_TOKEN
+# secret: npmjs.com trusts this file *by name*, and renaming it breaks
+# publishing until the trusted publisher on npmjs.com is updated to match.
+# Provenance is attached automatically, and it is checked case-sensitively
+# against package.json `repository.url` — which is why that says `Naz-Ovh`.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: CI gate
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish to npm and GitHub
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # npm trusted publishing
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      # Node 24 bundles an npm new enough for trusted publishing. No dependency
+      # cache: a poisoned cache entry would ship inside the published tarball.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Tag matches package.json, and the changelog has its section
+        id: version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+          awk -v v="$version" '
+            index($0, "## [" v "]") == 1 { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            echo "::error::CHANGELOG.md has no ## [$version] section"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Skipped when the version is already on npm, so a release published by
+      # hand can still be tagged afterwards to get its GitHub release. Asked of
+      # the registry directly: `npm view` would send setup-node's placeholder
+      # token and could read a 401 as "not published".
+      - name: Publish to npm
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if curl -fsS -o /dev/null "https://registry.npmjs.org/forgedoc/$VERSION"; then
+            echo "forgedoc@$VERSION is already on npm; skipping publish."
+          else
+            npm publish
+          fi
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; skipping."
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag \
+              --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md"
+          fi

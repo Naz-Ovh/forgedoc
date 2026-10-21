@@ -8,8 +8,12 @@ name: CI
 #   push:
 #     branches: [main]
 #   pull_request:
+#
+# release.yml calls this workflow as its gate, so a tag is only published once
+# both jobs pass on exactly the tagged commit.
 on:
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

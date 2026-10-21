@@ -5,10 +5,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/naz-ovh/forgedoc.git"
+    "url": "git+https://github.com/Naz-Ovh/forgedoc.git"
   },
-  "homepage": "https://github.com/naz-ovh/forgedoc#readme",
-  "bugs": "https://github.com/naz-ovh/forgedoc/issues",
+  "homepage": "https://github.com/Naz-Ovh/forgedoc#readme",
+  "bugs": "https://github.com/Naz-Ovh/forgedoc/issues",
   "keywords": [
     "web-components",
     "planning",
