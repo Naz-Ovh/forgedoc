@@ -50,7 +50,7 @@ npm test             # Vitest: real Chromium + node projects
 npm run check        # format, lint, typecheck, build, test — run before finishing
 npm run docs:generate    # regenerate REFERENCE.md + both CHEATSHEET.md copies
 npm run test:visual      # browser e2e: offline, CDN and themed builds
-git push origin vX.Y.Z   # release: CI gate, npm publish, GitHub release
+git push origin vX.Y.Z   # release: npm publish, GitHub release (check first)
 ```
 
 A release is a pushed tag; `.github/workflows/release.yml` holds the steps.

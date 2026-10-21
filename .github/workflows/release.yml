@@ -5,11 +5,14 @@ name: Release
 #   1. Bump "version" in package.json, give it a `## [x.y.z] - date` section in
 #      CHANGELOG.md, and move the pinned versions in README.md and
 #      website/content/docs/installation.md.
-#   2. Merge to main.
+#   2. Run `npm run check`, then merge to main.
 #   3. git tag vX.Y.Z && git push origin vX.Y.Z
 #
 # The tag must equal package.json's version and the changelog must have a
 # section for it; both are checked before anything is published.
+#
+# No tests run here. why: `npm run check` locally is the gate, as ci.yml
+# explains — Actions minutes are spent on publishing only.
 #
 # npm authenticates by trusted publishing (OIDC), so there is no NPM_TOKEN
 # secret: npmjs.com trusts this file *by name*, and renaming it breaks
@@ -24,13 +27,8 @@ permissions:
   contents: read
 
 jobs:
-  check:
-    name: CI gate
-    uses: ./.github/workflows/ci.yml
-
   publish:
     name: Publish to npm and GitHub
-    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: write # create the GitHub release
