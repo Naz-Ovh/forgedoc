@@ -7,7 +7,7 @@
  * maths is covered in `tests/node/mindmap.test.ts`.
  */
 
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 
 import { authorNodesOf, mountPlan, settle, waitFor } from '../helpers.js';
 
@@ -50,6 +50,7 @@ function part(root: Element, name: string): HTMLElement {
 const isHidden = (element: Element): boolean => element.hasAttribute('hidden');
 
 afterEach(() => {
+  vi.restoreAllMocks();
   for (const page of Array.from(document.querySelectorAll('doc-page'))) page.remove();
 });
 
@@ -146,15 +147,21 @@ test('the title card closes and opens the whole map', async () => {
   expect(part(root, 'toggle').textContent).toBe('+3');
 });
 
-test('Expand all opens every branch and Collapse all closes them again', async () => {
+test('Expand all and Collapse all finish even when animation frames are delayed', async () => {
   const map = await mountMap(900);
 
+  // A busy browser can deliver the final animation frame after a fixed sleep.
+  const frame = window.requestAnimationFrame.bind(window);
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) =>
+    frame(() => window.setTimeout(() => callback(performance.now()), 450)),
+  );
+
   part(map, 'expand-all').click();
-  await settle(400);
+  await waitFor(() => !isHidden(node(map, 'authenticateVendor')));
   expect(isHidden(node(map, 'authenticateVendor'))).toBe(false);
 
   part(map, 'collapse-all').click();
-  await settle(400);
+  await waitFor(() => isHidden(node(map, 'customers')) && isHidden(node(map, 'Guards')));
   expect(isHidden(node(map, 'Database'))).toBe(false);
   expect(isHidden(node(map, 'customers'))).toBe(true);
   expect(isHidden(node(map, 'Guards'))).toBe(true);
