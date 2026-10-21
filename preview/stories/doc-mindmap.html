@@ -1,0 +1,31 @@
+<doc-mindmap title="Account split" expand="1">
+  <doc-node title="Database" icon="database" tone="green" open>
+    <p>Three account tables, <strong>one per surface</strong>.</p>
+    <doc-node title="customers" icon="table"></doc-node>
+    <doc-node title="vendor_users" icon="table" tone="cyan">Vendor staff, with <code>vendor_id</code>.</doc-node>
+    <doc-node title="admin_users" icon="table" tone="violet" closed>
+      <doc-node title="admin_sessions"></doc-node>
+    </doc-node>
+  </doc-node>
+  <doc-node title="Server" icon="server" tone="blue">
+    <ul><li>One guard per surface</li><li>One cookie per surface</li></ul>
+    <doc-node title="Guards" icon="service" tone="amber"></doc-node>
+    <doc-node title="Sessions" icon="store" tone="red"></doc-node>
+  </doc-node>
+  <doc-node title="Apps" icon="app" tone="rose">
+    <doc-node title="Shop" icon="person" tone="accent"></doc-node>
+    <doc-node title="Review" icon="check" tone="neutral"><a href="#">Back to the top</a></doc-node>
+    <doc-node title="Questions" icon="question"></doc-node>
+    <doc-node title="Feedback" icon="comment"></doc-node>
+  </doc-node>
+</doc-mindmap>
+
+<doc-mindmap title="Radial" layout="radial" expand="all">
+  <doc-node title="One"><doc-node title="One a"></doc-node></doc-node>
+  <doc-node title="Two"></doc-node>
+  <doc-node title="Three" tone="green"></doc-node>
+</doc-mindmap>
+
+<doc-mindmap title="Explicit tree" layout="tree" expand="none">
+  <doc-node title="Closed until asked"><doc-node title="Inside"></doc-node></doc-node>
+</doc-mindmap>

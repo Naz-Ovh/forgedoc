@@ -1,0 +1,21 @@
+<doc-params>
+  <doc-param name="markup" type="string" required>
+    <p>Raw HTML or ForgeDoc semantic markup source string.</p>
+  </doc-param>
+  <doc-param name="strict" type="boolean" default="false">
+    <p>Enable strict linting warnings as hard build errors.</p>
+  </doc-param>
+  <doc-param name="id" type="string" in="path" required>
+    <p>Plan identifier interpolated into the route.</p>
+  </doc-param>
+  <doc-param name="limit" type="integer" in="query" default="50">
+    <p>Maximum results per page.</p>
+  </doc-param>
+  <doc-param name="Authorization" type="string" in="header" required>
+    <p>Bearer credential for the request.</p>
+  </doc-param>
+  <doc-param name="markup" type="string" in="body" required>
+    <p>The document source, sent as the request body.</p>
+  </doc-param>
+  <doc-param name="bare">Plain text, no type and no paragraph.</doc-param>
+</doc-params>

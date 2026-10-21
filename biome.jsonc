@@ -32,7 +32,12 @@
       // doc-diff and doc-tree is rendered verbatim, and the validator tests
       // assert exact line numbers — so reformatting these silently changes what
       // they test.
-      "!tests/fixtures"
+      "!tests/fixtures",
+
+      // Component stories: author markup like the fixtures, kept out for the
+      // same reason. Biome's HTML a11y rules also read contract attributes
+      // (`focus` on doc-scene, `drop` on doc-change) as event handlers.
+      "!preview/stories"
     ]
   },
 

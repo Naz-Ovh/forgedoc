@@ -1,5 +1,6 @@
 /**
- * Svelte configuration — used only by the bucket panel (§10).
+ * Svelte configuration — used by the bucket panel and the question drawer
+ * (§10), and by the dev-only component browser in `preview/`.
  *
  * MUST NOT set `customElement: true`. In custom element mode Svelte inlines
  * component styles as a JavaScript string rather than emitting a CSS file, which

@@ -45,7 +45,7 @@ agent regenerates.** Every design decision below serves that loop.
 
 ```sh
 npm run build        # tsdown: 3 runtime variants + CLI, then tsc for .d.ts
-npm run dev          # Vite dev server, opens the kitchen-sink QA page
+npm run dev          # Vite dev server, opens the component browser at /preview/
 npm test             # Vitest: real Chromium + node projects
 npm run check        # format, lint, typecheck, build, test — run before finishing
 npm run docs:generate    # regenerate REFERENCE.md + both CHEATSHEET.md copies
@@ -103,6 +103,7 @@ skills/better-plan/  planning skill — SKILL, CHEATSHEET, BUILDING, FEEDBACK
 skills/better-docs/  documentation skill — SKILL
 docs/              PLAN.md, DECISIONS.md — repo-only, never shipped
 website/           separate Fumadocs/Next.js handbook; does not ship in the runtime
+preview/           dev-only component browser (Svelte); stories/<tag>.html is one component's markup
 ```
 
 Adding a component touches six places; `tools/gen-docs.mjs` and the

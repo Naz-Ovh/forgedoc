@@ -1,0 +1,31 @@
+<doc-choice mode="single" question="Should section numbers be CSS counters or real text nodes?">
+  <doc-option recommended>
+    CSS counters
+    <p slot="desc">Free renumbering, nothing to keep in sync. Not selectable or copyable.</p>
+  </doc-option>
+  <doc-option value="text-nodes">
+    Real text nodes
+    <p slot="desc">Copyable, but the runtime has to rewrite them whenever the outline changes.</p>
+  </doc-option>
+  <doc-option other>Something else</doc-option>
+</doc-choice>
+
+<doc-choice mode="multi" question="Which delivery modes must ship in version one?">
+  <doc-option recommended>
+    Offline single file
+    <p slot="desc">The primary path, and the one that must never break.</p>
+  </doc-option>
+  <doc-option>
+    CDN script tag
+    <p slot="desc">Cheap to keep working once the offline build exists.</p>
+  </doc-option>
+  <doc-option>
+    npm package for tooling
+    <p slot="desc">Needed by any harness that wants to parse a bucket.</p>
+  </doc-option>
+</doc-choice>
+
+<doc-choice question="No mode, labels only">
+  <doc-option>Yes</doc-option>
+  <doc-option>No</doc-option>
+</doc-choice>

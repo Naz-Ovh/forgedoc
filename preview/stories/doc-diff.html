@@ -1,0 +1,18 @@
+<doc-diff lang="ts" filename="src/core/store.ts">
+  @@ -12,7 +12,9 @@
+   export function createStore(docId: string): DocStore {
+  -  const storage = localStorage;
+  +  const storage = probeStorage();
+  +  // why: a typeof check passes in Safari private mode, then throws on write.
+     const key = storageKey(docId);
+     return {
+  -    available: true,
+  +    available: storage !== null,
+</doc-diff>
+
+<doc-diff>
+  @@ -1,2 +1,2 @@
+  -No lang and no filename.
+  +No lang and no filename, still a diff.
+   An unchanged context line.
+</doc-diff>

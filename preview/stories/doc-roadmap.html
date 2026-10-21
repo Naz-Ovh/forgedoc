@@ -1,0 +1,31 @@
+<doc-roadmap start="0">
+  <doc-stage title="Contract and harness" subtitle="validator, CLI, build" current>
+    <p>Ends with <code>forgedoc validate</code> correctly rejecting a malformed file.</p>
+    <doc-checklist>
+      <li>Validator rejects a document with no <code>doc-id</code></li>
+      <li>All four artefacts build from one source tree</li>
+      <li>CI is green</li>
+    </doc-checklist>
+  </doc-stage>
+
+  <doc-stage title="Shell" subtitle="numbering, slugs, TOC, layout" open>
+    <p>A document with only headings and paragraphs already looks like the reference. Open by attribute.</p>
+  </doc-stage>
+
+  <doc-stage title="The eighty percent" subtitle="choice, note, blocker, table, code">
+    <p>The reference document reproduced except roadmap, flow and figures.</p>
+  </doc-stage>
+
+  <doc-stage title="Bucket">
+    <p>No subtitle. Select text, answer questions, reload, copy — output matches the golden file.</p>
+  </doc-stage>
+</doc-roadmap>
+
+<doc-roadmap>
+  <doc-stage title="No start attribute" subtitle="so numbering begins at the default">
+    <p>First stage.</p>
+  </doc-stage>
+  <doc-stage title="Second stage">
+    <p>Second.</p>
+  </doc-stage>
+</doc-roadmap>

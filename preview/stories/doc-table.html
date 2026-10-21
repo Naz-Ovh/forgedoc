@@ -1,0 +1,36 @@
+<doc-table size="md" stack="auto">
+  <table>
+    <caption>Build variants and what each one carries</caption>
+    <thead>
+      <tr><th>Variant</th><th>Format</th><th>Mermaid</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>cdn</td><td>IIFE</td><td>Loaded on demand</td></tr>
+      <tr><td>standalone</td><td>IIFE</td><td>Embedded</td></tr>
+      <tr><td>esm</td><td>ES</td><td>External import</td></tr>
+    </tbody>
+  </table>
+</doc-table>
+
+<doc-table size="sm" stack="never">
+  <table>
+    <thead>
+      <tr><th>Token</th><th>Default</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>--doc-space-unit</code></td><td>4px</td></tr>
+      <tr><td><code>--doc-measure</code></td><td>1200px</td></tr>
+    </tbody>
+  </table>
+</doc-table>
+
+<table>
+  <caption>A bare table, no doc-table wrapper</caption>
+  <thead>
+    <tr><th>Output</th><th>Format</th><th>Contents</th><th>Used by</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>forgedoc.iife.js</code></td><td>IIFE</td><td>Core + Prism</td><td>CDN viewer</td></tr>
+    <tr><td><code>forgedoc.standalone.iife.js</code></td><td>IIFE</td><td>Everything, Mermaid included</td><td>Offline <code>file://</code></td></tr>
+  </tbody>
+</table>

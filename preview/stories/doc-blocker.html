@@ -1,0 +1,20 @@
+<doc-blocker severity="high" title="localStorage is shared across all file:// documents in Chrome">
+  <doc-blocks>Two plans opened from disk see each other's answers, and one reader's feedback surfaces inside an unrelated document.</doc-blocks>
+  <doc-why>Chrome has historically treated every <code>file://</code> origin as one storage bucket.</doc-why>
+  <doc-action>Every key is namespaced <code>forgedoc:&lt;doc-id&gt;:state</code>, and the validator rejects a document without a <code>doc-id</code>.</doc-action>
+</doc-blocker>
+
+<doc-blocker severity="medium" title="CSS counters are not selectable">
+  <doc-blocks>A reader cannot copy "3.1" out of a heading.</doc-blocks>
+  <doc-action>The <code>numbering="text"</code> attribute renders real text nodes instead.</doc-action>
+</doc-blocker>
+
+<doc-blocker severity="low" title="Mermaid is roughly one megabyte">
+  <doc-blocks>Bundling it into the CDN build punishes every reader.</doc-blocks>
+  <doc-why>The full diagram registry ships as one module.</doc-why>
+  <doc-action>Two builds: lazy from a pinned CDN URL online, bundled in the offline file.</doc-action>
+</doc-blocker>
+
+<doc-blocker title="No severity, action only">
+  <doc-action>Ask #platform-eng for a scoped token.</doc-action>
+</doc-blocker>

@@ -50,6 +50,7 @@
     "src/**/*.d.ts",
     "tools/**/*.ts",
     "tests/**/*.ts",
+    "preview/**/*.ts",
     "vite.config.ts",
     "tsdown.config.ts",
     "playwright.config.ts"

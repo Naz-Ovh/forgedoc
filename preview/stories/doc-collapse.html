@@ -1,0 +1,15 @@
+<doc-collapse title="The full markup contract, if you want it" sticky>
+  <p>Every tag, attribute and enumerated value lives in <code>src/core/contract.ts</code>. Sticky: the open state survives a reload.</p>
+  <doc-list kind="neutral">
+    <li>The validator reads it.</li>
+    <li>The CLI documentation commands render from it.</li>
+  </doc-list>
+</doc-collapse>
+
+<doc-collapse title="Closed by default, and not remembered">
+  <p>Without <code>sticky</code>, the <code>open</code> attribute wins on every load.</p>
+</doc-collapse>
+
+<doc-collapse title="Open by attribute" open>
+  <p>Starts open on every load.</p>
+</doc-collapse>

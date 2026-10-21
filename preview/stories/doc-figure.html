@@ -1,0 +1,24 @@
+<doc-figure type="mermaid" caption="How a plan travels from the agent to the reader and back">
+  flowchart LR
+    A[Agent writes markup] --&gt; B[forgedoc build]
+    B --&gt; C[One self-contained file]
+    C --&gt; D[Reader answers inline]
+    D --&gt; E[FB v1 bucket]
+    E --&gt; A
+</doc-figure>
+
+<doc-figure type="svg">
+  <svg viewBox="0 0 240 60" role="img" aria-label="Three connected boxes">
+    <rect x="4" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
+    <rect x="88" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
+    <rect x="172" y="14" width="64" height="32" rx="6" fill="none" stroke="currentColor"></rect>
+    <path d="M68 30h20M152 30h20" stroke="currentColor"></path>
+  </svg>
+  <doc-caption>Inline <code>svg</code>, captioned by a <code>doc-caption</code> child.</doc-caption>
+</doc-figure>
+
+<doc-figure type="image" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%2260%22%3E%3Crect%20width%3D%22240%22%20height%3D%2260%22%20fill%3D%22%2312907a%22%2F%3E%3C%2Fsvg%3E" alt="A solid teal rectangle" caption="An image, captioned by the attribute"></doc-figure>
+
+<doc-figure type="html" caption="An isolated HTML mock, rendered in an iframe srcdoc">
+  &lt;div style="padding:12px;border:1px solid currentColor"&gt;Isolated markup&lt;/div&gt;
+</doc-figure>

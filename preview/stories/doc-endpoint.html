@@ -1,0 +1,22 @@
+<doc-endpoint method="post" path="/api/v1/plans/validate" summary="Validate plan markup" description="Validate planning markup against the schema contract before building a document." auth="bearer" headers="Content-Type: application/json; Authorization: Bearer token" params="strict:query:boolean:optional:Fail on warnings" request="{ markup: string, strict?: boolean }" status="200 OK" response="{ valid: boolean, errors: ValidationError[] }"></doc-endpoint>
+
+<doc-endpoint method="get" path="/api/v1/plans/list" summary="List plans" auth="none" params="limit:query:integer:optional:Maximum results; cursor:query:string:optional:Pagination cursor" status="200 OK"></doc-endpoint>
+
+<doc-endpoint method="put" path="/api/v1/plans/{id}" summary="Replace a plan" auth="basic" params="id:path:string:required:Plan identifier" status="200 OK"></doc-endpoint>
+
+<doc-endpoint method="patch" path="/api/v1/plans/{id}" summary="Update plan properties" auth="api-key" params="id:path:string:required:Plan identifier" status="200 OK"></doc-endpoint>
+
+<doc-endpoint method="delete" path="/api/v1/plans/{id}" summary="Delete a plan" auth="session" params="id:path:string:required:Plan identifier" status="204 No Content"></doc-endpoint>
+
+<doc-endpoint method="head" path="/api/v1/health" summary="Health check" status="200 OK"></doc-endpoint>
+
+<doc-endpoint method="options" path="/api/v1/cors" summary="CORS capabilities" status="200 OK"></doc-endpoint>
+
+<doc-endpoint method="post" path="/api/v1/orders/{id}/notify" summary="Parameters as children" auth="bearer" status="202 Accepted">
+  <doc-param name="id" type="string" in="path" required>
+    <p>Order identifier.</p>
+  </doc-param>
+  <doc-param name="dry_run" type="boolean" in="query" default="false">
+    <p>Skip delivery.</p>
+  </doc-param>
+</doc-endpoint>

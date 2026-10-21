@@ -60,7 +60,9 @@ export default defineConfig(
     },
 
     server: {
-      open: '/tests/fixtures/kitchen-sink.html',
+      // The component browser: one story at a time. The kitchen sink is still
+      // served at /tests/fixtures/kitchen-sink.html.
+      open: '/preview/',
     },
 
     test: {

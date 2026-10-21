@@ -1,0 +1,38 @@
+<doc-code lang="ts" title="src/core/base.ts" highlight="3-5,9">
+  export abstract class DocElement extends HTMLElement {
+    connectedCallback(): void {
+      if (this.dataset.docUp !== undefined) return;
+      this.dataset.docUp = '';
+      this.enhance();
+    }
+
+    protected abstract enhance(): void;
+    protected teardown(): void {}
+  }
+</doc-code>
+
+<doc-code lang="bash" title="The whole toolchain">
+  forgedoc new vendor-orders
+  forgedoc validate DOC_vendor-orders.html --format=json
+  forgedoc build DOC_vendor-orders.html --out dist/plan.html
+</doc-code>
+
+<doc-code lang="css">
+  @layer doc.reset, doc.tokens, doc.preset, doc.base, doc.components, doc.utilities;
+</doc-code>
+
+<doc-code lang="json">
+  { "name": "forgedoc", "type": "module" }
+</doc-code>
+
+<doc-code lang="sql" title="Long lines scroll">
+  SELECT vendor_id, count(*) AS unread FROM notifications WHERE read_at IS NULL AND created_at > now() - interval '30 days' GROUP BY vendor_id ORDER BY unread DESC;
+</doc-code>
+
+<doc-code lang="sql" title="Long lines wrap" wrap>
+  SELECT vendor_id, count(*) AS unread FROM notifications WHERE read_at IS NULL AND created_at > now() - interval '30 days' GROUP BY vendor_id ORDER BY unread DESC;
+</doc-code>
+
+<doc-code lang="text">
+  Plain text needs no grammar, and says so rather than guessing.
+</doc-code>
